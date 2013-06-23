@@ -6,8 +6,6 @@ type: regular
 category: tech
 ---
 
-# UTF issue when running Jekyll on Windows
-
 I ran in to an issue when trying to set up Jekyll for this site on my Windows PC:
 
 	D:\source\belfry_images\belfryimages.github.com>jekyll serve --watch
