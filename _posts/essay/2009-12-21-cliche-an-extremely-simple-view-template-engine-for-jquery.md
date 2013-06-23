@@ -6,12 +6,13 @@ type: regular
 category: essay
 ---
 
-I’ve written a very simple plugin for jQuery that takes a template and a model and returns a view of the model. <strike>To make sure it worked I wrote some tests and examples, and since I did that I figured I would write a little mini-site.</strike> The plugin itself is pretty straightforward:
+I’ve written a very simple plugin for jQuery that takes a template and a model and returns a view of the model. The plugin itself is pretty straightforward:
 
     (function($){
         $.fn.cliche = function(model){
             var template = $(this).html();
-            template = template.replace(/%7C/g, '|');   // pipes in a href like <a href="|... get converted to %7C, convert it back
+            // pipes in a href like <a href="|... get converted to %7C, convert it back:
+            template = template.replace(/%7C/g, '|');
             template = template.replace(/\|.*?\|/g, function(f) {
                 var val = model;
                 var fieldParts = f.replace(/\|/g, '').split('.');
