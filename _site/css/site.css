@@ -3,7 +3,7 @@ body {
 }
 .container {
 	text-align: center; 
-	width: 900px;
+	max-width: 900px;
 }
 .row {
 	text-align: left;
@@ -33,4 +33,8 @@ ul.posts {
 ul.posts li span {
 	font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
 	color: #888;
+}
+hr {
+	border-top: 3px dashed #eee;
+	border-bottom: none;
 }
