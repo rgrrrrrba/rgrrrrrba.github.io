@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Accessing anonymous object properties using reflection</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+		<style type="text/css">
+			body {
+				font-family: 'PT Sans', sans-serif;
+			}
+			.container {
+				text-align: center; 
+				width: 900px;
+			}
+			.row {
+				text-align: left;
+				width: 100%;
+			}
+			.header {
+				text-align: right;
+			}
+			.header h1 {
+				font-size: 150%;
+				color: #888;
+			}
+			.header h2 {
+				font-size: 100%;
+			}
+			.header a { color: #888; }
+			.header a:hover { color: #555; }
+			h1, h2, h3, h4 , h5 {
+				font-family: 'Cinzel', serif;
+			}
+			.footer {
+				text-align: right;
+			}
+			ul.posts {
+				list-style-type: none;
+			}
+			ul.posts li span {
+				font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+				color: #888;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+			<div class="row content">
+				<h1><a href="/">~/</a>Accessing anonymous object properties using reflection <br/></h1>
+<h2><small><em>19 Apr 2010 | essay</em></small></h2>
+
+<p>Anonymous objects are a way to create strongly typed objects without having to declare a class or struct in C# 3.5 and above. Declaring an anonymous object is easy:</p>
+
+<pre><code>var breakfast = new
+{
+    Cereal = "High fibre",
+    Coffee = "Latte",
+    Bacon = "Crispy"
+};
+</code></pre>
+
+<p>In the scope of the object’s declaration, accessing the properties of breakfast is as simple as <code>breakfast.Cereal</code>. However accessing the properties outside of that scope is not as simple. Say we have an object <code>ben</code> with a method <code>Eat(object meal)</code>. Within <code>ben.Eat()</code> we can’t do something directly with <code>meal.Coffee</code> because <code>Coffee</code> isn’t known in <code>ben.Eat()</code>‘s scope.</p>
+
+<p>Getting a property value using reflection is pretty basic but takes a couple of steps. There are much more advanced uses of reflection that allow access to hidden properties, fields and methods, but picking public properties is probably the easiest case. The following method returns the value of a public property of an object. This could be used on an anonymous object, or on any other class of object.</p>
+
+<pre><code>using System.Reflection;
+...
+object GetPropertyValue(object o, string propertyName)
+{
+    var prop = o.GetType().GetProperty(propertyName);
+    if (prop == null) return null;
+    return prop.GetValue(o, null);
+}
+...
+var cereal = GetPropertyValue(breakfast, "Cereal");
+Assert.That(cereal, Is.EqualTo("High fibre"));
+</code></pre>
+
+<p>prop is a PropertyInfo object that lets the value of a property be retrieved via reflection. The same method can be used to get a dictionary of [property name, value] from an anonymous object:</p>
+
+<pre><code>IDictionary&lt;string, object&gt; ObjectToDictionary(object o)
+{
+    var dict = o.GetType().GetProperties().ToDictionary(
+        prop =&gt; prop.Name, prop =&gt; prop.GetValue(o, null)
+            );
+    return dict;
+}
+</code></pre>
+
+<p>This sets up a dictionary where the key is the name of the property, and the value is (ahem) the value of the property:</p>
+
+<pre><code>var breakfastDictionary = ObjectToDictionary(breakfast);
+Assert.That(breakfastDictionary.Count, Is.EqualTo(3));
+Assert.That(breakfastDictionary["Coffee"], Is.EqualTo("Latte"));
+</code></pre>
+
+<p>Using anonymous objects and reflection is a bit slower to execute than using strongly-typed objects, but once the methods are in place to access the properties, the savings in developer time can be great. Leaving more time for breakfast. Speaking of which, I’m late for work.</p>
+
+			</div>
+
+			<hr/>
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+	</body>
+</html>

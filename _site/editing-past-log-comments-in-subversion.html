@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Editing past log comments in Subversion</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+		<style type="text/css">
+			body {
+				font-family: 'PT Sans', sans-serif;
+			}
+			.container {
+				text-align: center; 
+				width: 900px;
+			}
+			.row {
+				text-align: left;
+				width: 100%;
+			}
+			.header {
+				text-align: right;
+			}
+			.header h1 {
+				font-size: 150%;
+				color: #888;
+			}
+			.header h2 {
+				font-size: 100%;
+			}
+			.header a { color: #888; }
+			.header a:hover { color: #555; }
+			h1, h2, h3, h4 , h5 {
+				font-family: 'Cinzel', serif;
+			}
+			.footer {
+				text-align: right;
+			}
+			ul.posts {
+				list-style-type: none;
+			}
+			ul.posts li span {
+				font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+				color: #888;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+			<div class="row content">
+				<h1><a href="/">~/</a>Editing past log comments in Subversion <br/></h1>
+<h2><small><em>18 Mar 2008 | tech</em></small></h2>
+
+<p>Subversion is my source version control software of choice, but it’s not immediately obvious how to edit the log comment of a past commit (such as after adding a particularly scathing remark that may not be a wise career move). A caveat is that you need to have administrator access to the Subversion repository.</p>
+
+<p>In the repository directory (wherever you created the repository) is a hooks folder (on my system this is <code>H:\IT\svnrepos\pas\hooks</code>). This folder contains scripts that are called by Subversion when various events occur (hooks). The files that are created in a repository’s hooks folder by default are templates of hooks designed for Linux etc. On a Windows server they need to be created as batch files (*.bat) to be executed.</p>
+
+<p>What you need to do is create a hook that will run prior to changing a revision property (such as a log comment) and let Subversion know that changing the comment is permitted. By default changing the log comment is disabled (obviously, or you wouldn’t be reading this). Make a new file in the <code>hooks</code> folder called <code>pre-revprop-change.bat</code> and write the following into it:</p>
+
+<pre><code>if "%4" == "svn:log" exit 0
+echo Property '%4' cannot be changed &gt;&amp;2
+exit 1
+</code></pre>
+
+<p>The <code>%4</code> argument contains which operation is being performed. If the operation is <code>svn:log</code> we indicate success, which is a return code of 0. Otherwise it prints an error and exits with a non-zero, which indicates an error (and that the operation shouldn’t be allowed). Once that is saved, you should be able to use your to Subversion client to edit the comment. Be careful with what you do, as revision properties aren’t versioned, and you won’t be able to undo your changes. You should also probably rename <code>pre-revprop-change.bat</code> to <code>pre-revprop-change.bat.bak</code> once finished.</p>
+
+			</div>
+
+			<hr/>
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+	</body>
+</html>

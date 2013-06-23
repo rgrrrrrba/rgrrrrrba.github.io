@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>URL namespace access rights when developing WCF hosts</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+		<style type="text/css">
+			body {
+				font-family: 'PT Sans', sans-serif;
+			}
+			.container {
+				text-align: center; 
+				width: 900px;
+			}
+			.row {
+				text-align: left;
+				width: 100%;
+			}
+			.header {
+				text-align: right;
+			}
+			.header h1 {
+				font-size: 150%;
+				color: #888;
+			}
+			.header h2 {
+				font-size: 100%;
+			}
+			.header a { color: #888; }
+			.header a:hover { color: #555; }
+			h1, h2, h3, h4 , h5 {
+				font-family: 'Cinzel', serif;
+			}
+			.footer {
+				text-align: right;
+			}
+			ul.posts {
+				list-style-type: none;
+			}
+			ul.posts li span {
+				font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+				color: #888;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+			<div class="row content">
+				<h1><a href="/">~/</a>URL namespace access rights when developing WCF hosts <br/></h1>
+<h2><small><em>09 May 2011 | tech</em></small></h2>
+
+<p>Running up a WCF service host on a new address gives this exception:</p>
+
+<pre><code>Unhandled Exception: System.ServiceModel.AddressAccessDeniedException: HTTP could 
+not register URL http://+:61100/HelloWorld.svc/. Your process does not have access rights 
+to this namespace (see http://go.microsoft.com/fwlink/?LinkId=70353 for details). ---&gt; 
+System.Net.HttpListenerException: Access is denied
+</code></pre>
+
+<p>The <a href="http://go.microsoft.com/fwlink/?LinkId=70353">link</a>  (Configuring HTTP and HTTPS on MSDN) is pretty useful, it resolves to <a href="http://msdn.microsoft.com/en-us/library/ms733768.aspx">here</a> at the moment (go.microsoft.com seems to break links at times). In short, on Win7, open an administrator console and run this:</p>
+
+<pre><code>netsh http add urlacl url=http://+:61100/HelloWorld.svc user=DOMAIN\USER
+</code></pre>
+
+<p>The error messages are pretty cryptic so good luck...</p>
+
+			</div>
+
+			<hr/>
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+	</body>
+</html>

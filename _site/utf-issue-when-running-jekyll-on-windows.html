@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>UTF issue when running Jekyll on Windows</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+		<style type="text/css">
+			body {
+				font-family: 'PT Sans', sans-serif;
+			}
+			.container {
+				text-align: center; 
+				width: 900px;
+			}
+			.row {
+				text-align: left;
+				width: 100%;
+			}
+			.header {
+				text-align: right;
+			}
+			.header h1 {
+				font-size: 150%;
+				color: #888;
+			}
+			.header h2 {
+				font-size: 100%;
+			}
+			.header a { color: #888; }
+			.header a:hover { color: #555; }
+			h1, h2, h3, h4 , h5 {
+				font-family: 'Cinzel', serif;
+			}
+			.footer {
+				text-align: right;
+			}
+			ul.posts {
+				list-style-type: none;
+			}
+			ul.posts li span {
+				font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+				color: #888;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+			<div class="row content">
+				<h1><a href="/">~/</a>UTF issue when running Jekyll on Windows <br/></h1>
+<h2><small><em>23 Jun 2013 | tech</em></small></h2>
+
+<h1>UTF issue when running Jekyll on Windows</h1>
+
+<p>I ran in to an issue when trying to set up Jekyll for this site on my Windows PC:</p>
+
+<pre><code>D:\source\belfry_images\belfryimages.github.com&gt;jekyll serve --watch
+Configuration file: D:/source/belfry_images/belfryimages.github.com/_config.yml
+            Source: D:/source/belfry_images/belfryimages.github.com
+       Destination: D:/source/belfry_images/belfryimages.github.com/_site
+      Generating... ←[31m  Liquid Exception: incompatible character encodings: UTF-8 and CP850 in default.html←[0m
+error: incompatible character encodings: UTF-8 and CP850. Use --trace to view backtrace
+</code></pre>
+
+<p>The important thing here is the <code>incompatible character encodings: UTF-8 and CP850</code>. I tried various things like blowing away the site and resaving the files using UTF-8 to no avail. I eventually found a blog post (in French) that gives an answer (<a href="http://translate.google.com/#auto/en/Ces%20erreurs%20peuvent%20avoir%20un%20impact%20sur%20l'affichage%20du%20blog.%20Et%20m%C3%AAme%20dans%20certains%20cas%2C%20cela%20peut%20emp%C3%AAcher%20le%20bon%20fonctionnement%20de%20Jekyll.%20Il%20existe%20une%20parade%20%C3%A0%20ce%20probl%C3%A8me.%20Il%20suffit%20simplement%20de%20lancer%20les%20commandes%20suivantes%20avant%20de%20lancer%20le%20serveur%20Jekyll%20%3A%0A%0Aset%20LC_ALL%3Den_US.UTF-8%0Aset%20LANG%3Den_US.UTF-8%0ACette%20commande%20permet%20de%20dire%20%C3%A0%20Windows%20que%20l'encodage%20a%20utilis%C3%A9%20est%20l'UTF-8.%20Si%20vous%20relancez%20Jekyll%20apr%C3%A8s%20cette%20manipulation%2C%20ces%20errurs%20auront%20disparus.">translated by Google</a>):</p>
+
+<blockquote><p>These errors can have an impact on the blog posting. And in some cases, it may prevent the proper functioning of Jekyll. There is a workaround to this problem. Simply run the following commands before starting the Jekyll server:</p></blockquote>
+
+<pre><code>set LC_ALL = en_US.UTF-8
+set LANG = en_US.UTF-8
+</code></pre>
+
+<blockquote><p>This command is used to tell Windows that the encoding used is UTF-8. If you raise Jekyll after handling these errurs are gone.</p></blockquote>
+
+<p>Add the <code>LC_ALL</code> and <code>LANG</code> settings to <em>System -> System Properties -> Environment Variables</em> (under either <em>User variables</em> or <em>System variables</em>) and restart your shell.</p>
+
+<p>Wooo. Go Jekyll.</p>
+
+			</div>
+
+			<hr/>
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+	</body>
+</html>
