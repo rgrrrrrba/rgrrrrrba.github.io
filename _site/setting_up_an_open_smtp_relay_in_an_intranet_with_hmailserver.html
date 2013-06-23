@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Setting up an open SMTP relay in an intranet with hMailServer</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Setting up an open SMTP relay in an intranet with hMailServer <br/></h1>
+<h2><small><em>12 Nov 2012 | tech</em></small></h2>
+
+<p><strong>You need to do this because you have line of business software or printer/scanner/faxes that need to send emails within a corporate intranet and your email server is hosted offsite.</strong></p>
+
+<p>This doesn't work with Office 365 acting as the external SMTP server. It should work but there's something about Office 365's use of TLS that stops the SMTP relay from authenticating properly in hMailServer. The same problem seems to happen with IIS's built-in SMTP relay so I think I may have been doing something wrong. In any case, although the main <code>.com.au</code>'s MX is Office 365, I also have a <code>.net.au</code> domain hosted on a shared server with a more straightforward (ie less secure) configuration, which I used as the relay.</p>
+
+<ol>
+<li>Install <a href="http://www.hmailserver.com/">hMailServer</a> on a Windows machine within the intranet. Make sure port 25 isn't blocked by a firewall on the machine. The default self-hosted SQL Server Compact database option in hMailServer should be fine.</li>
+<li>Create an email address on the external mail server. Something like <code>relay@example.com</code>.</li>
+<li>Create a wildcard route on hMailServer.
+
+<ul>
+<li>This is a domain of *.</li>
+<li>The target SMTP host should be set to <code>mail.example.com</code> or wherever the external server is hosted.</li>
+<li>The TCP/IP port should be set to 25.</li>
+<li>Under the Delivery tab check the <em>Server requires authentication</em> box and fill in the user name and password for the relay email address.</li>
+</ul>
+</li>
+<li>The trick is that hMailServer doesn’t seem to support wildcard routes, even though it will let you create a route of *. To work around this you just add a rule that sends everything to the wildcard route:
+
+<ol>
+<li>Name the rule <code>wildcard</code></li>
+<li>Add a criteria: predefined field <code>From</code>, search type <code>Wildcard</code>, value is <code>*</code></li>
+<li>Add an action: <code>Send using route to *</code></li>
+</ol>
+</li>
+<li>Under <em>Advanced</em>, <em>IP Ranges</em>, add a range called <code>intranet</code> or similar:
+
+<ol>
+<li>Set the lower and upper IP ranges to encompass your intranet (eg <code>192.168.1.0</code> to <code>192.168.1.255</code>)</li>
+<li>Set the priority to something greater than 15</li>
+<li>Under <em>Other</em>, uncheck <em>Anti-spam</em>, <em>Anti-virus</em></li>
+<li>Under <em>Require SMTP authentication</em>, uncheck all of the boxes</li>
+</ol>
+</li>
+<li>Save everything</li>
+</ol>
+
+
+<p>This can be tested by telnetting (or <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTy</a>ing) into port 25 of the machine, then sending an email by hand (see <a href="http://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol#SMTP_transport_example">Wikipedia’s entry for SMTP</a> for an example). Sending the email by hand is a very easy way to figure out configuration problems on the client-facing side of the SMTP relay and is a skill worth learning - also it makes you look like a boss if anybody nearby understands what you are doing. The email should be sent through the hMailServer SMTP relay, through to the external SMTP server (using the relay email address for authentication), then through to its destination. hMailServer also has pretty good logging which can help figure out any bugs or misconfiguration.</p>
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
