@@ -11,28 +11,28 @@ out to be objects going out of scope.
 
 The first tip is to use a delegate for the alert view and keep it in the class scope:
 
-  public class MyAlertViewDelegate {
-    readonly Action _callback;
-    public MyAlertViewDelegate(Action callback) {
-      _callback = callback;
+    public class MyAlertViewDelegate {
+      readonly Action _callback;
+      public MyAlertViewDelegate(Action callback) {
+        _callback = callback;
+      }
+      public override Clicked(UIAlertView alertview, int buttonIndex) {
+        _callback();
+      }
     }
-    public override Clicked(UIAlertView alertview, int buttonIndex) {
-      _callback();
-    }
-  }
-  
-  public class ParentClass {
-    MyAlertViewDelegate _myAlertViewDelegate;
     
-    void ShowAlert() {
-      _myAlertViewDelegate = new MyAlertViewDelegate(() => {});
-      var alert = new UIAlertView("title", "message", _alertViewDelegate, "Ok");
-      alert.Show();
+    public class ParentClass {
+      MyAlertViewDelegate _myAlertViewDelegate;
+      
+      void ShowAlert() {
+        _myAlertViewDelegate = new MyAlertViewDelegate(() => {});
+        var alert = new UIAlertView("title", "message", _alertViewDelegate, "Ok");
+        alert.Show();
+      }
     }
-  }
 
 The second tip is to make sure the ParentClass instance doesn't go out of scope. This is probably by giving 
 it a lifetime scope in the IoC container. For example in TinyIoC:
 
-  container.Register<ParentClass>().AsSingleton();
+    container.Register<ParentClass>().AsSingleton();
 
