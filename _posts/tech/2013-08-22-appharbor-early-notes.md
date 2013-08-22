@@ -15,7 +15,7 @@ First you set up an account, then you can create applications within that accoun
 
 
 ### DVCS integration
-I've only tried Github integration but they also odder Bitbucket and CodePlex integration. When creating a new application the integration links are right there so you can set everything up via AppHarbor, but I picked the wrong Github repo, the links disappeared, and I ended up setting it up manually. I did that through Github:
+I've only tried Github integration but they also offer Bitbucket and CodePlex integration. When creating a new application the integration links are right there so you can set everything up via AppHarbor, but I picked the wrong Github repo, the links disappeared, and I ended up setting it up manually. I did that through Github:
 
 - open the repo settings
 - select Service Hooks
