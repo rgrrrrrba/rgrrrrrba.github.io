@@ -1,5 +1,5 @@
 ---
-title: AppHarbor - Early thoughts
+title: AppHarbor - Early notes
 layout: post
 date: 2013-08-22
 category: tech
