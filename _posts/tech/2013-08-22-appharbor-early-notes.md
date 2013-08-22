@@ -47,3 +47,14 @@ After installing it the configuration needs to be updated. The `Connectionstring
 #### More information
 - [AppHarbor FAQ - SQL Server Compact](http://support.appharbor.com/kb/getting-started/frequently-asked-questions#sql-server-compact)
 
+
+### Builds
+When you push a new version you have to refresh the application page to see the updated build status. A big gotcha is that the build status doesn't update when the build completes. A bigger gotcha is that the build has to be deployed manually by pressing a Deploy button. I guess this is a good thing as long as you know about it and the build doesn't take an hour. Older builds cn also be redeployed. Again, when deploying the status page has to be manually refreshed to see the status.
+
+
+### Glimpse
+For a lark I installed [Glimpse](http://getglimpse.com/), an awesome server side diagnostics tool. This is installed purely through NuGet and hooks in to the ASP.NET pipeline. Glimpse has to be configured to allow access to the Glimpse console from a remote session (ignore LocalPolicy) but once that is done everything works like a dream, including SQL queries via Glimpse's EF 4 plugin.
+
+#### More information
+- [Glimpse configuration](http://getglimpse.com/Help/Configuration)
+

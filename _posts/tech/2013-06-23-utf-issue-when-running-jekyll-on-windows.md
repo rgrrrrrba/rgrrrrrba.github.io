@@ -6,6 +6,8 @@ type: regular
 category: tech
 ---
 
+**UPDATE:** Running `chcp 65001` seems to work just as well, rather than messing with the environment.
+
 I ran in to an issue when trying to set up Jekyll for this site on my Windows PC:
 
 	D:\source\belfry_images\belfryimages.github.com>jekyll serve --watch
