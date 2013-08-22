@@ -1,5 +1,13 @@
-# Red, Green, Refactor, Red, Red, Red, Revert, Back Away
+# [Red, Green, Refactor, Red, Red, Red, Revert, Back Away](http://rgrrrrrba.github.io)
 
-Ben Scott's blog - <rgrrrrrba.github.io>
+Ben Scott's blog - <http://rgrrrrrba.github.io>
 
 The blog formerly known as Belfry Images.
+
+Itsa Jekyll site, remember?
+
+- install [chocolatey](http://chocolatey.org)
+- `cinst ruby`
+- `cinst ruby.devkit`
+- `gem install jekyll`
+- 
