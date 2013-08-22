@@ -10,4 +10,7 @@ Itsa Jekyll site, remember?
 - `cinst ruby`
 - `cinst ruby.devkit`
 - `gem install jekyll`
-- 
+- `gem install rdiscount`
+- `chcp 65001` if [running on windows](http://joseoncode.com/2011/11/27/solving-utf-problem-with-jekyll-on-windows/)
+- `jekyll serve`
+
