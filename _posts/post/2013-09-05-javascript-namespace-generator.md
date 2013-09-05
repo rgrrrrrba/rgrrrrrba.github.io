@@ -1,5 +1,5 @@
 ---
-title: JavaScript namesapce generator
+title: JavaScript namespace generator
 layout: post
 date: 2013-09-05
 category: post
