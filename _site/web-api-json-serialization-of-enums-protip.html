@@ -25,7 +25,7 @@
 		<div class="container">		
 			<div class="row content">
 				<h1><a href="/">~/</a>Web API JSON serialization of enums pro-tip <br/></h1>
-<h2><small><em>06 Sep 2013 | post</em></small></h2>
+<h2><small><em>06 Sep 2013</em></small></h2>
 
 <p>When serializing an enum value in Web API as JSON it will use the integer value of the enum by default. To make it serialize as the <code>ToString()</code> value (eg. <code>UserType.Admin</code> as <code>"Admin"</code> instead of <code>2</code>) add this to <code>WebApiConfig.cs</code> (in the <code>AppStart</code> directory):</p>
 
