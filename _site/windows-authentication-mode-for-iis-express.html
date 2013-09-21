@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Enabling Windows authentication in IIS Express</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Enabling Windows authentication in IIS Express <br/></h1>
+<h2><small><em>21 Sep 2013</em></small></h2>
+
+<p>So I'm changing a site developed using Forms authentication to use Windows authentication, testing in IIS Express.</p>
+
+<h3>Thread.CurrentPrincipal.Identity.Name</h3>
+
+<p>The first thing to be aware of is that in Forms authentication you set the thread principal yourself when logging in. With Windows authentication <code>Thread.CurrentPrincipal.Identity.Name</code> is set automatically (as long as the rest of these instructions are correct). So nothing should have to be changed in the application code as long as you're already using <code>Thread.CurrentPrincipal.Identity.Name</code> with the Forms authentication.</p>
+
+<h3>Web.config</h3>
+
+<p>The first step is to get rid of the Forms authentication section in the application's <code>Web.config</code>. Mine looked like this:</p>
+
+<pre><code>&lt;system.web&gt;
+    ...
+
+    &lt;!-- Comment out this to disable Forms authentication --&gt;
+    &lt;authentication mode="Forms"&gt;
+        &lt;forms loginUrl="/LogIn" timeout="30"&gt;
+            &lt;credentials passwordFormat="Clear"&gt;
+                &lt;user name="admin" password="test" /&gt;
+                &lt;user name="state_admin" password="test" /&gt;
+                &lt;user name="api" password="test" /&gt;
+            &lt;/credentials&gt;
+        &lt;/forms&gt;
+    &lt;/authentication&gt;
+
+&lt;/system.web&gt;
+</code></pre>
+
+<h3>IIS Express configuration</h3>
+
+<p>You can find the IIS Express configuration in <code>X:\Users\your_account\Documents\IISExpress\config\applicationhost.config</code>. First you need to find the name of the site. Search for the <code>&lt;sites&gt;</code> node and look for the site. It should be something like this:</p>
+
+<pre><code>&lt;site name="YourSite" id="6"&gt;
+    &lt;application path="/" applicationPool="Clr4IntegratedAppPool"&gt;
+        &lt;virtualDirectory path="/" physicalPath="C:\source\YourSolution\src\YourSite.Web" /&gt;
+    &lt;/application&gt;
+    &lt;bindings&gt;
+        &lt;binding protocol="http" bindingInformation="*:57635:localhost" /&gt;
+        &lt;binding protocol="http" bindingInformation="*:57635:192.168.80.103" /&gt;
+    &lt;/bindings&gt;
+&lt;/site&gt;
+</code></pre>
+
+<p>This site's name is <code>YourSite</code>. You need to add (or alter) the site's <code>system.webServer</code> overrides. Search for <code>location path="YourSite"</code> but chances are you need to create a new one. Add this right at the bottom of the file, just before the closing <code>&lt;/configuration&gt;</code> tag:</p>
+
+<pre><code>&lt;location path="YourSite"&gt;
+    &lt;system.webServer&gt;
+        &lt;security&gt;
+            &lt;authentication&gt;
+                &lt;anonymousAuthentication enabled="false" /&gt;
+                &lt;windowsAuthentication enabled="true" /&gt;
+            &lt;/authentication&gt;
+        &lt;/security&gt;
+    &lt;/system.webServer&gt;
+&lt;/location&gt;
+</code></pre>
+
+<p>That should be all that is required to enable Windows authentication in an IIS Express ASP.NET application.</p>
+
+<h3>Check the authentication mode</h3>
+
+<p>One thing you can change in the application code is a check for the authentication mode being used. This can be used to hide a "Log out" link for example. You can get the authentication mode using this method:</p>
+
+<pre><code>public AuthenticationMode GetAuthenticationMode()
+{
+    var configuration = WebConfigurationManager.OpenWebConfiguration("/");
+    var authenticationSection = (AuthenticationSection)configuration.GetSection("system.web/authentication");
+    return authenticationSection.Mode;
+}
+</code></pre>
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
