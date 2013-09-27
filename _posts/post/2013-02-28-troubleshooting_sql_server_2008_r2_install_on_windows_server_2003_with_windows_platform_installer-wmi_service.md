@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting SQL Server 2008 R2 install on Windows Server 2003 with Windows Platform Installer – WMI service
 layout: post
-date: 2013-02-29
+date: 2013-02-28
 type: regular
 category: post
 ---
