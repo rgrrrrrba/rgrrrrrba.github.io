@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Naive offline cache for a UIWebView in iOS</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Naive offline cache for a UIWebView in iOS <br/></h1>
+<h2><small><em>27 Sep 2013</em></small></h2>
+
+<p>On Github I've got a <a href="https://github.com/belfryimages/naive-ios-urlcache">NSUrlCache implementation that adds simple offline caching</a>. Dropping this in to an iOS application will allow <code>UIWebView</code>s to work offline.</p>
+
+<p>It doesn't include precaching (although that could be done by bundling cached files with the app) or any smarts around cache invalidation or caching while online. In fact if the device is online it will <em>always</em> use the online resource and update the cached item. The only thing it adds is offline capability.</p>
+
+<p>The cache is assigned to the static <code>NSUrlCache.SharedCache</code> so add this to your <code>AppDelegate.FinishedLaunching</code> or similar:</p>
+
+<pre><code>var cachePath = Path.Combine(Environment.GetFolderPath (Environment.SpecialFolder.MyDocuments), "urlcache");
+NSUrlCache.SharedCache = new OfflineUrlCache(cachePath);
+</code></pre>
+
+<p>This will only affect anything that uses <code>NSUrl</code>s like the <code>UIWebView</code>. So anything that is in .NET world like RestSharp won't be affected. Which is usually what you would want.</p>
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>

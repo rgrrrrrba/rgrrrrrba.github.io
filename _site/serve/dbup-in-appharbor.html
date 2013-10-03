@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>How to run DbUp in an AppHarbor ASP.NET MVC application</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>How to run DbUp in an AppHarbor ASP.NET MVC application <br/></h1>
+<h2><small><em>31 Aug 2013</em></small></h2>
+
+<p><a href="https://twitter.com/PawelPabich">Pawel Pabich</a> has a good way to <a href="http://www.pabich.eu/2011/03/automated-database-deployments-to.html">run DbUp as part of AppHarbor's build process</a> which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up <a href="http://dbup.github.io/">DbUp</a> with a web hook.</p>
+
+<p>Something important to note is that there is no security around this. It relies on an obfuscated controller path, so it is only really useful for bootstrapping an early project. The controller should be moved behind security as soon as possible.</p>
+
+<p>I'm assuming that DbUp has been set up as per my post on <a href="/reset-the-world.html">resetting the world</a>. Specifically, the DbUp DLL should have an upgrader that looks like this:</p>
+
+<pre><code>namespace ResetTheWorld
+{
+    public class DatabaseUpgrader
+    {
+        private const string ConnectionStringName = "xyz";
+
+        public static void Upgrade(IUpgradeLog upgradeLog = null)
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringName].ConnectionString;
+            var upgrader = DeployChanges.To
+                .SqlDatabase(connectionString)
+                .WithScriptsEmbeddedInAssembly(Assembly.GetAssembly(typeof (DatabaseUpgrader)))
+                .LogTo(upgradeLog ?? new ConsoleUpgradeLog())
+                .Build();
+
+            var result = upgrader.PerformUpgrade();
+
+            if (!result.Successful)
+            {
+                throw new Exception("DB Upgrade failed", result.Error);
+            }
+        }
+
+        public static void SetConnectionString(string connectionString)
+        {
+            typeof (ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(ConfigurationManager.ConnectionStrings, false);
+            ConfigurationManager.ConnectionStrings.Add(new ConnectionStringSettings(ConnectionStringName,
+                connectionString,
+                "System.Data.SqlClient"));
+        }
+    }
+}
+</code></pre>
+
+<p>I've just created a controller with a long random name:</p>
+
+<pre><code>public class njvfdklnvfjdkslndsieController : Controller
+{
+    public ActionResult UpdateTheWorld()
+    {
+        var log = new HtmlLog();
+
+        DatabaseUpgrader.Upgrade(log);
+
+        ViewBag.Log = log.ToString();
+
+        return View();
+    }
+}
+</code></pre>
+
+<p>The <code>HtmlLog</code> is a basic replacement for DbUp's console log that just builds up a HTML string:</p>
+
+<pre><code>class HtmlLog : IUpgradeLog
+{
+    readonly StringBuilder _stringBuilder = new StringBuilder();
+    public override string ToString()
+    {
+        return _stringBuilder.ToString();
+    }
+
+    public void WriteError(string format, params object[] args)
+    {
+        _stringBuilder.AppendFormat("&lt;p class='error'&gt;" + format + "&lt;/p&gt;", args);
+    }
+
+    public void WriteInformation(string format, params object[] args)
+    {
+        _stringBuilder.AppendFormat("&lt;p class='information'&gt;" + format + "&lt;/p&gt;", args);
+    }
+
+    public void WriteWarning(string format, params object[] args)
+    {
+        _stringBuilder.AppendFormat("&lt;p class='warning'&gt;" + format + "&lt;/p&gt;", args);
+    }
+}
+</code></pre>
+
+<p>And the view for the <code>UpdateTheWorld()</code> action just writes out the log, with added colours:</p>
+
+<pre><code>@model dynamic
+
+@{
+    ViewBag.Title = "UpdateTheWorld";
+}
+
+&lt;style&gt;
+    p.error{color:red}
+    p.information{color:#000}
+    p.warning{color:orange}
+&lt;/style&gt;
+
+&lt;h1&gt;UpdateTheWorld&lt;/h1&gt;
+@Html.Raw(ViewBag.Log)
+</code></pre>
+
+<p>Now browsing to <code>http://&lt;app&gt;.apphb.com/njvfdklnvfjdkslndsie/UpdateTheWorld</code> will update the existing database. A <code>ResetTheWorld</code> action could be added which drops the database before running the scripts.</p>
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>

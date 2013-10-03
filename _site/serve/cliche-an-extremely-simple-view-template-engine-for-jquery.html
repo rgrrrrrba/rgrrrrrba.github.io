@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Cliche – an extremely simple view template engine for jQuery</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://rgrrrrrba.github.io">Red, Green, Refactor, Red, Red, Red, Revert, Back Away</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Cliche – an extremely simple view template engine for jQuery <br/></h1>
+<h2><small><em>21 Dec 2009</em></small></h2>
+
+<p>I’ve written a very simple plugin for jQuery that takes a template and a model and returns a view of the model. The plugin itself is pretty straightforward:</p>
+
+<pre><code>(function($){
+    $.fn.cliche = function(model){
+        var template = $(this).html();
+        // pipes in a href like &lt;a href="|... get converted to %7C, convert it back:
+        template = template.replace(/%7C/g, '|');
+        template = template.replace(/\|.*?\|/g, function(f) {
+            var val = model;
+            var fieldParts = f.replace(/\|/g, '').split('.');
+            for (var i = 0; i &lt; fieldParts.length; i ++) {
+                val = val[fieldParts[i]];
+            }
+            return val;
+        });
+        return template;
+    };
+}(jQuery));
+</code></pre>
+
+<p>It is used by setting up a template (putting it into a <code>script type="text/html</code>" block is convenient and hides it from display) and calling cliche(model) on the jQuery object:</p>
+
+<pre><code>&lt;div id="output"&gt;
+    &lt;ul&gt;&lt;/ul&gt;
+&lt;/div&gt;
+&lt;script type="text/html" id="testTemplate"&gt;
+    &lt;li id="item|id|"&gt;&lt;a href="viewItem?id=|id|"&gt;|name|&lt;/a&gt;&lt;/li&gt;
+&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+    $('#output ul').append(
+        $('#testTemplate').cliche({
+            id: 1, name: 'Lorem'
+        })
+    );
+&lt;/script&gt;
+</code></pre>
+
+<p><strike>Cliche is licensed under a Creative Commons Attribution 2.5 Australia license. Check it out at http://cliche.belfryimages.com.au.</strike></p>
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/belfryimages">@belfryimages</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/belfryimages">https://github.com/belfryimages</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
