@@ -66,6 +66,23 @@
 
 <p>This can be tested by telnetting (or <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTy</a>ing) into port 25 of the machine, then sending an email by hand (see <a href="http://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol#SMTP_transport_example">Wikipedia’s entry for SMTP</a> for an example). Sending the email by hand is a very easy way to figure out configuration problems on the client-facing side of the SMTP relay and is a skill worth learning - also it makes you look like a boss if anybody nearby understands what you are doing. The email should be sent through the hMailServer SMTP relay, through to the external SMTP server (using the relay email address for authentication), then through to its destination. hMailServer also has pretty good logging which can help figure out any bugs or misconfiguration.</p>
 
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
 			</div>
 		</div>
 
