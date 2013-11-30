@@ -27,6 +27,7 @@
 				<h1><a href="/">~/</a>Convention tests - Controller actions require an attribute <br/></h1>
 <h2><small><em>31 Aug 2013</em></small></h2>
 
+
 <p>I looove convention tests. The idea is you have some assumption about the system that you want to test and enforce. In this case, I want all controller actions (bar some exceptions) to be decorated with the <code>AuthorizeAttribute</code>.</p>
 
 <p>I'm using <a href="http://nunit.org/">NUnit</a> for the tests and <a href="http://shouldly.github.io/">Shouldly</a> to help with assertions. I'm also using <a href="http://autofac.org/">Autofac</a>, which shouldn't affect the tests except that it gives me a nice extension method.</p>
@@ -134,6 +135,8 @@ bool IsIgnored(Type type)
 </code></pre>
 
 
+
+<br/>
 
 <div id="disqus_thread"></div>
 <script type="text/javascript">

@@ -27,6 +27,7 @@
 				<h1><a href="/">~/</a>How to run DbUp in an AppHarbor ASP.NET MVC application <br/></h1>
 <h2><small><em>31 Aug 2013</em></small></h2>
 
+
 <p><a href="https://twitter.com/PawelPabich">Pawel Pabich</a> has a good way to <a href="http://www.pabich.eu/2011/03/automated-database-deployments-to.html">run DbUp as part of AppHarbor's build process</a> which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up <a href="http://dbup.github.io/">DbUp</a> with a web hook.</p>
 
 <p>Something important to note is that there is no security around this. It relies on an obfuscated controller path, so it is only really useful for bootstrapping an early project. The controller should be moved behind security as soon as possible.</p>
@@ -133,6 +134,8 @@
 <p>Now browsing to <code>http://&lt;app&gt;.apphb.com/njvfdklnvfjdkslndsie/UpdateTheWorld</code> will update the existing database. A <code>ResetTheWorld</code> action could be added which drops the database before running the scripts.</p>
 
 
+
+<br/>
 
 <div id="disqus_thread"></div>
 <script type="text/javascript">

@@ -27,6 +27,7 @@
 				<h1><a href="/">~/</a>Google via Ruby console tool <br/></h1>
 <h2><small><em>01 Aug 2010</em></small></h2>
 
+
 <p>So I’ve been getting my console-fu on since moving to [Mercurial][http://blog.belfryimages.com.au/category/mercurial/] at work, and finding ways to get more efficient. One thing that bugs me is having to spend time grabbing the mouse to search Google via a browser. I’ve also wanted to spend some time with Ruby, so to acheive both goals I wrote a little script that uses the Google AJAX Search API, which returns search results as a JSON object. The full code is available as a [gist on my GitHub][http://gist.github.com/503145]. There are a couple of interesting (for me anyway) parts of the code that I’ll go through now.</p>
 
 <p>The request/response is done via a HTTP GET responding with a JSON-serialised object graph. A query string is built up and parsed into a URI object (using the same reference), then the request is made and parsed from the text JSON representation into an associative array (the result of JSON.parse):</p>
@@ -75,6 +76,8 @@ end
 <p>All up it was very educational spending some time building something a bit significant in Ruby, and the result should hopefully be pretty fun to use.</p>
 
 
+
+<br/>
 
 <div id="disqus_thread"></div>
 <script type="text/javascript">

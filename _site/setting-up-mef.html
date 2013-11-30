@@ -27,6 +27,7 @@
 				<h1><a href="/">~/</a>Setting up MEF <br/></h1>
 <h2><small><em>29 Apr 2012</em></small></h2>
 
+
 <p><em>The source code for the example application created while writing this post is available on <a href="https://github.com/belfryimages/mef-test">GitHub</a>.</em></p>
 
 <p>I've been working on adding support for plugins to <a href="http://code52.org/DownmarkerWPF/">MarkPad</a>. Initially this was going to use NuGet to drag in the plugins, and MEF to dynamically load the . Because of problems like how to manage updates with new versions and the general awkwardness of the build system, I've decided to drop NuGet for now and just link the plugins statically, still using MEF to handle basic dependency injection and loading up the plugins.</p>
@@ -203,6 +204,8 @@ container.ComposeParts(this);
 <p>In case you missed it at the top, the entire project is on <a href="https://github.com/belfryimages/mef-test">GitHub</a>.</p>
 
 
+
+<br/>
 
 <div id="disqus_thread"></div>
 <script type="text/javascript">

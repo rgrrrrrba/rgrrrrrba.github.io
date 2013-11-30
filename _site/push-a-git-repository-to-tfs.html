@@ -27,6 +27,7 @@
 				<h1><a href="/">~/</a>Push a Git repository to TFS <br/></h1>
 <h2><small><em>20 Sep 2013</em></small></h2>
 
+
 <p>I've been working on a project using Git and the time has come to move it to TFS. This is for TFS 2012. TFS 2013 should include support for Git out of the box but it looks like that only if the TFS project is created as a Git repo from the start - I may be wrong on this - but these instructions should work regardless. I'm pushing my Git repository in to an empty TFS project.</p>
 
 <p>I've used <a href="http://chocolatey.org/packages/gittfs">Chocolatey NuGet</a> to install <a href="https://github.com/git-tfs/git-tfs">git-tfs</a> (<code>cinst gittfs</code>).</p>
@@ -66,6 +67,8 @@ git tfs checkin
 <p>And everything is pushed to both remote repositories. Once everything is working you can just copy the <code>.git</code> folder back in to the original, <code>git reset --hard</code>, and get back to work. Allons-y!</p>
 
 
+
+<br/>
 
 <div id="disqus_thread"></div>
 <script type="text/javascript">
