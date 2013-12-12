@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Try This One Simple Trick To Drastically Reduce Method Test Complexity And Reveal Intent Using Default Arguments</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Try This One Simple Trick To Drastically Reduce Method Test Complexity And Reveal Intent Using Default Arguments <br/></h1>
+<h2><small><em>12 Dec 2013</em></small></h2>
+
+
+<h3>YOU WON'T BELIEVE YOUR EYES</h3>
+
+<p>How search engine. Such marketing. Wow.</p>
+
+<p>A trap I fall into when writing tests is big 'arrange' or 'act' sections to test a single 'thing'. Here's a trivial example:</p>
+
+<pre><code>[Test]
+public void Member_first_name_is_updated_correctly()
+{
+    var member = new Member(....);
+
+    member.Modify("First", "Last", "0400123456", new DateTime(2000, 1, 1));
+
+    Assert.That(member.FirstName, Is.EqualTo("First");
+}
+</code></pre>
+
+<p>The member instantiation could be taken care of using an <a href="http://martinfowler.com/bliki/ObjectMother.html">object mother pattern</a> but the complexity of the <code>Modify()</code> invocation (passing a dummy last name, phone number, etc) hides the intent of the test. That is, given a member, <em>when modifying the first name</em>, the first name matches what it was modified to.</p>
+
+<p>Revealing that intent can be done by creating a proxy method over <code>member.Modify</code>, which uses default parameters to allow the test to succinctly express the <em>when</em>.</p>
+
+<pre><code>[Test]
+public void Member_first_name_is_updated_correctly()
+{
+    var member = new Member(...);
+
+    ModifyMember(member, first: "First");
+
+    Assert.That(member.FirstName, Is.EqualTo("First"));
+}
+
+static void ModifyMember(Member member, string first = "first", string last = "last", string phone = "0400123456", DateTime dateOfBirth = default(DateTime))
+{
+    if (dateOfBirth == default(DateTime))
+        dateOfBirth = new DateTime(2000, 1, 1);
+    member.Modify(first, last, phone, dateOfBirth);
+}
+</code></pre>
+
+<p>Now the test only reveals the subject of the test - the first name.</p>
+
+<p>The <code>dateOfBirth</code> parameter is interesting. Default parameters have to be compile-time constants. <code>new DateTime(2000, 1, 1)</code> is mutable, i.e. not a constant. We default to a magic value (<code>default(DateTime)</code>) which is then converted to the default value for the <code>member.Modify()</code> call. So to actually pass in <code>default(DateTime)</code> another proxy method is needed:</p>
+
+<pre><code>static void ModifyMemberWithDefaultDateOfBirth(Member member) 
+{
+    member.Modify("first", "last", "0400123456", default(DateTime));
+}
+</code></pre>
+
+<p>which is annoying and not completely DRY, but at least the test is nice. A better way would be to use <code>DateTime?</code>:</p>
+
+<pre><code>static void ModifyMember(.... , DateTime? dateOfBirth = null)
+{
+    dateOfBirth = dateOfBirth ?? new DateTime(2000, 1, 1);
+    member.Modify(...);
+}
+</code></pre>
+
+<p>Of course this assumes that <code>member.Modify()</code> doesn't accept a nullable date of birth.</p>
+
+<p>These proxy methods would quickly need to be used in multiple test fixtures, so could be appropriate to move them to the member's object mother. They <em>could</em> be made into extension methods, but that may make things more confusing as the tests would appear to operate on the member in a way that isn't supported in the application itself. If indeed your tests are intended to be documentation for the application. Which they should be. Y'all.</p>
+
+<p>HT to my home boy <a href="http://robdmoore.id.au/">Rob Moore</a> (<a href="https://twitter.com/robdmoore">@robdmoore</a>) for showing me this ONE SIMPLE TRICK.</p>
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
