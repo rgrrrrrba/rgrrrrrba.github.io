@@ -5,7 +5,7 @@ date: 2013-11-05
 category: post
 ---
 
-This was written while figuring out the best way to compose a view with a nested view model. [Here is a git repo](https://github.com/bendetat/test-nested-view-model). I haven't spent much time in ASP.NET MVC so be fair.
+This was written while figuring out the best way to compose a view with a nested view model. [Here is a Git repo](https://github.com/bendetat/test-nested-view-model). I haven't spent much time in ASP.NET MVC so be fair.
 
 I'm trying to illustrate composing a view. I suspect a better method would be `Html.EditorFor` but that approach doesn't seem as rich as using partials (how would I use different editors for the same view model in a different context?).
 
