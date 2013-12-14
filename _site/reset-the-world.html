@@ -25,7 +25,9 @@
 		<div class="container">		
 			<div class="row content">
 				<h1><a href="/">~/</a>Reset The World! <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>31 Aug 2013</em></small></h2>
+
 
 
 <p>Resetting the world refers to resetting a build environment (usually just a database) to a known state. This could include running SSIS scripts to migrate data from existing systems, creating web sites, or setting up dependent services. For a simple system or a system in its infancy it usually just refers to creating or upgrading a database for development, and that is what I'm going to show now. There will be two execution paths here - the first drops any existing database and recreates it from the scripts, and the second just executes any new scripts on an existing database. This technique is taken from several projects that I've worked in at Readify. The scripts are run in a console - Powershell if you know what's good for you :trollface:</p>
@@ -135,6 +137,7 @@ if(!$?) { exit 1; }
 
 
 
+
 <br/>
 
 <div id="disqus_thread"></div>
@@ -151,6 +154,9 @@ if(!$?) { exit 1; }
 </script>
 <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
 
 			</div>
 		</div>

@@ -25,7 +25,9 @@
 		<div class="container">		
 			<div class="row content">
 				<h1><a href="/">~/</a>Editing past log comments in Subversion <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>18 Mar 2008</em></small></h2>
+
 
 
 <p>Subversion is my source version control software of choice, but it’s not immediately obvious how to edit the log comment of a past commit (such as after adding a particularly scathing remark that may not be a wise career move). A caveat is that you need to have administrator access to the Subversion repository.</p>
@@ -40,6 +42,7 @@ exit 1
 </code></pre>
 
 <p>The <code>%4</code> argument contains which operation is being performed. If the operation is <code>svn:log</code> we indicate success, which is a return code of 0. Otherwise it prints an error and exits with a non-zero, which indicates an error (and that the operation shouldn’t be allowed). Once that is saved, you should be able to use your to Subversion client to edit the comment. Be careful with what you do, as revision properties aren’t versioned, and you won’t be able to undo your changes. You should also probably rename <code>pre-revprop-change.bat</code> to <code>pre-revprop-change.bat.bak</code> once finished.</p>
+
 
 
 
@@ -59,6 +62,9 @@ exit 1
 </script>
 <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
 
 			</div>
 		</div>

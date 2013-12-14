@@ -25,7 +25,9 @@
 		<div class="container">		
 			<div class="row content">
 				<h1><a href="/">~/</a>Naive offline cache for a UIWebView in iOS <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>27 Sep 2013</em></small></h2>
+
 
 
 <p>On Github I've got a <a href="https://github.com/belfryimages/naive-ios-urlcache">NSUrlCache implementation that adds simple offline caching</a>. Dropping this in to an iOS application will allow <code>UIWebView</code>s to work offline.</p>
@@ -39,6 +41,7 @@ NSUrlCache.SharedCache = new OfflineUrlCache(cachePath);
 </code></pre>
 
 <p>This will only affect anything that uses <code>NSUrl</code>s like the <code>UIWebView</code>. So anything that is in .NET world like RestSharp won't be affected. Which is usually what you would want.</p>
+
 
 
 
@@ -58,6 +61,9 @@ NSUrlCache.SharedCache = new OfflineUrlCache(cachePath);
 </script>
 <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
 
 			</div>
 		</div>

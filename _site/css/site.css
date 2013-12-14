@@ -38,3 +38,7 @@ hr {
 	border-top: 3px dashed #eee;
 	border-bottom: none;
 }
+
+.twitter-link {
+	float: right;
+}

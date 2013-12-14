@@ -25,7 +25,9 @@
 		<div class="container">		
 			<div class="row content">
 				<h1><a href="/">~/</a>Declaring a class with inheritance and a generic type constraint in C# <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>13 Nov 2009</em></small></h2>
+
 
 
 <p>I’m writing a generic class that inherits from a base class, implements an interface, and has a type constraint on the generic class. The class inheritance and interface are straightforward, as is the type constraint, but combined together it’s not obvious how to write this. Any examples of type constraints I could find don’t have inheritance or interfaces as well. So, via a bit of trail and error, here is a right way to declare such a class:</p>
@@ -35,6 +37,7 @@
     where T : ClassOfT
 {...}
 </code></pre>
+
 
 
 
@@ -54,6 +57,9 @@
 </script>
 <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
 
 			</div>
 		</div>
