@@ -190,6 +190,8 @@ That doesn't read very naturally so I like to invert the method with an extensio
         return typeof(T).IsAssignableFrom(fromType);
     }
 
+**NOTE** Know what? This is included in Autofac. Loove Autofac.
+
 I also need to exclude abstract types from the query, so that abstract types can take a parameter in their constructor but concrete implementations have to provide a default constructor. This excludes the interface itself as well. There are a number of interesting methods and properties given by the `Type` class.
 
 The complete data source is this:
