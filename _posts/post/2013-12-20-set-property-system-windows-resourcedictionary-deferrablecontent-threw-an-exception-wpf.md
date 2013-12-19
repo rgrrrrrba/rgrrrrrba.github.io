@@ -1,5 +1,5 @@
 ---
-title: "Set property 'System.Windows.ResourceDictionary.DeferrableContent' threw an exception" error in WPF
+title: Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF
 layout: post
 date: 2013-12-20
 category: post

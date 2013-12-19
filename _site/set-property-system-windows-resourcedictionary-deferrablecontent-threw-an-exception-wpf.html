@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>20 Dec 2013</em></small></h2>
+
+
+
+<p>Ok so I'm working on a WPF launcher that loads a shell that loads a client. Three different appdomains. The launcher could load the shell. The shell could load the client. But when I tried to get the launcher to load the shell then the shell to load the client, I would get this lovely exception when the client instance was created:</p>
+
+<pre><code>Set property 'System.Windows.ResourceDictionary.DeferrableContent' threw an exception
+</code></pre>
+
+<p><a href="https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;aqs=chrome..69i57.519j0j4&amp;sourceid=chrome&amp;espv=210&amp;es_sm=122&amp;ie=UTF-8">Googling the exception</a> gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread.</p>
+
+<p>Turned out I was doing this in the shell, to keep its UI responsive:</p>
+
+<pre><code>var launchCompletedResetEvent = new AutoResetEvent(false);
+var worker = new BackgroundWorker();
+worker.DoWork += (s,e) =&gt; {
+    ... // download and extract the client
+};
+worker.RunWorkerCompleted += (s,e) =&gt; {
+    ... // launch the client
+    launchCompletedResetEvent.Set();
+};
+worker.RunWorkerAsync();
+launchCompletedResetEvent.WaitOne();
+</code></pre>
+
+<p>The <code>launchCompletedResetEvent</code> mutex is so the shell didn't terminate before launching the client.</p>
+
+<p>This was launching the client in a non-UI thread. For some reason this seems to have worked when running the shell directly but not when running the shell through the launcher. Maybe when I ran the shell directly I was bypassing the download step and launching the client on the main thread. Actually that makes sense.</p>
+
+<p>I just had to move the client launch to after the <code>WaitOne</code> to get everything working:</p>
+
+<pre><code>var launchCompletedResetEvent = new AutoResetEvent(false);
+var worker = new BackgroundWorker();
+worker.DoWork += (s,e) =&gt; {
+    ... // download and extract the client
+};
+worker.RunWorkerCompleted += (s,e) =&gt; {
+    launchCompletedResetEvent.Set();
+};
+worker.RunWorkerAsync();
+launchCompletedResetEvent.WaitOne();
+... // launch the client
+</code></pre>
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
