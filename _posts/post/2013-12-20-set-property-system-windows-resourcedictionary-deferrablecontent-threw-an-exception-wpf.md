@@ -9,7 +9,7 @@ Ok so I'm working on a WPF launcher that loads a shell that loads a client. Thre
 
     Set property 'System.Windows.ResourceDictionary.DeferrableContent' threw an exception
 
-[Googling the exception](https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&aqs=chrome..69i57.519j0j4&sourceid=chrome&espv=210&es_sm=122&ie=UTF-8) gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread.
+[Googling the exception](https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&aqs=chrome..69i57.519j0j4&sourceid=chrome&espv=210&es_sm=122&ie=UTF-8) gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread (`InvalidOperationException`, "The calling thread must be STA, because many UI components require this.").
 
 Turned out I was doing this in the shell, to keep its UI responsive:
 
