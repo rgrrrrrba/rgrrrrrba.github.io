@@ -7,7 +7,7 @@ category: link
 
 ### GH4W
 
-I use [GitHub for Windows](http://windows.github.com/) to get up and running quickly with GitHub on a new machine. Opening a Powershell instance from GH4W gives me a relatively nice msysgit instance. Then the `github_rsa.pub` file in `C:\Users\**username**\.ssh` can be used added to BitBucket to get that running with the same credentials.
+I use [GitHub for Windows](http://windows.github.com/) to get up and running quickly with GitHub on a new machine. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the `github_rsa.pub` file in `C:\Users\**username**\.ssh` can be used added to BitBucket to get that running with the same credentials.
 
 ### Switch to Cmder
 
