@@ -83,9 +83,18 @@ Things to note in the view's XAML:
 - The trigger has to be a data trigger
 - The trigger just sets the `Source` property of the image based on the value of the `MyEnum` property
 
-This is then used as follows:
+This is then used as a content control bound to an instance of a `ToggleMyEnumViewModel`. Consuming XAML:
 
-    <local:ToggleMyEnumButton MyEnum="{Binding MyLocalValueForMyEnum}"/>
+    <ContentControl x:Name="ToggleMyEnum" />
 
-Note that `MyLocalValueForMyEnum` is a property on the consuming code's view model. Clicking the button directly updates that bound property.
+Consuming view model:
 
+    public ToggleMyEnumViewModel ToggleMyEnum { get; private set; }
+
+    public ConsumingViewModel()
+    {
+        /// ...
+        ToggleMyEnum = new ToggleMyEnumViewModel(); // or use an IOC factory
+    }
+
+This isn't exactly what I want, I would prefer to bind directly to a property on the consuming view model rather than indirectly with the `ToggleMyEnumViewModel`.
