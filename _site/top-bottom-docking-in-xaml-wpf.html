@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF</title>
+		<title>Top/Bottom docking in XAML / WPF</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,51 +24,42 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF <br/></h1>
+				<h1><a href="/">~/</a>Top/Bottom docking in XAML / WPF <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
-<h2><small><em>20 Dec 2013</em></small></h2>
+<h2><small><em>10 Jan 2014</em></small></h2>
 
 
 
-<p>Ok so I'm working on a WPF launcher that loads a shell that loads a client. Three different appdomains. The launcher could load the shell. The shell could load the client. But when I tried to get the launcher to load the shell then the shell to load the client, I would get this lovely exception when the client instance was created:</p>
+<p>You want a layout like:</p>
 
-<pre><code>Set property 'System.Windows.ResourceDictionary.DeferrableContent' threw an exception
+<pre><code>^^ top content
+^^ content that fills the control vv
+bottom content (nav, actions,etc) vv
 </code></pre>
 
-<p><a href="https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;aqs=chrome..69i57.519j0j4&amp;sourceid=chrome&amp;espv=210&amp;es_sm=122&amp;ie=UTF-8">Googling the exception</a> gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread (<code>InvalidOperationException</code>, "The calling thread must be STA, because many UI components require this.").</p>
+<p><code>DockPanel</code> is your friend but just setting <code>DockPanel.Dock</code> on the top and bottom controls won't work. By default the last child control in the <code>DockPanel</code> fills the panel:</p>
 
-<p>Turned out I was doing this in the shell, to keep its UI responsive:</p>
-
-<pre><code>var launchCompletedResetEvent = new AutoResetEvent(false);
-var worker = new BackgroundWorker();
-worker.DoWork += (s,e) =&gt; {
-    ... // download and extract the client
-};
-worker.RunWorkerCompleted += (s,e) =&gt; {
-    ... // launch the client
-    launchCompletedResetEvent.Set();
-};
-worker.RunWorkerAsync();
-launchCompletedResetEvent.WaitOne();
+<pre><code>&lt;DockPanel&gt;
+    &lt;Control DockPanel.Dock="Top" x:Name="TopContentControl" /&gt;
+    &lt;Control DockPanel.Dock="Bottom" x:Name="BottonNavControl" /&gt;
+    &lt;Control x:Name="FillControl" /&gt;
+&lt;/DockPanel&gt;
 </code></pre>
 
-<p>The <code>launchCompletedResetEvent</code> mutex is so the shell didn't terminate before launching the client.</p>
+<p>If you've just got content at the top and nav docked to the bottom, the top control can become the fill control. Just remember that is has to be the last control in the <code>DockPanel</code>.</p>
 
-<p>This was launching the client in a non-UI thread. For some reason this seems to have worked when running the shell directly but not when running the shell through the launcher. Maybe when I ran the shell directly I was bypassing the download step and launching the client on the main thread. Actually that makes sense.</p>
+<pre><code>&lt;DockPanel&gt;
+    &lt;Control DockPanel.Dock="Bottom" x:Name="BottomNavControl" /&gt;
+    &lt;Control x:Name="TopContentControl" /&gt;
+&lt;/DockPanel&gt;
+</code></pre>
 
-<p>I just had to move the client launch to after the <code>WaitOne</code> to get everything working:</p>
+<p>Or if you want to keep the same control ordering and explicitly dock the top control to the top, the "last child control in the <code>DockPanel</code> filling the panel" default can be turned off.</p>
 
-<pre><code>var launchCompletedResetEvent = new AutoResetEvent(false);
-var worker = new BackgroundWorker();
-worker.DoWork += (s,e) =&gt; {
-    ... // download and extract the client
-};
-worker.RunWorkerCompleted += (s,e) =&gt; {
-    launchCompletedResetEvent.Set();
-};
-worker.RunWorkerAsync();
-launchCompletedResetEvent.WaitOne();
-... // launch the client
+<pre><code>&lt;DockPanel LastChildFill="False"&gt;
+    &lt;Control DockPanel.Dock="Top" x:Name="TopContentControl" /&gt;
+    &lt;Control DockPanel.Dock="Bottom" x:Name="BottomNavControl" /&gt;
+&lt;/DockPanel&gt;
 </code></pre>
 
 
