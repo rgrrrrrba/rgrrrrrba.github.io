@@ -40,7 +40,7 @@ This opens port 80 on the *external* firewall. The server's internal firewall wi
 
 ### Attach a new disk
 
-<img src="http://i.imgur.com/4Znf3hr.png" style="float: left"/> The VM has two drives configured by default - C:, which contains the Windows installation, and D:, which is called temporary storage. They both sound a bit transient, so it is probably a good idea to attach a new disk, which can be managed separately and moved from machine to machine AFAIK. 
+<img src="http://i.imgur.com/4Znf3hr.png" style="float: left; padding-right: 1em;"/> The VM has two drives configured by default - C:, which contains the Windows installation, and D:, which is called temporary storage. They both sound a bit transient, so it is probably a good idea to attach a new disk, which can be managed separately and moved from machine to machine AFAIK. 
  
 Attach a new disk by selecting the ATTACH option from the bottom menu. Select Empty Disk.  Accept the defaults, I gave it a size of 20 GB. I'm assuming it's easy to increase the size later. The disk will be attached and the status should return to running.
 
