@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF</title>
+		<title>Get running fast on GitHub and BitBucket</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,51 +24,49 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF <br/></h1>
+				<h1><a href="/">~/</a>Get running fast on GitHub and BitBucket <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
-<h2><small><em>20 Dec 2013</em></small></h2>
+<h2><small><em>22 Jan 2014</em></small></h2>
 
 
 
-<p>Ok so I'm working on a WPF launcher that loads a shell that loads a client. Three different appdomains. The launcher could load the shell. The shell could load the client. But when I tried to get the launcher to load the shell then the shell to load the client, I would get this lovely exception when the client instance was created:</p>
+<h3>GH4W</h3>
 
-<pre><code>Set property 'System.Windows.ResourceDictionary.DeferrableContent' threw an exception
+<p>I use <a href="http://windows.github.com/">GitHub for Windows</a> to get up and running quickly with GitHub on a new machine. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the <code>github_rsa.pub</code> file in <code>C:\Users\**username**\.ssh</code> can be used added to BitBucket to get that running with the same credentials.</p>
+
+<h3>Switch to Cmder</h3>
+
+<p>I just tried out <a href="http://bliker.github.io/cmder/">Cmder</a> with great success as a Powershell replacement but the msysgit instance used in that doesn't work with the public key named <code>github_rsa.pub</code>. I just copied <code>github_rsa.pub</code> to <code>id_rsa.pub</code> and <code>github_rsa</code> to <code>id_rsa</code>. Working well so far.</p>
+
+<p><strong>update</strong> hmm looks like this is a work in progress....</p>
+
+<p>Run this to configure git to push the current branch by default:</p>
+
+<pre><code>git config --global push.default current
 </code></pre>
 
-<p><a href="https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;aqs=chrome..69i57.519j0j4&amp;sourceid=chrome&amp;espv=210&amp;es_sm=122&amp;ie=UTF-8">Googling the exception</a> gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread (<code>InvalidOperationException</code>, "The calling thread must be STA, because many UI components require this.").</p>
+<p>Also check this out: <a href="https://help.github.com/articles/set-up-git">https://help.github.com/articles/set-up-git</a></p>
 
-<p>Turned out I was doing this in the shell, to keep its UI responsive:</p>
+<p>Looks like password caching is an issue, but only with non-SSH remote urls. If <code>.git/config</code> looks like this it shoud use the above keys:</p>
 
-<pre><code>var launchCompletedResetEvent = new AutoResetEvent(false);
-var worker = new BackgroundWorker();
-worker.DoWork += (s,e) =&gt; {
-    ... // download and extract the client
-};
-worker.RunWorkerCompleted += (s,e) =&gt; {
-    ... // launch the client
-    launchCompletedResetEvent.Set();
-};
-worker.RunWorkerAsync();
-launchCompletedResetEvent.WaitOne();
+<pre><code>[remote "origin"]
+    url = git@github.com:rgrrrrrba/rgrrrrrba.github.io.git
 </code></pre>
 
-<p>The <code>launchCompletedResetEvent</code> mutex is so the shell didn't terminate before launching the client.</p>
+<h3>Merge tool</h3>
 
-<p>This was launching the client in a non-UI thread. For some reason this seems to have worked when running the shell directly but not when running the shell through the launcher. Maybe when I ran the shell directly I was bypassing the download step and launching the client on the main thread. Actually that makes sense.</p>
+<p>I also needed to set my merge tool. I use (and pay for) <a href="http://www.scootersoftware.com/moreinfo.php">Beyond Compare 3</a> and the <a href="http://www.scootersoftware.com/support.php?zz=kb_vcs">instructions here</a> were helpful. The commands to use are:</p>
 
-<p>I just had to move the client launch to after the <code>WaitOne</code> to get everything working:</p>
+<pre><code>git config --global merge.tool bc3
+git config --global mergetool.bc3.path "C:/Program Files (x86)/Beyond Compare 3/BCompare.exe"                 
+</code></pre>
 
-<pre><code>var launchCompletedResetEvent = new AutoResetEvent(false);
-var worker = new BackgroundWorker();
-worker.DoWork += (s,e) =&gt; {
-    ... // download and extract the client
-};
-worker.RunWorkerCompleted += (s,e) =&gt; {
-    launchCompletedResetEvent.Set();
-};
-worker.RunWorkerAsync();
-launchCompletedResetEvent.WaitOne();
-... // launch the client
+<p>Notice that you need to use forward-slashes in the path to BC. <code>~/.gitconfig</code> should end up like this:</p>
+
+<pre><code>[merge]
+    tool = bc3
+[mergetool "bc3"]
+    path = C:/Program Files (x86)/Beyond Compare 3/BCompare.exe
 </code></pre>
 
 

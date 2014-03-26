@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF</title>
+		<title>Git cherry-pick from another repository</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,52 +24,48 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF <br/></h1>
+				<h1><a href="/">~/</a>Git cherry-pick from another repository <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
-<h2><small><em>20 Dec 2013</em></small></h2>
+<h2><small><em>24 Jan 2014</em></small></h2>
 
 
 
-<p>Ok so I'm working on a WPF launcher that loads a shell that loads a client. Three different appdomains. The launcher could load the shell. The shell could load the client. But when I tried to get the launcher to load the shell then the shell to load the client, I would get this lovely exception when the client instance was created:</p>
+<p>Somehow.. somehow... I managed to overwrite a commit by force-pushing a branch that didn't include said commit.</p>
 
-<pre><code>Set property 'System.Windows.ResourceDictionary.DeferrableContent' threw an exception
+<p>The commit was made in a local copy of the repository that I was working on in parallel with my normal working copy. So,</p>
+
+<pre><code>c:\source\repo        &lt;-- working copy
+c:\source\repo-copy   &lt;-- copy with the commit I need
 </code></pre>
 
-<p><a href="https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;aqs=chrome..69i57.519j0j4&amp;sourceid=chrome&amp;espv=210&amp;es_sm=122&amp;ie=UTF-8">Googling the exception</a> gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread (<code>InvalidOperationException</code>, "The calling thread must be STA, because many UI components require this.").</p>
+<p>I didn't want to mess around with rebasing the <code>repo-copy</code> to merge in the remote branch and totally muck everything up.</p>
 
-<p>Turned out I was doing this in the shell, to keep its UI responsive:</p>
+<p>The solution is to cherry pick the commit from the working copy. First add the local copy as a remote to the working copy:</p>
 
-<pre><code>var launchCompletedResetEvent = new AutoResetEvent(false);
-var worker = new BackgroundWorker();
-worker.DoWork += (s,e) =&gt; {
-    ... // download and extract the client
-};
-worker.RunWorkerCompleted += (s,e) =&gt; {
-    ... // launch the client
-    launchCompletedResetEvent.Set();
-};
-worker.RunWorkerAsync();
-launchCompletedResetEvent.WaitOne();
+<pre><code>c:\source\repo&gt; git remote add localcopy ../repo-copy
 </code></pre>
 
-<p>The <code>launchCompletedResetEvent</code> mutex is so the shell didn't terminate before launching the client.</p>
+<p>This adds a remote called <code>localcopy</code> which points to the local repo copy. Then, fetch from <code>localcopy</code>:</p>
 
-<p>This was launching the client in a non-UI thread. For some reason this seems to have worked when running the shell directly but not when running the shell through the launcher. Maybe when I ran the shell directly I was bypassing the download step and launching the client on the main thread. Actually that makes sense.</p>
-
-<p>I just had to move the client launch to after the <code>WaitOne</code> to get everything working:</p>
-
-<pre><code>var launchCompletedResetEvent = new AutoResetEvent(false);
-var worker = new BackgroundWorker();
-worker.DoWork += (s,e) =&gt; {
-    ... // download and extract the client
-};
-worker.RunWorkerCompleted += (s,e) =&gt; {
-    launchCompletedResetEvent.Set();
-};
-worker.RunWorkerAsync();
-launchCompletedResetEvent.WaitOne();
-... // launch the client
+<pre><code>c:\source\repo&gt; git fetch localcopy
+remote: Counting objects: 500, done.                                                                                   
+remote: Compressing objects: 100% (306/306), done.                                                                     
+emote: Total 444 (delta 329), reused 149 (delta 132)                                                                   
+Receiving objects: 100% (444/444), 58.53 KiB | 0 bytes/s, done.                                                        
+Resolving deltas: 100% (329/329), completed with 35 local objects.                                                     
+From ..\repo-copy\                                                                                                  
+ * [new branch]      xxxx -&gt; repo-copy/xxxx              
+ ...
 </code></pre>
+
+<p><code>&lt;aside&gt;</code>What happened with  line 3 of the response? <code>emote</code>? strange.<code>&lt;/aside&gt;</code></p>
+
+<p>Then cherry-pick the appropriate commit:</p>
+
+<pre><code>c:\source\repo-copy&gt; git cherry-pick &lt;commit-hash&gt;
+</code></pre>
+
+<p>I had to resolve some conflicts but it all looks ok.</p>
 
 
 
