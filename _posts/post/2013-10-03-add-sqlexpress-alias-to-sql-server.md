@@ -2,7 +2,9 @@
 title: Add .\sqlexpress alias to SQL Server
 layout: post
 date: 2013-10-03
-category: post
+categories:
+- post
+- sticky
 ---
 
 A lot of code bases are hard-coded to point to `.\sqlexpress` which is the default named instance for SQL Server Express. To add a `.\sqlexpress` alias to an unnamed SQL Server instance (developer edition in my case) follow these simple mind-blowing steps:

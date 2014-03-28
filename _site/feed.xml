@@ -7,6 +7,109 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Uninstalling Azure Service Bus after (accidently) deleting the databases</title>
+				<description>&lt;p&gt;I accidently blew away my databases (while upgrading the SQL Server version) and my local Azure Service Bus stopped working. You can't reinstall or restore easily AFAIK so I just wanted to uninstall Azure Service Bus and start again. Unfortunately you can't uninstall without leaving the farm, and you can't leave the farm without the databases.&lt;/p&gt;
+
+&lt;p&gt;The answer is to remove the registry key for the service bus, which is in &lt;code&gt;HKLM\Software\Microsoft\Service Bus&lt;/code&gt;. That tells the unstaller that there is nothing to see and allows uninstallation.&lt;/p&gt;
+
+&lt;p&gt;Found at &lt;a href=&quot;http://social.msdn.microsoft.com/Forums/windowsazure/en-US/f5096a7a-9605-4231-b093-b7d278be7c20/cant-uninstall-service-bus&quot;&gt;http://social.msdn.microsoft.com/Forums/windowsazure/en-US/f5096a7a-9605-4231-b093-b7d278be7c20/cant-uninstall-service-bus&lt;/a&gt; (similar but unrelated root cause).&lt;/p&gt;
+</description>
+				<pubDate>Thu, 27 Mar 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/uninstalling-azure-service-bus.html</link>
+				<guid isPermaLink="true">http://bendetat.com/uninstalling-azure-service-bus.html</guid>
+			</item>
+		
+			<item>
+				<title>A list of my favourite Visual Studio shortcuts</title>
+				<description>&lt;p&gt;Set them in Tools -&gt; Options -&gt; Environment -&gt; Keyboard.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;File.Close&lt;/code&gt;: &lt;code&gt;Ctrl+Shift+W&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Window.MovetoPreviousTabGroup&lt;/code&gt;: &lt;code&gt;Ctrl+Shift+Alt+[&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Window.MovetoNextTabGroup&lt;/code&gt;: &lt;code&gt;Ctrl+Shift+Alt+]&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 27 Mar 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/a-list-of-my-favourite-visual-studio-keyboard-shortcuts.html</link>
+				<guid isPermaLink="true">http://bendetat.com/a-list-of-my-favourite-visual-studio-keyboard-shortcuts.html</guid>
+			</item>
+		
+			<item>
+				<title>Git - reapply a commit using cherry-pick</title>
+				<description>&lt;p&gt;How do I reapply a commit, so I actually want the commit run twice? Say I do something cool, then do something uncool, and want to do that cool thing again, without having to mess around with history?&lt;/p&gt;
+
+&lt;p&gt;Say I pull in some dependency which adds a readme file somewhere, then I delete the readme file, then I update the dependency which pulls in the file again.&lt;/p&gt;
+
+&lt;blockquote&gt;&lt;p&gt;we use Git's cherry-pick command, which applies it as a patch and immediately commits it with the same commit message):&lt;/p&gt;&lt;/blockquote&gt;
+
+&lt;pre&gt;&lt;code&gt;git cherry-pick 89bec60
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://definitivedrupal.org/suggestions/using-git-re-apply-old-over-written-change&quot;&gt;&lt;em&gt;Turns out&lt;/em&gt;&lt;/a&gt;.&lt;/p&gt;
+</description>
+				<pubDate>Wed, 26 Mar 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/git-reapply-a-commit-cherry-pick.html</link>
+				<guid isPermaLink="true">http://bendetat.com/git-reapply-a-commit-cherry-pick.html</guid>
+			</item>
+		
+			<item>
+				<title>Xamarin Studio can't find my Android device</title>
+				<description>&lt;p&gt;&lt;strong&gt;Know what?&lt;/strong&gt; This doesn't work. Try setting the USB transfer mode (Settings, Storage, (in the menu) USB computer connection) to 'Camera (PTP)'. Found in &lt;a href=&quot;http://stackoverflow.com/a/16797152/149259&quot;&gt;this StackOverflow answer&lt;/a&gt;. I'll leave the below for reference in case it comes in handy.&lt;/p&gt;
+
+&lt;h3&gt;Messing with Android Developer Bridge (ADB)&lt;/h3&gt;
+
+&lt;p&gt;I installed Xamarin Studio on Windows 8 to start on some Android development. I was able to debug directly on my little oldish Nexus 7 (running Android 4.4.2) (Xamarin's instructions are &lt;a href=&quot;http://docs.xamarin.com/guides/android/getting_started/installation/set_up_device_for_development/&quot;&gt;here&lt;/a&gt;):&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;after enabling debug mode on the device:
+
+&lt;ul&gt;
+&lt;li&gt;'Settings'&lt;/li&gt;
+&lt;li&gt;'About tablet'&lt;/li&gt;
+&lt;li&gt;Tap 'Build number' &lt;em&gt;seven&lt;/em&gt; times&lt;/li&gt;
+&lt;li&gt;Go back, and 'Developer options' will be at the bottom of the 'Settings' screen&lt;/li&gt;
+&lt;li&gt;Within 'Developer options', check 'USB debugging'&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;and installing the OEM drivers for the tablet:
+
+&lt;ul&gt;
+&lt;li&gt;My device is an Asus Nexus 7, so I downloaded the drivers from &lt;a href=&quot;http://www.asus.com/Tablets_Mobile/Nexus_7/#support&quot;&gt;ASUS&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;In 'Device Manager' under 'Other Devices', right click the device and 'Update Driver Software'&lt;/li&gt;
+&lt;li&gt;Browse to and select the downloaded OEM driver&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;This worked fine, yay for me. The problem was, after restarting my system (after an upgrade to Windows 8.1 (how seamless is that now by the way?)) Xamarin Studio wasn't seeing my device. It was still showing up in Device Manager correctly and debug mode was still enabled, but something broke.&lt;/p&gt;
+
+&lt;p&gt;Turns out the something is the Android Debug Bridge, or ADB. I found a reference deep in &lt;a href=&quot;http://docs.xamarin.com/guides/android/troubleshooting/offline.pdf&quot;&gt;this document (WARNING PDF)&lt;/a&gt; from Xamarin:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/uWvypuM.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Helpful but not extremely helpful. That link to &lt;code&gt;adb program&lt;/code&gt; is broken by the way. I found some nicer information about the Android Debug Bridge on &lt;a href=&quot;http://developer.android.com/tools/help/adb.html&quot;&gt;Android's developer site&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Next step is actually finding the ADB program, which is part of the Android SDK. I looked all over my machine for the SDK. &lt;em&gt;Turns out&lt;/em&gt; Xamarin installs the SDK in the user's local AppData directory, in &lt;code&gt;X:\Users\username\AppData\Local\Android\android-sdk&lt;/code&gt;. Then &lt;code&gt;adp.exe&lt;/code&gt; lives in the &lt;code&gt;platform-tools&lt;/code&gt; directory.&lt;/p&gt;
+
+&lt;p&gt;After all that, I dropped a batch file on my desktop to restart the bridge, in case this happens again:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;@C:\Users\ben\AppData\Local\Android\android-sdk\platform-tools\adb.exe kill-server
+@C:\Users\ben\AppData\Local\Android\android-sdk\platform-tools\adb.exe start-server
+@pause
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Results:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/fqjVl9L.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+				<pubDate>Sun, 23 Mar 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/xamarin-studio-cant-find-my-android-device.html</link>
+				<guid isPermaLink="true">http://bendetat.com/xamarin-studio-cant-find-my-android-device.html</guid>
+			</item>
+		
+			<item>
 				<title>Set up TeamCity on an Azure virtual machine</title>
 				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I'm learning in the open here. I have barely used Azure and have only ever used already established TeamCity instances, so I'm really just messing around with two new things at the same time here. I'm sure I'm missing a heap of very important points.&lt;/p&gt;
 
@@ -388,428 +491,6 @@ launchCompletedResetEvent.WaitOne();
 				<pubDate>Fri, 20 Dec 2013 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/set-property-system-windows-resourcedictionary-deferrablecontent-threw-an-exception-wpf.html</link>
 				<guid isPermaLink="true">http://bendetat.com/set-property-system-windows-resourcedictionary-deferrablecontent-threw-an-exception-wpf.html</guid>
-			</item>
-		
-			<item>
-				<title>Starting out with convention tests and data-driven tests in xUnit</title>
-				<description>&lt;p&gt;I'm really interested in convention tests, and as I want to get into xUnit I thought I would try taking some patterns that I've used in NUnit and applying them in xUnit.&lt;/p&gt;
-
-&lt;p&gt;The test project I created while writing this post is &lt;a href=&quot;https://github.com/bendetat/convention-tests-in-xunit&quot;&gt;available on GitHub&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2&gt;First steps&lt;/h2&gt;
-
-&lt;p&gt;The first thing to notice is the xUnit has slightly different naming conventions compared to NUnit. This is a simple test in NUnit:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class ItShouldHaveTests
-{
-    [Test]
-    public void AndItDoes()
-    {
-        Assert.True(true);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The equivalent in xUnit:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class ItShouldHaveTests
-{
-    [Fact]
-    public void AndItDoes()
-    {
-        Assert.True(true);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;So xUnit has &lt;code&gt;[Fact]&lt;/code&gt;s while NUnit has &lt;code&gt;[Test]&lt;/code&gt;s. Cool so far. Note that the class has to be public. In NUnit I would usually mark test fixtures with &lt;code&gt;[TestFixture]&lt;/code&gt; and the class usually ends up &lt;code&gt;internal&lt;/code&gt;, which Resharper's test runner will pick up. NUnit has been able to pick up public classes without the &lt;code&gt;[TestFixture]&lt;/code&gt; decoration for the past couple of years IIRC but I've had mixed success with Resharper's test runner. Sometimes I would spend valuable seconds wondering why tests weren't running and looking dumb, so I would automatically add the attribute. xUnit doesn't have a &lt;code&gt;[TestFixture]&lt;/code&gt; equivalent. It will just find all public classes that contain tests.&lt;/p&gt;
-
-&lt;h2&gt;Comparisons with NUnit&lt;/h2&gt;
-
-&lt;p&gt;The xUnit Wiki has a nice &lt;a href=&quot;http://xunit.codeplex.com/wikipage?title=Comparisons&quot;&gt;comparison page&lt;/a&gt; showing differences between NUnit, MSTest and itself.&lt;/p&gt;
-
-&lt;p&gt;Apart from the obvious &lt;code&gt;[Fact]&lt;/code&gt; vs &lt;code&gt;[Test]&lt;/code&gt; and not needing &lt;code&gt;[TestFixture]&lt;/code&gt;, the big differences seem to be with how the two test frameworks handle fixture setup and teardown. NUnit uses &lt;code&gt;[SetUp]&lt;/code&gt; and &lt;code&gt;[TearDown]&lt;/code&gt; attributes to mark methods, while xUnit adds awesome to the mix by using the public constructor as the setup method. It just creates a new instance of the fixture class for each test. This completely obviates issues that have cropped up for me in NUnit around fixture state being shared between tests. Teardown is done by implementing &lt;code&gt;IDisposable&lt;/code&gt;, in the &lt;code&gt;Dispose&lt;/code&gt; method. I don't remember the last time I wrote a teardown method anyway, but using &lt;code&gt;IDisposable&lt;/code&gt; is a really nice and obvious convention. Shared fixture state can be implemented with the &lt;code&gt;IUseFixture&amp;lt;T&amp;gt;&lt;/code&gt; interface but I won't explore that here.&lt;/p&gt;
-
-&lt;h2&gt;A data-driven test&lt;/h2&gt;
-
-&lt;p&gt;I used NUnit's data-driven tests to TDD a simple Fibonacci number generator (my favourite integer sequence). The implementation of the generator is &lt;a href=&quot;https://github.com/bendetat/convention-tests-in-xunit/blob/master/src/MyApp.Shared/FibonacciGenerator.cs&quot;&gt;in the repo&lt;/a&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Test]
-[TestCase(0, 0)]
-[TestCase(1, 1)]
-[TestCase(2, 1)]
-[TestCase(3, 2)]
-[TestCase(4, 3)]
-[TestCase(5, 5)]
-[TestCase(6, 8)]
-[TestCase(7, 13)]
-[TestCase(8, 21)]
-[TestCase(16, 987)]
-public void TestNumber(int sequence, int result)
-{
-    Assert.AreEqual(result, FibonacciGenerator.For(sequence));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;xUnit uses Theories for data driven tests, which sounds so cool. Interestingly, theories aren't part of xUnit out of the box. You need to install the &lt;code&gt;xunit.extensions&lt;/code&gt; package. Apart from the naming differences everything is pretty much the same.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Theory]
-[InlineData(0, 0)]
-[InlineData(1, 1)]
-[InlineData(2, 1)]
-[InlineData(3, 2)]
-[InlineData(4, 3)]
-[InlineData(5, 5)]
-[InlineData(6, 8)]
-[InlineData(7, 13)]
-[InlineData(8, 21)]
-[InlineData(16, 987)]
-public void TestNumber(int sequence, int result)
-{
-    Assert.Equal(result, FibonacciGenerator.For(sequence));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;xUnit uses some reflection magic to show the name of the parameters in the test runner output, so while NUnit shows &lt;code&gt;TestNumber(7, 13)&lt;/code&gt;, xUnit shows &lt;code&gt;TestNumber(sequence: 7, result: 13)&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2&gt;Theory data sources&lt;/h2&gt;
-
-&lt;p&gt;&lt;code&gt;InlineData&lt;/code&gt; is only one of the data sources that xUnit provides. There doesn't seem to be much documentation around the source types, so I'm working from the &lt;a href=&quot;https://github.com/xunit/xunit/tree/master/test/test.xunit1/xunit.extensions/DataTheories/AcceptanceTests&quot;&gt;acceptance tests in the xUnit source&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3&gt;InlineData&lt;/h3&gt;
-
-&lt;p&gt;As shown above, this is obviously on par with NUnit's &lt;code&gt;TestCase&lt;/code&gt;. It takes a &lt;code&gt;params&lt;/code&gt; array of objects and passes them into the test method.&lt;/p&gt;
-
-&lt;h3&gt;ClassData&lt;/h3&gt;
-
-&lt;p&gt;This uses a class as the source for the test data. The data source class implements &lt;code&gt;IEnumerable&amp;lt;object[]&amp;gt;&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class FibonacciTestUsingClassData
-{
-    [Theory]
-    [ClassData(typeof(FibonacciTestSource))]
-    public void TestNumber(int sequence, int result)
-    {
-        Assert.Equal(result, FibonacciGenerator.For(sequence));
-    }
-}
-
-class FibonacciTestSource : IEnumerable&amp;lt;object[]&amp;gt;
-{
-    public IEnumerator&amp;lt;object[]&amp;gt; GetEnumerator()
-    {
-        // ...
-        yield return new object[] { 8, 21 };
-        yield return new object[] { 16, 987 };
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The test data still has to be an array of &lt;code&gt;object&lt;/code&gt;, so I couldn't strongly type my test data. This is something I never liked about NUnit's data-driven tests, so it is disappointing that xUnit has the same limitation. However class data sources are obviously a great way of sharing test cases between fixtures.&lt;/p&gt;
-
-&lt;h3&gt;ExcelData&lt;/h3&gt;
-
-&lt;p&gt;This is pretty cool. The data source can be an Excel spreadsheet. This looks like a great way to manage lots of test cases outside of code. I coded up an example, but the JET engine isn't on 64-bit Windows so it didn't work. This dependence on JET is a problem IMO, one which has been around since Windows Vista made 64-bit relatively mainstream back in 2007.&lt;/p&gt;
-
-&lt;p&gt;So I couldn't get to work, but I think this is how Excel driven tests would look:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Theory]
-[ExcelData(@&quot;MyApp.Tests\FibonacchiTestData.xlsx&quot;, &quot;select * from Data&quot;)]
-public void TestNumber(int sequence, int result)
-{
-    Assert.Equal(result, FibonacciGenerator.For(sequence));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;PropertyData&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;PropertyData&lt;/code&gt; is very similar to &lt;code&gt;ClassData&lt;/code&gt; but obviously on a property of the test class rather than a class of its own. This also looks closest to NUnit's &lt;code&gt;TestCaseSource&lt;/code&gt;, which references a method that returns &lt;code&gt;IEnumerable&amp;lt;TestCaseData&amp;gt;&lt;/code&gt;. xUnit doesn't have as much ceremony around the test data, although the enumerable still has return arrays of &lt;code&gt;object&lt;/code&gt;s.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static IEnumerable&amp;lt;object[]&amp;gt; TestData
-{
-    get
-    {
-        // ...
-        yield return new object[] { 8, 21 };
-        yield return new object[] { 16, 987 };
-    }
-}
-
-[Theory]
-[PropertyData(&quot;TestData&quot;)]
-public void TestNumber(int sequence, int result)
-{
-    Assert.Equal(result, FibonacciGenerator.For(sequence));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;A simple convention test&lt;/h2&gt;
-
-&lt;p&gt;So it looks like &lt;code&gt;PropertyData&lt;/code&gt; is the most appropriate for the simple convention test I'm going to put together.&lt;/p&gt;
-
-&lt;p&gt;This is going to be really basic. The convention I'm testing is:&lt;/p&gt;
-
-&lt;blockquote&gt;&lt;p&gt;All classes that implement &lt;code&gt;IDomainObject&lt;/code&gt; must have an empty constructor&lt;/p&gt;&lt;/blockquote&gt;
-
-&lt;p&gt;This might be because those classes have to work with Entity Framework or nHibernate, or need to be deserialised in some way.&lt;/p&gt;
-
-&lt;p&gt;So the first part is defining the data source:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static IEnumerable&amp;lt;object[]&amp;gt; DomainObjectClasses
-{
-    get
-    {
-        // ... returns Types
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I like to think of this in terms of &quot;get all types that inherit from &lt;code&gt;IDomainObject&lt;/code&gt;&quot;. The &lt;code&gt;Type&lt;/code&gt; class has an &lt;code&gt;IsAssignableFrom(Type)&lt;/code&gt; method but for that to work I would have to invert the query, so something like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;from t in [types] where typeof(IDomainObject).IsAssignableFrom(t)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That doesn't read very naturally so I like to invert the method with an extension method, and add some generic love to the mix:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static bool IsAssignableTo&amp;lt;T&amp;gt;(this Type fromType)
-{
-    return typeof(T).IsAssignableFrom(fromType);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;NOTE&lt;/strong&gt; Know what? This is included in Autofac. Loove Autofac.&lt;/p&gt;
-
-&lt;p&gt;I also need to exclude abstract types from the query, so that abstract types can take a parameter in their constructor but concrete implementations have to provide a default constructor. This excludes the interface itself as well. There are a number of interesting methods and properties given by the &lt;code&gt;Type&lt;/code&gt; class.&lt;/p&gt;
-
-&lt;p&gt;The complete data source is this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static IEnumerable&amp;lt;object[]&amp;gt; DomainObjectClasses 
-{
-    get
-    {
-        return
-            from type in typeof (IDomainObject).Assembly.GetTypes()
-            where type.IsAssignableTo&amp;lt;IDomainObject&amp;gt;()
-            where !type.IsAbstract
-            select new [] { type };
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The test itself is hot:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Theory]
-[PropertyData(&quot;DomainObjectClasses&quot;)]
-public void DomainObjectHasDefaultConstructor(Type type)
-{
-    Assert.NotNull(type.GetConstructor(Type.EmptyTypes));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2&gt;Er...&lt;/h2&gt;
-
-&lt;p&gt;Fin.&lt;/p&gt;
-</description>
-				<pubDate>Sat, 14 Dec 2013 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/starting-convention-tests-and-data-driven-tests-in-xunit.html</link>
-				<guid isPermaLink="true">http://bendetat.com/starting-convention-tests-and-data-driven-tests-in-xunit.html</guid>
-			</item>
-		
-			<item>
-				<title>Try This One Simple Trick To Drastically Reduce Method Test Complexity And Reveal Intent Using Default Arguments</title>
-				<description>&lt;h3&gt;YOU WON'T BELIEVE YOUR EYES&lt;/h3&gt;
-
-&lt;p&gt;How search engine. Such marketing. Wow.&lt;/p&gt;
-
-&lt;p&gt;A trap I fall into when writing tests is big 'arrange' or 'act' sections to test a single 'thing'. Here's a trivial example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Test]
-public void Member_first_name_is_updated_correctly()
-{
-    var member = new Member(....);
-
-    member.Modify(&quot;First&quot;, &quot;Last&quot;, &quot;0400123456&quot;, new DateTime(2000, 1, 1));
-
-    Assert.That(member.FirstName, Is.EqualTo(&quot;First&quot;);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The member instantiation could be taken care of using an &lt;a href=&quot;http://martinfowler.com/bliki/ObjectMother.html&quot;&gt;object mother pattern&lt;/a&gt; but the complexity of the &lt;code&gt;Modify()&lt;/code&gt; invocation (passing a dummy last name, phone number, etc) hides the intent of the test. That is, given a member, &lt;em&gt;when modifying the first name&lt;/em&gt;, the first name matches what it was modified to.&lt;/p&gt;
-
-&lt;p&gt;Revealing that intent can be done by creating a proxy method over &lt;code&gt;member.Modify&lt;/code&gt;, which uses default parameters to allow the test to succinctly express the &lt;em&gt;when&lt;/em&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Test]
-public void Member_first_name_is_updated_correctly()
-{
-    var member = new Member(...);
-
-    ModifyMember(member, first: &quot;First&quot;);
-
-    Assert.That(member.FirstName, Is.EqualTo(&quot;First&quot;));
-}
-
-static void ModifyMember(Member member, string first = &quot;first&quot;, string last = &quot;last&quot;, string phone = &quot;0400123456&quot;, DateTime dateOfBirth = default(DateTime))
-{
-    if (dateOfBirth == default(DateTime))
-        dateOfBirth = new DateTime(2000, 1, 1);
-    member.Modify(first, last, phone, dateOfBirth);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now the test only reveals the subject of the test - the first name.&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;dateOfBirth&lt;/code&gt; parameter is interesting. Default parameters have to be compile-time constants. &lt;code&gt;new DateTime(2000, 1, 1)&lt;/code&gt; is mutable, i.e. not a constant. We default to a magic value (&lt;code&gt;default(DateTime)&lt;/code&gt;) which is then converted to the default value for the &lt;code&gt;member.Modify()&lt;/code&gt; call. So to actually pass in &lt;code&gt;default(DateTime)&lt;/code&gt; another proxy method is needed:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;static void ModifyMemberWithDefaultDateOfBirth(Member member) 
-{
-    member.Modify(&quot;first&quot;, &quot;last&quot;, &quot;0400123456&quot;, default(DateTime));
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;which is annoying and not completely DRY, but at least the test is nice. A better way would be to use &lt;code&gt;DateTime?&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;static void ModifyMember(.... , DateTime? dateOfBirth = null)
-{
-    dateOfBirth = dateOfBirth ?? new DateTime(2000, 1, 1);
-    member.Modify(...);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Of course this assumes that &lt;code&gt;member.Modify()&lt;/code&gt; doesn't accept a nullable date of birth.&lt;/p&gt;
-
-&lt;p&gt;These proxy methods would quickly need to be used in multiple test fixtures, so could be appropriate to move them to the member's object mother. They &lt;em&gt;could&lt;/em&gt; be made into extension methods, but that may make things more confusing as the tests would appear to operate on the member in a way that isn't supported in the application itself. If indeed your tests are intended to be documentation for the application. Which they should be. Y'all.&lt;/p&gt;
-
-&lt;p&gt;HT to my home boy &lt;a href=&quot;http://robdmoore.id.au/&quot;&gt;Rob Moore&lt;/a&gt; (&lt;a href=&quot;https://twitter.com/robdmoore&quot;&gt;@robdmoore&lt;/a&gt;) for showing me this ONE SIMPLE TRICK.&lt;/p&gt;
-</description>
-				<pubDate>Thu, 12 Dec 2013 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/simplify-method-tests-using-default-arguments.html</link>
-				<guid isPermaLink="true">http://bendetat.com/simplify-method-tests-using-default-arguments.html</guid>
-			</item>
-		
-			<item>
-				<title>Nested view models using Html.EditorFor</title>
-				<description>&lt;p&gt;This was written while figuring out the best way to compose a view with a nested view model. &lt;a href=&quot;https://github.com/bendetat/test-nested-view-model&quot;&gt;Here is a Git repo&lt;/a&gt;. I haven't spent much time in ASP.NET MVC so be fair.&lt;/p&gt;
-
-&lt;p&gt;I'm trying to illustrate composing a view. I suspect a better method would be &lt;code&gt;Html.EditorFor&lt;/code&gt; but that approach doesn't seem as rich as using partials (how would I use different editors for the same view model in a different context?).&lt;/p&gt;
-
-&lt;p&gt;TL;DR: it turns out that &lt;code&gt;Html.EditorFor&lt;/code&gt; is &lt;em&gt;exactly&lt;/em&gt; the correct solution, and as you can specify the template it is as flexible as you would expect.&lt;/p&gt;
-
-&lt;h3&gt;Using a partial&lt;/h3&gt;
-
-&lt;p&gt;The views look like this:&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;Index.cshtml&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;@model NestedViewModel.Models.HomeViewModel
-
-&amp;lt;p&amp;gt;
-    @Html.LabelFor(x =&amp;gt; x.HomeViewModelField)
-    @Html.TextBoxFor(x =&amp;gt; x.HomeViewModelField)
-&amp;lt;/p&amp;gt;
-
-@Html.Partial(&quot;_Nested&quot;, Model.Nested)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;_Nested.cshtml&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;@model NestedViewModel.Models.MyNestedViewModel
-
-&amp;lt;p&amp;gt;
-    @Html.LabelFor(x =&amp;gt; x.NestedViewModelField)
-    @Html.TextBoxFor(x =&amp;gt; x.NestedViewModelField)
-&amp;lt;/p&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The result looks like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;p&amp;gt;
-    &amp;lt;label for=&quot;HomeViewModelField&quot;&amp;gt;HomeViewModelField&amp;lt;/label&amp;gt;
-    &amp;lt;input id=&quot;HomeViewModelField&quot; name=&quot;HomeViewModelField&quot; type=&quot;text&quot; value=&quot;&quot; /&amp;gt;
-&amp;lt;/p&amp;gt;
-
-&amp;lt;p&amp;gt;
-    &amp;lt;label for=&quot;NestedViewModelField&quot;&amp;gt;NestedViewModelField&amp;lt;/label&amp;gt;
-    &amp;lt;input id=&quot;NestedViewModelField&quot; name=&quot;NestedViewModelField&quot; type=&quot;text&quot; value=&quot;&quot; /&amp;gt;
-&amp;lt;/p&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that &lt;code&gt;NestedViewModelField&lt;/code&gt;'s name won't bind back to the view model. For model binding to work the name should be &lt;code&gt;Nested.NestedViewModelField&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h3&gt;Using &lt;code&gt;Html.EditorFor&lt;/code&gt;&lt;/h3&gt;
-
-&lt;p&gt;If I make a view with the same name as the nested view model's type, in &lt;code&gt;Views/Home/EditorTemplates&lt;/code&gt;, then &lt;code&gt;Html.EditorFor&lt;/code&gt; will find it and use it. &lt;a href=&quot;http://www.hanselman.com/blog/ASPNETMVCDisplayTemplateAndEditorTemplatesForEntityFrameworkDbGeographySpatialTypes.aspx&quot;&gt;More on this from @shanselman&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;Views/Home/EditorTemplates/MyNestedViewModel.cshtml&lt;/code&gt; is the same as &lt;code&gt;_Nested.cshtml&lt;/code&gt; above. The index view swaps out the &lt;code&gt;Html.Partial&lt;/code&gt; for &lt;code&gt;Html.EditorFor&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;@model NestedViewModel.Models.HomeViewModel
-
-&amp;lt;p&amp;gt;
-    @Html.LabelFor(x =&amp;gt; x.HomeViewModelField)
-    @Html.TextBoxFor(x =&amp;gt; x.HomeViewModelField)
-&amp;lt;/p&amp;gt;
-
-@Html.EditorFor(x =&amp;gt; x.Nested)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The result is cooler than I expected. The nested view model's field names are correct :win: :&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;p&amp;gt;
-    &amp;lt;label for=&quot;HomeViewModelField&quot;&amp;gt;HomeViewModelField&amp;lt;/label&amp;gt;
-    &amp;lt;input id=&quot;HomeViewModelField&quot; name=&quot;HomeViewModelField&quot; type=&quot;text&quot; value=&quot;&quot; /&amp;gt;
-&amp;lt;/p&amp;gt;
-
-&amp;lt;p&amp;gt;
-    &amp;lt;label for=&quot;Nested_NestedViewModelField&quot;&amp;gt;NestedViewModelField&amp;lt;/label&amp;gt;
-    &amp;lt;input id=&quot;Nested_NestedViewModelField&quot; name=&quot;Nested.NestedViewModelField&quot; type=&quot;text&quot; value=&quot;&quot; /&amp;gt;
-&amp;lt;/p&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;Composing views and DRY&lt;/h3&gt;
-
-&lt;p&gt;The reason I wanted to explore nested view models was to be able to reuse parts of a form across different views and controllers, so that I am composing the views in a manner that is DRY. Partials are ok because they can be shared across the application, but they don't respect the view model. &lt;code&gt;EditorTemplates&lt;/code&gt; (and &lt;code&gt;DisplayTemplates&lt;/code&gt;) work better than I expected and look to be the correct solution. So how can I share an editor template across different controllers?&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;Html.EditorFor&lt;/code&gt; takes a &lt;code&gt;templateName&lt;/code&gt; argument. I didn't expect that. As a special bonus, the engine searches for editor templates in &lt;code&gt;Views/Shared&lt;/code&gt; by default (&lt;a href=&quot;http://stackoverflow.com/a/7841835/149259&quot;&gt;SO&lt;/a&gt;). So I dropped two editors for my nested view model into &lt;code&gt;/Shared/EditorTemplates/MyNestedViewModel/&lt;/code&gt; and specified which templates to use:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;@Html.EditorFor(x =&amp;gt; x.Nested, &quot;MyNestedViewModel/EditorOne&quot;)
-@Html.EditorFor(x =&amp;gt; x.Nested, &quot;MyNestedViewModel/EditorTwo&quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Magic. Intellisense even picked up the template name.&lt;/p&gt;
-</description>
-				<pubDate>Tue, 05 Nov 2013 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/nested-view-models-using-html-editorfor.html</link>
-				<guid isPermaLink="true">http://bendetat.com/nested-view-models-using-html-editorfor.html</guid>
-			</item>
-		
-			<item>
-				<title>Git - dealing with line endings</title>
-				<description>&lt;p&gt;&lt;a href=&quot;https://help.github.com/articles/dealing-with-line-endings&quot;&gt;Github Help - Dealing with line endings&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://help.github.com/articles/dealing-with-line-endings#re-normalizing-a-repository&quot;&gt;Re-normalizing a repository&lt;/a&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git rm --cached -r .
-# Remove everything from the index.
-
-git reset --hard
-# Write both the index and working directory from git's database.
-
-git add .
-# Prepare to make a commit by staging all the files that will get normalized.
-# This is your chance to inspect which files were never normalized. You should
-# get lots of messages like: &quot;warning: CRLF will be replaced by LF in file.&quot;
-
-git commit -m &quot;Normalize line endings&quot;
-# Commit
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-				<pubDate>Fri, 11 Oct 2013 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/dealing-with-line-endings.html</link>
-				<guid isPermaLink="true">http://bendetat.com/dealing-with-line-endings.html</guid>
 			</item>
 		
 	</channel>

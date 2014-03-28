@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>Add .\sqlexpress alias to SQL Server</title>
+		<title>Git - reapply a commit using cherry-pick</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,32 +24,22 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>Add .\sqlexpress alias to SQL Server <br/></h1>
+				<h1><a href="/">~/</a>Git - reapply a commit using cherry-pick <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
-<h2><small><em>03 Oct 2013</em></small></h2>
+<h2><small><em>26 Mar 2014</em></small></h2>
 
 
 
-<p>A lot of code bases are hard-coded to point to <code>.\sqlexpress</code> which is the default named instance for SQL Server Express. To add a <code>.\sqlexpress</code> alias to an unnamed SQL Server instance (developer edition in my case) follow these simple mind-blowing steps:</p>
+<p>How do I reapply a commit, so I actually want the commit run twice? Say I do something cool, then do something uncool, and want to do that cool thing again, without having to mess around with history?</p>
 
-<ol>
-<li>Open <em>Sql Server Configuration Manager</em>
+<p>Say I pull in some dependency which adds a readme file somewhere, then I delete the readme file, then I update the dependency which pulls in the file again.</p>
 
-<ul>
-<li>You may not be able to find this from the Start screen. See <a href="http://technet.microsoft.com/en-us/library/ms174212.aspx">here</a> for more details but I can just open the Run dialog (<code>win-R</code>) and enter <code>sqlservermanager11.msc</code> (for SQL Server 2012) or <code>sqlservermanager10.msc</code> (if you have 2010).</li>
-</ul>
-</li>
-<li>Open <em>SQL Server Network Configuration</em></li>
-<li>Open <em>Protocols for MSSQLSERVER</em></li>
-<li>Enable TCP/IP</li>
-<li>Save. There will be a message to restart the server, we'll do that soon.</li>
-<li>Go to <em>SQL Native Client 11.0 Configuration (32bit)</em></li>
-<li>Go to Aliases</li>
-<li>Add an alias, with <em>Alias Name</em> of <code>.\sqlexpress</code> and <em>Server</em> of <code>.</code></li>
-<li>Repeat 7 &amp; 8 for <em>SQL Native Client 11.0 Configuration</em></li>
-<li>Go to <em>SQL Server Services</em>, right click <em>SQL Server (MSSQLSERVER)</em> and select <em>Restart</em></li>
-</ol>
+<blockquote><p>we use Git's cherry-pick command, which applies it as a patch and immediately commits it with the same commit message):</p></blockquote>
 
+<pre><code>git cherry-pick 89bec60
+</code></pre>
+
+<p><a href="http://definitivedrupal.org/suggestions/using-git-re-apply-old-over-written-change"><em>Turns out</em></a>.</p>
 
 
 

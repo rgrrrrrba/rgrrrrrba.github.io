@@ -1,5 +1,5 @@
 ---
-title: A list of my favourite VIsual Studio shortcuts
+title: A list of my favourite Visual Studio shortcuts
 layout: post
 date: 2014-03-27
 category: post
