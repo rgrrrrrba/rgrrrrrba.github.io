@@ -5,7 +5,7 @@ date: 2014-04-01
 category: post
 ---
 
-I don't know if "entry/exit" is the right name for this pattern, but it gets used a lot in client code. It relates to the use of guard sections and cross-cutting concerns. For example, using Caliburn.Micro you might have a WPF viewmodel (implementing `PropertyChangedBase`) that sets  `IsNotifying` flag to false, executes some code that would otherwise cause notifications, then sets the `IsNotifying` flag to true.
+I don't know if "entry/exit" is the right name for this pattern, but it gets used a lot in client-side code. It relates to the use of guard sections and cross-cutting concerns. For example, using Caliburn.Micro you might have a WPF viewmodel (implementing `PropertyChangedBase`) that sets  `IsNotifying` flag to false, executes some code that would otherwise cause notifications, then sets the `IsNotifying` flag to true.
 
 	IsNotifying = false;
 
