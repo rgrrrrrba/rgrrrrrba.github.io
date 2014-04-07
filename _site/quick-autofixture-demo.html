@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>A Quick AutoFixture Demo</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>A Quick AutoFixture Demo <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>07 Apr 2014</em></small></h2>
+
+
+
+<p><strong>Note:</strong> This is a very basic exploration of AutoFixture, written while I tried out a couple of things. It is not authoritive or representative of best practices. Comments are welcome! As are <a href="https://github.com/rgrrrrrba/rgrrrrrba.github.io">pull requests</a>!</p>
+
+<p><a href="https://github.com/AutoFixture/AutoFixture">AutoFixture</a> is a tool for automating the creation of test objects. It is written by <a href="http://blog.ploeh.dk/">Mark Seemann</a> (<a href="https://twitter.com/ploeh">@ploeh</a>).</p>
+
+<p>I'm just working through a couple of LINQPad tests here. <code>Fixture</code> and the <code>Create()</code> method are AutoFixture. <code>Dump()</code> belongs to LINQPad.</p>
+
+<pre><code>class Foo 
+{
+}
+
+void Main()
+{
+    new Fixture()
+        .Create&lt;Foo&gt;()
+        .Dump();
+}
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th> UserQuery+Foo </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>               </td>
+</tr>
+</tbody>
+</table>
+
+
+<p>Here the fixture creates a default instance of <code>Foo</code>. Nothing spectacular.</p>
+
+<p>If I plug in a a simple integer dependency things get interesting.</p>
+
+<pre><code>class Foo 
+{
+    public int Number{ get; set; }
+}
+
+void Main()
+{
+    new Fixture()
+        .Create&lt;Foo&gt;()
+        .Dump();
+}
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th> UserQuery+Foo </th>
+<th>    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Number        </td>
+<td> 49 </td>
+</tr>
+</tbody>
+</table>
+
+
+<p>AutoFixture provides a random dummy value to all publicly available properties. Make <code>Number</code> have a private setter and AutoFixture can't see it. It will however fill the constructor with values.</p>
+
+<pre><code>class Foo 
+{
+    public int Number{ get; private set; }
+
+    public Foo(int number) 
+    {
+        Number = number;
+    }
+}
+
+void Main()
+{
+    new Fixture()
+        .Create&lt;Foo&gt;()
+        .Dump();
+}
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th> UserQuery+Foo </th>
+<th>    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Number        </td>
+<td> 38 </td>
+</tr>
+</tbody>
+</table>
+
+
+<p>By default, AutoFixture will use the greediest constructor it can find that it can fulfil. It will also work through those parameters, constructing them in the same way. Similar to an IoC framework like Autofac.</p>
+
+<pre><code>class Foo 
+{
+    public int Number{ get; private set; }
+    public Bar MyBar { get; private set; }
+
+    public Foo(int number, Bar bar) 
+    {
+        Number = number;
+        MyBar = bar;
+    }
+}
+
+class Bar
+{
+    public int BarNumber { get; set; }
+}
+
+void Main()
+{
+    new Fixture()
+        .Create&lt;Foo&gt;()
+        .Dump();
+}
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th> UserQuery+Foo </th>
+<th>                     </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Number        </td>
+<td> 4                   </td>
+</tr>
+<tr>
+<td> MyBar         </td>
+<td> UserQuery+Bar       </td>
+</tr>
+<tr>
+<td>               </td>
+<td> -> BarNumber == 198 </td>
+</tr>
+</tbody>
+</table>
+
+
+<p>You can see here that <code>Foo</code> and <code>Bar</code> both got different numbers - 4 and 198 respecitively. The fixture's behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value <code>999</code>.</p>
+
+<pre><code>void Main()
+{
+    var fixture = new Fixture();
+
+    fixture.Register(() =&gt; 999)
+
+    fixture.Create&lt;Foo&gt;()
+        .Dump();
+}
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th> UserQuery+Foo </th>
+<th>                     </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Number        </td>
+<td> 999                 </td>
+</tr>
+<tr>
+<td> MyBar         </td>
+<td> UserQuery+Bar       </td>
+</tr>
+<tr>
+<td>               </td>
+<td> -> BarNumber == 999 </td>
+</tr>
+</tbody>
+</table>
+
+
+<p>Complex types can be registered in the same way.</p>
+
+<pre><code>void Main()
+{
+    var fixture = new Fixture();
+
+    var bar = new Bar { BarNumber = 999 };
+    fixture.Register(() =&gt; bar);
+
+    fixture.Create&lt;Foo&gt;()
+        .Dump();
+}
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th> UserQuery+Foo </th>
+<th>                     </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Number        </td>
+<td> 194                 </td>
+</tr>
+<tr>
+<td> MyBar         </td>
+<td> UserQuery+Bar       </td>
+</tr>
+<tr>
+<td>               </td>
+<td> -> BarNumber == 999 </td>
+</tr>
+</tbody>
+</table>
+
+
+<h2>More information</h2>
+
+<p>Mark Seeman's blog articles under the <a href="http://blog.ploeh.dk/tags.html#AutoFixture-ref">AutoFixture tag</a> are the most comprehensive source of information about AutoFixture.</p>
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2013 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>

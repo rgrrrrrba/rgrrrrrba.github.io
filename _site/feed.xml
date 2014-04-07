@@ -7,6 +7,244 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>A Quick AutoFixture Demo</title>
+				<description>&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This is a very basic exploration of AutoFixture, written while I tried out a couple of things. It is not authoritive or representative of best practices. Comments are welcome! As are &lt;a href=&quot;https://github.com/rgrrrrrba/rgrrrrrba.github.io&quot;&gt;pull requests&lt;/a&gt;!&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/AutoFixture/AutoFixture&quot;&gt;AutoFixture&lt;/a&gt; is a tool for automating the creation of test objects. It is written by &lt;a href=&quot;http://blog.ploeh.dk/&quot;&gt;Mark Seemann&lt;/a&gt; (&lt;a href=&quot;https://twitter.com/ploeh&quot;&gt;@ploeh&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;I'm just working through a couple of LINQPad tests here. &lt;code&gt;Fixture&lt;/code&gt; and the &lt;code&gt;Create()&lt;/code&gt; method are AutoFixture. &lt;code&gt;Dump()&lt;/code&gt; belongs to LINQPad.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Foo 
+{
+}
+
+void Main()
+{
+    new Fixture()
+        .Create&amp;lt;Foo&amp;gt;()
+        .Dump();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt; UserQuery+Foo &lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;               &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+&lt;p&gt;Here the fixture creates a default instance of &lt;code&gt;Foo&lt;/code&gt;. Nothing spectacular.&lt;/p&gt;
+
+&lt;p&gt;If I plug in a a simple integer dependency things get interesting.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Foo 
+{
+    public int Number{ get; set; }
+}
+
+void Main()
+{
+    new Fixture()
+        .Create&amp;lt;Foo&amp;gt;()
+        .Dump();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt; UserQuery+Foo &lt;/th&gt;
+&lt;th&gt;    &lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt; Number        &lt;/td&gt;
+&lt;td&gt; 49 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+&lt;p&gt;AutoFixture provides a random dummy value to all publicly available properties. Make &lt;code&gt;Number&lt;/code&gt; have a private setter and AutoFixture can't see it. It will however fill the constructor with values.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Foo 
+{
+    public int Number{ get; private set; }
+
+    public Foo(int number) 
+    {
+        Number = number;
+    }
+}
+
+void Main()
+{
+    new Fixture()
+        .Create&amp;lt;Foo&amp;gt;()
+        .Dump();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt; UserQuery+Foo &lt;/th&gt;
+&lt;th&gt;    &lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt; Number        &lt;/td&gt;
+&lt;td&gt; 38 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+&lt;p&gt;By default, AutoFixture will use the greediest constructor it can find that it can fulfil. It will also work through those parameters, constructing them in the same way. Similar to an IoC framework like Autofac.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Foo 
+{
+    public int Number{ get; private set; }
+    public Bar MyBar { get; private set; }
+
+    public Foo(int number, Bar bar) 
+    {
+        Number = number;
+        MyBar = bar;
+    }
+}
+
+class Bar
+{
+    public int BarNumber { get; set; }
+}
+
+void Main()
+{
+    new Fixture()
+        .Create&amp;lt;Foo&amp;gt;()
+        .Dump();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt; UserQuery+Foo &lt;/th&gt;
+&lt;th&gt;                     &lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt; Number        &lt;/td&gt;
+&lt;td&gt; 4                   &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt; MyBar         &lt;/td&gt;
+&lt;td&gt; UserQuery+Bar       &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;               &lt;/td&gt;
+&lt;td&gt; -&gt; BarNumber == 198 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+&lt;p&gt;You can see here that &lt;code&gt;Foo&lt;/code&gt; and &lt;code&gt;Bar&lt;/code&gt; both got different numbers - 4 and 198 respecitively. The fixture's behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value &lt;code&gt;999&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void Main()
+{
+    var fixture = new Fixture();
+
+    fixture.Register(() =&amp;gt; 999)
+
+    fixture.Create&amp;lt;Foo&amp;gt;()
+        .Dump();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt; UserQuery+Foo &lt;/th&gt;
+&lt;th&gt;                     &lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt; Number        &lt;/td&gt;
+&lt;td&gt; 999                 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt; MyBar         &lt;/td&gt;
+&lt;td&gt; UserQuery+Bar       &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;               &lt;/td&gt;
+&lt;td&gt; -&gt; BarNumber == 999 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+&lt;p&gt;Complex types can be registered in the same way.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void Main()
+{
+    var fixture = new Fixture();
+
+    var bar = new Bar { BarNumber = 999 };
+    fixture.Register(() =&amp;gt; bar);
+
+    fixture.Create&amp;lt;Foo&amp;gt;()
+        .Dump();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt; UserQuery+Foo &lt;/th&gt;
+&lt;th&gt;                     &lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt; Number        &lt;/td&gt;
+&lt;td&gt; 194                 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt; MyBar         &lt;/td&gt;
+&lt;td&gt; UserQuery+Bar       &lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;               &lt;/td&gt;
+&lt;td&gt; -&gt; BarNumber == 999 &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+&lt;h2&gt;More information&lt;/h2&gt;
+
+&lt;p&gt;Mark Seeman's blog articles under the &lt;a href=&quot;http://blog.ploeh.dk/tags.html#AutoFixture-ref&quot;&gt;AutoFixture tag&lt;/a&gt; are the most comprehensive source of information about AutoFixture.&lt;/p&gt;
+</description>
+				<pubDate>Mon, 07 Apr 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/quick-autofixture-demo.html</link>
+				<guid isPermaLink="true">http://bendetat.com/quick-autofixture-demo.html</guid>
+			</item>
+		
+			<item>
 				<title>The Greatest string.FormatWith() Extension Method Implementation In The World</title>
 				<description>&lt;p&gt;This is in fact the Greatest &lt;code&gt;string.FormatWith()&lt;/code&gt; Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, &lt;del&gt;probably thanks to my brother-in-code &lt;a href=&quot;http://robdmoore.id.au/&quot;&gt;Rob Moore&lt;/a&gt;&lt;/del&gt; &lt;strong&gt;correction&lt;/strong&gt; turns out credit is due to &lt;a href=&quot;http://hammerproject.com/&quot;&gt;Matt Kocoj&lt;/a&gt;, and I brought it back along the breadth of our mighty continent. A 'Journey to the West', if you will. Less awesome implementations of &lt;code&gt;FormatWith()&lt;/code&gt; are just simple inversions of &lt;code&gt;string.Format()&lt;/code&gt;:&lt;/p&gt;
 
@@ -560,52 +798,6 @@ From ..\repo-copy\
 				<pubDate>Fri, 24 Jan 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/git-cherry-pick-from-another-repository.html</link>
 				<guid isPermaLink="true">http://bendetat.com/git-cherry-pick-from-another-repository.html</guid>
-			</item>
-		
-			<item>
-				<title>Get running fast on GitHub and BitBucket</title>
-				<description>&lt;h3&gt;GH4W&lt;/h3&gt;
-
-&lt;p&gt;I use &lt;a href=&quot;http://windows.github.com/&quot;&gt;GitHub for Windows&lt;/a&gt; to get up and running quickly with GitHub on a new machine. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the &lt;code&gt;github_rsa.pub&lt;/code&gt; file in &lt;code&gt;C:\Users\**username**\.ssh&lt;/code&gt; can be used added to BitBucket to get that running with the same credentials.&lt;/p&gt;
-
-&lt;h3&gt;Switch to Cmder&lt;/h3&gt;
-
-&lt;p&gt;I just tried out &lt;a href=&quot;http://bliker.github.io/cmder/&quot;&gt;Cmder&lt;/a&gt; with great success as a Powershell replacement but the msysgit instance used in that doesn't work with the public key named &lt;code&gt;github_rsa.pub&lt;/code&gt;. I just copied &lt;code&gt;github_rsa.pub&lt;/code&gt; to &lt;code&gt;id_rsa.pub&lt;/code&gt; and &lt;code&gt;github_rsa&lt;/code&gt; to &lt;code&gt;id_rsa&lt;/code&gt;. Working well so far.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;update&lt;/strong&gt; hmm looks like this is a work in progress....&lt;/p&gt;
-
-&lt;p&gt;Run this to configure git to push the current branch by default:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git config --global push.default current
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Also check this out: &lt;a href=&quot;https://help.github.com/articles/set-up-git&quot;&gt;https://help.github.com/articles/set-up-git&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Looks like password caching is an issue, but only with non-SSH remote urls. If &lt;code&gt;.git/config&lt;/code&gt; looks like this it shoud use the above keys:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[remote &quot;origin&quot;]
-    url = git@github.com:rgrrrrrba/rgrrrrrba.github.io.git
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3&gt;Merge tool&lt;/h3&gt;
-
-&lt;p&gt;I also needed to set my merge tool. I use (and pay for) &lt;a href=&quot;http://www.scootersoftware.com/moreinfo.php&quot;&gt;Beyond Compare 3&lt;/a&gt; and the &lt;a href=&quot;http://www.scootersoftware.com/support.php?zz=kb_vcs&quot;&gt;instructions here&lt;/a&gt; were helpful. The commands to use are:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git config --global merge.tool bc3
-git config --global mergetool.bc3.path &quot;C:/Program Files (x86)/Beyond Compare 3/BCompare.exe&quot;                 
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Notice that you need to use forward-slashes in the path to BC. &lt;code&gt;~/.gitconfig&lt;/code&gt; should end up like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[merge]
-    tool = bc3
-[mergetool &quot;bc3&quot;]
-    path = C:/Program Files (x86)/Beyond Compare 3/BCompare.exe
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-				<pubDate>Wed, 22 Jan 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</link>
-				<guid isPermaLink="true">http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</guid>
 			</item>
 		
 	</channel>
