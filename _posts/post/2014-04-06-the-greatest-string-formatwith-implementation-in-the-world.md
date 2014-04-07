@@ -5,7 +5,7 @@ date: 2014-04-06
 category: post
 ---
 
-This is in fact the Greatest `string.FormatWith()` Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, probably thanks to my brother-in-code [Rob Moore](http://robdmoore.id.au/), and I brought it back along the breadth of our mighty continent. A 'Journey to the West', if you will. Less awesome implementations of `FormatWith()` are just simple inversions of `string.Format()`:
+This is in fact the Greatest `string.FormatWith()` Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, ~~probably thanks to my brother-in-code [Rob Moore](http://robdmoore.id.au/)~~ **correction** turns out credit is due to [Matt Kocoj](http://hammerproject.com/), and I brought it back along the breadth of our mighty continent. A 'Journey to the West', if you will. Less awesome implementations of `FormatWith()` are just simple inversions of `string.Format()`:
 
 	public static string FormatWith(string s, params object[] args)
 	{
@@ -85,5 +85,5 @@ Or it can go full [super-saiyan](http://dragonball.wikia.com/wiki/Super_Saiyan):
 
 ![](http://media.giphy.com/media/6KlLzO38CkLjG/giphy.gif)
 
-**WARNING**: Now this is probably not the most performant code. If you're going to run this in a tight loop you may want to go with ye olde `string.Format()`. The rest of the time, go forth and be awesome.
+**WARNING**: Now this is probably not the most performant code. If you're going to run this in a tight loop you may want to go with ye olde `string.Format()`. The other 99.99% of the time, go forth and be awesome.
 

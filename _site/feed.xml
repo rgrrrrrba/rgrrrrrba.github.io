@@ -7,6 +7,208 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>The Greatest string.FormatWith() Extension Method Implementation In The World</title>
+				<description>&lt;p&gt;This is in fact the Greatest &lt;code&gt;string.FormatWith()&lt;/code&gt; Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, &lt;del&gt;probably thanks to my brother-in-code &lt;a href=&quot;http://robdmoore.id.au/&quot;&gt;Rob Moore&lt;/a&gt;&lt;/del&gt; &lt;strong&gt;correction&lt;/strong&gt; turns out credit is due to &lt;a href=&quot;http://hammerproject.com/&quot;&gt;Matt Kocoj&lt;/a&gt;, and I brought it back along the breadth of our mighty continent. A 'Journey to the West', if you will. Less awesome implementations of &lt;code&gt;FormatWith()&lt;/code&gt; are just simple inversions of &lt;code&gt;string.Format()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public static string FormatWith(string s, params object[] args)
+{
+    return string.Format(s, args);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;which you can use thusly:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&quot;This is {0} the {1} {2} in the {3}&quot;.FormatWith(
+    &quot;not&quot;, &quot;greatest&quot;, &quot;string.FormatWith() implementation&quot;, &quot;world&quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/B9bZxUmVr3ZNS/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Nice, but let's be honest, pitiful. Feel the power of this implementation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public static class StringExtensions
+{
+    public static string FormatWith(this string format, params object[] args)
+    {
+        args = args ?? new object[0];
+
+        var distinctNumberedTemplateMatches =
+            (from object match in new Regex(@&quot;\{\d{1,2}\}&quot;).Matches(format) select match.ToString())
+            .Distinct().Count();
+        if (distinctNumberedTemplateMatches != args.Length)
+        {
+            var argsDic = GetDictionaryFromAnonObject(args[0]);
+
+            if (argsDic.Count &amp;lt; 1)
+            {
+                throw new InvalidOperationException(&quot;Please supply enough args for the numbered templates or use an anonymous object to identify the templates by name.&quot;);
+            }
+
+            return argsDic.Aggregate(format, (current, o) =&amp;gt; current.Replace(&quot;0&quot;.FormatWith(o.Key), o.Value.ToString()));
+        }
+
+        var validationInput = format;
+        for (var i = 0; i &amp;lt; args.Length; i++)
+        {
+            format = format.Replace(&quot;{&quot; + i + &quot;}&quot;, args[i] == null ? string.Empty : args[i].ToString());
+        }
+        if (validationInput == format)
+        {
+            throw new InvalidOperationException(
+                &quot;You can not mix template types. Use numbered templates or named ones with an anonymous object.&quot;);
+        }
+
+        return format;
+    }
+
+    private static IDictionary&amp;lt;string, object&amp;gt; GetDictionaryFromAnonObject(object args)
+    {
+        if (args == null)
+        {
+            return new Dictionary&amp;lt;string, object&amp;gt;();
+        }
+
+        return TypeDescriptor.GetProperties(args).Cast&amp;lt;PropertyDescriptor&amp;gt;()
+            .ToDictionary(
+                property =&amp;gt; property.Name, 
+                property =&amp;gt; property.GetValue(args));
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This can be used in the same way as before:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&quot;This is {0} the {1} {2} in the {3}&quot;.FormatWith(
+    &quot;definitely&quot;, &quot;greatest&quot;, &quot;string.FormatWith() implementation&quot;, &quot;world, but why?&quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Or it can go full &lt;a href=&quot;http://dragonball.wikia.com/wiki/Super_Saiyan&quot;&gt;super-saiyan&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&quot;{who} is {what} who {action} with {target}!&quot;.FormatWith(new{
+    who = &quot;Hero&quot;,
+    what = &quot;he alone&quot;,
+    action = &quot;vies&quot;,
+    target=  &quot;powers supreme&quot;})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/6KlLzO38CkLjG/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;WARNING&lt;/strong&gt;: Now this is probably not the most performant code. If you're going to run this in a tight loop you may want to go with ye olde &lt;code&gt;string.Format()&lt;/code&gt;. The other 99.99% of the time, go forth and be awesome.&lt;/p&gt;
+</description>
+				<pubDate>Sun, 06 Apr 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/the-greatest-string-formatwith-implementation-in-the-world.html</link>
+				<guid isPermaLink="true">http://bendetat.com/the-greatest-string-formatwith-implementation-in-the-world.html</guid>
+			</item>
+		
+			<item>
+				<title>Using IDisposable for entry/exit pattern</title>
+				<description>&lt;p&gt;I don't know if &quot;entry/exit&quot; is the right name for this pattern, but it gets used a lot in client-side code. It relates to the use of guard sections and cross-cutting concerns. For example, using Caliburn.Micro you might have a WPF viewmodel (implementing &lt;code&gt;PropertyChangedBase&lt;/code&gt;) that sets  &lt;code&gt;IsNotifying&lt;/code&gt; flag to false, executes some code that would otherwise cause notifications, then sets the &lt;code&gt;IsNotifying&lt;/code&gt; flag to true.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;IsNotifying = false;
+
+Name = &quot;foo&quot;;   // won't notify
+
+IsNotifying = true;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The problem with this is having to explicitly set the flags before and after the operation. What if some statements get moved around, or the assignations get dropped? This can be a tricky issue to resolve as the usage of the class isn't very clear to consumers.&lt;/p&gt;
+
+&lt;p&gt;A pattern I've seen is to wrap the code in an &lt;code&gt;Action&lt;/code&gt; invoker:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void InvokeWithoutNotification(Action action) {
+    IsNotifying = false;
+    action();
+    IsNotifying = true;
+}
+
+this.InvokeWithoutNotification(() =&amp;gt; {
+    Name = &quot;foo&quot;;
+});
+
+// or:
+
+viewModel.InvokeWithoutNotification(() =&amp;gt; viewModel.Name = &quot;foo&quot;);  
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is much nicer, but there is a layer of indirection with the action. You could step right over the entire action payload when debugging, the stack trace has an extra entry. Still, this is a very attractive solution.&lt;/p&gt;
+
+&lt;p&gt;I had a thought that you could do something very similar using &lt;code&gt;IDisposable&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class PropertyChangedBaseIsNotifyingGuard
+    : IDisposable {
+    PropertyChangeBase _target;
+
+    public PropertyChangedBaseIsNotifyingGuard(PropertyChangeBase target) {
+        _target = target;
+        _target.IsNotifying = false;
+    }
+
+    public void Dispose() {
+        _target.IsNotifying = true;
+    }
+}
+
+public static class PropertyChangedBaseExtensions {
+    public static PropertyChangedBaseIsNotifyingGuard WithoutNotification(
+        this PropertyChangedBase target) {
+        return new PropertyChangedBaseIsNotifyingGuard(target);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This gets used in a &lt;code&gt;using&lt;/code&gt; statement:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;using (this.WithoutNotification()) {
+    Name = &quot;foo&quot;;
+}
+
+// or
+
+using (viewModel.WithoutNotification()) {
+    viewModel.Name = &quot;foo&quot;;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There is more ceremony involved with the setup and there isn't a heap of immediate benefits. One is the seperation of this guard logic into its own class, which may or may not be appropriate but is at least an interesting possibility. You could also combine guards quite easily:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;using (viewModel.WithoutNotification())
+using (viewModel.WithoutValidation())
+using (viewModel.ValidateOnCompletion())
+{
+    viewModel.Name = &quot;foo&quot;;
+}
+
+// ValidateOnCompletion:
+public class SpecialViewModelValidateOnCompletionGuard
+    : IDisposable {
+    PropertyChangeBase _target;
+
+    public SpecialViewModelValidateOnCompletionGuard(SpecialViewModel target) {
+        _target = target;
+    }
+
+    public void Dispose() {
+        _target.PerformValidation();
+        _target.CommitValidation();
+        _target.RainbowsAndUnicorns();
+    }
+}
+public static class SpecialViewModelExtensions {
+    public static SpecialViewModelValidateOnCompletionGuard ValidateOnCompletion(
+        this SpecialViewModel target) {
+        return new SpecialViewModelValidateOnCompletionGuard(target);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is getting very similar to what you can achieve in &lt;a href=&quot;http://en.wikipedia.org/wiki/Aspect-oriented_programming&quot;&gt;Aspect-oriented programming&lt;/a&gt; using entry and exit pointcuts, however in AOP the pointcuts can only extend down to method granularity, so the payload would have to be its own method. I think it's a pretty neat compromise.&lt;/p&gt;
+</description>
+				<pubDate>Tue, 01 Apr 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/using-idisposable-for-entry-exit-patterns.html</link>
+				<guid isPermaLink="true">http://bendetat.com/using-idisposable-for-entry-exit-patterns.html</guid>
+			</item>
+		
+			<item>
 				<title>Uninstalling Azure Service Bus after (accidently) deleting the databases</title>
 				<description>&lt;p&gt;I accidently blew away my databases (while upgrading the SQL Server version) and my local Azure Service Bus stopped working. You can't reinstall or restore easily AFAIK so I just wanted to uninstall Azure Service Bus and start again. Unfortunately you can't uninstall without leaving the farm, and you can't leave the farm without the databases.&lt;/p&gt;
 
@@ -404,93 +606,6 @@ git config --global mergetool.bc3.path &quot;C:/Program Files (x86)/Beyond Compa
 				<pubDate>Wed, 22 Jan 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</link>
 				<guid isPermaLink="true">http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</guid>
-			</item>
-		
-			<item>
-				<title>Top/Bottom docking in XAML / WPF</title>
-				<description>&lt;p&gt;You want a layout like:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;^^ top content
-^^ content that fills the control vv
-bottom content (nav, actions,etc) vv
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;DockPanel&lt;/code&gt; is your friend but just setting &lt;code&gt;DockPanel.Dock&lt;/code&gt; on the top and bottom controls won't work. By default the last child control in the &lt;code&gt;DockPanel&lt;/code&gt; fills the panel:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;DockPanel&amp;gt;
-    &amp;lt;Control DockPanel.Dock=&quot;Top&quot; x:Name=&quot;TopContentControl&quot; /&amp;gt;
-    &amp;lt;Control DockPanel.Dock=&quot;Bottom&quot; x:Name=&quot;BottonNavControl&quot; /&amp;gt;
-    &amp;lt;Control x:Name=&quot;FillControl&quot; /&amp;gt;
-&amp;lt;/DockPanel&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you've just got content at the top and nav docked to the bottom, the top control can become the fill control. Just remember that is has to be the last control in the &lt;code&gt;DockPanel&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;DockPanel&amp;gt;
-    &amp;lt;Control DockPanel.Dock=&quot;Bottom&quot; x:Name=&quot;BottomNavControl&quot; /&amp;gt;
-    &amp;lt;Control x:Name=&quot;TopContentControl&quot; /&amp;gt;
-&amp;lt;/DockPanel&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Or if you want to keep the same control ordering and explicitly dock the top control to the top, the &quot;last child control in the &lt;code&gt;DockPanel&lt;/code&gt; filling the panel&quot; default can be turned off.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;DockPanel LastChildFill=&quot;False&quot;&amp;gt;
-    &amp;lt;Control DockPanel.Dock=&quot;Top&quot; x:Name=&quot;TopContentControl&quot; /&amp;gt;
-    &amp;lt;Control DockPanel.Dock=&quot;Bottom&quot; x:Name=&quot;BottomNavControl&quot; /&amp;gt;
-&amp;lt;/DockPanel&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-				<pubDate>Fri, 10 Jan 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/top-bottom-docking-in-xaml-wpf.html</link>
-				<guid isPermaLink="true">http://bendetat.com/top-bottom-docking-in-xaml-wpf.html</guid>
-			</item>
-		
-			<item>
-				<title>Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF</title>
-				<description>&lt;p&gt;Ok so I'm working on a WPF launcher that loads a shell that loads a client. Three different appdomains. The launcher could load the shell. The shell could load the client. But when I tried to get the launcher to load the shell then the shell to load the client, I would get this lovely exception when the client instance was created:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Set property 'System.Windows.ResourceDictionary.DeferrableContent' threw an exception
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;amp;oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;amp;aqs=chrome..69i57.519j0j4&amp;amp;sourceid=chrome&amp;amp;espv=210&amp;amp;es_sm=122&amp;amp;ie=UTF-8&quot;&gt;Googling the exception&lt;/a&gt; gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread (&lt;code&gt;InvalidOperationException&lt;/code&gt;, &quot;The calling thread must be STA, because many UI components require this.&quot;).&lt;/p&gt;
-
-&lt;p&gt;Turned out I was doing this in the shell, to keep its UI responsive:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var launchCompletedResetEvent = new AutoResetEvent(false);
-var worker = new BackgroundWorker();
-worker.DoWork += (s,e) =&amp;gt; {
-    ... // download and extract the client
-};
-worker.RunWorkerCompleted += (s,e) =&amp;gt; {
-    ... // launch the client
-    launchCompletedResetEvent.Set();
-};
-worker.RunWorkerAsync();
-launchCompletedResetEvent.WaitOne();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;launchCompletedResetEvent&lt;/code&gt; mutex is so the shell didn't terminate before launching the client.&lt;/p&gt;
-
-&lt;p&gt;This was launching the client in a non-UI thread. For some reason this seems to have worked when running the shell directly but not when running the shell through the launcher. Maybe when I ran the shell directly I was bypassing the download step and launching the client on the main thread. Actually that makes sense.&lt;/p&gt;
-
-&lt;p&gt;I just had to move the client launch to after the &lt;code&gt;WaitOne&lt;/code&gt; to get everything working:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var launchCompletedResetEvent = new AutoResetEvent(false);
-var worker = new BackgroundWorker();
-worker.DoWork += (s,e) =&amp;gt; {
-    ... // download and extract the client
-};
-worker.RunWorkerCompleted += (s,e) =&amp;gt; {
-    launchCompletedResetEvent.Set();
-};
-worker.RunWorkerAsync();
-launchCompletedResetEvent.WaitOne();
-... // launch the client
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-				<pubDate>Fri, 20 Dec 2013 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/set-property-system-windows-resourcedictionary-deferrablecontent-threw-an-exception-wpf.html</link>
-				<guid isPermaLink="true">http://bendetat.com/set-property-system-windows-resourcedictionary-deferrablecontent-threw-an-exception-wpf.html</guid>
 			</item>
 		
 	</channel>
