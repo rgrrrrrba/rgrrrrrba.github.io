@@ -26,47 +26,43 @@ Nice, but let's be honest, pitiful. Feel the power of this implementation.
         public static string FormatWith(this string format, params object[] args)
         {
             args = args ?? new object[0];
- 
-            var distinctNumberedTemplateMatches =
-                (from object match in new Regex(@"\{\d{1,2}\}").Matches(format) select match.ToString())
-                .Distinct().Count();
-            if (distinctNumberedTemplateMatches != args.Length)
+            string result;
+            var numberedTemplateCount = (from object match in new Regex(@"\{\d{1,2}\}").Matches(format) select match.ToString()).Distinct().Count();
+
+            if (numberedTemplateCount != args.Length)
             {
-                var argsDic = GetDictionaryFromAnonObject(args[0]);
- 
-                if (argsDic.Count < 1)
+                var argsDictionary = args[0].ToDictionary();
+
+                if (!argsDictionary.Any())
                 {
                     throw new InvalidOperationException("Please supply enough args for the numbered templates or use an anonymous object to identify the templates by name.");
                 }
- 
-                return argsDic.Aggregate(format, (current, o) => current.Replace("{{0}}".FormatWith(o.Key), o.Value.ToString()));
+
+                result = argsDictionary.Aggregate(format, (current, o) => current.Replace("{" + o.Key + "}", (o.Value ?? string.Empty).ToString()));
             }
- 
-            var validationInput = format;
-            for (var i = 0; i < args.Length; i++)
+            else
             {
-                format = format.Replace("{" + i + "}", args[i] == null ? string.Empty : args[i].ToString());
+                result = string.Format(format, args);
             }
-            if (validationInput == format)
+
+            if (result == format)
             {
-                throw new InvalidOperationException(
-                    "You can not mix template types. Use numbered templates or named ones with an anonymous object.");
+                throw new InvalidOperationException("You cannot mix template types. Use numbered templates or named ones with an anonymous object.");
             }
- 
-            return format;
+
+            return result;
         }
- 
-        private static IDictionary<string, object> GetDictionaryFromAnonObject(object args)
+    }
+
+    public static class ObjectExtensions
+    { 
+        public static IDictionary<string, object> ToDictionary(this object o)
         {
-            if (args == null)
-            {
-                return new Dictionary<string, object>();
-            }
- 
-            return TypeDescriptor.GetProperties(args).Cast<PropertyDescriptor>()
-                .ToDictionary(
-                    property => property.Name, 
-                    property => property.GetValue(args));
+            if (o == null) return new Dictionary<string, object>();
+
+            return TypeDescriptor
+                .GetProperties(o).Cast<PropertyDescriptor>()
+                .ToDictionary(x => x.Name, x => x.GetValue(o));
         }
     }
 
@@ -81,9 +77,13 @@ Or it can go full [super-saiyan](http://dragonball.wikia.com/wiki/Super_Saiyan):
 		who = "Hero",
 		what = "he alone",
 		action = "vies",
-		target=  "powers supreme"})
+		target = "powers supreme"})
 
 ![](http://media.giphy.com/media/6KlLzO38CkLjG/giphy.gif)
 
 **WARNING**: Now this is probably not the most performant code. If you're going to run this in a tight loop you may want to go with ye olde `string.Format()`. The other 99.99% of the time, go forth and be awesome.
+
+### Updates
+
+- 2014-04-23: `ToDictionary()` is now in it's own extension class, the named template conversion is simpler, and the numbered template conversion just uses `string.Format`.
 
