@@ -53,7 +53,13 @@ Notice that you need to use forward-slashes in the path to BC. `~/.gitconfig` sh
 	[difftool "bc3"]
 		path = C:/Program Files (x86)/Beyond Compare 3/BCompare.exe
 
-TortoiseGit needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit's Settings screen (right-click in Explorer, TortoiseGit, Settings):
+Run these commands to tighten up things a bit by skipping confirmation prompts and removing merge backups:
+
+	git config --global difftool.prompt false
+	git config --global mergetool.prompt false
+	git config --global mergetool.keepBackup false
+
+TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit's Settings screen (right-click in Explorer, TortoiseGit, Settings):
 
 ![](http://i.imgur.com/fhkbebQ.png)
 
