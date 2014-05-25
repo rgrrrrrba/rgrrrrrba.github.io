@@ -1,7 +1,7 @@
 ---
 title: Up and Running with MonoGame
 layout: post
-date: 2014-04-29
+date: 2014-05-24
 category: post
 ---
 
