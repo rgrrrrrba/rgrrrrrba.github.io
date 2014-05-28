@@ -37,7 +37,7 @@ Initially I wanted to put the configuration in the game class's constructor. It 
 	ShooterGame() -> Initialize() -> LoadContent() -> Update() -> Draw() -> UnloadContent()
 	                                       ^------------/               
 
-This seems a little late to be configuring the container and I hope this won't come back to bite me later. Here is my trimmed down constructor:
+This seems a little late to be configuring the container so I hope this won't come back to bite me later, but it's working fine for now. Here is my trimmed down constructor:
 
     public ShooterGame()
     {
