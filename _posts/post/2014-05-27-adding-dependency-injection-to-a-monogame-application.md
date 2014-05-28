@@ -164,7 +164,7 @@ This registers each of the found types by the interfaces that the type implement
 
     .InstancePerLifetimeScope();
 
-This registers the types as a single instance per the scope of the container's lifetime. The lifetime is only a consideration if you resolve dependencies within nested lifetime scopes. For the purposes of the application so far there is a single scope, so the instances are essentially singletons - the same instance of a `Foo` will be provided to all components that request it.
+This registers the types as a single instance per the scope of the container's lifetime. The lifetime is only a consideration if you resolve dependencies within nested lifetime scopes. So far for this application there is only ever going to be a single scope, so the instances are essentially singletons - the same instance of a `Foo` will be provided to all components that request it.
 
 
 ### Components and dependencies
