@@ -192,11 +192,11 @@ This means that the game class doesn't have to know anything about the player cl
 Resolving a dependency using Autofac is slower than just creating a player manually, like `var player = new Player(_contentManager, this.Viewport, ....`. But a player is only created once at the start of the game, so the cost is negligible. For things that need to be created multiple times within the game loop (such as projectiles or particles) we will use other methods like factories, which will speed up object creation while still allowing dependency injection.
 
 
-### The `IRegistering` interface
+### The IRegistering interface
 
 The `IRegistering` interface is an empty interface that is used as a marker for classes that should be registered with Autofac. Without using a marker interface, the registration will either apply across all types found in the assembly (which could include types that shouldn't be registered) or each type needs to be registered manually.
 
-The scanning registration process isn't free but it would generally take much less than a second. This is another once-off speed cost at the start of the application.
+The scanning registration process isn't free but it would generally take much less than a second. This is another once-off cost of speed at the start of the application.
 
 
 ### Abstractions and wrappers
@@ -266,7 +266,7 @@ If I want to write some unit tests around the `Player` class I can just pass in 
 At the moment only enough is abstracted and exposed to get the game running. I've also created factories and abstractions for the the `Animation` and `ParallaxingBackground` classes created in the original tutorials.
 
 
-### `LoadContent()` and the game structure
+### LoadContent() and the game structure
 
 Dependency injection simplifies the game's structure because it takes care of injecting all of the dependencies of the different components that build up the game. The game class itself is the only place where Autofac is directly used to instantiate the elements that the game class is directly responsible for.
 
