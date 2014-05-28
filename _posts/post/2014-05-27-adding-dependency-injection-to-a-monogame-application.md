@@ -28,13 +28,14 @@ The first thing I wanted to do is to refactor the code so I can use dependency i
 
 ### Math is hard, dependency injection is easy
 
-I started by adding Autofac to the `Win8ShooterGame` solution - the solution that contains all of the game code. This is a Windows 8 Store apps. Autofac should work whether you're targeting Win 8 store apps, Windows desktop games, or Windows Phone 8. I'm not sure about iOS but it should also work for Android, Linux and Mac OS X if you're targeting those platforms.
+I started by adding Autofac to the `Win8ShooterGame` solution - the solution that contains all of the game code. This is a Windows 8 Store App. Autofac should work whether you're targeting Win 8 store apps, Windows desktop games, or Windows Phone 8. I'm not sure about iOS but it might also work for Android, Linux and Mac OS X if you're targeting those platforms.
 
 Then I had to decide where the DI container was going to be configured and live. The `Main()` method is usually a good place, but in a MonoGame application the `Main()` method just calls a factory that creates the game instance and runs it. There are no obvious entry points to configure the game. So I decided to do the configuration in the game instance itself. In my repo this is the `ShooterGame` class.
 
-Initially I wanted to put the configuration in the game class's constructor. It already had the initial configuration and seemed like the obvious choice. However due to the game's lifecycle, few of the things I need to configure Autofac with exist in the constructor. In fact the best place I found was in the `LoadContent()` method. By this stage the constructor and `Initialize()` methods have already been executed:
+Initially I wanted to put the configuration in the game class's constructor. It already had the initial configuration and seemed like the obvious choice. However due to the game's lifecycle, few of the things I need to configure Autofac with exist in the constructor. In fact the best place I found was in the `LoadContent()` method. By this stage the constructor and `Initialize()` methods have already been executed. Here's the basic game lifecycle for reference:
 
-	ShooterGame() -> Initialize() -> LoadContent()
+	ShooterGame() -> Initialize() -> LoadContent() -> Update() -> Draw() -> UnloadContent()
+	                                       ^------------/               
 
 This seems a little late to be configuring the container and I hope this won't come back to bite me later. Here is my trimmed down constructor:
 
