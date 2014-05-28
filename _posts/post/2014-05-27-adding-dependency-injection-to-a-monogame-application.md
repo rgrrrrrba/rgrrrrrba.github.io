@@ -47,7 +47,6 @@ This seems a little late to be configuring the container so I hope this won't co
 Here's something interesting. Note that I still need the constructor to create the `GraphicsDeviceManager` instance. This instance isn't actually directly used anywhere in the code - I could remove it and the project would still compile, but as soon as I try to run it I get an exception:
 
 	An unhandled exception of type 'System.InvalidOperationException' occurred in MonoGame.Framework.DLL
-
 	Additional information: No Graphics Device Manager
 
 The reason for this lies in the `GraphicsDeviceManager` constructor:
@@ -69,7 +68,7 @@ The reason for this lies in the `GraphicsDeviceManager` constructor:
 		this._game.Services.AddService(typeof (IGraphicsDeviceService), (object) this);
 	}
 
-The last two lines assign `this` - the `GraphicsDeviceManager` - back to the game. This constructor has side effects. I'm sure there's reasons for this very nasty piece of work but I would rather not know them.
+The last two lines assign `this` - the `GraphicsDeviceManager` - back to the game. This constructor has side effects. I'm sure there's reasons for this very nasty piece of work but I would rather not know them. The result is I can't create the `GraphicsDeviceManager` anywhere except for in the game's constructor.
 
 Moving on.
 
@@ -79,7 +78,7 @@ Moving on.
         base.Initialize();
     }
 
-This hasn't changed. It enables the free drag gesture, to light up on touch, and calls the `base.Initialize()` method. It seems that a lot of inherited classes need to call the base method. In my opinion this design is a bit fragile and another good reason to replace it with some abstractions.
+This hasn't changed. It enables the free drag gesture to light up on touch, and calls the `base.Initialize()` method. It seems that a lot of inherited classes need to call the base method. In my opinion this design is a bit fragile and another good reason to replace it with some abstractions.
 
 Now here are the first few lines of my new `LoadContent()` method:
 
@@ -338,3 +337,6 @@ I've added dependency injection to a simple game that was going to be potentiall
 
 My next post in this series will be around adding unit tests to the `Player` class, to help with some issues with viewport edge detection that have been plaguing me. I'll then add the ability for the ship to fire, then start displaying and keeping track of the score.
 
+Oh, and here is an obligatory screenshot:
+
+![](http://i.imgur.com/XkRIKoX.png)
