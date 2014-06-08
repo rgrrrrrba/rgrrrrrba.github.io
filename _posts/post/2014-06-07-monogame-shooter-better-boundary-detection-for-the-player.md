@@ -1,9 +1,12 @@
 ---
 title: MonoGame Shooter - Better boundary detection for the player
 layout: post
-date: 2014-05-29
+date: 2014-06-07
 category: post
 ---
+
+1. Better boundary detection for the player
+2. [Converting tests to BDD style](http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html)
 
 This is the first post of hopefully many as I learn MonoGame by extending on a [tutorial series by Tara Walker](http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx). The source code is available, both [before](https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007) and [after](https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d).
 
