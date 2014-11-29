@@ -1,8 +1,10 @@
 ---
 title: Get running fast on GitHub and BitBucket
 layout: post
-date: 2014-01-22
-category: link
+date: 2014-11-29
+categories: 
+- link
+- sticky
 ---
 
 ### GH4W
