@@ -1,10 +1,10 @@
-# [Red, Green, Refactor, Red, Red, Red, Revert, Back Away](http://rgrrrrrba.github.io)
+# [Ben d'état](http://bendetat.com)
 
-Ben Scott's blog - <http://rgrrrrrba.github.io>
+Ben Scott's blog - <http://bendetat.com>
 
-The blog formerly known as Belfry Images.
+The blog formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, formerly known as Belfry Images.
 
-Itsa Jekyll site, remember?
+It's Jekyll site, remember?
 
 - install [chocolatey](http://chocolatey.org)
 - `cinst ruby`
