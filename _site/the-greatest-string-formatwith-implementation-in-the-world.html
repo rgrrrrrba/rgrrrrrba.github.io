@@ -4,7 +4,7 @@
 		<meta charset="utf-8"/>
 		<title>The Greatest string.FormatWith() Extension Method Implementation In The World</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
 		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
 		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
@@ -53,47 +53,43 @@
     public static string FormatWith(this string format, params object[] args)
     {
         args = args ?? new object[0];
+        string result;
+        var numberedTemplateCount = (from object match in new Regex(@"\{\d{1,2}\}").Matches(format) select match.ToString()).Distinct().Count();
 
-        var distinctNumberedTemplateMatches =
-            (from object match in new Regex(@"\{\d{1,2}\}").Matches(format) select match.ToString())
-            .Distinct().Count();
-        if (distinctNumberedTemplateMatches != args.Length)
+        if (numberedTemplateCount != args.Length)
         {
-            var argsDic = GetDictionaryFromAnonObject(args[0]);
+            var argsDictionary = args[0].ToDictionary();
 
-            if (argsDic.Count &lt; 1)
+            if (!argsDictionary.Any())
             {
                 throw new InvalidOperationException("Please supply enough args for the numbered templates or use an anonymous object to identify the templates by name.");
             }
 
-            return argsDic.Aggregate(format, (current, o) =&gt; current.Replace("0".FormatWith(o.Key), o.Value.ToString()));
+            result = argsDictionary.Aggregate(format, (current, o) =&gt; current.Replace("{" + o.Key + "}", (o.Value ?? string.Empty).ToString()));
+        }
+        else
+        {
+            result = string.Format(format, args);
         }
 
-        var validationInput = format;
-        for (var i = 0; i &lt; args.Length; i++)
+        if (result == format)
         {
-            format = format.Replace("{" + i + "}", args[i] == null ? string.Empty : args[i].ToString());
-        }
-        if (validationInput == format)
-        {
-            throw new InvalidOperationException(
-                "You can not mix template types. Use numbered templates or named ones with an anonymous object.");
+            throw new InvalidOperationException("You cannot mix template types. Use numbered templates or named ones with an anonymous object.");
         }
 
-        return format;
+        return result;
     }
+}
 
-    private static IDictionary&lt;string, object&gt; GetDictionaryFromAnonObject(object args)
+public static class ObjectExtensions
+{ 
+    public static IDictionary&lt;string, object&gt; ToDictionary(this object o)
     {
-        if (args == null)
-        {
-            return new Dictionary&lt;string, object&gt;();
-        }
+        if (o == null) return new Dictionary&lt;string, object&gt;();
 
-        return TypeDescriptor.GetProperties(args).Cast&lt;PropertyDescriptor&gt;()
-            .ToDictionary(
-                property =&gt; property.Name, 
-                property =&gt; property.GetValue(args));
+        return TypeDescriptor
+            .GetProperties(o).Cast&lt;PropertyDescriptor&gt;()
+            .ToDictionary(x =&gt; x.Name, x =&gt; x.GetValue(o));
     }
 }
 </code></pre>
@@ -110,12 +106,19 @@
     who = "Hero",
     what = "he alone",
     action = "vies",
-    target=  "powers supreme"})
+    target = "powers supreme"})
 </code></pre>
 
 <p><img src="http://media.giphy.com/media/6KlLzO38CkLjG/giphy.gif" alt="" /></p>
 
 <p><strong>WARNING</strong>: Now this is probably not the most performant code. If you're going to run this in a tight loop you may want to go with ye olde <code>string.Format()</code>. The other 99.99% of the time, go forth and be awesome.</p>
+
+<h3>Updates</h3>
+
+<ul>
+<li>2014-04-23: <code>ToDictionary()</code> is now in it's own extension class, the named template conversion is simpler, and the numbered template conversion just uses <code>string.Format</code>.</li>
+</ul>
+
 
 
 
@@ -148,7 +151,7 @@
 		<div class="container">			
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2013 Ben Scott<br/>
+					Content &copy; 2008-2014 Ben Scott<br/>
 					<a href="https://twitter.com/bendetat">@bendetat</a> |
 					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
 					<a href="https://github.com/bendetat">github.com/bendetat</a> |

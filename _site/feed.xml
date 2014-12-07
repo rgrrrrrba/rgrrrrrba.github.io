@@ -7,6 +7,1588 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Get running fast on GitHub and BitBucket</title>
+				<description>&lt;p&gt;These are the steps I use to set up a new PC with Git. I mainly use Git on the command line, with TortoiseGit for staging commits and visualising logs and Beyond Compare for diffs and merges.&lt;/p&gt;
+
+&lt;h3&gt;GH4W&lt;/h3&gt;
+
+&lt;p&gt;I use &lt;a href=&quot;http://windows.github.com/&quot;&gt;GitHub for Windows&lt;/a&gt; to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the &lt;code&gt;github_rsa.pub&lt;/code&gt; file in &lt;code&gt;C:\Users\**username**\.ssh&lt;/code&gt; can be added to BitBucket and other services to get everything running with the same credentials. Generally I won't use GH4W after this as I'm mostly a command line junky, with gaps filled by TortoiseGit.&lt;/p&gt;
+
+&lt;h3&gt;Put &lt;code&gt;c:\bin&lt;/code&gt; on the path&lt;/h3&gt;
+
+&lt;p&gt;Create a folder called &lt;code&gt;bin&lt;/code&gt; somewhere fairly central. I use &lt;code&gt;c:\bin&lt;/code&gt;. Then put it on the path. Now you can drop scripts and executables into the &lt;code&gt;bin&lt;/code&gt; folder and they will work in any console anywhere. To mess with the path:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Open the System control panel item (&lt;code&gt;Win&lt;/code&gt;-&lt;code&gt;pause/break&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Select Advanced system settings (opens the System Properties dialog)&lt;/li&gt;
+&lt;li&gt;Select Environment Variables&lt;/li&gt;
+&lt;li&gt;Update both of the Path variables (in User variables and System variables), add &lt;code&gt;;c:\bin&lt;/code&gt; to the end of the values (don't delete the existing value)&lt;/li&gt;
+&lt;li&gt;'OK' out of the dialogs. You will need to restart any open command prompts to get the path change to work, rebooting is usually the fastest way to make sure the change has gone through (logging out and in may work too).&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/hWvTzkl.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3&gt;TortoiseGit&lt;/h3&gt;
+
+&lt;p&gt;I use &lt;a href=&quot;code.google.com/p/tortoisegit&quot;&gt;TortoiseGit&lt;/a&gt; to help stage commits and for visualising the log. I can bypass clicking around in Explorer by adding this batch file (named &lt;code&gt;tgit.bat&lt;/code&gt;) to somewhere in my path (I usually add &lt;code&gt;c:\bin&lt;/code&gt; to the path for this reason). This is based on a &lt;a href=&quot;http://ayende.com/blog/4749/executing-tortoisegit-from-the-command-line&quot;&gt;post by Oren Eini&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;@start &quot;TortoiseGit&quot; &quot;C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe&quot; /command:%1 /path:.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;TortoiseGit has a number of commands available from the command line. Use &lt;code&gt;tgit commit&lt;/code&gt; to preview, stage and execute a commit, and &lt;code&gt;tgit log&lt;/code&gt; to see the log.&lt;/p&gt;
+
+&lt;h3&gt;Switch to Cmder&lt;/h3&gt;
+
+&lt;p&gt;I use &lt;a href=&quot;http://bliker.github.io/cmder/&quot;&gt;Cmder&lt;/a&gt; as a console replacement but the msysgit instance included in the full download doesn't work with the public key named &lt;code&gt;github_rsa.pub&lt;/code&gt;. I just copied &lt;code&gt;github_rsa.pub&lt;/code&gt; to &lt;code&gt;id_rsa.pub&lt;/code&gt; and &lt;code&gt;github_rsa&lt;/code&gt; to &lt;code&gt;id_rsa&lt;/code&gt;. Cmder has support for aliases using the &lt;code&gt;alias&lt;/code&gt; command but I usually use the &lt;code&gt;c:\bin&lt;/code&gt; path with batch files to keep everything relatively portable. Install Cmder to &lt;code&gt;c:\bin\cmder&lt;/code&gt; and drag &lt;code&gt;C:\bin\cmder\cmder.exe&lt;/code&gt; onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (&lt;code&gt;c:\source&lt;/code&gt; is mine):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/22KOl45.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3&gt;Fine-tune Git&lt;/h3&gt;
+
+&lt;p&gt;Run this to add a Git alias that opens the global configuration in its default editor (Vim) (&lt;code&gt;git ec&lt;/code&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git config --global alias.ec &quot;config --global -e&quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now that's in you can hand edit the config to add some or all of &lt;a href=&quot;http://haacked.com/archive/2014/07/28/github-flow-aliases/&quot;&gt;Phil Haack's GitHub Flow aliases&lt;/a&gt;. I usually just use 'wipe', 'save' and 'undo':&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;wipe = !git add -A &amp;amp;&amp;amp; git commit -qm 'WIPE SAVEPOINT' &amp;amp;&amp;amp; git reset HEAD~1 --hard
+save = !git add -A &amp;amp;&amp;amp; git commit -m 'SAVEPOINT'
+undo = reset HEAD~1 --mixed
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Run this to configure git to push the current branch by default:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git config --global push.default current
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Also check this out: &lt;a href=&quot;https://help.github.com/articles/set-up-git&quot;&gt;https://help.github.com/articles/set-up-git&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Looks like password caching is an issue with Cmder's msysgit, but only with non-SSH remote urls. If &lt;code&gt;.git/config&lt;/code&gt; looks like this it shoud use the above keys:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[remote &quot;origin&quot;]
+    url = git@github.com:rgrrrrrba/rgrrrrrba.github.io.git
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Beyond Compare&lt;/h3&gt;
+
+&lt;p&gt;I use (and happily pay for) &lt;a href=&quot;http://www.scootersoftware.com/moreinfo.php&quot;&gt;Beyond Compare 4&lt;/a&gt; and the &lt;a href=&quot;http://www.scootersoftware.com/support.php?zz=kb_vcs&quot;&gt;instructions here&lt;/a&gt; were helpful. To get Git to use BC4 for diffs and merges:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git config --global merge.tool bc4
+git config --global mergetool.bc4.path &quot;C:/Program Files (x86)/Beyond Compare 4/BCompare.exe&quot;                 
+git config --global diff.tool bc4
+git config --global difftool.bc4.path &quot;C:/Program Files (x86)/Beyond Compare 4/BCompare.exe&quot;                 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice that you need to use forward-slashes in the path to BC. &lt;code&gt;~/.gitconfig&lt;/code&gt; should end up like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[merge]
+    tool = bc4
+[mergetool &quot;bc4&quot;]
+    path = C:/Program Files (x86)/Beyond Compare 4/BCompare.exe
+[diff]
+    tool = bc4
+[difftool &quot;bc4&quot;]
+    path = C:/Program Files (x86)/Beyond Compare 4/BCompare.exe
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Run these commands to tighten up things a bit by skipping confirmation prompts and removing merge backups:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git config --global difftool.prompt false
+git config --global mergetool.prompt false
+git config --global mergetool.keepBackup false
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit's Settings screen (right-click in Explorer, TortoiseGit, Settings, or just use &lt;code&gt;tgit settings&lt;/code&gt; if you added the alias):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/fhkbebQ.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+				<pubDate>Sat, 29 Nov 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</link>
+				<guid isPermaLink="true">http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</guid>
+			</item>
+		
+			<item>
+				<title>Compare branches in TortoiseGit</title>
+				<description>&lt;p&gt;Using a PR / peer review model when developing in a team is a great way keep quality high with a large number of changes. This model relies on being able to review diffs easily, something which Bitbucket is usually pretty good at.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately Bitbucket falls down once PRs reach a certain size:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/JRllPwb.png&quot; alt=&quot;This merge is too large to display&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;i haz a sadz&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Ideally, PRs should be small enough that this doesn't crop up, but when you're performing large refactors or working on significant feature branches the ideal isn't always possible.&lt;/p&gt;
+
+&lt;p&gt;TortoiseGit to the rescue: &lt;a href=&quot;http://wikgren.fi/compare-diff-branches-in-tortoise-git-or-how-to-preview-changes-before-doing-a-merge/&quot;&gt;Compare (Diff) branches in Tortoise Git, or how to preview changes before doing a merge&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Basically:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;shift&lt;/em&gt;-right click the folder&lt;/li&gt;
+&lt;li&gt;Select &lt;code&gt;TortoiseGit -&amp;gt; Browse Reference&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Select the two branches to compare using control (usually the current branch and &lt;code&gt;master&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Right-click and select &lt;code&gt;Compare selected refs&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 07 Aug 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/compare-branches-in-tortoise-git.html</link>
+				<guid isPermaLink="true">http://bendetat.com/compare-branches-in-tortoise-git.html</guid>
+			</item>
+		
+			<item>
+				<title>Resolving a list of type registrations from Autofac</title>
+				<description>&lt;p&gt;I needed to get all types that implemented a given interface that were registered with Autofac. Not a set of factories, that would be as simple as this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Consumer
+{
+    public Consumer(IEnumerable&amp;lt;Func&amp;lt;IFoo&amp;gt;&amp;gt; fooFactories)
+    {
+        // ...
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;What I really need is something like &lt;code&gt;Consumer(IEnumerable&amp;lt;Type&amp;gt; fooTypes)&lt;/code&gt; where the types are everything implementing &lt;code&gt;IFoo&lt;/code&gt;, but of course Autofac can't resolve that.&lt;/p&gt;
+
+&lt;p&gt;Inspired by &lt;a href=&quot;http://stackoverflow.com/a/9503695/149259&quot;&gt;this StackOverflow answer&lt;/a&gt;, here's an extension method that does what I need:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public static class LifetimeScopeExtensions
+{
+    public static IEnumerable&amp;lt;Type&amp;gt; GetImplementingTypes&amp;lt;T&amp;gt;(this ILifetimeScope scope)
+    {
+        return scope.ComponentRegistry
+            .RegistrationsFor(new TypedService(typeof (T)))
+            .Select(x =&amp;gt; x.Activator)
+            .OfType&amp;lt;ReflectionActivator&amp;gt;()
+            .Select(x =&amp;gt; x.LimitType);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To use it my consumer just takes an &lt;code&gt;ILifetimeScope&lt;/code&gt; dependency:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public Consumer(ILifetimeScope scope) 
+{
+    var fooTypes = scope.GetImplementingTypes&amp;lt;IFoo&amp;gt;();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that I needed to register the types both as the base type &lt;code&gt;IFoo&lt;/code&gt; (for the implementing type resolution) and as self, so I could later resolve using &lt;code&gt;scope.Resolve(fooType)&lt;/code&gt;. My registration looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;        builder.RegisterAssemblyTypes(typeof (IFoo).Assembly)
+            .Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IFoo&amp;gt;())
+            .Where(t =&amp;gt; !t.IsAbstract)
+            .As&amp;lt;IFoo&amp;gt;()
+            .AsSelf()
+            .InstancePerDependency();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+				<pubDate>Thu, 26 Jun 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/autofac-get-registration-types.html</link>
+				<guid isPermaLink="true">http://bendetat.com/autofac-get-registration-types.html</guid>
+			</item>
+		
+			<item>
+				<title>MonoGame Shooter - Converting tests to BDD style</title>
+				<description>&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html&quot;&gt;Better boundary detection for the player&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Converting tests to BDD style&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;This is the second post of hopefully many as I learn MonoGame by extending on a &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;tutorial series by Tara Walker&lt;/a&gt;. The source code is available, both &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d&quot;&gt;before&lt;/a&gt; and &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b&quot;&gt;after&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In this post I convert the player boundary detection tests I wrote in the last post to a behavior-driven development (BDD) style to remove some duplication and simplify the tests.&lt;/p&gt;
+
+&lt;h3&gt;Behavior-driven development&lt;/h3&gt;
+
+&lt;p&gt;BDD is an approach to test-driven development that works from the outside in. A BDD test is described using a language that the business understands (the &lt;a href=&quot;http://martinfowler.com/bliki/UbiquitousLanguage.html&quot;&gt;ubiquitous language&lt;/a&gt;). It then describes the conditions, events and results that make up the desired behavior.&lt;/p&gt;
+
+&lt;h3&gt;Existing tests&lt;/h3&gt;
+
+&lt;p&gt;The existing tests written in the previous post were quite repetitive. They were all around what happens to a player's position given some user inputs, such as if the player is at the top of the screen and the gamepad is pushed up, the player shouldn't move any further up.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUp
+{
+    [Fact]
+    public void ThenThePositionIsNotChanged()
+    {
+        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
+            .WithTopBoundary(10)
+            .Build();
+        var viewport = ObjectMother.Core.Viewports.Default
+            .WithHeight(100)
+            .WithWidth(100)
+            .Build();
+        var player = ObjectMother.Sprites.PlayerSprite.Players.Default
+            .WithPlayerConfiguration(configuration)
+            .WithViewport(viewport)
+            .Build();
+        var initialPosition = new Vector2(20, 10);
+        player.Position = initialPosition;
+
+        var gamePadState = ObjectMother.Input.GamePadStates.Default
+            .WithLeftThumbstickFullyUp()
+            .Build();
+        var state = ObjectMother.Core.ShooterGameInputStates.Default
+            .WithCurrentGamePadState(gamePadState)
+            .Build();
+
+        player.Update(state);
+
+        player.Position.Y.ShouldBe(10);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A lot of the initial setup and state creation is common across all of the tests. The naming convention used for the test class and method is describing the behaviors appropriately but it is still difficult to scan through the body of the test and immediately see what is happening.&lt;/p&gt;
+
+&lt;h3&gt;BDDfy&lt;/h3&gt;
+
+&lt;p&gt;I'm going to use a framework called &lt;a href=&quot;http://docs.teststack.net/bddfy/index.html&quot;&gt;BDDfy&lt;/a&gt;, which uses reflection to step through the methods in the test class and execute them in the 'given, when, then' order. Here's a really simple example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class WhenEnemyIsDestroyedScenario
+{
+    private Enemy _enemy;
+
+    public void GivenAnEnemyThatIsAlive()
+    {
+        var animation = Substitute.For&amp;lt;IAnimation&amp;gt;();
+        var spriteBatch = Substitute.For&amp;lt;ISpriteBatch&amp;gt;();
+
+        _enemy = new Enemy(animation, spriteBatch);
+    }
+
+    public void WhenEnemyIsDestroyed()
+    {
+        _enemy.Destroy();
+    }
+
+    public void ThenTheEnemyHealthIsZero()
+    {
+        _enemy.Health.ShouldBe(0);
+    }
+
+    [Fact]
+    public void Execute()
+    {
+        this.BDDfy();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The benefits in this example aren't huge or immediately compelling, but scanning through the method names makes the intent and structure of the test clear. If there were multiple outcomes, say if the enemy's state changes, then additional &lt;code&gt;Then&lt;/code&gt; steps can be added. Parts of this could be shared as well, such as moving &lt;code&gt;GivenAnEnemyThatIsAlive()&lt;/code&gt; into a &lt;code&gt;GivenAnEnemyThatIsAliveScenarioBase&lt;/code&gt; base class.&lt;/p&gt;
+
+&lt;p&gt;BDD is a great way of revealing intent and increasing the value of the test suite, and BDDfy in particular gives us an easy implementation of BDD in a way that makes our test suites composable.&lt;/p&gt;
+
+&lt;p&gt;Install BDDfy using the package manager console with &lt;code&gt;install-package TestStack.BDDfy&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3&gt;Reconstructing the first test&lt;/h3&gt;
+
+&lt;p&gt;The tests are already in a consistent arrange/act/assert format. Rename the &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUp&lt;/code&gt; class to &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt;, because the name of the test class is going to be the &lt;code&gt;When&lt;/code&gt; part of the BDD style test.&lt;/p&gt;
+
+&lt;p&gt;Add an &lt;code&gt;Execute()&lt;/code&gt; method to the bottom of the test&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Fact]
+public void Execute()
+{
+    this.BDDfy();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is needed to tell BDDfy to reflect over the class and execute the given/when/then methods. Remove the &lt;code&gt;[Fact]&lt;/code&gt; attribute from the &lt;code&gt;ThenThePositionIsNotChanged()&lt;/code&gt; method, otherwise it will be executed twice.&lt;/p&gt;
+
+&lt;p&gt;The first &lt;code&gt;Given&lt;/code&gt; is the player. Setting the position will be the second &lt;code&gt;Given&lt;/code&gt;, because this will change between tests. Copy down to where the player is built and extract this out into a new &lt;code&gt;GivenThePlayer()&lt;/code&gt; method. The &lt;code&gt;player&lt;/code&gt; object will be made into a class variable so it can be shared between the other test methods in the class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;private Player _player;
+
+public void GivenThePlayer()
+{
+    var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
+        .WithTopBoundary(10)
+        .Build();
+    var viewport = ObjectMother.Core.Viewports.Default
+        .WithHeight(100)
+        .WithWidth(100)
+        .Build();
+    _player = ObjectMother.Sprites.PlayerSprite.Players.Default
+        .WithPlayerConfiguration(configuration)
+        .WithViewport(viewport)
+        .Build();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The other tests set the other boundaries so as I convert them I'll add their boundaries to this shared method.&lt;/p&gt;
+
+&lt;p&gt;I like to prefix my class variables with an underscore. You should too, so fix the old references from &lt;code&gt;player&lt;/code&gt; to &lt;code&gt;_player&lt;/code&gt; then extract out the &lt;code&gt;AndGivenThePlayerIsAtTheTopOfTheScreen()&lt;/code&gt; and &lt;code&gt;AndGivenTheThumbstickIsFullyUp()&lt;/code&gt; methods.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void AndGivenThePlayerIsAtTheTopOfTheScreen()
+{
+    _player.Position = new Vector2(20, 10);
+}
+
+private ShooterGameInputState _state;
+
+public void AndGivenTheThumbstickIsFullyUp()
+{
+    var gamePadState = ObjectMother.Input.GamePadStates.Default
+        .WithLeftThumbstickFullyUp()
+        .Build();
+    _state = ObjectMother.Core.ShooterGameInputStates.Default
+        .WithCurrentGamePadState(gamePadState)
+        .Build();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now extract the &lt;code&gt;_player.Update()&lt;/code&gt; call into the &lt;code&gt;When&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void WhenUpdatingThePlayerState()
+{
+    _player.Update(_state);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;ThenThePositionIsNotChanged()&lt;/code&gt; method should now just be the position assertion. The name of the method already follows BDDfy's naming convention so it will be executed last.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public void ThenThePositionIsNotChanged()
+{
+    _player.Position.Y.ShouldBe(10);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running the test is successful so we can move on.&lt;/p&gt;
+
+&lt;h3&gt;Creating a scenario base&lt;/h3&gt;
+
+&lt;p&gt;You may have noticed that although the test is now broken into easy to understand chunks, the test itself is now significantly larger than the original single method test. The next step is to extract the common part into a base class.&lt;/p&gt;
+
+&lt;p&gt;The only method I'm going to put into the base class is the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method. There will still be some duplication mainly with the &lt;code&gt;WhenUpdatingThePlayerState&lt;/code&gt; but I would rather be able to see the main steps in each test.&lt;/p&gt;
+
+&lt;p&gt;Create a new class called &lt;code&gt;GivenThePlayerScenarioBase&lt;/code&gt; and move the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method into the new class, making it &lt;code&gt;virtual&lt;/code&gt; along the way. The &lt;code&gt;_player&lt;/code&gt; instance should be moved as well and made protected (and renamed to &lt;code&gt;Player&lt;/code&gt; to match C# naming conventions).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public abstract class GivenThePlayerScenarioBase
+{
+    protected Player Player;
+
+    public virtual void GivenThePlayer()
+    {
+        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
+            .WithTopBoundary(10)
+            .Build();
+        var viewport = ObjectMother.Core.Viewports.Default
+            .WithHeight(100)
+            .WithWidth(100)
+            .Build();
+        Player = ObjectMother.Sprites.PlayerSprite.Players.Default
+            .WithPlayerConfiguration(configuration)
+            .WithViewport(viewport)
+            .Build();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I've made the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method virtual because I still want to have a method named &lt;code&gt;GivenThePlayer()&lt;/code&gt; in the concrete scenario class. This is a matter of taste and doesn't affect BDDfy's operation, but it keeps all the steps in the scenario class which I find valuable.&lt;/p&gt;
+
+&lt;p&gt;Change &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt; to inherit from &lt;code&gt;GivenThePlayerScenarioBase&lt;/code&gt; and rename the &lt;code&gt;_player&lt;/code&gt; references to &lt;code&gt;Player&lt;/code&gt;. The test still passes! Now we can go through the other classes and convert them to the hot new BDD style tests.&lt;/p&gt;
+
+&lt;h3&gt;Wrap-up&lt;/h3&gt;
+
+&lt;p&gt;I won't go through the other conversions but for reference here is the complete &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario
+    : GivenThePlayerScenarioBase
+{
+    private ShooterGameInputState _state;
+
+    public override void GivenThePlayer()
+    {
+        base.GivenThePlayer();
+    }
+
+    public void AndGivenThePlayerIsAtTheTopOfTheScreen()
+    {
+        Player.Position = new Vector2(20, 10);
+    }
+
+    public void AndGivenTheThumbstickIsFullyUp()
+    {
+        var gamePadState = ObjectMother.Input.GamePadStates.Default
+            .WithLeftThumbstickFullyUp()
+            .Build();
+        _state = ObjectMother.Core.ShooterGameInputStates.Default
+            .WithCurrentGamePadState(gamePadState)
+            .Build();
+    }
+
+    public void WhenUpdatingThePlayerState()
+    {
+        Player.Update(_state);
+    }
+
+    public void ThenThePositionIsNotChanged()
+    {
+        Player.Position.Y.ShouldBe(10);
+    }
+
+    [Fact]
+    public void Execute()
+    {
+        this.BDDfy();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The completed &lt;code&gt;GivenThePlayerScenarioBase&lt;/code&gt; with the different boundaries is here:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public abstract class GivenThePlayerScenarioBase
+{
+    protected Player Player;
+
+    public virtual void GivenThePlayer()
+    {
+        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
+            .WithTopBoundary(10)
+            .WithRightBoundary(10)
+            .WithBottomBoundary(10)
+            .WithLeftBoundary(10)
+            .Build();
+        var viewport = ObjectMother.Core.Viewports.Default
+            .WithHeight(100)
+            .WithWidth(100)
+            .Build();
+        Player = ObjectMother.Sprites.PlayerSprite.Players.Default
+            .WithPlayerConfiguration(configuration)
+            .WithViewport(viewport)
+            .Build();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As always you can refer to &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial&quot;&gt;the current source code&lt;/a&gt; or &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b&quot;&gt;the source code as at the finish of this post&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3&gt;Coming up next&lt;/h3&gt;
+
+&lt;p&gt;In my next post I'm going to implement killing the player when it gets hit by an enemy.&lt;/p&gt;
+
+&lt;h3&gt;Resources&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;Up and Running with MonoGame&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;xUnit tests in a Windows 8.1 Store App&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html&quot;&gt;Adding dependency injection to a MonoGame application&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's original Shooter Game tutorial&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;John Sonmez' Introduction to 2D Programming with XNA (Pluralsight video)&lt;/a&gt; ($)&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sun, 08 Jun 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html</link>
+				<guid isPermaLink="true">http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html</guid>
+			</item>
+		
+			<item>
+				<title>MonoGame Shooter - Better boundary detection for the player</title>
+				<description>&lt;ol&gt;
+&lt;li&gt;Better boundary detection for the player&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html&quot;&gt;Converting tests to BDD style&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;This is the first post of hopefully many as I learn MonoGame by extending on a &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;tutorial series by Tara Walker&lt;/a&gt;. The source code is available, both &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007&quot;&gt;before&lt;/a&gt; and &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d&quot;&gt;after&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In this post I walk through adding screen edge detection to the player's ship, using Test-Driven Development practices where possible to keep a high quality of code.&lt;/p&gt;
+
+&lt;h3&gt;Changes since last post&lt;/h3&gt;
+
+&lt;p&gt;I have created a &lt;code&gt;Sprite&lt;/code&gt; class, which is the base class for both the &lt;code&gt;Player&lt;/code&gt; class and the &lt;code&gt;Enemy&lt;/code&gt; class. The &lt;code&gt;Sprite&lt;/code&gt; class uses a velocity and maximum speed to calculate the position in each frame. I changed the &lt;code&gt;ViewportWrapper&lt;/code&gt; to expose the &lt;code&gt;Viewport&lt;/code&gt; directly. Turns out the &lt;code&gt;Viewport&lt;/code&gt; object is just a basic &lt;code&gt;struct&lt;/code&gt; without any dependencies, so it should play nice with tests. Because it is a &lt;code&gt;struct&lt;/code&gt;, which is a value type, it can't be directly registered with AutoFac, so I need to keep the &lt;code&gt;IViewport&lt;/code&gt; abstraction. I also added an &lt;code&gt;IDrawMyself&lt;/code&gt; interface. MonoGame has an &lt;code&gt;IDrawable&lt;/code&gt; interface but it comes with some baggage. &lt;code&gt;IDrawMyself&lt;/code&gt; is implemented by &lt;code&gt;IAnimation&lt;/code&gt; and will eventually be implemented by &lt;code&gt;ITexture2D&lt;/code&gt; and &lt;code&gt;IParallaxingBackground&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Implementations of the &lt;code&gt;Sprite&lt;/code&gt; class use events to hook into the &lt;code&gt;Update()&lt;/code&gt; and &lt;code&gt;Draw()&lt;/code&gt; methods. Here is how the &lt;code&gt;Enemy&lt;/code&gt; class updates its &lt;code&gt;IsActive&lt;/code&gt; state before the position is recalculated (the event is subscribed to in the &lt;code&gt;Enemy&lt;/code&gt; constructor):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public Enemy(..) 
+{
+    // ..
+
+    BeforeUpdate += state =&amp;gt;
+    {
+        if (Position.X &amp;lt; -Width || _health &amp;lt;= 0)
+        {
+            IsActive = false;
+        }
+    };
+
+    // ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I also moved to a normal Windows (DirectX) project instead of the Windows 8 Store app that I started with. The only reason for this is so I can use a nice mocking library with little friction, as the portable class libraries that you have to use with Windows 8 Store apps don't support &lt;code&gt;Reflection.Emit&lt;/code&gt;. I only had to change one line of code to retarget the game, so I'm pretty sure moving to different targets further along will be straightforward.&lt;/p&gt;
+
+&lt;h3&gt;Boundary technique&lt;/h3&gt;
+
+&lt;p&gt;This technique is borrowed from a &lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;Pluralsight course&lt;/a&gt; by &lt;a href=&quot;https://twitter.com/jsonmez&quot;&gt;John Sonmez&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Basically we'll describe four rectangles around the boundary we want to limit the player's ship to. In practice these will be slightly inset from the screen and a bit further in on the right hand side, to keep the player from going too far forward.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/sMbJiiv.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;To keep things simple, these rectanges will be 'owned' by the player.&lt;/p&gt;
+
+&lt;h3&gt;Writing the first test&lt;/h3&gt;
+
+&lt;p&gt;To make sure that everything is working as we expect, the first test will just confirm that given a ship somewhere in the middle of the screen, with no inputs (keys all up, game pad zeroed), when updating the player, the position does not change. This seems like an obvious test but it will give us a lot of guidance on how to write the rest of the tests and possibly make some changes to help testing along.&lt;/p&gt;
+
+&lt;p&gt;I'm using &lt;a href=&quot;https://github.com/xunit/xunit&quot;&gt;xUnit&lt;/a&gt; as the testing framework but the tests should be pretty much the same whether you're using xUnit, NUnit or some other framework. I have a post on &lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;how to set up xUnit for a Windows 8 Store app&lt;/a&gt; if that's what you're targeting. To install xUnit, open the Package Manager Console, select the tests assembly, and enter &lt;code&gt;install-package xunit&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/trq8uv3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I will need to create some mock objects to pass into the &lt;code&gt;Player&lt;/code&gt; constructor. I'm going to use &lt;a href=&quot;http://nsubstitute.github.io/&quot;&gt;NSubstitute&lt;/a&gt; (&lt;code&gt;install-package nsubstitute&lt;/code&gt;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Fact]
+public void ThePositionStaysTheSame()
+{
+    var contentManager = Substitute.For&amp;lt;IContentManager&amp;gt;();
+    var viewport = Substitute.For&amp;lt;IViewport&amp;gt;();
+    var animationFactory = Substitute.For&amp;lt;IAnimationFactory&amp;gt;();
+    var spriteBatch = Substitute.For&amp;lt;ISpriteBatch&amp;gt;();
+
+    var player = new Player(contentManager, viewport, animationFactory, spriteBatch);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I'm creating some substitutes for the player's dependencies and constructing the player object. If I run the tests at this point everything is successful, which is good because it means the player class is happy to construct itself using the substituted dependencies.&lt;/p&gt;
+
+&lt;p&gt;Now for the &quot;act&quot; part of the test. I'll set an initial position, then call &lt;code&gt;Update()&lt;/code&gt; with no mocked inputs.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/I4C0vsi.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Creating these test input states are going to be a problem in the long term. For now I'll just move it into a seperate method. I'll revisit this in the next test.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var initialPosition = new Vector2(4, 5);
+player.Position = initialPosition;
+
+var state = GetInputState();
+player.Update(state);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;GetInputState()&lt;/code&gt; returns a new &lt;code&gt;ShooterGameInputState&lt;/code&gt; instance with default game pad, keyboard and mouse states and a default &lt;code&gt;GameTime&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;I run my test again to make sure everything is still happy, and I'm pleased to see it fail. It seems that the &lt;code&gt;Player.Update()&lt;/code&gt; method was using some static &lt;code&gt;TouchPanel&lt;/code&gt; calls, which resulted in a null reference exception outside of the game. I simply updated the &lt;code&gt;ShooterGameInputState&lt;/code&gt; class with the touch panel state, although it looks like mocking out touch panel inputs will be problematic unless they are fully abstracted.&lt;/p&gt;
+
+&lt;p&gt;Now I need to assert that the player didn't move. I'm using &lt;a href=&quot;http://shouldly.github.io/&quot;&gt;Shouldly&lt;/a&gt; as the assertions library (&lt;code&gt;install-package shouldly&lt;/code&gt;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;player.Position.ShouldBe(initialPosition);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;My test passes! I make sure the comparison is working by testing the position against &lt;code&gt;Vector2.Zero&lt;/code&gt; (because I can't trust the tests quite yet).&lt;/p&gt;
+
+&lt;h3&gt;Testing the player's movement&lt;/h3&gt;
+
+&lt;p&gt;If the left thumbstick is fully up and left, with the player's default speed of 8, the player should move up 8 and left 8 after one update (note that this isn't actually true, read on for an explanation). This will be the second test.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class WhenLeftThumbStickFullyLeftAndUp
+{
+    [Fact]
+    public void ThenThePositionMovesUpAndLeftAtFullSpeed()
+    {
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I don't want to simply copy the player initialization code, especially since I know I'm going to write a pile of these tests. So I'm going to extract out the creation using the &lt;a href=&quot;http://martinfowler.com/bliki/ObjectMother.html&quot;&gt;Object Mother&lt;/a&gt; pattern.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public static partial class ObjectMother
+{
+    public static partial class Sprites
+    {
+        public static partial class PlayerSprite
+        {
+            public static partial class Players
+            {
+                public static PlayerBuilder Default { get { return new PlayerBuilder();} }
+
+                public class PlayerBuilder
+                    : BuilderFor&amp;lt;Player&amp;gt;
+                {
+                    public override Player Build()
+                    {
+                        return new Player(
+                            Substitute.For&amp;lt;IContentManager&amp;gt;(),
+                            Substitute.For&amp;lt;IViewport&amp;gt;(),
+                            Substitute.For&amp;lt;IAnimationFactory&amp;gt;(),
+                            Substitute.For&amp;lt;ISpriteBatch&amp;gt;());
+                    }
+                }
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The nested classes are so we can add to the object mothers and use the same naming convention as the object's namespace. If managed properly, the Object Mother pattern can scale out to hundreds of builders with a consistent interface, allowing a high amount of control using the domain language but keeping a very high level of code reuse.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var player = ObjectMother.Sprites.PlayerSprite.Players.Default.Build();
+
+var initialPosition = new Vector2(4, 5);
+player.Position = initialPosition;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I'm also going to move the input state creation into an object mother but I'll add an entry point to set the left thumbstick position. I'll add an object mother for &lt;code&gt;GamePadState&lt;/code&gt; since that's what will be passed into the input state. Here is the builder part:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class GamePadStateBuilder
+    : BuilderFor&amp;lt;GamePadState&amp;gt;
+{
+    private Vector2 _leftThumbStick = Vector2.Zero;
+
+    public override GamePadState Build()
+    {
+        return new GamePadState(_leftThumbStick, Vector2.Zero, 0, 0);
+    }
+
+    public GamePadStateBuilder WithLeftThumbstick(Vector2 position)
+    {
+        _leftThumbStick = position;
+        return this;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;BuilderFor&lt;/code&gt; class has some 'magic' to let you record the builder configuration using a &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs&quot;&gt;DIY fluent interface&lt;/a&gt;. Here's next part of the test, creating the input state with the left gamepad stick fully up and right. Note that thumbstick vector's Y value is &lt;em&gt;positive&lt;/em&gt; in the &lt;em&gt;up&lt;/em&gt; direction and &lt;em&gt;negative&lt;/em&gt; in the &lt;em&gt;down&lt;/em&gt; direction, which is the opposite to the screen, which decreases to zero at you approach the top of the screen.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var gamePadState = ObjectMother.Input.GamePadStates.Default
+    .WithLeftThumbstick(new Vector2(1, 1))
+    .Build();
+var state = ObjectMother.Core.ShooterGameInputStates.Default
+    .WithCurrentGamePadState(gamePadState)
+    .Build();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;With that I add the 'act' and 'assert' parts of the test:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;player.Update(state);
+
+player.Position.ShouldBe(initialPosition + new Vector2(player.Speed, -player.Speed));
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When running this I found something interesting about the game pad thumbsticks. When creating the &lt;code&gt;GamePadThumbSticks&lt;/code&gt; object used to represent the thumbsticks, a static value &lt;code&gt;GamePadThumbSticks.GateType&lt;/code&gt; is used to normalize the input value. The default gate is &lt;code&gt;Round&lt;/code&gt;, which gates the position to a circular shape. Stand back, I'm going to do some math.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/azB0IGU.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;So the thumbstick at full extension to the top right is actually &lt;code&gt;(0.7071, 0.7071)&lt;/code&gt;, so the player sprite will move &lt;code&gt;8 * 0.7071&lt;/code&gt; pixels per update in the X and Y axes. I'll update the test accordingly:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;player.Update(state);
+
+var normalisedVelocity = Math.Sqrt(2)/2.0d;
+var changeInPosition = new Vector2(
+    player.Speed*(float) normalisedVelocity,
+    -player.Speed*(float) normalisedVelocity);
+
+player.Position.ShouldBe(initialPosition + changeInPosition);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This test finally passes. This revealed something about the keyboard, mouse and d-pad inputs which I hadn't noticed. When those inputs are triggering diagonal movement my player is moving with a velocity of &lt;code&gt;(1, 1)&lt;/code&gt;, which is significantly faster than the thumbpad's velocity of &lt;code&gt;(0.7071, 0.7071)&lt;/code&gt;. This will eventually have to be corrected.&lt;/p&gt;
+
+&lt;h3&gt;Configuring the player's boundaries&lt;/h3&gt;
+
+&lt;p&gt;I want to be able to configure parts of the player. To be able to unit test the player I need to be able to set the configuration outside of the player class. I could do this by passing things into the constructor:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;new Player(contentManager, viewport, ...., leftBoundary, topBoundary, rightBoundary, ...)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is a bit unwieldy and will get worse as new configurable things get added to the player. Instead I could wrap the configuration in another class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class PlayerConfiguration
+{
+    public int LeftBoundary { get; set; }
+    public int TopBoundary { get; set; }
+    // ...
+}
+
+new Player(contentManager, viewport, ..., playerConfiguration);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Because I'm creating the player using Autofac I can make this more generic and let the runtime configuration be baked in. The sprite's width and height should also be in the configuration, because determining width and height using the animation is going to be messy for unit tests.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public interface IPlayerConfiguration
+{
+    int LeftBoundary { get; }
+    int TopBoundary { get; }
+    int RightBoundary { get; }
+    int BottomBoundary { get; }
+    int Width { get; }
+    int Height { get; }
+}
+
+public class PlayerConfiguration : IPlayerConfiguration, IRegistering
+{
+    public int LeftBoundary { get { return 20; } }
+    public int TopBoundary { get { return 20; } }
+    public int RightBoundary { get { return 60; } }
+    public int BottomBoundary { get { return 20; } }
+    public int Width { get { return 115; } }
+    public int Height { get { return 69; } }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;By the way, the boundaries are going to be like padding. The player class will calculate the actual boundaries using the viewport later on.&lt;/p&gt;
+
+&lt;p&gt;I need to add the new player configuration to the player's object mother's &lt;code&gt;PlayerBuilder&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class PlayerBuilder
+    : BuilderFor&amp;lt;Player&amp;gt;
+{
+    private IPlayerConfiguration _playerConfiguration;
+
+    public override Player Build()
+    {
+        return new Player(
+            Substitute.For&amp;lt;IContentManager&amp;gt;(),
+            Substitute.For&amp;lt;IViewport&amp;gt;(),
+            Substitute.For&amp;lt;IAnimationFactory&amp;gt;(),
+            Substitute.For&amp;lt;ISpriteBatch&amp;gt;(),
+            _playerConfiguration ?? Substitute.For&amp;lt;IPlayerConfiguration&amp;gt;());
+    }
+
+    public PlayerBuilder WithPlayerConfiguration(IPlayerConfiguration playerConfiguration)
+    {
+        _playerConfiguration = playerConfiguration;
+        return this;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This lets me either use a default &lt;code&gt;IPlayerConfiguration&lt;/code&gt; make with NSubstitute (which will return a default of &lt;code&gt;0&lt;/code&gt; for the boundaries), or pass in my own &lt;code&gt;IPlayerConfiguration&lt;/code&gt; instance. To make this easier to work with I also made an object mother for &lt;code&gt;IPlayerConfiguration&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public static partial class ObjectMother
+{
+    public static partial class Sprites
+    {
+        public static partial class PlayerSprite
+        {
+            public static partial class PlayerConfigurations
+            {
+                public static PlayerConfigurationBuilder Default
+                {
+                    get { return new PlayerConfigurationBuilder(); }
+                }
+
+                public class PlayerConfigurationBuilder
+                    : BuilderFor&amp;lt;IPlayerConfiguration&amp;gt;
+                {
+                    private readonly IPlayerConfiguration _playerConfiguration =
+                        Substitute.For&amp;lt;IPlayerConfiguration&amp;gt;();
+
+                    public PlayerConfigurationBuilder()
+                    {
+                        _playerConfiguration.Width.Returns(10);
+                        _playerConfiguration.Height.Returns(10);
+                    }
+
+                    public override IPlayerConfiguration Build()
+                    {
+                        return _playerConfiguration;
+                    }
+
+                    public PlayerConfigurationBuilder WithLeftBoundary(int boundary)
+                    {
+                        _playerConfiguration.LeftBoundary.Returns(boundary);
+                        return this;
+                    }
+
+                    public PlayerConfigurationBuilder WithRightBoundary(int boundary)
+                    {
+                        _playerConfiguration.RightBoundary.Returns(boundary);
+                        return this;
+                    }
+
+                    public PlayerConfigurationBuilder WithTopBoundary(int boundary)
+                    {
+                        _playerConfiguration.TopBoundary.Returns(boundary);
+                        return this;
+                    }
+
+                    public PlayerConfigurationBuilder WithBottomBoundary(int boundary)
+                    {
+                        _playerConfiguration.BottomBoundary.Returns(boundary);
+                        return this;
+                    }
+                }
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I also need to provide the player with a sensible viewport in the tests. To do this I created an &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs&quot;&gt;object mother for the viewport&lt;/a&gt; and added a &lt;code&gt;WithViewport()&lt;/code&gt; method to the player object mother.&lt;/p&gt;
+
+&lt;h3&gt;Testing the left boundary&lt;/h3&gt;
+
+&lt;p&gt;I'm guessing that the easiest boundaries to test will be the left and top, since I don't have to worry about the size of the viewport yet. So my first test will be, with a left boundary of 10, with the player sitting on that boundary, with the the thumbstick to the left, the player's X position doesn't change.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnLeftBoundaryWithLeftThumbStickFullyLeft
+{
+    [Fact]
+    public void ThenThePositionIsNotChanged()
+    {
+        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
+            .WithLeftBoundary(10)
+            .Build();
+        var player = ObjectMother.Sprites.PlayerSprite.Players.Default
+            .WithPlayerConfiguration(configuration)
+            .Build();
+        var initialPosition = new Vector2(10, 5);
+        player.Position = initialPosition;
+
+        var gamePadState = ObjectMother.Input.GamePadStates.Default
+            .WithLeftThumbstickFullyLeft()
+            .Build();
+        var state = ObjectMother.Core.ShooterGameInputStates.Default
+            .WithCurrentGamePadState(gamePadState)
+            .Build();
+
+        player.Update(state);
+
+        player.Position.X.ShouldBe(initialPosition.X);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Initially this fails because the boundary isn't implemented:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Shouldly.ChuckedAWobblyplayer.Position.X
+        should be
+    10
+        but was
+    2
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This first boundary is pretty easy to describe. The player has a set of boundaries:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class Player : //...
+{
+    private readonly Rectangle[] _boundaries;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The left boundary is created in the &lt;code&gt;Player&lt;/code&gt; constructor:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;_boundaries = new[]
+{
+    new Rectangle(-100, 0, 100 + _configuration.LeftBoundary, _viewport.Height),
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is a rectangle starting 100 pixels to the left of the viewport, finishing at the left boundary, and the full height of the viewport.&lt;/p&gt;
+
+&lt;p&gt;Now I need a way of stopping the player from moving into that boundary. In the &lt;code&gt;Sprite&lt;/code&gt; class (the base class for the player and the enemies) the position is set in the &lt;code&gt;Update&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var deltaX = Velocity.X*Speed;
+var deltaY = Velocity.Y*Speed;
+
+Position += new Vector2(deltaX, deltaY);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So I can add a new virtual method to &lt;code&gt;Sprite&lt;/code&gt; which checks the new position:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;protected virtual bool CheckNewPosition(Vector2 newPosition)
+{
+    return true;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The update method needs to be changed to use this method. Replace:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Position += new Vector2(deltaX, deltaY);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt; with:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var newPosition = Position + new Vector2(deltaX, deltaY);
+if (CheckNewPosition(newPosition))
+{
+    Position = newPosition;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;Player&lt;/code&gt; class now just needs to override the &lt;code&gt;CheckNewPosition&lt;/code&gt; method. If I make it return &lt;code&gt;false&lt;/code&gt; my new test passes but my existing test fails, but this is a good check to make sure everything is working as expected:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;protected override bool CheckNewPosition(Vector2 newPosition)
+{
+    return false;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When I run the game, the player now can't be moved at all. I need to change the &lt;code&gt;CheckNewPosition&lt;/code&gt; method to use the boundaries:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;protected override bool CheckNewPosition(Vector2 newPosition)
+{
+    var newBounds = new Rectangle((int)newPosition.X, (int)newPosition.Y, Width, Height);
+
+    foreach (var boundary in _boundaries)
+    {
+        if (boundary.Intersects(newBounds))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This gets the tests passing, but something strange is going on with the boundaries in the game:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/96xaBhi.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;By debugging the game this is aparrently at &lt;code&gt;X=20&lt;/code&gt;, which is obviously being clipped by the edge of the screen, so one of my assumptions is incorrect. The culprit turns out to be in the &lt;code&gt;Animation.Draw&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var destRect = new Rectangle(
+    (int) position.X - ScaledWidth/2,
+    (int) position.Y - ScaledHeight/2,
+    ScaledWidth,
+    ScaledHeight);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The destination rectangle (the rectangle the sprite is being drawn at) is shifted by half the height and width, so the origin of the sprite is the center of the animation. This actually makes sense, so I need to change my logic to suit. The player's &lt;code&gt;GetBounds()&lt;/code&gt; method is changed to this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public override Rectangle GetBounds()
+{
+    return GetBoundsAt(Position);
+}
+
+protected Rectangle GetBoundsAt(Vector2 position)
+{
+    return new Rectangle(
+        (int) position.X - _configuration.Width / 2,
+        (int) position.Y - _configuration.Height / 2,
+        _configuration.Width,
+        _configuration.Height);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And the &lt;code&gt;CheckNewPosition()&lt;/code&gt; method uses the new &lt;code&gt;GetBoundsAt()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;protected override bool CheckNewPosition(Vector2 newPosition)
+{
+    var newBounds = GetBoundsAt(newPosition);
+
+    foreach (var boundary in _boundaries)
+    {
+        if (boundary.Intersects(newBounds))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;My tests still pass because the player has a default width and height of 0. I will update my tests to make sure the width of the player is handled correctly but this will do for now. When I start the game I need to push the starting position right a bit so I can move the player.&lt;/p&gt;
+
+&lt;h3&gt;Testing the other boundaries&lt;/h3&gt;
+
+&lt;p&gt;Implementing and testing the other boundaries is basically a rinse and repeat of the left boundary. Here is the test for the right boundary:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnRightBoundaryWithLeftThumbStickFullyRight
+{
+    [Fact]
+    public void ThenThePositionIsNotChanged()
+    {
+        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
+            .WithRightBoundary(10)
+            .Build();
+        var viewport = ObjectMother.Core.Viewports.Default
+            .WithHeight(100)
+            .WithWidth(100)
+            .Build();
+        var player = ObjectMother.Sprites.PlayerSprite.Players.Default
+            .WithPlayerConfiguration(configuration)
+            .WithViewport(viewport)
+            .Build();
+        var initialPosition = new Vector2(90, 5);
+        player.Position = initialPosition;
+
+        var gamePadState = ObjectMother.Input.GamePadStates.Default
+            .WithLeftThumbstickFullyRight()
+            .Build();
+        var state = ObjectMother.Core.ShooterGameInputStates.Default
+            .WithCurrentGamePadState(gamePadState)
+            .Build();
+
+        player.Update(state);
+
+        player.Position.X.ShouldBe(90);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here are the final set of boundaries, fully unit tested and configurable:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;_boundaries = new[]
+{
+    new Rectangle(-100, 0, 100 + _configuration.LeftBoundary, _viewport.Height),
+    new Rectangle(_viewport.Width - _configuration.RightBoundary, 0, 100, _viewport.Height), 
+    new Rectangle(0, -100, _viewport.Width, 100 + _configuration.TopBoundary), 
+    new Rectangle(0, _viewport.Height - _configuration.BottomBoundary, _viewport.Width, 100), 
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3&gt;Coming up next&lt;/h3&gt;
+
+&lt;p&gt;In my next post I'm going to refactor my tests to use a BDD format, which will simplify the tests and reduce some duplication. That will pave the way for implementing killing the player when it gets hit by an enemy.&lt;/p&gt;
+
+&lt;h3&gt;Resources&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;Up and Running with MonoGame&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;xUnit tests in a Windows 8.1 Store App&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html&quot;&gt;Adding dependency injection to a MonoGame application&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's original Shooter Game tutorial&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;John Sonmez' Introduction to 2D Programming with XNA (Pluralsight video)&lt;/a&gt; ($)&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sat, 07 Jun 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html</link>
+				<guid isPermaLink="true">http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html</guid>
+			</item>
+		
+			<item>
+				<title>Adding dependency injection to a MonoGame application</title>
+				<description>&lt;h3&gt;Disclaimer&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;This is not a tutorial!&lt;/strong&gt; This is an explanation of how I have modified the code that I ended up with at the end of the tutorials. These modifications lay the foundation for a cleaner codebase that I will extend upon in the future.&lt;/p&gt;
+
+&lt;p&gt;For people who are familiar with dependency injection, and more familiar with dependency injection than MonoGame, &lt;strong&gt;this is not for you&lt;/strong&gt;. This is a basic explanation of how I pulled apart a slightly complex spaghetti-coded solution and added dependency injection to make it easier to work with in the future. Think of it as 'using dependency injection in a MonoGame app for people that don't do dependency injection but have started to learn MonoGame'. &lt;strong&gt;I am only learning MonoGame&lt;/strong&gt;. These probably aren't best practices and will have numerous issues that expert game developers will laugh at. &lt;em&gt;Laugh away, experts.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;This also doesn't go into dependency injection in a lot of detail. There are plenty of places to learn about dependency injection but I found the best way to learn was to work in a basic system that uses dependency injection. Which I'm conveniently building here. You're welcome.&lt;/p&gt;
+
+&lt;h3&gt;Building a Shooter Game&lt;/h3&gt;
+
+&lt;p&gt;I worked my way through all six of &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's &quot;Building a Shooter Game&quot;&lt;/a&gt; tutorials, but the series ends abruptly and hasn't been updated for nine months. So I'm going to continue with my experimenting with the game, and I'll try to document the process as I go.&lt;/p&gt;
+
+&lt;p&gt;If you want to play along (sorry) you can either go through Tara's tutorials then tackle this yourself, or download my solution either &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36&quot;&gt;before&lt;/a&gt; or &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007&quot;&gt;after&lt;/a&gt; these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to &lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;install and configure MonoGame with Visual Studio&lt;/a&gt; before starting.&lt;/p&gt;
+
+&lt;p&gt;The first thing I wanted to do is to refactor the code so I can use dependency injection. I have two reasons for this:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Refactoring and dependency injection will clean up a lot of the dependencies through the project&lt;/li&gt;
+&lt;li&gt;Math is hard, and to be able to easily unit test my calculations I need the cleaner dependencies&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;Math is hard, dependency injection is easy&lt;/h3&gt;
+
+&lt;p&gt;I started by adding Autofac to the &lt;code&gt;Win8ShooterGame&lt;/code&gt; solution - the solution that contains all of the game code. This is a Windows 8 Store App. Autofac should work whether you're targeting Win 8 store apps, Windows desktop games, or Windows Phone 8. I'm not sure about iOS but it might also work for Android, Linux and Mac OS X if you're targeting those platforms.&lt;/p&gt;
+
+&lt;p&gt;Then I had to decide where the DI container was going to be configured and live. The &lt;code&gt;Main()&lt;/code&gt; method is usually a good place, but in a MonoGame application the &lt;code&gt;Main()&lt;/code&gt; method just calls a factory that creates the game instance and runs it. There are no obvious entry points to configure the game. So I decided to do the configuration in the game instance itself. In my repo this is the &lt;code&gt;ShooterGame&lt;/code&gt; class.&lt;/p&gt;
+
+&lt;p&gt;Initially I wanted to put the configuration in the game class's constructor. It already had the initial configuration and seemed like the obvious choice. However due to the game's lifecycle, few of the things I need to configure Autofac with exist in the constructor. In fact the best place I found was in the &lt;code&gt;LoadContent()&lt;/code&gt; method. By this stage the constructor and &lt;code&gt;Initialize()&lt;/code&gt; methods have already been executed. Here's the basic game lifecycle for reference:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ShooterGame() -&amp;gt; Initialize() -&amp;gt; LoadContent() -&amp;gt; Update() -&amp;gt; Draw() -&amp;gt; UnloadContent()
+                                       ^------------/               
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This seems a little late to be configuring the container so I hope this won't come back to bite me later, but it's working fine for now. Here is my trimmed down constructor:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public ShooterGame()
+{
+    _graphics = new GraphicsDeviceManager(this);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here's something interesting. Note that I still need the constructor to create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; instance. This instance isn't actually directly used anywhere in the code - I could remove it and the project would still compile, but as soon as I try to run it I get an exception:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;An unhandled exception of type 'System.InvalidOperationException' occurred in MonoGame.Framework.DLL
+Additional information: No Graphics Device Manager
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The reason for this lies in the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; constructor:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public GraphicsDeviceManager(Game game)
+{
+    if (game == null)
+        throw new ArgumentNullException(&quot;The game cannot be null!&quot;);
+    this._game = game;
+    this._supportedOrientations = DisplayOrientation.Default;
+    this._preferredBackBufferWidth = Math.Max(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
+    this._preferredBackBufferHeight = Math.Min(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
+    this._preferredBackBufferFormat = SurfaceFormat.Color;
+    this._preferredDepthStencilFormat = DepthFormat.Depth24;
+    this._synchronizedWithVerticalRetrace = true;
+    if (this._game.Services.GetService(typeof (IGraphicsDeviceManager)) != null)
+        throw new ArgumentException(&quot;Graphics Device Manager Already Present&quot;);
+    this._game.Services.AddService(typeof (IGraphicsDeviceManager), (object) this);
+    this._game.Services.AddService(typeof (IGraphicsDeviceService), (object) this);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The last two lines assign &lt;code&gt;this&lt;/code&gt; - the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; - back to the game. This constructor has side effects. I'm sure there's reasons for this very nasty piece of work but I would rather not know them. The result is I can't create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; anywhere except for in the game's constructor.&lt;/p&gt;
+
+&lt;p&gt;Moving on.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;protected override void Initialize()
+{
+    TouchPanel.EnabledGestures = GestureType.FreeDrag;
+    base.Initialize();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This hasn't changed. It enables the free drag gesture to light up on touch, and calls the &lt;code&gt;base.Initialize()&lt;/code&gt; method. It seems that a lot of inherited classes need to call the base method. In my opinion this design is a bit fragile and another good reason to replace it with some abstractions.&lt;/p&gt;
+
+&lt;p&gt;Now here are the first few lines of my new &lt;code&gt;LoadContent()&lt;/code&gt; method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;protected override void LoadContent()
+{
+    _container = AutofacConfig.Register(this);
+
+    _spriteBatch = _container.Resolve&amp;lt;ISpriteBatch&amp;gt;();
+    _enemyFactory = _container.Resolve&amp;lt;IEnemyFactory&amp;gt;();
+
+    _player = _container.Resolve&amp;lt;IPlayer&amp;gt;();
+
+    //...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;AutofacConfig&lt;/code&gt; is a new class that I've created in the &lt;code&gt;Configuration&lt;/code&gt; folder. I'll go through it soon. The &lt;code&gt;Register()&lt;/code&gt; method returns an &lt;code&gt;IContainer&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class ShooterGame : Game
+{
+    // ...
+    private IContainer _container;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This container is then used to resolve the parts of the game. I'll go through the rest of the &lt;code&gt;LoadContent()&lt;/code&gt; method at the end of this post.&lt;/p&gt;
+
+&lt;h3&gt;Configuring Autofac&lt;/h3&gt;
+
+&lt;p&gt;Here is the entire Autofac configuration class and registration method:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public static class AutofacConfig
+{
+    public static IContainer Register(Game game)
+    {
+        var builder = new ContainerBuilder();
+
+        game.Content.RootDirectory = &quot;Content&quot;;
+
+        builder.RegisterInstance(new SpriteBatch(game.GraphicsDevice)).AsSelf();
+        builder.RegisterInstance(game.Content).AsSelf();
+        builder.RegisterInstance(game.GraphicsDevice).AsSelf();
+
+        builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
+            .Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IRegistering&amp;gt;())
+            .AsImplementedInterfaces()
+            .InstancePerLifetimeScope();
+
+        return builder.Build();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;First we make a container builder. This builder is used to configure the container before use. The content root directory is also set here, just to keep the configuration in one place.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;builder.RegisterInstance(new SpriteBatch(game.GraphicsDevice)).AsSelf();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Previously the &lt;code&gt;spriteBatch&lt;/code&gt; was created in the game's &lt;code&gt;LoadContent()&lt;/code&gt; method. Autofac is being configured in the &lt;code&gt;LoadContent()&lt;/code&gt; method, so this is at the same stage in the application lifecycle. We tell Autofac to provide the created sprite batch instance whenever any component requests a sprite batch instance. This avoids having to pass the sprite batch object to anything that wants to draw itself. It also avoids keeping a reference to the sprite batch in the game object itself. There are some extra abstractions around the sprite batch and other objects which I will discuss below.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;builder.RegisterInstance(game.Content).AsSelf();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This line tells Autofac to pass the &lt;code&gt;game.Content&lt;/code&gt; instance whenever any component requests a &lt;code&gt;ContentManager&lt;/code&gt; instance. This avoids having to pass &lt;code&gt;Content&lt;/code&gt; around wherever anything wants to load up a texture or a sound, or to have to do all of the loading in the game class's &lt;code&gt;LoadContent()&lt;/code&gt; method then pass the loaded textures or sounds around the application.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;builder.RegisterInstance(game.GraphicsDevice).AsSelf();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This does the same thing for the game's &lt;code&gt;GraphicDevice&lt;/code&gt; instance.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
+    .Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IRegistering&amp;gt;())
+    .AsImplementedInterfaces()
+    .InstancePerLifetimeScope();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This part is a bit more complicated. I'll go through it line by line.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This finds all types declared in the specified assembly - the &lt;code&gt;Win8ShooterGame&lt;/code&gt; application.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;.Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IRegistering&amp;gt;())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This limits the search to types that implement the &lt;code&gt;IRegistering&lt;/code&gt; interface - I'll explain this more later.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;.AsImplementedInterfaces()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This registers each of the found types by the interfaces that the type implements. Say we have &lt;code&gt;class Foo : IFoo, IRegistering&lt;/code&gt;. If a component requests an &lt;code&gt;IFoo&lt;/code&gt; dependency, Autofac will provide an instance of &lt;code&gt;Foo&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;.InstancePerLifetimeScope();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This registers the types as a single instance per the scope of the container's lifetime. The lifetime is only a consideration if you resolve dependencies within nested lifetime scopes. So far for this application there is only ever going to be a single scope, so the instances are essentially singletons - the same instance of a &lt;code&gt;Foo&lt;/code&gt; will be provided to all components that request it.&lt;/p&gt;
+
+&lt;h3&gt;Components and dependencies&lt;/h3&gt;
+
+&lt;p&gt;It's probably a good time to step back and look at what is meant by 'injecting a dependency' and how components can 'request' dependencies.&lt;/p&gt;
+
+&lt;p&gt;At the top level our game class gets a container - &lt;code&gt;IContainer&lt;/code&gt;. This container is used to resolve the game's high level dependencies:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var player = _container.Resolve&amp;lt;IPlayer&amp;gt;()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To resolve the player object Autofac searches through its registrations and finds a concrete class that implements the &lt;code&gt;IPlayer&lt;/code&gt; class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class Player : IPlayer, IRegistering
+{
+    //...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It creates an instance of the player, automatically resolving the dependencies required by the &lt;code&gt;Player&lt;/code&gt; class's constructor.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public Player(IContentManager contentManager, IViewport viewport, IAnimationFactory animationFactory)
+{
+    //...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This means that the game class doesn't have to know anything about the player class's dependencies, and the player class doesn't rely on particular implementations of its dependencies. Because the player class depends on interfaces, we can easily pass in mock dependencies in our unit tests.&lt;/p&gt;
+
+&lt;p&gt;Resolving a dependency using Autofac is slower than just creating a player manually, like &lt;code&gt;var player = new Player(_contentManager, this.Viewport, ....&lt;/code&gt;. But a player is only created once at the start of the game, so the cost is negligible. For things that need to be created multiple times within the game loop (such as projectiles or particles) we will use other methods like factories, which will speed up object creation while still allowing dependency injection.&lt;/p&gt;
+
+&lt;h3&gt;The IRegistering interface&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;IRegistering&lt;/code&gt; interface is an empty interface that is used as a marker for classes that should be registered with Autofac. Without using a marker interface, the registration will either apply across all types found in the assembly (which could include types that shouldn't be registered) or each type needs to be registered manually.&lt;/p&gt;
+
+&lt;p&gt;The scanning registration process isn't free but it would generally take much less than a second. This is another once-off cost of speed at the start of the application.&lt;/p&gt;
+
+&lt;h3&gt;Abstractions and wrappers&lt;/h3&gt;
+
+&lt;p&gt;I introduced Autofac to the application so I could easily manage some changes to the code that will support adding unit tests.&lt;/p&gt;
+
+&lt;p&gt;An example is the &lt;code&gt;Player&lt;/code&gt; class. I eventually want to add some tests around the player's screen edge detection. To do that before my changes I would have to pass in test implementations of the content manager, sprite batch and viewport. I don't know if those implementations would work in a test harness without actually creating a window with its own game loop. I avoid this complexity by passing in abstractions. For example, I could create a mock content manager that will provide a mock texture, without having to configure a real content manager with a texture.&lt;/p&gt;
+
+&lt;p&gt;MonoGame doesn't have any abstractions around the main elements, which makes testing using the build in system difficult. For example, the &lt;code&gt;SpriteBatch&lt;/code&gt; class has a hard dependency on &lt;code&gt;GraphicsDevice&lt;/code&gt; and none of the methods are virtual, so even subclassing wouldn't work. To get around these dependencies with my own game objects, I've created a small set of wrapper classes with interfaces to replace the MonoGame elements.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;ContentManagerWrapper&lt;/code&gt; is a wrapper for the MonoGame &lt;code&gt;ContentManager&lt;/code&gt; class:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;internal class ContentManagerWrapper
+    : IContentManager, IRegistering
+{
+    private readonly ContentManager _contentManager;
+
+    public ContentManagerWrapper(ContentManager contentManager)
+    {
+        _contentManager = contentManager;
+    }
+
+    public ITexture2D Load(string assetName)
+    {
+        var texture = _contentManager.Load&amp;lt;Texture2D&amp;gt;(assetName);
+        return new Texture2DWrapper(texture);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It exposes the &lt;code&gt;Load()&lt;/code&gt; method, which just calls the underlying &lt;code&gt;ContentManager&lt;/code&gt; instance's method and returns the &lt;code&gt;Texture2D&lt;/code&gt; result wrapped in a &lt;code&gt;Texture2DWrapper&lt;/code&gt;, which implements &lt;code&gt;ITexture2D&lt;/code&gt;. It has the &lt;code&gt;IRegistering&lt;/code&gt; marker interface so it will be automatically registered with Autofac when the application starts, and the &lt;code&gt;ContentManager&lt;/code&gt; instance is provided by Autofac from the registered instance (the one belonging to the game). It also implements the &lt;code&gt;IContentManager&lt;/code&gt; interface:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public interface IContentManager
+{
+    ITexture2D Load(string assetName);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This means that classes that want to use the content manager just take a dependency on &lt;code&gt;IContentManager&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class Player : IPlayer, IRegistering
+{
+    //...
+
+    public Player(IContentManager contentManager, IViewport viewport, IAnimationFactory animationFactory)
+    {
+        _animation = animationFactory.Build(
+            contentManager.Load(@&quot;Graphics\shipAnimation&quot;),
+            115, 30, 8);
+
+        _position = new Vector2(viewport.TitleSafeArea.X, viewport.TitleSafeArea.Y + viewport.TitleSafeArea.Height/2);
+    }
+
+// ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here the &lt;code&gt;Player&lt;/code&gt; class has a dependency on an &lt;code&gt;IContentManager&lt;/code&gt; instance. When the application is running Autofac will provide an instance of &lt;code&gt;ContentManagerWrapper&lt;/code&gt;, which just wraps the usual content manager, primed with the application's content. Calling &lt;code&gt;contentManager.Load()&lt;/code&gt; calls the underlying content manager.&lt;/p&gt;
+
+&lt;p&gt;If I want to write some unit tests around the &lt;code&gt;Player&lt;/code&gt; class I can just pass in a mock implementation of &lt;code&gt;IContentManager&lt;/code&gt;, without having to worry about any underlying implementations. Here is an example using &lt;a href=&quot;http://nsubstitute.github.io/&quot;&gt;NSubstitute&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var texture = Substitute.For&amp;lt;ITexture2D&amp;gt;();
+
+var contentManager = Substitute.For&amp;lt;IContentManager&amp;gt;();
+content.Load(@&quot;Graphics\shipAnimation&quot;).Returns(texture);
+
+var player = new Player(contentManager, ...);
+
+// test the Player instance
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At the moment only enough is abstracted and exposed to get the game running. I've also created factories and abstractions for the the &lt;code&gt;Animation&lt;/code&gt; and &lt;code&gt;ParallaxingBackground&lt;/code&gt; classes created in the original tutorials.&lt;/p&gt;
+
+&lt;h3&gt;LoadContent() and the game structure&lt;/h3&gt;
+
+&lt;p&gt;Dependency injection simplifies the game's structure because it takes care of injecting all of the dependencies of the different components that build up the game. The game class itself is the only place where Autofac is directly used to instantiate the elements that the game class is directly responsible for.&lt;/p&gt;
+
+&lt;p&gt;The game's content is loaded in the &lt;code&gt;LoadContent()&lt;/code&gt; method as before, except for the addition of Autofac and the use of some factories:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;protected override void LoadContent()
+{
+    _container = AutofacConfig.Register(this);
+
+    _spriteBatch = _container.Resolve&amp;lt;ISpriteBatch&amp;gt;();
+    _enemyFactory = _container.Resolve&amp;lt;IEnemyFactory&amp;gt;();
+
+    _player = _container.Resolve&amp;lt;IPlayer&amp;gt;();
+
+    var contentManager = _container.Resolve&amp;lt;IContentManager&amp;gt;();
+    var parallaxingBackgroundFactory = _container.Resolve&amp;lt;IParallaxingBackgroundFactory&amp;gt;();
+
+    _background1 = parallaxingBackgroundFactory.Build(contentManager.Load(&quot;Graphics/bgLayer1&quot;), -1,
+        GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+    _background2 = parallaxingBackgroundFactory.Build(contentManager.Load(&quot;Graphics/bgLayer2&quot;), -2,
+        GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+
+    _mainBackground = contentManager.Load(&quot;Graphics/mainBackground&quot;);
+    _mainBackgroundRect = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;_enemyFactory&lt;/code&gt; is a factory used to create 'enemies' without using Autofac 'in the loop'. The &lt;code&gt;EnemyFactory&lt;/code&gt; implementation loads up the texture once, then creates a new enemy object when requested.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class EnemyFactory : IEnemyFactory, IRegistering
+{
+    private readonly IContentManager _contentManager;
+    private readonly IAnimationFactory _animationFactory;
+    private ITexture2D _texture;
+
+    public EnemyFactory(IContentManager contentManager, IAnimationFactory animationFactory)
+    {
+        _contentManager = contentManager;
+        _animationFactory = animationFactory;
+        _texture = _contentManager.Load(&quot;Graphics/mineAnimation&quot;);
+    }
+
+    public IEnemy Build()
+    {
+        var animation = _animationFactory.Build(_texture, 47, 30, 8);
+        return new Enemy(animation);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Adding an enemy just calls the factory to create a new enemy:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void AddEmemy()
+{
+    var enemy = _enemyFactory.Build();
+    enemy.SetPosition(new Vector2(
+        GraphicsDevice.Viewport.Width + enemy.Width / 2,
+        _random.Next(100, GraphicsDevice.Viewport.Height - 100)));
+    _enemies.Add(enemy);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note we're still using the core MonoGame objects in places. I would expect the &lt;code&gt;enemy.SetPosition&lt;/code&gt; call to eventually happen in the factory.&lt;/p&gt;
+
+&lt;p&gt;The rest of the application structure is pretty much the same as before, exept that it is calling the abstractions rather than directly talking to the underlying MonoGame objects.&lt;/p&gt;
+
+&lt;h3&gt;Conclusion&lt;/h3&gt;
+
+&lt;p&gt;I've added dependency injection to a simple game that was going to be potentially difficult to maintain and extend, and the resulting abstractions should be easier to work with and refactor further down the track. I've also made it a lot easier to add unit tests.&lt;/p&gt;
+
+&lt;p&gt;My next post in this series will be around adding unit tests to the &lt;code&gt;Player&lt;/code&gt; class, to help with some issues with viewport edge detection that have been plaguing me. I'll then add the ability for the ship to fire, then start displaying and keeping track of the score.&lt;/p&gt;
+
+&lt;p&gt;Oh, and here is an obligatory screenshot:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/XkRIKoX.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+				<pubDate>Tue, 27 May 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html</link>
+				<guid isPermaLink="true">http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html</guid>
+			</item>
+		
+			<item>
+				<title>xUnit tests in a Windows 8.1 Store App</title>
+				<description>&lt;p&gt;At the time of writing the current version of xUnit (1.9.2) does not support Windows 8.1 Store applications. The pre-release version (2.0.0-beta-build2650) however has the core library built as a PCL (Portable Class Library). So to add a xUnit test assembly to a Windows 8.1 Store application we need to add a PCL library and add the pre-release xUnit NuGet package.&lt;/p&gt;
+
+&lt;p&gt;Add a new project. Under &lt;code&gt;Visual C#&lt;/code&gt;, then &lt;code&gt;Store Apps&lt;/code&gt;, then &lt;code&gt;Windows Apps&lt;/code&gt;, select &lt;code&gt;Class Library (Windows)&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/L9hKws2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Install the pre-release version of xUnit by either picking &lt;code&gt;Include Prelease&lt;/code&gt; in the Package Manager, or open the Package Manager Console (&lt;code&gt;Tools&lt;/code&gt;, &lt;code&gt;NuGet Packager Manager&lt;/code&gt;, &lt;code&gt;Package Manager Console&lt;/code&gt;), select the new test assembly project, and execute &lt;code&gt;install-package xunit -Pre&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/kbtfRkN.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I also use the &lt;a href=&quot;https://github.com/xunit/resharper-xunit&quot;&gt;xUnit.net Test Support&lt;/a&gt; test runner for Resharper, which has a pre-release version that supports xUnit 2. Install that by opening Resharper's &lt;code&gt;Extension Manager&lt;/code&gt; and selecting &lt;code&gt;Include Prerelease&lt;/code&gt; before searching for xUnit:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/eIp0x04.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Results are fields of green:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/gMjneQL.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+				<pubDate>Sun, 25 May 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html</link>
+				<guid isPermaLink="true">http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html</guid>
+			</item>
+		
+			<item>
+				<title>Up and Running with MonoGame</title>
+				<description>&lt;p&gt;&lt;em&gt;or, XNA is dead! Long live XNA!&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;WARNING!&lt;/strong&gt; Learning in the open&amp;trade;! There are a few moving parts when starting with MonoGame, so I'm just documenting the steps I took.&lt;/p&gt;
+
+&lt;h3&gt;Microsoft XNA&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Microsoft_XNA&quot;&gt;Microsoft XNA&lt;/a&gt; is/was a set of tools and a frameworks that provided a relatively easy way to create games using the CLR, sitting on top of DirectX.&lt;/p&gt;
+
+&lt;p&gt;Microsoft stopped active development of XNA around 2011, and last year &lt;a href=&quot;http://www.polygon.com/2013/1/31/3939230/microsoft-has-no-plans-for-future-versions-of-xna-software&quot;&gt;it became obvious&lt;/a&gt; that XNA would be retired. The former XNA home page now redirects to MSDN's &lt;a href=&quot;http://msdn.microsoft.com/dn629515&quot;&gt;Games development page&lt;/a&gt;, which (apart from not actually having any useful information about game development on Microsoft's platforms) is mainly spruiking Microsoft's partnership with &lt;a href=&quot;http://unity3d.com/&quot;&gt;Unity&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3&gt;A quick note about Unity&lt;/h3&gt;
+
+&lt;p&gt;Unity is both a game engine and a component oriented game development environment, with Mono-based scripting using C#. What this means for the average code monkey such as I is that when firing up Unity you are confronted with a drafting board. No comforting &lt;code&gt;10 PRINT 'HELLO, WORLD!'&lt;/code&gt; here folks.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/zjQrmdlR9ZCM/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3&gt;MonoGame to the rescue!&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://monogame.net&quot;&gt;MonoGame&lt;/a&gt; is an open-source rewrite of XNA 4 (the last version), using the same namespaces and with support for both DirectX 11 and OpenGL. Since it is based on Mono, it allows applications to be written and ported to most platforms, including PS4, Wii U, Xbox 360, Windows Desktop and Store, Android, iOS, Windows Phone, Mac OSX and Linux. The big player missing from that list is Xbox One, which currently does not support applications targeting the CLR.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt; Unity apparently &lt;em&gt;will&lt;/em&gt; (soon) support Xbox One so I guess it deploys native code, much like how Xamarin can deploy native code written in C# to target platforms that don't support the CLR such as iOS. Which begs the question, why not just do the same in MonoGame? A question for smarter cookies than myself. &lt;code&gt;&amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;MonoGame also has some official M$ love with several games published by Microsoft Studio.&lt;/p&gt;
+
+&lt;p&gt;Given these weighty credentials, I put the key in the ignition and powered up for a full throttle hello world.&lt;/p&gt;
+
+&lt;h3&gt;Obligatory false start&lt;/h3&gt;
+
+&lt;p&gt;Don't try this at home.&lt;/p&gt;
+
+&lt;p&gt;I cloned the &lt;a href=&quot;https://github.com/Mono-Game/MonoGame.Samples&quot;&gt;samples repo&lt;/a&gt; and just tried to run the &lt;code&gt;WindowsDX&lt;/code&gt; (Windows desktop DirectX) solution. No dice. Couldn't copy resource files, couldn't resolve all the referenced assemblies.&lt;/p&gt;
+
+&lt;p&gt;MonoGame has some &lt;a href=&quot;http://www.nuget.org/packages/MonoGame/&quot;&gt;NuGet packages&lt;/a&gt; so I pulled them into the project. I got it building but still had the same problem with the resource files.&lt;/p&gt;
+
+&lt;p&gt;I then installed MonoGame using the installer. This let me create new projects using MonoGame's templates, so I created a new project and started following &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;this tutorial series&lt;/a&gt; by &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/&quot;&gt;Tara Walker&lt;/a&gt;. The first part went well, which involved showing a simple image on a surface. The tutorial links to an &lt;code&gt;.xnb&lt;/code&gt; file containing the image, which loads correctly. So far so good, I've got stuff on the screen, I'm a game developer.&lt;/p&gt;
+
+&lt;p&gt;The third part of the series goes through creating that &lt;code&gt;.xnb&lt;/code&gt; file from a source image. This is where I became unstuck.&lt;/p&gt;
+
+&lt;h3&gt;Content Pipeline&lt;/h3&gt;
+
+&lt;p&gt;Images and other assets are relatively easy to use in the web and desktop application space. To add an image to a web site, you drop a JPEG, PNG or GIF onto a server and add a &lt;code&gt;&amp;lt;img&amp;gt;&lt;/code&gt; tag to your markup. To add an image to a WPF, Store, Phone or WinForms application, you add the file to the project as an embedded resource and then use it in a similar way.&lt;/p&gt;
+
+&lt;p&gt;Asset management is a much bigger part of game development. There are textures, meshes, sound effects, background music, graphics shader programs and probably a heap of other stuff that I will never understand, and it these assets need to be available to the game code in a way that is efficient and managable. For example, a texture used for a wall may have a number of resolutions, ranging from a very small resolution without much detail for display at a distance to a very large resolution with a lot of detail for display at a short distance.&lt;/p&gt;
+
+&lt;p&gt;The content pipeline is a preprocessing step that takes the game assets and converts them into a format suitable for the engine. In MonoGame's (and XNA's) case, this is the &lt;code&gt;.xnb&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt; Note that I don't have a full knowledge of the reasons and techniques used in the content pipeline, this is just my understanding of the ideas.&lt;code&gt;&amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;MonoGame doesn't have its own content pipeline management system, although it does use XNA's &lt;code&gt;.xnb&lt;/code&gt; format. For this reason we have to use XNA.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Lhpog1k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;XNA 4 only targets VS2010 so it can be tricky to get it working with VS2013. I found a nice post &lt;a href=&quot;http://rbwhitaker.wikidot.com/setting-up-xna&quot;&gt;here&lt;/a&gt;, Mr Whitaker has written a &lt;a href=&quot;https://bitbucket.org/rbwhitaker/xna-beyond-vs-2010/downloads/XnaFor2013.ps1&quot;&gt;script&lt;/a&gt; that downloads the XNA installer and sets it up in whatever versions of Visual Studio from 2010 to 2013 that it can find. I went through the script manually and got it going. Here are the steps:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Download the installer from here: &lt;a href=&quot;http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe&quot;&gt;http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Close Visual Studio&lt;/li&gt;
+&lt;li&gt;Open a shell where the installer was downloaded&lt;/li&gt;
+&lt;li&gt;Execute: &lt;code&gt;XNAGS40_setup.exe /extract:XNA&lt;/code&gt;, this will extract the installer files into a &lt;code&gt;.\XNA&lt;/code&gt; folder&lt;/li&gt;
+&lt;li&gt;Browse to that folder&lt;/li&gt;
+&lt;li&gt;Run &lt;code&gt;redists.msi&lt;/code&gt;, this installs some more installers to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio&lt;/code&gt;. Yo dawg.&lt;/li&gt;
+&lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio\Setup&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Execute: &lt;code&gt;XLiveRedist.msi&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio\Redist\XNA FX Redist&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Execute: &lt;code&gt;xnaliveproxy.msi&lt;/code&gt; (this actually failed for me but it hasn't caused any dramas so far)&lt;/li&gt;
+&lt;li&gt;Execute: &lt;code&gt;xnags_platform_tools.msi&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Execute: &lt;code&gt;xnags_shared.msi&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Execute: &lt;code&gt;xnags_visualstudio.msi&lt;/code&gt;. This installs the VS2010 extension, we'll get back to this one.&lt;/li&gt;
+&lt;li&gt;Browse back to the &lt;code&gt;XNA&lt;/code&gt; folder in step 4 (possibly order is important)&lt;/li&gt;
+&lt;li&gt;Execute: &lt;code&gt;arpentry.msi&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\Extensions\Microsoft&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Find the &lt;code&gt;XNA Game Studio 4.0&lt;/code&gt; folder. This is the VS2010 extension installed in step 13.&lt;/li&gt;
+&lt;li&gt;Copy the folder to &lt;code&gt;X:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\Extensions\Microsoft&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Edit the &lt;code&gt;extension.vsixmanifest&lt;/code&gt; file in the new &lt;code&gt;XNA Game Studio 4.0&lt;/code&gt; folder (this is in &lt;code&gt;Program Files&lt;/code&gt; so you'll probably need to open notepad as an administrator)&lt;/li&gt;
+&lt;li&gt;Find the line that says &lt;code&gt;Version=&quot;10.0&quot;&lt;/code&gt; and change it to &lt;code&gt;Version=&quot;12.0&quot;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Insert a new line after that line and add &lt;code&gt;&amp;lt;Edition&amp;gt;WDExpress&amp;lt;/Edition&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Clear your cached extensions by browsing to &lt;code&gt;%userprofile%\AppData\Local\Microsoft\VisualStudio\12.0&lt;/code&gt; and deleting the &lt;code&gt;Extensions&lt;/code&gt; folder&lt;/li&gt;
+&lt;li&gt;Restart Visual Studio&lt;/li&gt;
+&lt;/ol&gt;
+
+
+&lt;p&gt;Now when you create a new project you should have XNA Game Studio 4.0 templates available. Create a new &lt;code&gt;Empty Content Project (4.0)&lt;/code&gt; and compile it to make sure the content pipeline is working.&lt;/p&gt;
+
+&lt;h3&gt;Bringing MonoGame back into the picture&lt;/h3&gt;
+
+&lt;p&gt;As I said above, I also installed the MonoGame binaries, which adds the MonoGame templates to Visual Studio. Download the bits from &lt;a href=&quot;http://www.monogame.net/downloads/&quot;&gt;MonoGame's Downloads page&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I kept working through &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's tutorial series&lt;/a&gt; and to prove that the content pipeline is working, here's a handy screenshot (&lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/9945c675303c35e61888de6816a5b165c074cada&quot;&gt;Github repo at this revision&lt;/a&gt;):&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/pE2DmVf.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h3&gt;Resources&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://rbwhitaker.wikidot.com/setting-up-xna&quot;&gt;RB Whitaker - Setting up XNA&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://rbwhitaker.wikidot.com/monogame-accessing-the-xna-content-pipeline&quot;&gt;RB Whitaker - Accessing the XNA Content Pipeline&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.monogame.net/documentation/?page=tutorials_md&quot;&gt;MonoGame Tutorials&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's &quot;Building a Shooter Game&quot; tutorial series, part 1&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://www.monogame.net/downloads/&quot;&gt;MonoGame - Downloads&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Pluralsight ($) (note I haven't watched all of these):
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;Introduction to 2D Game Programming with XNA&lt;/a&gt; by John Sonmez&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=monogame&amp;amp;highlight=john-sonmez_monogame-m1-introduction*4!john-sonmez_monogame-m6-wp7!john-sonmez_monogame-m2-building-pong#monogame-m1-introduction&quot;&gt;Cross Platform Game Development with MonoGame&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial&quot;&gt;My repo going through TW's above tutorial&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sat, 24 May 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/up-and-running-with-monogame.html</link>
+				<guid isPermaLink="true">http://bendetat.com/up-and-running-with-monogame.html</guid>
+			</item>
+		
+			<item>
+				<title>Telerik's WPF RadScheduleView - Double-click to create an appointment gotcha</title>
+				<description>&lt;p&gt;I'm using &lt;a href=&quot;http://www.telerik.com/help/wpf/radscheduleview-overview.html&quot;&gt;Telerik's RadScheduleView&lt;/a&gt; in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Turns out&lt;/em&gt; I had changed my custom appointment subclass's default constructor from &lt;code&gt;public&lt;/code&gt; to &lt;code&gt;protected&lt;/code&gt;. The schedule view needs a public default constructor or it will just silently not create new appointments:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class MyCustomAppointment
+{
+    // this is required to double-click to create
+    public MyCustomAppointment()
+    {
+        // ...
+    }
+
+    // non-default constructor can still be called in code
+    public MyCustomAppointment(...)
+    {
+        // ...
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+				<pubDate>Tue, 29 Apr 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/telerik-wpf-radscheduleview-double-click-to-create-appointment-gotcha.html</link>
+				<guid isPermaLink="true">http://bendetat.com/telerik-wpf-radscheduleview-double-click-to-create-appointment-gotcha.html</guid>
+			</item>
+		
+			<item>
 				<title>A Quick AutoFixture Demo</title>
 				<description>&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; This is a very basic exploration of AutoFixture, written while I tried out a couple of things. It is not authoritive or representative of best practices. Comments are welcome! As are &lt;a href=&quot;https://github.com/rgrrrrrba/rgrrrrrba.github.io&quot;&gt;pull requests&lt;/a&gt;!&lt;/p&gt;
 
@@ -160,7 +1742,7 @@ void Main()
 &lt;/table&gt;
 
 
-&lt;p&gt;You can see here that &lt;code&gt;Foo&lt;/code&gt; and &lt;code&gt;Bar&lt;/code&gt; both got different numbers - 4 and 198 respecitively. The fixture's behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value &lt;code&gt;999&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;You can see here that &lt;code&gt;Foo&lt;/code&gt; and &lt;code&gt;Bar&lt;/code&gt; both received different numbers - 4 and 198 respectively. The fixture's behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value &lt;code&gt;999&lt;/code&gt;.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;void Main()
 {
@@ -197,13 +1779,13 @@ void Main()
 &lt;/table&gt;
 
 
-&lt;p&gt;Complex types can be registered in the same way.&lt;/p&gt;
+&lt;p&gt;Complex types can be registered in the same way. This registers an instance of &lt;code&gt;Bar&lt;/code&gt; with a &lt;code&gt;BarNumber&lt;/code&gt; of &lt;code&gt;1234&lt;/code&gt;. The &lt;code&gt;Foo.Number&lt;/code&gt; field is given a dummy value.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;void Main()
 {
     var fixture = new Fixture();
 
-    var bar = new Bar { BarNumber = 999 };
+    var bar = new Bar { BarNumber = 1234 };
     fixture.Register(() =&amp;gt; bar);
 
     fixture.Create&amp;lt;Foo&amp;gt;()
@@ -215,21 +1797,21 @@ void Main()
 &lt;thead&gt;
 &lt;tr&gt;
 &lt;th&gt; UserQuery+Foo &lt;/th&gt;
-&lt;th&gt;                     &lt;/th&gt;
+&lt;th&gt;                      &lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt; Number        &lt;/td&gt;
-&lt;td&gt; 194                 &lt;/td&gt;
+&lt;td&gt; 194                  &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt; MyBar         &lt;/td&gt;
-&lt;td&gt; UserQuery+Bar       &lt;/td&gt;
+&lt;td&gt; UserQuery+Bar        &lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;               &lt;/td&gt;
-&lt;td&gt; -&gt; BarNumber == 999 &lt;/td&gt;
+&lt;td&gt; -&gt; BarNumber == 1234 &lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -242,562 +1824,6 @@ void Main()
 				<pubDate>Mon, 07 Apr 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/quick-autofixture-demo.html</link>
 				<guid isPermaLink="true">http://bendetat.com/quick-autofixture-demo.html</guid>
-			</item>
-		
-			<item>
-				<title>The Greatest string.FormatWith() Extension Method Implementation In The World</title>
-				<description>&lt;p&gt;This is in fact the Greatest &lt;code&gt;string.FormatWith()&lt;/code&gt; Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, &lt;del&gt;probably thanks to my brother-in-code &lt;a href=&quot;http://robdmoore.id.au/&quot;&gt;Rob Moore&lt;/a&gt;&lt;/del&gt; &lt;strong&gt;correction&lt;/strong&gt; turns out credit is due to &lt;a href=&quot;http://hammerproject.com/&quot;&gt;Matt Kocoj&lt;/a&gt;, and I brought it back along the breadth of our mighty continent. A 'Journey to the West', if you will. Less awesome implementations of &lt;code&gt;FormatWith()&lt;/code&gt; are just simple inversions of &lt;code&gt;string.Format()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static string FormatWith(string s, params object[] args)
-{
-    return string.Format(s, args);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;which you can use thusly:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&quot;This is {0} the {1} {2} in the {3}&quot;.FormatWith(
-    &quot;not&quot;, &quot;greatest&quot;, &quot;string.FormatWith() implementation&quot;, &quot;world&quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/B9bZxUmVr3ZNS/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Nice, but let's be honest, pitiful. Feel the power of this implementation.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static class StringExtensions
-{
-    public static string FormatWith(this string format, params object[] args)
-    {
-        args = args ?? new object[0];
-
-        var distinctNumberedTemplateMatches =
-            (from object match in new Regex(@&quot;\{\d{1,2}\}&quot;).Matches(format) select match.ToString())
-            .Distinct().Count();
-        if (distinctNumberedTemplateMatches != args.Length)
-        {
-            var argsDic = GetDictionaryFromAnonObject(args[0]);
-
-            if (argsDic.Count &amp;lt; 1)
-            {
-                throw new InvalidOperationException(&quot;Please supply enough args for the numbered templates or use an anonymous object to identify the templates by name.&quot;);
-            }
-
-            return argsDic.Aggregate(format, (current, o) =&amp;gt; current.Replace(&quot;0&quot;.FormatWith(o.Key), o.Value.ToString()));
-        }
-
-        var validationInput = format;
-        for (var i = 0; i &amp;lt; args.Length; i++)
-        {
-            format = format.Replace(&quot;{&quot; + i + &quot;}&quot;, args[i] == null ? string.Empty : args[i].ToString());
-        }
-        if (validationInput == format)
-        {
-            throw new InvalidOperationException(
-                &quot;You can not mix template types. Use numbered templates or named ones with an anonymous object.&quot;);
-        }
-
-        return format;
-    }
-
-    private static IDictionary&amp;lt;string, object&amp;gt; GetDictionaryFromAnonObject(object args)
-    {
-        if (args == null)
-        {
-            return new Dictionary&amp;lt;string, object&amp;gt;();
-        }
-
-        return TypeDescriptor.GetProperties(args).Cast&amp;lt;PropertyDescriptor&amp;gt;()
-            .ToDictionary(
-                property =&amp;gt; property.Name, 
-                property =&amp;gt; property.GetValue(args));
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This can be used in the same way as before:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&quot;This is {0} the {1} {2} in the {3}&quot;.FormatWith(
-    &quot;definitely&quot;, &quot;greatest&quot;, &quot;string.FormatWith() implementation&quot;, &quot;world, but why?&quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Or it can go full &lt;a href=&quot;http://dragonball.wikia.com/wiki/Super_Saiyan&quot;&gt;super-saiyan&lt;/a&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&quot;{who} is {what} who {action} with {target}!&quot;.FormatWith(new{
-    who = &quot;Hero&quot;,
-    what = &quot;he alone&quot;,
-    action = &quot;vies&quot;,
-    target=  &quot;powers supreme&quot;})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/6KlLzO38CkLjG/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;WARNING&lt;/strong&gt;: Now this is probably not the most performant code. If you're going to run this in a tight loop you may want to go with ye olde &lt;code&gt;string.Format()&lt;/code&gt;. The other 99.99% of the time, go forth and be awesome.&lt;/p&gt;
-</description>
-				<pubDate>Sun, 06 Apr 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/the-greatest-string-formatwith-implementation-in-the-world.html</link>
-				<guid isPermaLink="true">http://bendetat.com/the-greatest-string-formatwith-implementation-in-the-world.html</guid>
-			</item>
-		
-			<item>
-				<title>Using IDisposable for entry/exit pattern</title>
-				<description>&lt;p&gt;I don't know if &quot;entry/exit&quot; is the right name for this pattern, but it gets used a lot in client-side code. It relates to the use of guard sections and cross-cutting concerns. For example, using Caliburn.Micro you might have a WPF viewmodel (implementing &lt;code&gt;PropertyChangedBase&lt;/code&gt;) that sets  &lt;code&gt;IsNotifying&lt;/code&gt; flag to false, executes some code that would otherwise cause notifications, then sets the &lt;code&gt;IsNotifying&lt;/code&gt; flag to true.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;IsNotifying = false;
-
-Name = &quot;foo&quot;;   // won't notify
-
-IsNotifying = true;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The problem with this is having to explicitly set the flags before and after the operation. What if some statements get moved around, or the assignations get dropped? This can be a tricky issue to resolve as the usage of the class isn't very clear to consumers.&lt;/p&gt;
-
-&lt;p&gt;A pattern I've seen is to wrap the code in an &lt;code&gt;Action&lt;/code&gt; invoker:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public void InvokeWithoutNotification(Action action) {
-    IsNotifying = false;
-    action();
-    IsNotifying = true;
-}
-
-this.InvokeWithoutNotification(() =&amp;gt; {
-    Name = &quot;foo&quot;;
-});
-
-// or:
-
-viewModel.InvokeWithoutNotification(() =&amp;gt; viewModel.Name = &quot;foo&quot;);  
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is much nicer, but there is a layer of indirection with the action. You could step right over the entire action payload when debugging, the stack trace has an extra entry. Still, this is a very attractive solution.&lt;/p&gt;
-
-&lt;p&gt;I had a thought that you could do something very similar using &lt;code&gt;IDisposable&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class PropertyChangedBaseIsNotifyingGuard
-    : IDisposable {
-    PropertyChangeBase _target;
-
-    public PropertyChangedBaseIsNotifyingGuard(PropertyChangeBase target) {
-        _target = target;
-        _target.IsNotifying = false;
-    }
-
-    public void Dispose() {
-        _target.IsNotifying = true;
-    }
-}
-
-public static class PropertyChangedBaseExtensions {
-    public static PropertyChangedBaseIsNotifyingGuard WithoutNotification(
-        this PropertyChangedBase target) {
-        return new PropertyChangedBaseIsNotifyingGuard(target);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This gets used in a &lt;code&gt;using&lt;/code&gt; statement:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;using (this.WithoutNotification()) {
-    Name = &quot;foo&quot;;
-}
-
-// or
-
-using (viewModel.WithoutNotification()) {
-    viewModel.Name = &quot;foo&quot;;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;There is more ceremony involved with the setup and there isn't a heap of immediate benefits. One is the seperation of this guard logic into its own class, which may or may not be appropriate but is at least an interesting possibility. You could also combine guards quite easily:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;using (viewModel.WithoutNotification())
-using (viewModel.WithoutValidation())
-using (viewModel.ValidateOnCompletion())
-{
-    viewModel.Name = &quot;foo&quot;;
-}
-
-// ValidateOnCompletion:
-public class SpecialViewModelValidateOnCompletionGuard
-    : IDisposable {
-    PropertyChangeBase _target;
-
-    public SpecialViewModelValidateOnCompletionGuard(SpecialViewModel target) {
-        _target = target;
-    }
-
-    public void Dispose() {
-        _target.PerformValidation();
-        _target.CommitValidation();
-        _target.RainbowsAndUnicorns();
-    }
-}
-public static class SpecialViewModelExtensions {
-    public static SpecialViewModelValidateOnCompletionGuard ValidateOnCompletion(
-        this SpecialViewModel target) {
-        return new SpecialViewModelValidateOnCompletionGuard(target);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is getting very similar to what you can achieve in &lt;a href=&quot;http://en.wikipedia.org/wiki/Aspect-oriented_programming&quot;&gt;Aspect-oriented programming&lt;/a&gt; using entry and exit pointcuts, however in AOP the pointcuts can only extend down to method granularity, so the payload would have to be its own method. I think it's a pretty neat compromise.&lt;/p&gt;
-</description>
-				<pubDate>Tue, 01 Apr 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/using-idisposable-for-entry-exit-patterns.html</link>
-				<guid isPermaLink="true">http://bendetat.com/using-idisposable-for-entry-exit-patterns.html</guid>
-			</item>
-		
-			<item>
-				<title>Uninstalling Azure Service Bus after (accidently) deleting the databases</title>
-				<description>&lt;p&gt;I accidently blew away my databases (while upgrading the SQL Server version) and my local Azure Service Bus stopped working. You can't reinstall or restore easily AFAIK so I just wanted to uninstall Azure Service Bus and start again. Unfortunately you can't uninstall without leaving the farm, and you can't leave the farm without the databases.&lt;/p&gt;
-
-&lt;p&gt;The answer is to remove the registry key for the service bus, which is in &lt;code&gt;HKLM\Software\Microsoft\Service Bus&lt;/code&gt;. That tells the unstaller that there is nothing to see and allows uninstallation.&lt;/p&gt;
-
-&lt;p&gt;Found at &lt;a href=&quot;http://social.msdn.microsoft.com/Forums/windowsazure/en-US/f5096a7a-9605-4231-b093-b7d278be7c20/cant-uninstall-service-bus&quot;&gt;http://social.msdn.microsoft.com/Forums/windowsazure/en-US/f5096a7a-9605-4231-b093-b7d278be7c20/cant-uninstall-service-bus&lt;/a&gt; (similar but unrelated root cause).&lt;/p&gt;
-</description>
-				<pubDate>Thu, 27 Mar 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/uninstalling-azure-service-bus.html</link>
-				<guid isPermaLink="true">http://bendetat.com/uninstalling-azure-service-bus.html</guid>
-			</item>
-		
-			<item>
-				<title>A list of my favourite Visual Studio shortcuts</title>
-				<description>&lt;p&gt;Set them in Tools -&gt; Options -&gt; Environment -&gt; Keyboard.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;File.Close&lt;/code&gt;: &lt;code&gt;Ctrl+Shift+W&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Window.MovetoPreviousTabGroup&lt;/code&gt;: &lt;code&gt;Ctrl+Shift+Alt+[&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Window.MovetoNextTabGroup&lt;/code&gt;: &lt;code&gt;Ctrl+Shift+Alt+]&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Thu, 27 Mar 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/a-list-of-my-favourite-visual-studio-keyboard-shortcuts.html</link>
-				<guid isPermaLink="true">http://bendetat.com/a-list-of-my-favourite-visual-studio-keyboard-shortcuts.html</guid>
-			</item>
-		
-			<item>
-				<title>Git - reapply a commit using cherry-pick</title>
-				<description>&lt;p&gt;How do I reapply a commit, so I actually want the commit run twice? Say I do something cool, then do something uncool, and want to do that cool thing again, without having to mess around with history?&lt;/p&gt;
-
-&lt;p&gt;Say I pull in some dependency which adds a readme file somewhere, then I delete the readme file, then I update the dependency which pulls in the file again.&lt;/p&gt;
-
-&lt;blockquote&gt;&lt;p&gt;we use Git's cherry-pick command, which applies it as a patch and immediately commits it with the same commit message):&lt;/p&gt;&lt;/blockquote&gt;
-
-&lt;pre&gt;&lt;code&gt;git cherry-pick 89bec60
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://definitivedrupal.org/suggestions/using-git-re-apply-old-over-written-change&quot;&gt;&lt;em&gt;Turns out&lt;/em&gt;&lt;/a&gt;.&lt;/p&gt;
-</description>
-				<pubDate>Wed, 26 Mar 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/git-reapply-a-commit-cherry-pick.html</link>
-				<guid isPermaLink="true">http://bendetat.com/git-reapply-a-commit-cherry-pick.html</guid>
-			</item>
-		
-			<item>
-				<title>Xamarin Studio can't find my Android device</title>
-				<description>&lt;p&gt;&lt;strong&gt;Know what?&lt;/strong&gt; This doesn't work. Try setting the USB transfer mode (Settings, Storage, (in the menu) USB computer connection) to 'Camera (PTP)'. Found in &lt;a href=&quot;http://stackoverflow.com/a/16797152/149259&quot;&gt;this StackOverflow answer&lt;/a&gt;. I'll leave the below for reference in case it comes in handy.&lt;/p&gt;
-
-&lt;h3&gt;Messing with Android Developer Bridge (ADB)&lt;/h3&gt;
-
-&lt;p&gt;I installed Xamarin Studio on Windows 8 to start on some Android development. I was able to debug directly on my little oldish Nexus 7 (running Android 4.4.2) (Xamarin's instructions are &lt;a href=&quot;http://docs.xamarin.com/guides/android/getting_started/installation/set_up_device_for_development/&quot;&gt;here&lt;/a&gt;):&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;after enabling debug mode on the device:
-
-&lt;ul&gt;
-&lt;li&gt;'Settings'&lt;/li&gt;
-&lt;li&gt;'About tablet'&lt;/li&gt;
-&lt;li&gt;Tap 'Build number' &lt;em&gt;seven&lt;/em&gt; times&lt;/li&gt;
-&lt;li&gt;Go back, and 'Developer options' will be at the bottom of the 'Settings' screen&lt;/li&gt;
-&lt;li&gt;Within 'Developer options', check 'USB debugging'&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;and installing the OEM drivers for the tablet:
-
-&lt;ul&gt;
-&lt;li&gt;My device is an Asus Nexus 7, so I downloaded the drivers from &lt;a href=&quot;http://www.asus.com/Tablets_Mobile/Nexus_7/#support&quot;&gt;ASUS&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;In 'Device Manager' under 'Other Devices', right click the device and 'Update Driver Software'&lt;/li&gt;
-&lt;li&gt;Browse to and select the downloaded OEM driver&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;This worked fine, yay for me. The problem was, after restarting my system (after an upgrade to Windows 8.1 (how seamless is that now by the way?)) Xamarin Studio wasn't seeing my device. It was still showing up in Device Manager correctly and debug mode was still enabled, but something broke.&lt;/p&gt;
-
-&lt;p&gt;Turns out the something is the Android Debug Bridge, or ADB. I found a reference deep in &lt;a href=&quot;http://docs.xamarin.com/guides/android/troubleshooting/offline.pdf&quot;&gt;this document (WARNING PDF)&lt;/a&gt; from Xamarin:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/uWvypuM.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Helpful but not extremely helpful. That link to &lt;code&gt;adb program&lt;/code&gt; is broken by the way. I found some nicer information about the Android Debug Bridge on &lt;a href=&quot;http://developer.android.com/tools/help/adb.html&quot;&gt;Android's developer site&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Next step is actually finding the ADB program, which is part of the Android SDK. I looked all over my machine for the SDK. &lt;em&gt;Turns out&lt;/em&gt; Xamarin installs the SDK in the user's local AppData directory, in &lt;code&gt;X:\Users\username\AppData\Local\Android\android-sdk&lt;/code&gt;. Then &lt;code&gt;adp.exe&lt;/code&gt; lives in the &lt;code&gt;platform-tools&lt;/code&gt; directory.&lt;/p&gt;
-
-&lt;p&gt;After all that, I dropped a batch file on my desktop to restart the bridge, in case this happens again:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;@C:\Users\ben\AppData\Local\Android\android-sdk\platform-tools\adb.exe kill-server
-@C:\Users\ben\AppData\Local\Android\android-sdk\platform-tools\adb.exe start-server
-@pause
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Results:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/fqjVl9L.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-</description>
-				<pubDate>Sun, 23 Mar 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/xamarin-studio-cant-find-my-android-device.html</link>
-				<guid isPermaLink="true">http://bendetat.com/xamarin-studio-cant-find-my-android-device.html</guid>
-			</item>
-		
-			<item>
-				<title>Set up TeamCity on an Azure virtual machine</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I'm learning in the open here. I have barely used Azure and have only ever used already established TeamCity instances, so I'm really just messing around with two new things at the same time here. I'm sure I'm missing a heap of very important points.&lt;/p&gt;
-
-&lt;h2&gt;Set up the VM&lt;/h2&gt;
-
-&lt;h3&gt;Get started on Azure&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/AsSmaMo.png&quot; style=&quot;float:right&quot;/&gt; Setting up a new Azure account is pretty much as easy as hitting &lt;a href=&quot;http://windowsazure.com&quot;&gt;http://windowsazure.com&lt;/a&gt; and starting a free trial. You land in a sweet management console that is a lot easier to use than I expected, based on my experiences with Office 365 (early versions), OWA and SharePoint. &lt;a href=&quot;http://www.troyhunt.com/&quot;&gt;Troy Hunt&lt;/a&gt; recently released an awesome Azure demo video - &lt;a href=&quot;http://worldsgreatestazuredemo.com/&quot;&gt;http://worldsgreatestazuredemo.com/&lt;/a&gt; - which is a good introduction to Azure.&lt;/p&gt;
-
-&lt;h3&gt;Create a new virtual machine&lt;/h3&gt;
-
-&lt;p&gt;Select the VIRTUAL MACHINES tab and click NEW from the bottom menu. Select FROM GALLERY and pick 'Windows Server 2012 R2 Datacenter' (or whatever is most current). Hit next and give it a cool name. I just left the size at Small for now. Enter a username and password, which you will need to remote into the VM. Next through the rest of the pages and the VM will soon be provisioned:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/SzdGki7.png&quot; alt=&quot;http://i.imgur.com/SzdGki7.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Click that arrow to start managing the VM.&lt;/p&gt;
-
-&lt;h3&gt;Open up the firewall&lt;/h3&gt;
-
-&lt;p&gt;We'll want to open up port 80 for TeamCity. Select the ENDPOINTS tab and ADD a new one.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/nelGyMd.png&quot; alt=&quot;http://i.imgur.com/nelGyMd.png&quot; /&gt;&lt;/p&gt;
-
-&lt;blockquote&gt;&lt;p&gt;Note that you're ADDing an endpoint. The NEW button will start creating a new VM. It's like Microsoft wants you to keep adding more and more VMs.&lt;/p&gt;&lt;/blockquote&gt;
-
-&lt;p&gt;Accept the first screen to add a stand-alone endpoints (load balancing sounds a little too technical for today although I'm sure it's a great idea). Pick HTTP from the NAME drop-down, which will automatically fill in the port number. Complete the screen.&lt;/p&gt;
-
-&lt;p&gt;This opens port 80 on the &lt;em&gt;external&lt;/em&gt; firewall. The server's internal firewall will still need to be configured (below).&lt;/p&gt;
-
-&lt;h3&gt;Attach a new disk&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/4Znf3hr.png&quot; style=&quot;float: left; padding-right: 1em;&quot;/&gt; The VM has two drives configured by default - C:, which contains the Windows installation, and D:, which is called temporary storage. They both sound a bit transient, so it is probably a good idea to attach a new disk, which can be managed separately and moved from machine to machine AFAIK.&lt;/p&gt;
-
-&lt;p&gt;Attach a new disk by selecting the ATTACH option from the bottom menu. Select Empty Disk.  Accept the defaults, I gave it a size of 20 GB. I'm assuming it's easy to increase the size later. The disk will be attached and the status should return to running.&lt;/p&gt;
-
-&lt;h3&gt;Remote in and start configuring the VM&lt;/h3&gt;
-
-&lt;p&gt;Go to the DASHBOARD tab and select CONNECT from the bottom menu. This will download an .RDP file which will should open in Remote Desktop. Enter the username and password and you should get connected to the server's desktop.&lt;/p&gt;
-
-&lt;h4&gt;IE Enhanced Security&lt;/h4&gt;
-
-&lt;p&gt;Turn off IE Enhanced Security from the Server Manager, in the Local Server Tab. This will let you use Internet Explorer to download TeamCity (or to install Chrome to download TeamCity and lolcats).&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/N5ouyt1.png&quot; alt=&quot;IE Enhanced Security&quot; /&gt;&lt;/p&gt;
-
-&lt;h4&gt;Open port 80 in the firewall&lt;/h4&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/376xLMi.png&quot; style=&quot;float:right&quot;/&gt; Open the Windows Firewall with Advanved Security MMC snap-in. Easiest way to find it is to search for &lt;code&gt;firewall&lt;/code&gt; from the start screen. Create a new inbound rule.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/MlQbntP.png&quot; alt=&quot;http://i.imgur.com/MlQbntP.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Select Port, specify local TCP port 80, Allow the connection, apply the rule to all profiles, and call the rule &lt;code&gt;TeamCity&lt;/code&gt; (so you can find it again ;-) ).&lt;/p&gt;
-
-&lt;h4&gt;Format and assign the empty disk&lt;/h4&gt;
-
-&lt;p&gt;The empty disk that we attached needs to be formatted and assigned to a drive letter in the server as well. You can think of attaching an empty disk as plugging in a new disk to any normal machine - the disk still needs be configured in the OS.&lt;/p&gt;
-
-&lt;p&gt;In the Server Manager, select File and Storage Services, then Disks (under Volumes). The new disk should be online with a partition type of 'Unknown'. Right-click the disk and select New Volume...&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/vgarRGg.png&quot; alt=&quot;File and Storage Services - New Volume&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Next through everything and accept the defaults. It should be assigned to drive E:. I gave it a volume name of &lt;code&gt;bendetat-teamcity&lt;/code&gt;.&lt;/p&gt;
-
-&lt;blockquote&gt;&lt;p&gt;Just sit back for a moment and look at what we've achieved. We've got a new VM running the latest Windows Server OS, firewalls configured and remote desktop enabled. I haven't even taken out my credit card yet. Compare with the amount of work needed to boot up a new physical server in a network, or even provisioning a new VM in Hyper-V. Squeeeee? Indeed.&lt;/p&gt;&lt;/blockquote&gt;
-
-&lt;h2&gt;Install TeamCity&lt;/h2&gt;
-
-&lt;p&gt;I just downloaded the 'default free professional edition' of TeamCity from &lt;a href=&quot;http://www.jetbrains.com/teamcity/download/&quot;&gt;here&lt;/a&gt;. The version at the time of writing was 8.1.1.&lt;/p&gt;
-
-&lt;p&gt;It downloads blazingly fast, I assume because the internet pipes are faster everywhere except here in Australia. Ahem.&lt;/p&gt;
-
-&lt;p&gt;Start up the installer. Select &lt;code&gt;e:\TeamCity&lt;/code&gt; as the destination folder (or wherever the new disk was assigned). I also left the components as default, which installs a build agent and the server with Windows services. Change the TeamCity data directory to somewhere on the new disk - I used &lt;code&gt;e:\TeamCity-data&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;After installation the Build Agent properties configuration appears, I just left this as default. It knows what it was doing. Then the Server service Service Account selector sashays onto the screen. I left it as user account. The domain is the name of the machine, the username and password should be the same as used to RDP into the VM. Do the same for the TeamCity Agent service account. Next through and the services will start. After you finish the installation, TeamCity First Start should open in IE.&lt;/p&gt;
-
-&lt;blockquote&gt;&lt;p&gt;Note that at this point the TeamCity instance should actually be available &lt;strong&gt;to the public&lt;/strong&gt; at &lt;code&gt;&amp;lt;machine name&amp;gt;.cloudapp.net&lt;/code&gt;. Either turn off the firewall to configure it locally or &lt;em&gt;very quickly&lt;/em&gt; configure the administrator account before publicising the name of the server.&lt;/p&gt;&lt;/blockquote&gt;
-
-&lt;p&gt;Start working through this wizard. I used the &lt;code&gt;Internal (HSQLDB)&lt;/code&gt; database type. I'll leave migrating to another database for later.&lt;/p&gt;
-
-&lt;h2&gt;Fin&lt;/h2&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/X1BGjuk.png&quot; alt=&quot;http://i.imgur.com/X1BGjuk.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Next I'll try adding a small OSS project to the TeamCity installation, with Github hooks and magic unicorns.&lt;/p&gt;
-
-&lt;h2&gt;References&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://blog.virtew.com/2012/08/18/setup-teamcity-on-an-azure-virtual-machine-for-windows-8-metro-style-apps/&quot;&gt;virtew - Setup TeamCity on an Azure Virtual Machine for Windows 8 Metro Style Apps&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://worldsgreatestazuredemo.com/&quot;&gt;World's Greatest Azure Demo&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sun, 16 Mar 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/set-up-teamcity-on-an-azure-instance.html</link>
-				<guid isPermaLink="true">http://bendetat.com/set-up-teamcity-on-an-azure-instance.html</guid>
-			</item>
-		
-			<item>
-				<title>Setting an image source using a trigger (WPF and Caliburn.Micro)</title>
-				<description>&lt;p&gt;So all I'm doing here is creating a button that has a different images depending on the enum value that is bound to the control.&lt;/p&gt;
-
-&lt;p&gt;The images used are linked as resources in a resource project - the build action is &lt;code&gt;Resource&lt;/code&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://snag.gy/o9v6X.jpg&quot; alt=&quot;Images are linked using a build action of Resource&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;The button's view model (&lt;code&gt;ToggleMyEnumViewModel.cs&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class ToggleMyEnumViewModel : Screen
-{
-    MyEnum _myEnumProperty = MyEnum.Foo;
-
-    public MyEnum MyEnumProperty
-    {
-        get { return _myEnumProperty; }
-        set
-        {
-            _myEnumProperty = value;
-            NotifyOfPropertyChange(() =&amp;gt; MyEnumProperty);
-        }
-    }
-
-    public void ToggleMyThing()
-    {
-        MyEnumProperty = MyEnumProperty == MyEnum.Foo
-            ? MyEnum.Bar
-            : MyEnum.Foo;
-    }
-}
-
-public enum MyEnum {
-    Foo, Bar
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The button's XAML (&lt;code&gt;ToggleMyEnumView.xaml&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;Button x:Class=&quot;MyNamespace.ToggleMyEnumButton&quot;
-             xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
-             xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
-             xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot; 
-             xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
-             xmlns:local=&quot;clr-namespace:MyNamespace&quot;
-             xmlns:i=&quot;http://schemas.microsoft.com/expression/2010/interactivity&quot;
-             mc:Ignorable=&quot;d&quot; 
-             Cursor=&quot;Hand&quot;
-             Background=&quot;Transparent&quot;&amp;gt;
-    &amp;lt;Image Stretch=&quot;Uniform&quot;&amp;gt;
-        &amp;lt;Image.Resources&amp;gt;
-            &amp;lt;Style x:Key=&quot;XButtonStyle&quot; TargetType=&quot;{x:Type Image}&quot;&amp;gt;
-                &amp;lt;Style.Triggers&amp;gt;
-                    &amp;lt;DataTrigger Binding=&quot;{Binding MyEnumProperty}&quot; Value=&quot;{x:Static local:MyEnum.Foo}&quot;&amp;gt;
-                        &amp;lt;Setter Property=&quot;Image.Source&quot; Value=&quot;pack://application:,,,/MyProject.Assets;component/Images/foo.png&quot; /&amp;gt;
-                    &amp;lt;/DataTrigger&amp;gt;
-                    &amp;lt;DataTrigger Binding=&quot;{Binding MyEnumProperty}&quot; Value=&quot;{x:Static local:MyEnum.Bar}&quot;&amp;gt;
-                        &amp;lt;Setter Property=&quot;Image.Source&quot; Value=&quot;pack://application:,,,/MyProject.Assets;component/Images/bar.png&quot; /&amp;gt;
-                    &amp;lt;/DataTrigger&amp;gt;
-                &amp;lt;/Style.Triggers&amp;gt;
-            &amp;lt;/Style&amp;gt;
-        &amp;lt;/Image.Resources&amp;gt;
-    &amp;lt;/Image&amp;gt;
-
-&amp;lt;i:Interaction.Triggers&amp;gt;
-    &amp;lt;i:EventTrigger EventName=&quot;Click&quot;&amp;gt;
-        &amp;lt;cal:ActionMessage MethodName=&quot;ToggleMyThing&quot;/&amp;gt;
-    &amp;lt;/i:EventTrigger&amp;gt;
-&amp;lt;/i:Interaction.Triggers&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;   &lt;/Button&gt;&lt;/p&gt;
-
-&lt;p&gt;The &lt;code&gt;&amp;lt;cal:ActionMessage MethodName=&quot;ToggleMyThing&quot;/&amp;gt;&lt;/code&gt; part is what binds the button click to the &lt;code&gt;ToggleMyThing&lt;/code&gt; method in the view model.&lt;/p&gt;
-
-&lt;p&gt;Things to note in the view's XAML:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;The style sits in the image's resources&lt;/li&gt;
-&lt;li&gt;The target type of the style is set to the &lt;code&gt;Image&lt;/code&gt; type&lt;/li&gt;
-&lt;li&gt;The trigger has to be a data trigger&lt;/li&gt;
-&lt;li&gt;The trigger just sets the &lt;code&gt;Source&lt;/code&gt; property of the image based on the value of the &lt;code&gt;MyEnum&lt;/code&gt; property&lt;/li&gt;
-&lt;/ul&gt;
-
-
-&lt;p&gt;This is then used as a content control bound to an instance of a &lt;code&gt;ToggleMyEnumViewModel&lt;/code&gt;. Consuming XAML:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;ContentControl x:Name=&quot;ToggleMyEnum&quot; /&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Consuming view model:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public ToggleMyEnumViewModel ToggleMyEnum { get; private set; }
-
-public ConsumingViewModel()
-{
-    /// ...
-    ToggleMyEnum = new ToggleMyEnumViewModel(); // or use an IOC factory
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This isn't exactly what I want, I would prefer to bind directly to a property on the consuming view model rather than indirectly with the &lt;code&gt;ToggleMyEnumViewModel&lt;/code&gt;.&lt;/p&gt;
-</description>
-				<pubDate>Wed, 29 Jan 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/setting-an-image-source-using-a-trigger-wpf.html</link>
-				<guid isPermaLink="true">http://bendetat.com/setting-an-image-source-using-a-trigger-wpf.html</guid>
-			</item>
-		
-			<item>
-				<title>Git cherry-pick from another repository</title>
-				<description>&lt;p&gt;Somehow.. somehow... I managed to overwrite a commit by force-pushing a branch that didn't include said commit.&lt;/p&gt;
-
-&lt;p&gt;The commit was made in a local copy of the repository that I was working on in parallel with my normal working copy. So,&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;c:\source\repo        &amp;lt;-- working copy
-c:\source\repo-copy   &amp;lt;-- copy with the commit I need
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I didn't want to mess around with rebasing the &lt;code&gt;repo-copy&lt;/code&gt; to merge in the remote branch and totally muck everything up.&lt;/p&gt;
-
-&lt;p&gt;The solution is to cherry pick the commit from the working copy. First add the local copy as a remote to the working copy:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;c:\source\repo&amp;gt; git remote add localcopy ../repo-copy
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This adds a remote called &lt;code&gt;localcopy&lt;/code&gt; which points to the local repo copy. Then, fetch from &lt;code&gt;localcopy&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;c:\source\repo&amp;gt; git fetch localcopy
-remote: Counting objects: 500, done.                                                                                   
-remote: Compressing objects: 100% (306/306), done.                                                                     
-emote: Total 444 (delta 329), reused 149 (delta 132)                                                                   
-Receiving objects: 100% (444/444), 58.53 KiB | 0 bytes/s, done.                                                        
-Resolving deltas: 100% (329/329), completed with 35 local objects.                                                     
-From ..\repo-copy\                                                                                                  
- * [new branch]      xxxx -&amp;gt; repo-copy/xxxx              
- ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt;What happened with  line 3 of the response? &lt;code&gt;emote&lt;/code&gt;? strange.&lt;code&gt;&amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Then cherry-pick the appropriate commit:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;c:\source\repo-copy&amp;gt; git cherry-pick &amp;lt;commit-hash&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I had to resolve some conflicts but it all looks ok.&lt;/p&gt;
-</description>
-				<pubDate>Fri, 24 Jan 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/git-cherry-pick-from-another-repository.html</link>
-				<guid isPermaLink="true">http://bendetat.com/git-cherry-pick-from-another-repository.html</guid>
 			</item>
 		
 	</channel>
