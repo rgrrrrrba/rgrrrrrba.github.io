@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>xUnit tests in a Windows 8.1 Store App</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>xUnit tests in a Windows 8.1 Store App <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>25 May 2014</em></small></h2>
+
+
+
+<p>At the time of writing the current version of xUnit (1.9.2) does not support Windows 8.1 Store applications. The pre-release version (2.0.0-beta-build2650) however has the core library built as a PCL (Portable Class Library). So to add a xUnit test assembly to a Windows 8.1 Store application we need to add a PCL library and add the pre-release xUnit NuGet package.</p>
+
+<p>Add a new project. Under <code>Visual C#</code>, then <code>Store Apps</code>, then <code>Windows Apps</code>, select <code>Class Library (Windows)</code>:</p>
+
+<p><img src="http://i.imgur.com/L9hKws2.png" alt="" /></p>
+
+<p>Install the pre-release version of xUnit by either picking <code>Include Prelease</code> in the Package Manager, or open the Package Manager Console (<code>Tools</code>, <code>NuGet Packager Manager</code>, <code>Package Manager Console</code>), select the new test assembly project, and execute <code>install-package xunit -Pre</code>.</p>
+
+<p><img src="http://i.imgur.com/kbtfRkN.png" alt="" /></p>
+
+<p>I also use the <a href="https://github.com/xunit/resharper-xunit">xUnit.net Test Support</a> test runner for Resharper, which has a pre-release version that supports xUnit 2. Install that by opening Resharper's <code>Extension Manager</code> and selecting <code>Include Prerelease</code> before searching for xUnit:</p>
+
+<p><img src="http://i.imgur.com/eIp0x04.png" alt="" /></p>
+
+<p>Results are fields of green:</p>
+
+<p><img src="http://i.imgur.com/gMjneQL.png" alt="" /></p>
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2014 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
