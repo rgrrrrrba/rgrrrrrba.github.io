@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>External graphics in XSL:FO not sizing correctly</title>
+		<title>Resolving a list of type registrations from Autofac</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,13 +24,59 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>External graphics in XSL:FO not sizing correctly <br/></h1>
+				<h1><a href="/">~/</a>Resolving a list of type registrations from Autofac <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
-<h2><small><em>04 Jun 2008</em></small></h2>
+<h2><small><em>26 Jun 2014</em></small></h2>
 
 
 
-<p>I’m using <a href="http://xmlgraphics.apache.org/fop/">Apache FOP</a> to generate PDFs from <a href="http://www.w3.org/TR/xsl">XSL:FO</a>, and an external graphic (think the <code>&lt;img&gt;</code> tag in HTML) kept being resized incorrectly. Another image (different size) was the correct size on the page. Turns out I was using height and width attributes in the <code>fo:external-graphic</code> element, when I should have been using <code>content-height</code> and <code>content-width</code>. Somehow the second image respected the height and width I wanted. Possibly this has something to do with the stored DPI of the images (since XSL:FO is a specification for printed documents), but in any case content-width and content-height is the way to go. Way to go, Ben :P</p>
+<p>I needed to get all types that implemented a given interface that were registered with Autofac. Not a set of factories, that would be as simple as this:</p>
+
+<pre><code>class Consumer
+{
+    public Consumer(IEnumerable&lt;Func&lt;IFoo&gt;&gt; fooFactories)
+    {
+        // ...
+    }
+}
+</code></pre>
+
+<p>What I really need is something like <code>Consumer(IEnumerable&lt;Type&gt; fooTypes)</code> where the types are everything implementing <code>IFoo</code>, but of course Autofac can't resolve that.</p>
+
+<p>Inspired by <a href="http://stackoverflow.com/a/9503695/149259">this StackOverflow answer</a>, here's an extension method that does what I need:</p>
+
+<pre><code>public static class LifetimeScopeExtensions
+{
+    public static IEnumerable&lt;Type&gt; GetImplementingTypes&lt;T&gt;(this ILifetimeScope scope)
+    {
+        return scope.ComponentRegistry
+            .RegistrationsFor(new TypedService(typeof (T)))
+            .Select(x =&gt; x.Activator)
+            .OfType&lt;ReflectionActivator&gt;()
+            .Select(x =&gt; x.LimitType);
+    }
+}
+</code></pre>
+
+<p>To use it my consumer just takes an <code>ILifetimeScope</code> dependency:</p>
+
+<pre><code>public Consumer(ILifetimeScope scope) 
+{
+    var fooTypes = scope.GetImplementingTypes&lt;IFoo&gt;();
+}
+</code></pre>
+
+<p>Note that I needed to register the types both as the base type <code>IFoo</code> (for the implementing type resolution) and as self, so I could later resolve using <code>scope.Resolve(fooType)</code>. My registration looks like this:</p>
+
+<pre><code>        builder.RegisterAssemblyTypes(typeof (IFoo).Assembly)
+            .Where(t =&gt; t.IsAssignableTo&lt;IFoo&gt;())
+            .Where(t =&gt; !t.IsAbstract)
+            .As&lt;IFoo&gt;()
+            .AsSelf()
+            .InstancePerDependency();
+</code></pre>
+
+<p><img src="http://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif" alt="" /></p>
 
 
 

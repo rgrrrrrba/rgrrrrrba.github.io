@@ -4,7 +4,7 @@
 		<meta charset="utf-8"/>
 		<title>A Quick AutoFixture Demo</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Red, Green, Refactor, Red, Red, Red, Revert, Back Away. Ben Scott's personal blog. The site formerly known as Belfry Images."/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
 		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
 		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
@@ -182,7 +182,7 @@ void Main()
 </table>
 
 
-<p>You can see here that <code>Foo</code> and <code>Bar</code> both got different numbers - 4 and 198 respecitively. The fixture's behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value <code>999</code>.</p>
+<p>You can see here that <code>Foo</code> and <code>Bar</code> both received different numbers - 4 and 198 respectively. The fixture's behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value <code>999</code>.</p>
 
 <pre><code>void Main()
 {
@@ -219,13 +219,13 @@ void Main()
 </table>
 
 
-<p>Complex types can be registered in the same way.</p>
+<p>Complex types can be registered in the same way. This registers an instance of <code>Bar</code> with a <code>BarNumber</code> of <code>1234</code>. The <code>Foo.Number</code> field is given a dummy value.</p>
 
 <pre><code>void Main()
 {
     var fixture = new Fixture();
 
-    var bar = new Bar { BarNumber = 999 };
+    var bar = new Bar { BarNumber = 1234 };
     fixture.Register(() =&gt; bar);
 
     fixture.Create&lt;Foo&gt;()
@@ -237,21 +237,21 @@ void Main()
 <thead>
 <tr>
 <th> UserQuery+Foo </th>
-<th>                     </th>
+<th>                      </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td> Number        </td>
-<td> 194                 </td>
+<td> 194                  </td>
 </tr>
 <tr>
 <td> MyBar         </td>
-<td> UserQuery+Bar       </td>
+<td> UserQuery+Bar        </td>
 </tr>
 <tr>
 <td>               </td>
-<td> -> BarNumber == 999 </td>
+<td> -> BarNumber == 1234 </td>
 </tr>
 </tbody>
 </table>
@@ -292,7 +292,7 @@ void Main()
 		<div class="container">			
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2013 Ben Scott<br/>
+					Content &copy; 2008-2014 Ben Scott<br/>
 					<a href="https://twitter.com/bendetat">@bendetat</a> |
 					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
 					<a href="https://github.com/bendetat">github.com/bendetat</a> |

@@ -7,6 +7,8 @@ categories:
 - sticky
 ---
 
+These are the steps I use to set up a new PC with Git. I mainly use Git on the command line, with TortoiseGit for staging commits and visualising logs and Beyond Compare for diffs and merges.
+
 ### GH4W
 I use [GitHub for Windows](http://windows.github.com/) to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the `github_rsa.pub` file in `C:\Users\**username**\.ssh` can be added to BitBucket and other services to get everything running with the same credentials. Generally I won't use GH4W after this as I'm mostly a command line junky, with gaps filled by TortoiseGit.
 

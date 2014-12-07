@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>External graphics in XSL:FO not sizing correctly</title>
+		<title>Compare branches in TortoiseGit</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,13 +24,33 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>External graphics in XSL:FO not sizing correctly <br/></h1>
+				<h1><a href="/">~/</a>Compare branches in TortoiseGit <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
-<h2><small><em>04 Jun 2008</em></small></h2>
+<h2><small><em>07 Aug 2014</em></small></h2>
 
 
 
-<p>I’m using <a href="http://xmlgraphics.apache.org/fop/">Apache FOP</a> to generate PDFs from <a href="http://www.w3.org/TR/xsl">XSL:FO</a>, and an external graphic (think the <code>&lt;img&gt;</code> tag in HTML) kept being resized incorrectly. Another image (different size) was the correct size on the page. Turns out I was using height and width attributes in the <code>fo:external-graphic</code> element, when I should have been using <code>content-height</code> and <code>content-width</code>. Somehow the second image respected the height and width I wanted. Possibly this has something to do with the stored DPI of the images (since XSL:FO is a specification for printed documents), but in any case content-width and content-height is the way to go. Way to go, Ben :P</p>
+<p>Using a PR / peer review model when developing in a team is a great way keep quality high with a large number of changes. This model relies on being able to review diffs easily, something which Bitbucket is usually pretty good at.</p>
+
+<p>Unfortunately Bitbucket falls down once PRs reach a certain size:</p>
+
+<p><img src="http://i.imgur.com/JRllPwb.png" alt="This merge is too large to display" /></p>
+
+<p><em>i haz a sadz</em></p>
+
+<p>Ideally, PRs should be small enough that this doesn't crop up, but when you're performing large refactors or working on significant feature branches the ideal isn't always possible.</p>
+
+<p>TortoiseGit to the rescue: <a href="http://wikgren.fi/compare-diff-branches-in-tortoise-git-or-how-to-preview-changes-before-doing-a-merge/">Compare (Diff) branches in Tortoise Git, or how to preview changes before doing a merge</a>.</p>
+
+<p>Basically:</p>
+
+<ul>
+<li><em>shift</em>-right click the folder</li>
+<li>Select <code>TortoiseGit -&gt; Browse Reference</code></li>
+<li>Select the two branches to compare using control (usually the current branch and <code>master</code>)</li>
+<li>Right-click and select <code>Compare selected refs</code></li>
+</ul>
+
 
 
 

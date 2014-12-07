@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>External graphics in XSL:FO not sizing correctly</title>
+		<title>xUnit tests in a Windows 8.1 Store App</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,13 +24,29 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>External graphics in XSL:FO not sizing correctly <br/></h1>
+				<h1><a href="/">~/</a>xUnit tests in a Windows 8.1 Store App <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
-<h2><small><em>04 Jun 2008</em></small></h2>
+<h2><small><em>25 May 2014</em></small></h2>
 
 
 
-<p>I’m using <a href="http://xmlgraphics.apache.org/fop/">Apache FOP</a> to generate PDFs from <a href="http://www.w3.org/TR/xsl">XSL:FO</a>, and an external graphic (think the <code>&lt;img&gt;</code> tag in HTML) kept being resized incorrectly. Another image (different size) was the correct size on the page. Turns out I was using height and width attributes in the <code>fo:external-graphic</code> element, when I should have been using <code>content-height</code> and <code>content-width</code>. Somehow the second image respected the height and width I wanted. Possibly this has something to do with the stored DPI of the images (since XSL:FO is a specification for printed documents), but in any case content-width and content-height is the way to go. Way to go, Ben :P</p>
+<p>At the time of writing the current version of xUnit (1.9.2) does not support Windows 8.1 Store applications. The pre-release version (2.0.0-beta-build2650) however has the core library built as a PCL (Portable Class Library). So to add a xUnit test assembly to a Windows 8.1 Store application we need to add a PCL library and add the pre-release xUnit NuGet package.</p>
+
+<p>Add a new project. Under <code>Visual C#</code>, then <code>Store Apps</code>, then <code>Windows Apps</code>, select <code>Class Library (Windows)</code>:</p>
+
+<p><img src="http://i.imgur.com/L9hKws2.png" alt="" /></p>
+
+<p>Install the pre-release version of xUnit by either picking <code>Include Prelease</code> in the Package Manager, or open the Package Manager Console (<code>Tools</code>, <code>NuGet Packager Manager</code>, <code>Package Manager Console</code>), select the new test assembly project, and execute <code>install-package xunit -Pre</code>.</p>
+
+<p><img src="http://i.imgur.com/kbtfRkN.png" alt="" /></p>
+
+<p>I also use the <a href="https://github.com/xunit/resharper-xunit">xUnit.net Test Support</a> test runner for Resharper, which has a pre-release version that supports xUnit 2. Install that by opening Resharper's <code>Extension Manager</code> and selecting <code>Include Prerelease</code> before searching for xUnit:</p>
+
+<p><img src="http://i.imgur.com/eIp0x04.png" alt="" /></p>
+
+<p>Results are fields of green:</p>
+
+<p><img src="http://i.imgur.com/gMjneQL.png" alt="" /></p>
 
 
 

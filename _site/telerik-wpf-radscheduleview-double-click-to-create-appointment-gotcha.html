@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>External graphics in XSL:FO not sizing correctly</title>
+		<title>Telerik's WPF RadScheduleView - Double-click to create an appointment gotcha</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,13 +24,31 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>External graphics in XSL:FO not sizing correctly <br/></h1>
+				<h1><a href="/">~/</a>Telerik's WPF RadScheduleView - Double-click to create an appointment gotcha <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
-<h2><small><em>04 Jun 2008</em></small></h2>
+<h2><small><em>29 Apr 2014</em></small></h2>
 
 
 
-<p>I’m using <a href="http://xmlgraphics.apache.org/fop/">Apache FOP</a> to generate PDFs from <a href="http://www.w3.org/TR/xsl">XSL:FO</a>, and an external graphic (think the <code>&lt;img&gt;</code> tag in HTML) kept being resized incorrectly. Another image (different size) was the correct size on the page. Turns out I was using height and width attributes in the <code>fo:external-graphic</code> element, when I should have been using <code>content-height</code> and <code>content-width</code>. Somehow the second image respected the height and width I wanted. Possibly this has something to do with the stored DPI of the images (since XSL:FO is a specification for printed documents), but in any case content-width and content-height is the way to go. Way to go, Ben :P</p>
+<p>I'm using <a href="http://www.telerik.com/help/wpf/radscheduleview-overview.html">Telerik's RadScheduleView</a> in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.</p>
+
+<p><em>Turns out</em> I had changed my custom appointment subclass's default constructor from <code>public</code> to <code>protected</code>. The schedule view needs a public default constructor or it will just silently not create new appointments:</p>
+
+<pre><code>public class MyCustomAppointment
+{
+    // this is required to double-click to create
+    public MyCustomAppointment()
+    {
+        // ...
+    }
+
+    // non-default constructor can still be called in code
+    public MyCustomAppointment(...)
+    {
+        // ...
+    }
+}
+</code></pre>
 
 
 
