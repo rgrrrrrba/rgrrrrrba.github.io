@@ -19,7 +19,7 @@ The ten day trial expired without me needing a profiler again, and it was anothe
 The idea here is to record the amount of time spent in any method. The total time in a given method is the time spent executing the actual code in that method plus the total time spent in other methods called by that method, including time spend waiting for things (blocked on IO). In a tree view you can visualise this in two ways: descending into methods that a given method calls, or ascending into callers of a given method. To find a method that is a target for optimisation, you would find a method that has a higher than expected usage and either descend down the callers to find an inefficient method, or ascending into callers of the method to find an inefficient use of the called code - as an example, code executed inefficiently inside a loop. I tend to go from one view to the other to help identify a call chain that might contain a target then work my way up or down.
 
 
-### The deep, rancid depths of WinForms profiling
+### The rancid depths of WinForms profiling
 
 For my sins I spent several years developing a LOB WinForms application, which because reasons[^1] it needed a fair bit of profiling and massaging.
 
