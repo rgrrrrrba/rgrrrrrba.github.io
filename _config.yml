@@ -1,4 +1,4 @@
 permalink: /:title.html
-markdown: rdiscount
+markdown: kramdown
 name: Ben d'état - Ben Scott's blog
 url: http://bendetat.com

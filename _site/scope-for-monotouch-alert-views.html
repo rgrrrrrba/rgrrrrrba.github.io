@@ -30,8 +30,8 @@
 
 
 
-<p>I'm currently working on a MonoTouch app - after a month I'm finally starting to come around to the stack.
-One issue I've been having is a crazy native code crash when I display a <code>UIAlertView</code>. The problem turned
+<p>I’m currently working on a MonoTouch app - after a month I’m finally starting to come around to the stack. 
+One issue I’ve been having is a crazy native code crash when I display a <code>UIAlertView</code>. The problem turned
 out to be objects going out of scope.</p>
 
 <p>The first tip is to use a delegate for the alert view and keep it in the class scope:</p>
@@ -48,7 +48,7 @@ out to be objects going out of scope.</p>
 
 public class ParentClass {
   MyAlertViewDelegate _myAlertViewDelegate;
-
+  
   void ShowAlert() {
     _myAlertViewDelegate = new MyAlertViewDelegate(() =&gt; {});
     var alert = new UIAlertView("title", "message", _alertViewDelegate, "Ok");
@@ -57,11 +57,12 @@ public class ParentClass {
 }
 </code></pre>
 
-<p>The second tip is to make sure the ParentClass instance doesn't go out of scope. This is probably by giving
+<p>The second tip is to make sure the ParentClass instance doesn’t go out of scope. This is probably by giving 
 it a lifetime scope in the IoC container. For example in TinyIoC:</p>
 
 <pre><code>container.Register&lt;ParentClass&gt;().AsSingleton();
 </code></pre>
+
 
 
 

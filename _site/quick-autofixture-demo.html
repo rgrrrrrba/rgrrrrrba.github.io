@@ -34,7 +34,7 @@
 
 <p><a href="https://github.com/AutoFixture/AutoFixture">AutoFixture</a> is a tool for automating the creation of test objects. It is written by <a href="http://blog.ploeh.dk/">Mark Seemann</a> (<a href="https://twitter.com/ploeh">@ploeh</a>).</p>
 
-<p>I'm just working through a couple of LINQPad tests here. <code>Fixture</code> and the <code>Create()</code> method are AutoFixture. <code>Dump()</code> belongs to LINQPad.</p>
+<p>I’m just working through a couple of LINQPad tests here. <code>Fixture</code> and the <code>Create()</code> method are AutoFixture. <code>Dump()</code> belongs to LINQPad.</p>
 
 <pre><code>class Foo 
 {
@@ -49,18 +49,17 @@ void Main()
 </code></pre>
 
 <table>
-<thead>
-<tr>
-<th> UserQuery+Foo </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>               </td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>UserQuery+Foo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td> </td>
+    </tr>
+  </tbody>
 </table>
-
 
 <p>Here the fixture creates a default instance of <code>Foo</code>. Nothing spectacular.</p>
 
@@ -80,27 +79,26 @@ void Main()
 </code></pre>
 
 <table>
-<thead>
-<tr>
-<th> UserQuery+Foo </th>
-<th>    </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td> Number        </td>
-<td> 49 </td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>UserQuery+Foo</th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Number</td>
+      <td>49</td>
+    </tr>
+  </tbody>
 </table>
 
-
-<p>AutoFixture provides a random dummy value to all publicly available properties. Make <code>Number</code> have a private setter and AutoFixture can't see it. It will however fill the constructor with values.</p>
+<p>AutoFixture provides a random dummy value to all publicly available properties. Make <code>Number</code> have a private setter and AutoFixture can’t see it. It will however fill the constructor with values.</p>
 
 <pre><code>class Foo 
 {
     public int Number{ get; private set; }
-
+    
     public Foo(int number) 
     {
         Number = number;
@@ -116,20 +114,19 @@ void Main()
 </code></pre>
 
 <table>
-<thead>
-<tr>
-<th> UserQuery+Foo </th>
-<th>    </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td> Number        </td>
-<td> 38 </td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>UserQuery+Foo</th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Number</td>
+      <td>38</td>
+    </tr>
+  </tbody>
 </table>
-
 
 <p>By default, AutoFixture will use the greediest constructor it can find that it can fulfil. It will also work through those parameters, constructing them in the same way. Similar to an IoC framework like Autofac.</p>
 
@@ -137,7 +134,7 @@ void Main()
 {
     public int Number{ get; private set; }
     public Bar MyBar { get; private set; }
-
+    
     public Foo(int number, Bar bar) 
     {
         Number = number;
@@ -159,65 +156,63 @@ void Main()
 </code></pre>
 
 <table>
-<thead>
-<tr>
-<th> UserQuery+Foo </th>
-<th>                     </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td> Number        </td>
-<td> 4                   </td>
-</tr>
-<tr>
-<td> MyBar         </td>
-<td> UserQuery+Bar       </td>
-</tr>
-<tr>
-<td>               </td>
-<td> -> BarNumber == 198 </td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>UserQuery+Foo</th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Number</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>MyBar</td>
+      <td>UserQuery+Bar</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>-&gt; BarNumber == 198</td>
+    </tr>
+  </tbody>
 </table>
 
-
-<p>You can see here that <code>Foo</code> and <code>Bar</code> both received different numbers - 4 and 198 respectively. The fixture's behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value <code>999</code>.</p>
+<p>You can see here that <code>Foo</code> and <code>Bar</code> both received different numbers - 4 and 198 respectively. The fixture’s behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value <code>999</code>.</p>
 
 <pre><code>void Main()
 {
     var fixture = new Fixture();
-
+    
     fixture.Register(() =&gt; 999)
-
+    
     fixture.Create&lt;Foo&gt;()
         .Dump();
 }
 </code></pre>
 
 <table>
-<thead>
-<tr>
-<th> UserQuery+Foo </th>
-<th>                     </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td> Number        </td>
-<td> 999                 </td>
-</tr>
-<tr>
-<td> MyBar         </td>
-<td> UserQuery+Bar       </td>
-</tr>
-<tr>
-<td>               </td>
-<td> -> BarNumber == 999 </td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>UserQuery+Foo</th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Number</td>
+      <td>999</td>
+    </tr>
+    <tr>
+      <td>MyBar</td>
+      <td>UserQuery+Bar</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>-&gt; BarNumber == 999</td>
+    </tr>
+  </tbody>
 </table>
-
 
 <p>Complex types can be registered in the same way. This registers an instance of <code>Bar</code> with a <code>BarNumber</code> of <code>1234</code>. The <code>Foo.Number</code> field is given a dummy value.</p>
 
@@ -227,39 +222,38 @@ void Main()
 
     var bar = new Bar { BarNumber = 1234 };
     fixture.Register(() =&gt; bar);
-
+    
     fixture.Create&lt;Foo&gt;()
         .Dump();
 }
 </code></pre>
 
 <table>
-<thead>
-<tr>
-<th> UserQuery+Foo </th>
-<th>                      </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td> Number        </td>
-<td> 194                  </td>
-</tr>
-<tr>
-<td> MyBar         </td>
-<td> UserQuery+Bar        </td>
-</tr>
-<tr>
-<td>               </td>
-<td> -> BarNumber == 1234 </td>
-</tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>UserQuery+Foo</th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Number</td>
+      <td>194</td>
+    </tr>
+    <tr>
+      <td>MyBar</td>
+      <td>UserQuery+Bar</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>-&gt; BarNumber == 1234</td>
+    </tr>
+  </tbody>
 </table>
 
+<h2 id="more-information">More information</h2>
 
-<h2>More information</h2>
-
-<p>Mark Seeman's blog articles under the <a href="http://blog.ploeh.dk/tags.html#AutoFixture-ref">AutoFixture tag</a> are the most comprehensive source of information about AutoFixture.</p>
+<p>Mark Seeman’s blog articles under the <a href="http://blog.ploeh.dk/tags.html#AutoFixture-ref">AutoFixture tag</a> are the most comprehensive source of information about AutoFixture. </p>
 
 
 

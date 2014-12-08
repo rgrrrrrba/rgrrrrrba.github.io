@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ben d'état - Ben Scott's blog</title>
+		<title>Ben d&#39;état - Ben Scott&#39;s blog</title>
 		<description></description>		
 		<link>http://bendetat.com</link>
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
@@ -10,52 +10,59 @@
 				<title>Uninstrumented statistical .NET profiling using open source tools</title>
 				<description>&lt;p&gt;Profilers are unusual tools in that you generally never need one, right up to just past the point where users are melting down and you desperately need one. Usually you get a condition that involves many different pieces of code and internal services and libraries put together in way that quickly grinds your application to a painful halt. Those conditions are (hopefully) pretty rare and in my experience come up when you change something in one area that turns out to badly affect a seemingly unrelated area.&lt;/p&gt;
 
-&lt;p&gt;This post is about tools for profiling client applications and applications running in-process (like a console application wrapped around a TopShelf service or self-hosting OWIN). So far I haven't had a need for any ASP.NET profiling but it looks like &lt;a href=&quot;http://miniprofiler.com/&quot;&gt;MiniProfiler&lt;/a&gt; looks compelling - although it doesn't appear to uninstrumented call profiling, which is probably unlikely to help in that environment anyway.&lt;/p&gt;
+&lt;p&gt;This post is about tools for profiling client applications and applications running in-process (like a console application wrapped around a TopShelf service or self-hosting OWIN). So far I haven’t had a need for any ASP.NET profiling but it looks like &lt;a href=&quot;http://miniprofiler.com/&quot;&gt;MiniProfiler&lt;/a&gt; looks compelling - although it doesn’t appear to uninstrumented call profiling, which is probably unlikely to help in that environment anyway.&lt;/p&gt;
 
-&lt;p&gt;Since I don't tend to use or need a profiler that often (although automated profiling should really happen as part of continuous integration) I don't have a profiler of choice. I'm told that I should use windbg but because I don't want to break my mind I'll avoid that as long as a simpler tool solves the immediate problem. JetBrains' &lt;a href=&quot;https://www.jetbrains.com/profiler/&quot;&gt;dotTrace&lt;/a&gt; product has been recommended to me fairly consistently, so the second last time I needed to diagnose one of those 'crashing halt' issues in a WPF app I downloaded the trial. It was great, I found the issue pretty quickly, but the only view that I actually used was the call tree, which shows the methods that have the most amount of CPU time in a tree. This view lets you crawl down these methods to find the callers, and their callers, and eventually the source of the inefficient operation.&lt;/p&gt;
+&lt;p&gt;Since I don’t tend to use or need a profiler that often (although automated profiling should really happen as part of continuous integration) I don’t have a profiler of choice. I’m told that I should use windbg but because I don’t want to break my mind I’ll avoid that as long as a simpler tool solves the immediate problem. JetBrains’ &lt;a href=&quot;https://www.jetbrains.com/profiler/&quot;&gt;dotTrace&lt;/a&gt; product has been recommended to me fairly consistently, so the second last time I needed to diagnose one of those ‘crashing halt’ issues in a WPF app I downloaded the trial. It was great, I found the issue pretty quickly, but the only view that I actually used was the call tree, which shows the methods that have the most amount of CPU time in a tree. This view lets you crawl down these methods to find the callers, and their callers, and eventually the source of the inefficient operation.&lt;/p&gt;
 
-&lt;p&gt;The ten day trial expired without me needing a profiler again, and it was another two months before I had a similar requirement, so I didn't end up purchasing it. A week ago I again needed a profiler to figure out a condition that hung the UI thread in a WPF application. I'm definitely not against paying for tooling and the &lt;a href=&quot;https://www.jetbrains.com/resharper/buy/index.jsp?product=ultimate&quot;&gt;ReSharper Ultimate&lt;/a&gt; bundle is only $100 more than standalone ReSharper, but I told somebody yesterday that I usually used an open source tool that gave me the call tree, which was all I usually needed. I figured that I should probably write it up, so here we are.&lt;/p&gt;
+&lt;p&gt;The ten day trial expired without me needing a profiler again, and it was another two months before I had a similar requirement, so I didn’t end up purchasing it. A week ago I again needed a profiler to figure out a condition that hung the UI thread in a WPF application. I’m definitely not against paying for tooling and the &lt;a href=&quot;https://www.jetbrains.com/resharper/buy/index.jsp?product=ultimate&quot;&gt;ReSharper Ultimate&lt;/a&gt; bundle is only $100 more than standalone ReSharper, but I told somebody yesterday that I usually used an open source tool that gave me the call tree, which was all I usually needed. I figured that I should probably write it up, so here we are.&lt;/p&gt;
 
-&lt;h3&gt;Basics of statistical CPU time profiling&lt;/h3&gt;
+&lt;h3 id=&quot;basics-of-statistical-call-time-profiling&quot;&gt;Basics of statistical call time profiling&lt;/h3&gt;
 
-&lt;p&gt;The idea here is to record the amount of CPU time spent in any method. The total time in a given method is the time spent executing the actual code in that method plus the total time spent in other methods called by that method, including time spend waiting for things (blocked on IO). In a tree view you can visualise this in two ways: descending into methods that a given method calls, or ascending into callers of a given method. To find a method that is a target for optimisation, you would find a method that has a higher than expected usage and either descend down the callers to find an inefficient method, or ascending into callers of the method to find an inefficient use of the called code - as an example, code executed inefficiently inside a loop. I tend to go from one view to the other to help identify a call chain that might contain a target then work my way up or down.&lt;/p&gt;
+&lt;p&gt;The idea here is to record the amount of time spent in any method. The total time in a given method is the time spent executing the actual code in that method plus the total time spent in other methods called by that method, including time spend waiting for things (blocked on IO). In a tree view you can visualise this in two ways: descending into methods that a given method calls, or ascending into callers of a given method. To find a method that is a target for optimisation, you would find a method that has a higher than expected usage and either descend down the callers to find an inefficient method, or ascending into callers of the method to find an inefficient use of the called code - as an example, code executed inefficiently inside a loop. I tend to go from one view to the other to help identify a call chain that might contain a target then work my way up or down.&lt;/p&gt;
 
-&lt;h3&gt;The deep, rancid depths of WinForms profiling&lt;/h3&gt;
+&lt;h3 id=&quot;the-deep-rancid-depths-of-winforms-profiling&quot;&gt;The deep, rancid depths of WinForms profiling&lt;/h3&gt;
 
-&lt;p&gt;For my sins I spent several years developing a LOB WinForms application, which because reasons&lt;a href=&quot;A&quot;&gt;^1&lt;/a&gt; it needed a fair bit of profiling and massaging.&lt;/p&gt;
+&lt;p&gt;For my sins I spent several years developing a LOB WinForms application, which because reasons&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt; it needed a fair bit of profiling and massaging.&lt;/p&gt;
 
-&lt;p&gt;Initially I used a tool called &lt;a href=&quot;https://code.google.com/p/nprof/&quot;&gt;nprof&lt;/a&gt;. The 0.9.1 version introduced me to the call tree view, but hadn't been updated since 2006 and I believe had issues after I moved to .NET 3. The 0.11 version was a bit more recent but appears to have been a rewrite three years later (2009). It turned out to be quite buggy and difficult to get the information I needed. Shortly thereafter the nprof homepage indicated that development had stopped and pointed to &lt;a href=&quot;https://code.google.com/p/slimtune/&quot;&gt;SlimTune&lt;/a&gt; as a successor.&lt;/p&gt;
+&lt;p&gt;Initially I used a tool called &lt;a href=&quot;https://code.google.com/p/nprof/&quot;&gt;nprof&lt;/a&gt;. The 0.9.1 version introduced me to the call tree view, but hadn’t been updated since 2006 and I believe had issues after I moved to .NET 3. The 0.11 version was a bit more recent but appears to have been a rewrite three years later (2009). It turned out to be quite buggy and difficult to get the information I needed. Shortly thereafter the nprof homepage indicated that development had stopped and pointed to &lt;a href=&quot;https://code.google.com/p/slimtune/&quot;&gt;SlimTune&lt;/a&gt; as a successor.&lt;/p&gt;
 
-&lt;h3&gt;SlimTune&lt;/h3&gt;
+&lt;h3 id=&quot;slimtune&quot;&gt;SlimTune&lt;/h3&gt;
 
-&lt;p&gt;SlimTune also appears to be abandoned, with the latest 0.3.0 version released in February 2011 and the source untouched since then. Luckily it still works with a WPF app using .NET 4.5.1, which was good enough for me. There are also options to connect to ASP.NET / IIS, CLR services and native applications but I haven't used any of these options.&lt;/p&gt;
+&lt;p&gt;SlimTune also appears to be abandoned, with the latest 0.3.0 version released in February 2011 and the source untouched since then. Luckily it still works with a WPF app using .NET 4.5.1, which was good enough for me. There are also options to connect to ASP.NET / IIS, CLR services and native applications but I haven’t used any of these options.&lt;/p&gt;
 
-&lt;p&gt;This isn't a pretty application (it's described as early beta) and needs a bit of hand-holding to get the results. It wants to open ports 3000 and 3001 in the firewall, which it uses to communicate between the profiler and the application being profiled.&lt;/p&gt;
+&lt;p&gt;This isn’t a pretty application (it’s described as early beta) and needs a bit of hand-holding to get the results. It wants to open ports 3000 and 3001 in the firewall, which it uses to communicate between the profiler and the application being profiled.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/QeAVxHM.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;You can't connect to an application that wasn't launched by SlimTune itself, since it needs to attach the instrumentation at startup. This means that you can't connect to an already running application, including one that you've F5ed from Visual Studio. You can start an application from SlimTune and connect to it later, say if you have to navigate to the state that you want to profile and then connect, to limit the amount of data in the profile results to reduce any noise.&lt;/p&gt;
+&lt;p&gt;You can’t connect to an application that wasn’t launched by SlimTune itself, since it needs to attach the instrumentation at startup. This means that you can’t connect to an already running application, including one that you’ve F5ed from Visual Studio. You can start an application from SlimTune and connect to it later, say if you have to navigate to the state that you want to profile and then connect, to limit the amount of data in the profile results to reduce any noise.&lt;/p&gt;
 
 &lt;p&gt;The results can be visualised in real time or after the fact. The profile results are saved to a SQLite file that can be opened and visualised later.&lt;/p&gt;
 
 &lt;p&gt;SlimTune has 5 visualisers:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Function Details, which shows a pie chart with the top utilisation of methods called in the selected method&lt;/li&gt;
-&lt;li&gt;NProf-Style TreeViews, a split view which shows the CPU time spent per method as a % of the parent (descending into methods that the given method calls) and the total time per method as a % of the total (descending into methods that call the given method)&lt;/li&gt;
-&lt;li&gt;Per-Thread Call Trees, this is the view 'recommended' by SlimTune and shows all of the threads used by the application, descending down into called methods&lt;/li&gt;
-&lt;li&gt;Performance Counters, this shows an empty chart so I assume it is incomplete&lt;/li&gt;
-&lt;li&gt;Query Debugger, this throws an exception so it is definitely incomplete&lt;/li&gt;
+  &lt;li&gt;Function Details, which shows a pie chart with the top utilisation of methods called in the selected method&lt;/li&gt;
+  &lt;li&gt;NProf-Style TreeViews, a split view which shows the CPU time spent per method as a % of the parent (descending into methods that the given method calls) and the total time per method as a % of the total (descending into methods that call the given method)&lt;/li&gt;
+  &lt;li&gt;Per-Thread Call Trees, this is the view ‘recommended’ by SlimTune and shows all of the threads used by the application, descending down into called methods&lt;/li&gt;
+  &lt;li&gt;Performance Counters, this shows an empty chart so I assume it is incomplete&lt;/li&gt;
+  &lt;li&gt;Query Debugger, this throws an exception so it is definitely incomplete&lt;/li&gt;
 &lt;/ul&gt;
-
 
 &lt;p&gt;I generally use the NProf-style TreeViews as it is comprehensive and the split view allows navigation in both directions, however the per-thread call trees is also useful in identifying blocking code on a specific thread.&lt;/p&gt;
 
-&lt;h3&gt;Ignotum per ignotius&lt;/h3&gt;
+&lt;h3 id=&quot;ignotum-per-ignotius&quot;&gt;Ignotum per ignotius&lt;/h3&gt;
 
-&lt;p&gt;Should you use SlimTune over dotTrace? If you're happy to spend a little bit of money and want Visual Studio integration, nope. dotTrace is a great application with heaps of features that SlimTune doesn't even come closing to touching on. Uninstrumented open source statistical .NET profiling is a desolate wasteland and dotTrace is a better decision by far (remembering I haven't tried any other commercial profilers).&lt;/p&gt;
+&lt;p&gt;Should you use SlimTune over dotTrace? If you’re happy to spend a little bit of money and want Visual Studio integration, nope. dotTrace is a great application with heaps of features that SlimTune doesn’t even come closing to touching on. Uninstrumented open source statistical .NET profiling is a desolate wasteland and dotTrace is a better decision by far (remembering I haven’t tried any other commercial profilers).&lt;/p&gt;
 
-&lt;p&gt;That said, if you need a profiler once a month at most and don't want or need VS integration, SlimTune is a viable substitute. Just don't expect too much.&lt;/p&gt;
+&lt;p&gt;That said, if you need a profiler once a month at most and don’t want or need VS integration, SlimTune is a viable substitute. Just don’t expect too much.&lt;/p&gt;
+
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:1&quot;&gt;
+      &lt;p&gt;A handrolled ORM, cache, IoC container and business layer (with n-level undo! I had been reading a lot of &lt;a href=&quot;http://www.lhotka.net/&quot;&gt;Rockford Lhotka&lt;/a&gt;’s work)  &lt;a href=&quot;#fnref:1&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
 </description>
 				<pubDate>Sun, 07 Dec 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/uninstrumented-statistical-dotnet-profiling-using-open-source-tools.html</link>
@@ -66,27 +73,23 @@
 				<title>Get running fast on GitHub and BitBucket</title>
 				<description>&lt;p&gt;These are the steps I use to set up a new PC with Git. I mainly use Git on the command line, with TortoiseGit for staging commits and visualising logs and Beyond Compare for diffs and merges.&lt;/p&gt;
 
-&lt;h3&gt;GH4W&lt;/h3&gt;
+&lt;h3 id=&quot;gh4w&quot;&gt;GH4W&lt;/h3&gt;
+&lt;p&gt;I use &lt;a href=&quot;http://windows.github.com/&quot;&gt;GitHub for Windows&lt;/a&gt; to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the &lt;code&gt;github_rsa.pub&lt;/code&gt; file in &lt;code&gt;C:\Users\**username**\.ssh&lt;/code&gt; can be added to BitBucket and other services to get everything running with the same credentials. Generally I won’t use GH4W after this as I’m mostly a command line junky, with gaps filled by TortoiseGit.&lt;/p&gt;
 
-&lt;p&gt;I use &lt;a href=&quot;http://windows.github.com/&quot;&gt;GitHub for Windows&lt;/a&gt; to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the &lt;code&gt;github_rsa.pub&lt;/code&gt; file in &lt;code&gt;C:\Users\**username**\.ssh&lt;/code&gt; can be added to BitBucket and other services to get everything running with the same credentials. Generally I won't use GH4W after this as I'm mostly a command line junky, with gaps filled by TortoiseGit.&lt;/p&gt;
-
-&lt;h3&gt;Put &lt;code&gt;c:\bin&lt;/code&gt; on the path&lt;/h3&gt;
-
+&lt;h3 id=&quot;put-cbin-on-the-path&quot;&gt;Put &lt;code&gt;c:\bin&lt;/code&gt; on the path&lt;/h3&gt;
 &lt;p&gt;Create a folder called &lt;code&gt;bin&lt;/code&gt; somewhere fairly central. I use &lt;code&gt;c:\bin&lt;/code&gt;. Then put it on the path. Now you can drop scripts and executables into the &lt;code&gt;bin&lt;/code&gt; folder and they will work in any console anywhere. To mess with the path:&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;Open the System control panel item (&lt;code&gt;Win&lt;/code&gt;-&lt;code&gt;pause/break&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;Select Advanced system settings (opens the System Properties dialog)&lt;/li&gt;
-&lt;li&gt;Select Environment Variables&lt;/li&gt;
-&lt;li&gt;Update both of the Path variables (in User variables and System variables), add &lt;code&gt;;c:\bin&lt;/code&gt; to the end of the values (don't delete the existing value)&lt;/li&gt;
-&lt;li&gt;'OK' out of the dialogs. You will need to restart any open command prompts to get the path change to work, rebooting is usually the fastest way to make sure the change has gone through (logging out and in may work too).&lt;/li&gt;
+  &lt;li&gt;Open the System control panel item (&lt;code&gt;Win&lt;/code&gt;-&lt;code&gt;pause/break&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;Select Advanced system settings (opens the System Properties dialog)&lt;/li&gt;
+  &lt;li&gt;Select Environment Variables&lt;/li&gt;
+  &lt;li&gt;Update both of the Path variables (in User variables and System variables), add &lt;code&gt;;c:\bin&lt;/code&gt; to the end of the values (don’t delete the existing value)&lt;/li&gt;
+  &lt;li&gt;‘OK’ out of the dialogs. You will need to restart any open command prompts to get the path change to work, rebooting is usually the fastest way to make sure the change has gone through (logging out and in may work too).&lt;/li&gt;
 &lt;/ol&gt;
-
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/hWvTzkl.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;h3&gt;TortoiseGit&lt;/h3&gt;
-
+&lt;h3 id=&quot;tortoisegit&quot;&gt;TortoiseGit&lt;/h3&gt;
 &lt;p&gt;I use &lt;a href=&quot;code.google.com/p/tortoisegit&quot;&gt;TortoiseGit&lt;/a&gt; to help stage commits and for visualising the log. I can bypass clicking around in Explorer by adding this batch file (named &lt;code&gt;tgit.bat&lt;/code&gt;) to somewhere in my path (I usually add &lt;code&gt;c:\bin&lt;/code&gt; to the path for this reason). This is based on a &lt;a href=&quot;http://ayende.com/blog/4749/executing-tortoisegit-from-the-command-line&quot;&gt;post by Oren Eini&lt;/a&gt;.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;@start &quot;TortoiseGit&quot; &quot;C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe&quot; /command:%1 /path:.
@@ -94,23 +97,21 @@
 
 &lt;p&gt;TortoiseGit has a number of commands available from the command line. Use &lt;code&gt;tgit commit&lt;/code&gt; to preview, stage and execute a commit, and &lt;code&gt;tgit log&lt;/code&gt; to see the log.&lt;/p&gt;
 
-&lt;h3&gt;Switch to Cmder&lt;/h3&gt;
-
-&lt;p&gt;I use &lt;a href=&quot;http://bliker.github.io/cmder/&quot;&gt;Cmder&lt;/a&gt; as a console replacement but the msysgit instance included in the full download doesn't work with the public key named &lt;code&gt;github_rsa.pub&lt;/code&gt;. I just copied &lt;code&gt;github_rsa.pub&lt;/code&gt; to &lt;code&gt;id_rsa.pub&lt;/code&gt; and &lt;code&gt;github_rsa&lt;/code&gt; to &lt;code&gt;id_rsa&lt;/code&gt;. Cmder has support for aliases using the &lt;code&gt;alias&lt;/code&gt; command but I usually use the &lt;code&gt;c:\bin&lt;/code&gt; path with batch files to keep everything relatively portable. Install Cmder to &lt;code&gt;c:\bin\cmder&lt;/code&gt; and drag &lt;code&gt;C:\bin\cmder\cmder.exe&lt;/code&gt; onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (&lt;code&gt;c:\source&lt;/code&gt; is mine):&lt;/p&gt;
+&lt;h3 id=&quot;switch-to-cmder&quot;&gt;Switch to Cmder&lt;/h3&gt;
+&lt;p&gt;I use &lt;a href=&quot;http://bliker.github.io/cmder/&quot;&gt;Cmder&lt;/a&gt; as a console replacement but the msysgit instance included in the full download doesn’t work with the public key named &lt;code&gt;github_rsa.pub&lt;/code&gt;. I just copied &lt;code&gt;github_rsa.pub&lt;/code&gt; to &lt;code&gt;id_rsa.pub&lt;/code&gt; and &lt;code&gt;github_rsa&lt;/code&gt; to &lt;code&gt;id_rsa&lt;/code&gt;. Cmder has support for aliases using the &lt;code&gt;alias&lt;/code&gt; command but I usually use the &lt;code&gt;c:\bin&lt;/code&gt; path with batch files to keep everything relatively portable. Install Cmder to &lt;code&gt;c:\bin\cmder&lt;/code&gt; and drag &lt;code&gt;C:\bin\cmder\cmder.exe&lt;/code&gt; onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (&lt;code&gt;c:\source&lt;/code&gt; is mine):&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/22KOl45.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;h3&gt;Fine-tune Git&lt;/h3&gt;
-
+&lt;h3 id=&quot;fine-tune-git&quot;&gt;Fine-tune Git&lt;/h3&gt;
 &lt;p&gt;Run this to add a Git alias that opens the global configuration in its default editor (Vim) (&lt;code&gt;git ec&lt;/code&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;git config --global alias.ec &quot;config --global -e&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Now that's in you can hand edit the config to add some or all of &lt;a href=&quot;http://haacked.com/archive/2014/07/28/github-flow-aliases/&quot;&gt;Phil Haack's GitHub Flow aliases&lt;/a&gt;. I usually just use 'wipe', 'save' and 'undo':&lt;/p&gt;
+&lt;p&gt;Now that’s in you can hand edit the config to add some or all of &lt;a href=&quot;http://haacked.com/archive/2014/07/28/github-flow-aliases/&quot;&gt;Phil Haack’s GitHub Flow aliases&lt;/a&gt;. I usually just use ‘wipe’, ‘save’ and ‘undo’:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;wipe = !git add -A &amp;amp;&amp;amp; git commit -qm 'WIPE SAVEPOINT' &amp;amp;&amp;amp; git reset HEAD~1 --hard
-save = !git add -A &amp;amp;&amp;amp; git commit -m 'SAVEPOINT'
+&lt;pre&gt;&lt;code&gt;wipe = !git add -A &amp;amp;&amp;amp; git commit -qm &#39;WIPE SAVEPOINT&#39; &amp;amp;&amp;amp; git reset HEAD~1 --hard
+save = !git add -A &amp;amp;&amp;amp; git commit -m &#39;SAVEPOINT&#39;
 undo = reset HEAD~1 --mixed
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -121,14 +122,13 @@ undo = reset HEAD~1 --mixed
 
 &lt;p&gt;Also check this out: &lt;a href=&quot;https://help.github.com/articles/set-up-git&quot;&gt;https://help.github.com/articles/set-up-git&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;Looks like password caching is an issue with Cmder's msysgit, but only with non-SSH remote urls. If &lt;code&gt;.git/config&lt;/code&gt; looks like this it shoud use the above keys:&lt;/p&gt;
+&lt;p&gt;Looks like password caching is an issue with Cmder’s msysgit, but only with non-SSH remote urls. If &lt;code&gt;.git/config&lt;/code&gt; looks like this it shoud use the above keys:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;[remote &quot;origin&quot;]
-    url = git@github.com:rgrrrrrba/rgrrrrrba.github.io.git
+	url = git@github.com:rgrrrrrba/rgrrrrrba.github.io.git
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h3&gt;Beyond Compare&lt;/h3&gt;
-
+&lt;h3 id=&quot;beyond-compare&quot;&gt;Beyond Compare&lt;/h3&gt;
 &lt;p&gt;I use (and happily pay for) &lt;a href=&quot;http://www.scootersoftware.com/moreinfo.php&quot;&gt;Beyond Compare 4&lt;/a&gt; and the &lt;a href=&quot;http://www.scootersoftware.com/support.php?zz=kb_vcs&quot;&gt;instructions here&lt;/a&gt; were helpful. To get Git to use BC4 for diffs and merges:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;git config --global merge.tool bc4
@@ -140,13 +140,13 @@ git config --global difftool.bc4.path &quot;C:/Program Files (x86)/Beyond Compar
 &lt;p&gt;Notice that you need to use forward-slashes in the path to BC. &lt;code&gt;~/.gitconfig&lt;/code&gt; should end up like this:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;[merge]
-    tool = bc4
+	tool = bc4
 [mergetool &quot;bc4&quot;]
-    path = C:/Program Files (x86)/Beyond Compare 4/BCompare.exe
+	path = C:/Program Files (x86)/Beyond Compare 4/BCompare.exe
 [diff]
-    tool = bc4
+	tool = bc4
 [difftool &quot;bc4&quot;]
-    path = C:/Program Files (x86)/Beyond Compare 4/BCompare.exe
+	path = C:/Program Files (x86)/Beyond Compare 4/BCompare.exe
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Run these commands to tighten up things a bit by skipping confirmation prompts and removing merge backups:&lt;/p&gt;
@@ -156,9 +156,10 @@ git config --global mergetool.prompt false
 git config --global mergetool.keepBackup false
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit's Settings screen (right-click in Explorer, TortoiseGit, Settings, or just use &lt;code&gt;tgit settings&lt;/code&gt; if you added the alias):&lt;/p&gt;
+&lt;p&gt;TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit’s Settings screen (right-click in Explorer, TortoiseGit, Settings, or just use &lt;code&gt;tgit settings&lt;/code&gt; if you added the alias):&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/fhkbebQ.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
 </description>
 				<pubDate>Sat, 29 Nov 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</link>
@@ -175,17 +176,17 @@ git config --global mergetool.keepBackup false
 
 &lt;p&gt;&lt;em&gt;i haz a sadz&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;Ideally, PRs should be small enough that this doesn't crop up, but when you're performing large refactors or working on significant feature branches the ideal isn't always possible.&lt;/p&gt;
+&lt;p&gt;Ideally, PRs should be small enough that this doesn’t crop up, but when you’re performing large refactors or working on significant feature branches the ideal isn’t always possible.&lt;/p&gt;
 
 &lt;p&gt;TortoiseGit to the rescue: &lt;a href=&quot;http://wikgren.fi/compare-diff-branches-in-tortoise-git-or-how-to-preview-changes-before-doing-a-merge/&quot;&gt;Compare (Diff) branches in Tortoise Git, or how to preview changes before doing a merge&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Basically:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;em&gt;shift&lt;/em&gt;-right click the folder&lt;/li&gt;
-&lt;li&gt;Select &lt;code&gt;TortoiseGit -&amp;gt; Browse Reference&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Select the two branches to compare using control (usually the current branch and &lt;code&gt;master&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;Right-click and select &lt;code&gt;Compare selected refs&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;shift&lt;/em&gt;-right click the folder&lt;/li&gt;
+  &lt;li&gt;Select &lt;code&gt;TortoiseGit -&amp;gt; Browse Reference&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Select the two branches to compare using control (usually the current branch and &lt;code&gt;master&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;Right-click and select &lt;code&gt;Compare selected refs&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>
@@ -200,16 +201,16 @@ git config --global mergetool.keepBackup false
 
 &lt;pre&gt;&lt;code&gt;class Consumer
 {
-    public Consumer(IEnumerable&amp;lt;Func&amp;lt;IFoo&amp;gt;&amp;gt; fooFactories)
-    {
-        // ...
-    }
+	public Consumer(IEnumerable&amp;lt;Func&amp;lt;IFoo&amp;gt;&amp;gt; fooFactories)
+	{
+		// ...
+	}
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;What I really need is something like &lt;code&gt;Consumer(IEnumerable&amp;lt;Type&amp;gt; fooTypes)&lt;/code&gt; where the types are everything implementing &lt;code&gt;IFoo&lt;/code&gt;, but of course Autofac can't resolve that.&lt;/p&gt;
+&lt;p&gt;What I really need is something like &lt;code&gt;Consumer(IEnumerable&amp;lt;Type&amp;gt; fooTypes)&lt;/code&gt; where the types are everything implementing &lt;code&gt;IFoo&lt;/code&gt;, but of course Autofac can’t resolve that.&lt;/p&gt;
 
-&lt;p&gt;Inspired by &lt;a href=&quot;http://stackoverflow.com/a/9503695/149259&quot;&gt;this StackOverflow answer&lt;/a&gt;, here's an extension method that does what I need:&lt;/p&gt;
+&lt;p&gt;Inspired by &lt;a href=&quot;http://stackoverflow.com/a/9503695/149259&quot;&gt;this StackOverflow answer&lt;/a&gt;, here’s an extension method that does what I need:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public static class LifetimeScopeExtensions
 {
@@ -228,7 +229,7 @@ git config --global mergetool.keepBackup false
 
 &lt;pre&gt;&lt;code&gt;public Consumer(ILifetimeScope scope) 
 {
-    var fooTypes = scope.GetImplementingTypes&amp;lt;IFoo&amp;gt;();
+	var fooTypes = scope.GetImplementingTypes&amp;lt;IFoo&amp;gt;();
 }
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -243,6 +244,7 @@ git config --global mergetool.keepBackup false
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
 </description>
 				<pubDate>Thu, 26 Jun 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/autofac-get-registration-types.html</link>
@@ -252,22 +254,21 @@ git config --global mergetool.keepBackup false
 			<item>
 				<title>MonoGame Shooter - Converting tests to BDD style</title>
 				<description>&lt;ol&gt;
-&lt;li&gt;&lt;a href=&quot;http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html&quot;&gt;Better boundary detection for the player&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Converting tests to BDD style&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html&quot;&gt;Better boundary detection for the player&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Converting tests to BDD style&lt;/li&gt;
 &lt;/ol&gt;
-
 
 &lt;p&gt;This is the second post of hopefully many as I learn MonoGame by extending on a &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;tutorial series by Tara Walker&lt;/a&gt;. The source code is available, both &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d&quot;&gt;before&lt;/a&gt; and &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b&quot;&gt;after&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;In this post I convert the player boundary detection tests I wrote in the last post to a behavior-driven development (BDD) style to remove some duplication and simplify the tests.&lt;/p&gt;
 
-&lt;h3&gt;Behavior-driven development&lt;/h3&gt;
+&lt;h3 id=&quot;behavior-driven-development&quot;&gt;Behavior-driven development&lt;/h3&gt;
 
 &lt;p&gt;BDD is an approach to test-driven development that works from the outside in. A BDD test is described using a language that the business understands (the &lt;a href=&quot;http://martinfowler.com/bliki/UbiquitousLanguage.html&quot;&gt;ubiquitous language&lt;/a&gt;). It then describes the conditions, events and results that make up the desired behavior.&lt;/p&gt;
 
-&lt;h3&gt;Existing tests&lt;/h3&gt;
+&lt;h3 id=&quot;existing-tests&quot;&gt;Existing tests&lt;/h3&gt;
 
-&lt;p&gt;The existing tests written in the previous post were quite repetitive. They were all around what happens to a player's position given some user inputs, such as if the player is at the top of the screen and the gamepad is pushed up, the player shouldn't move any further up.&lt;/p&gt;
+&lt;p&gt;The existing tests written in the previous post were quite repetitive. They were all around what happens to a player’s position given some user inputs, such as if the player is at the top of the screen and the gamepad is pushed up, the player shouldn’t move any further up.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUp
 {
@@ -304,9 +305,9 @@ git config --global mergetool.keepBackup false
 
 &lt;p&gt;A lot of the initial setup and state creation is common across all of the tests. The naming convention used for the test class and method is describing the behaviors appropriately but it is still difficult to scan through the body of the test and immediately see what is happening.&lt;/p&gt;
 
-&lt;h3&gt;BDDfy&lt;/h3&gt;
+&lt;h3 id=&quot;bddfy&quot;&gt;BDDfy&lt;/h3&gt;
 
-&lt;p&gt;I'm going to use a framework called &lt;a href=&quot;http://docs.teststack.net/bddfy/index.html&quot;&gt;BDDfy&lt;/a&gt;, which uses reflection to step through the methods in the test class and execute them in the 'given, when, then' order. Here's a really simple example:&lt;/p&gt;
+&lt;p&gt;I’m going to use a framework called &lt;a href=&quot;http://docs.teststack.net/bddfy/index.html&quot;&gt;BDDfy&lt;/a&gt;, which uses reflection to step through the methods in the test class and execute them in the ‘given, when, then’ order. Here’s a really simple example:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class WhenEnemyIsDestroyedScenario
 {
@@ -338,13 +339,13 @@ git config --global mergetool.keepBackup false
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The benefits in this example aren't huge or immediately compelling, but scanning through the method names makes the intent and structure of the test clear. If there were multiple outcomes, say if the enemy's state changes, then additional &lt;code&gt;Then&lt;/code&gt; steps can be added. Parts of this could be shared as well, such as moving &lt;code&gt;GivenAnEnemyThatIsAlive()&lt;/code&gt; into a &lt;code&gt;GivenAnEnemyThatIsAliveScenarioBase&lt;/code&gt; base class.&lt;/p&gt;
+&lt;p&gt;The benefits in this example aren’t huge or immediately compelling, but scanning through the method names makes the intent and structure of the test clear. If there were multiple outcomes, say if the enemy’s state changes, then additional &lt;code&gt;Then&lt;/code&gt; steps can be added. Parts of this could be shared as well, such as moving &lt;code&gt;GivenAnEnemyThatIsAlive()&lt;/code&gt; into a &lt;code&gt;GivenAnEnemyThatIsAliveScenarioBase&lt;/code&gt; base class.&lt;/p&gt;
 
 &lt;p&gt;BDD is a great way of revealing intent and increasing the value of the test suite, and BDDfy in particular gives us an easy implementation of BDD in a way that makes our test suites composable.&lt;/p&gt;
 
 &lt;p&gt;Install BDDfy using the package manager console with &lt;code&gt;install-package TestStack.BDDfy&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h3&gt;Reconstructing the first test&lt;/h3&gt;
+&lt;h3 id=&quot;reconstructing-the-first-test&quot;&gt;Reconstructing the first test&lt;/h3&gt;
 
 &lt;p&gt;The tests are already in a consistent arrange/act/assert format. Rename the &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUp&lt;/code&gt; class to &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt;, because the name of the test class is going to be the &lt;code&gt;When&lt;/code&gt; part of the BDD style test.&lt;/p&gt;
 
@@ -379,7 +380,7 @@ public void GivenThePlayer()
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The other tests set the other boundaries so as I convert them I'll add their boundaries to this shared method.&lt;/p&gt;
+&lt;p&gt;The other tests set the other boundaries so as I convert them I’ll add their boundaries to this shared method.&lt;/p&gt;
 
 &lt;p&gt;I like to prefix my class variables with an underscore. You should too, so fix the old references from &lt;code&gt;player&lt;/code&gt; to &lt;code&gt;_player&lt;/code&gt; then extract out the &lt;code&gt;AndGivenThePlayerIsAtTheTopOfTheScreen()&lt;/code&gt; and &lt;code&gt;AndGivenTheThumbstickIsFullyUp()&lt;/code&gt; methods.&lt;/p&gt;
 
@@ -409,7 +410,7 @@ public void AndGivenTheThumbstickIsFullyUp()
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;ThenThePositionIsNotChanged()&lt;/code&gt; method should now just be the position assertion. The name of the method already follows BDDfy's naming convention so it will be executed last.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;ThenThePositionIsNotChanged()&lt;/code&gt; method should now just be the position assertion. The name of the method already follows BDDfy’s naming convention so it will be executed last.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public void ThenThePositionIsNotChanged()
 {
@@ -419,11 +420,11 @@ public void AndGivenTheThumbstickIsFullyUp()
 
 &lt;p&gt;Running the test is successful so we can move on.&lt;/p&gt;
 
-&lt;h3&gt;Creating a scenario base&lt;/h3&gt;
+&lt;h3 id=&quot;creating-a-scenario-base&quot;&gt;Creating a scenario base&lt;/h3&gt;
 
 &lt;p&gt;You may have noticed that although the test is now broken into easy to understand chunks, the test itself is now significantly larger than the original single method test. The next step is to extract the common part into a base class.&lt;/p&gt;
 
-&lt;p&gt;The only method I'm going to put into the base class is the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method. There will still be some duplication mainly with the &lt;code&gt;WhenUpdatingThePlayerState&lt;/code&gt; but I would rather be able to see the main steps in each test.&lt;/p&gt;
+&lt;p&gt;The only method I’m going to put into the base class is the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method. There will still be some duplication mainly with the &lt;code&gt;WhenUpdatingThePlayerState&lt;/code&gt; but I would rather be able to see the main steps in each test.&lt;/p&gt;
 
 &lt;p&gt;Create a new class called &lt;code&gt;GivenThePlayerScenarioBase&lt;/code&gt; and move the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method into the new class, making it &lt;code&gt;virtual&lt;/code&gt; along the way. The &lt;code&gt;_player&lt;/code&gt; instance should be moved as well and made protected (and renamed to &lt;code&gt;Player&lt;/code&gt; to match C# naming conventions).&lt;/p&gt;
 
@@ -448,13 +449,13 @@ public void AndGivenTheThumbstickIsFullyUp()
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;I've made the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method virtual because I still want to have a method named &lt;code&gt;GivenThePlayer()&lt;/code&gt; in the concrete scenario class. This is a matter of taste and doesn't affect BDDfy's operation, but it keeps all the steps in the scenario class which I find valuable.&lt;/p&gt;
+&lt;p&gt;I’ve made the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method virtual because I still want to have a method named &lt;code&gt;GivenThePlayer()&lt;/code&gt; in the concrete scenario class. This is a matter of taste and doesn’t affect BDDfy’s operation, but it keeps all the steps in the scenario class which I find valuable.&lt;/p&gt;
 
 &lt;p&gt;Change &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt; to inherit from &lt;code&gt;GivenThePlayerScenarioBase&lt;/code&gt; and rename the &lt;code&gt;_player&lt;/code&gt; references to &lt;code&gt;Player&lt;/code&gt;. The test still passes! Now we can go through the other classes and convert them to the hot new BDD style tests.&lt;/p&gt;
 
-&lt;h3&gt;Wrap-up&lt;/h3&gt;
+&lt;h3 id=&quot;wrap-up&quot;&gt;Wrap-up&lt;/h3&gt;
 
-&lt;p&gt;I won't go through the other conversions but for reference here is the complete &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt; class:&lt;/p&gt;
+&lt;p&gt;I won’t go through the other conversions but for reference here is the complete &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt; class:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario
     : GivenThePlayerScenarioBase
@@ -527,18 +528,18 @@ public void AndGivenTheThumbstickIsFullyUp()
 
 &lt;p&gt;As always you can refer to &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial&quot;&gt;the current source code&lt;/a&gt; or &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b&quot;&gt;the source code as at the finish of this post&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3&gt;Coming up next&lt;/h3&gt;
+&lt;h3 id=&quot;coming-up-next&quot;&gt;Coming up next&lt;/h3&gt;
 
-&lt;p&gt;In my next post I'm going to implement killing the player when it gets hit by an enemy.&lt;/p&gt;
+&lt;p&gt;In my next post I’m going to implement killing the player when it gets hit by an enemy.&lt;/p&gt;
 
-&lt;h3&gt;Resources&lt;/h3&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;Up and Running with MonoGame&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;xUnit tests in a Windows 8.1 Store App&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html&quot;&gt;Adding dependency injection to a MonoGame application&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's original Shooter Game tutorial&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;John Sonmez' Introduction to 2D Programming with XNA (Pluralsight video)&lt;/a&gt; ($)&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;Up and Running with MonoGame&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;xUnit tests in a Windows 8.1 Store App&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html&quot;&gt;Adding dependency injection to a MonoGame application&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s original Shooter Game tutorial&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;John Sonmez’ Introduction to 2D Programming with XNA (Pluralsight video)&lt;/a&gt; ($)&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>
@@ -550,18 +551,17 @@ public void AndGivenTheThumbstickIsFullyUp()
 			<item>
 				<title>MonoGame Shooter - Better boundary detection for the player</title>
 				<description>&lt;ol&gt;
-&lt;li&gt;Better boundary detection for the player&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html&quot;&gt;Converting tests to BDD style&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Better boundary detection for the player&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html&quot;&gt;Converting tests to BDD style&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
-
 
 &lt;p&gt;This is the first post of hopefully many as I learn MonoGame by extending on a &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;tutorial series by Tara Walker&lt;/a&gt;. The source code is available, both &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007&quot;&gt;before&lt;/a&gt; and &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d&quot;&gt;after&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;In this post I walk through adding screen edge detection to the player's ship, using Test-Driven Development practices where possible to keep a high quality of code.&lt;/p&gt;
+&lt;p&gt;In this post I walk through adding screen edge detection to the player’s ship, using Test-Driven Development practices where possible to keep a high quality of code.&lt;/p&gt;
 
-&lt;h3&gt;Changes since last post&lt;/h3&gt;
+&lt;h3 id=&quot;changes-since-last-post&quot;&gt;Changes since last post&lt;/h3&gt;
 
-&lt;p&gt;I have created a &lt;code&gt;Sprite&lt;/code&gt; class, which is the base class for both the &lt;code&gt;Player&lt;/code&gt; class and the &lt;code&gt;Enemy&lt;/code&gt; class. The &lt;code&gt;Sprite&lt;/code&gt; class uses a velocity and maximum speed to calculate the position in each frame. I changed the &lt;code&gt;ViewportWrapper&lt;/code&gt; to expose the &lt;code&gt;Viewport&lt;/code&gt; directly. Turns out the &lt;code&gt;Viewport&lt;/code&gt; object is just a basic &lt;code&gt;struct&lt;/code&gt; without any dependencies, so it should play nice with tests. Because it is a &lt;code&gt;struct&lt;/code&gt;, which is a value type, it can't be directly registered with AutoFac, so I need to keep the &lt;code&gt;IViewport&lt;/code&gt; abstraction. I also added an &lt;code&gt;IDrawMyself&lt;/code&gt; interface. MonoGame has an &lt;code&gt;IDrawable&lt;/code&gt; interface but it comes with some baggage. &lt;code&gt;IDrawMyself&lt;/code&gt; is implemented by &lt;code&gt;IAnimation&lt;/code&gt; and will eventually be implemented by &lt;code&gt;ITexture2D&lt;/code&gt; and &lt;code&gt;IParallaxingBackground&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I have created a &lt;code&gt;Sprite&lt;/code&gt; class, which is the base class for both the &lt;code&gt;Player&lt;/code&gt; class and the &lt;code&gt;Enemy&lt;/code&gt; class. The &lt;code&gt;Sprite&lt;/code&gt; class uses a velocity and maximum speed to calculate the position in each frame. I changed the &lt;code&gt;ViewportWrapper&lt;/code&gt; to expose the &lt;code&gt;Viewport&lt;/code&gt; directly. Turns out the &lt;code&gt;Viewport&lt;/code&gt; object is just a basic &lt;code&gt;struct&lt;/code&gt; without any dependencies, so it should play nice with tests. Because it is a &lt;code&gt;struct&lt;/code&gt;, which is a value type, it can’t be directly registered with AutoFac, so I need to keep the &lt;code&gt;IViewport&lt;/code&gt; abstraction. I also added an &lt;code&gt;IDrawMyself&lt;/code&gt; interface. MonoGame has an &lt;code&gt;IDrawable&lt;/code&gt; interface but it comes with some baggage. &lt;code&gt;IDrawMyself&lt;/code&gt; is implemented by &lt;code&gt;IAnimation&lt;/code&gt; and will eventually be implemented by &lt;code&gt;ITexture2D&lt;/code&gt; and &lt;code&gt;IParallaxingBackground&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Implementations of the &lt;code&gt;Sprite&lt;/code&gt; class use events to hook into the &lt;code&gt;Update()&lt;/code&gt; and &lt;code&gt;Draw()&lt;/code&gt; methods. Here is how the &lt;code&gt;Enemy&lt;/code&gt; class updates its &lt;code&gt;IsActive&lt;/code&gt; state before the position is recalculated (the event is subscribed to in the &lt;code&gt;Enemy&lt;/code&gt; constructor):&lt;/p&gt;
 
@@ -581,27 +581,27 @@ public void AndGivenTheThumbstickIsFullyUp()
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;I also moved to a normal Windows (DirectX) project instead of the Windows 8 Store app that I started with. The only reason for this is so I can use a nice mocking library with little friction, as the portable class libraries that you have to use with Windows 8 Store apps don't support &lt;code&gt;Reflection.Emit&lt;/code&gt;. I only had to change one line of code to retarget the game, so I'm pretty sure moving to different targets further along will be straightforward.&lt;/p&gt;
+&lt;p&gt;I also moved to a normal Windows (DirectX) project instead of the Windows 8 Store app that I started with. The only reason for this is so I can use a nice mocking library with little friction, as the portable class libraries that you have to use with Windows 8 Store apps don’t support &lt;code&gt;Reflection.Emit&lt;/code&gt;. I only had to change one line of code to retarget the game, so I’m pretty sure moving to different targets further along will be straightforward.&lt;/p&gt;
 
-&lt;h3&gt;Boundary technique&lt;/h3&gt;
+&lt;h3 id=&quot;boundary-technique&quot;&gt;Boundary technique&lt;/h3&gt;
 
 &lt;p&gt;This technique is borrowed from a &lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;Pluralsight course&lt;/a&gt; by &lt;a href=&quot;https://twitter.com/jsonmez&quot;&gt;John Sonmez&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;Basically we'll describe four rectangles around the boundary we want to limit the player's ship to. In practice these will be slightly inset from the screen and a bit further in on the right hand side, to keep the player from going too far forward.&lt;/p&gt;
+&lt;p&gt;Basically we’ll describe four rectangles around the boundary we want to limit the player’s ship to. In practice these will be slightly inset from the screen and a bit further in on the right hand side, to keep the player from going too far forward.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/sMbJiiv.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;To keep things simple, these rectanges will be 'owned' by the player.&lt;/p&gt;
+&lt;p&gt;To keep things simple, these rectanges will be ‘owned’ by the player.&lt;/p&gt;
 
-&lt;h3&gt;Writing the first test&lt;/h3&gt;
+&lt;h3 id=&quot;writing-the-first-test&quot;&gt;Writing the first test&lt;/h3&gt;
 
 &lt;p&gt;To make sure that everything is working as we expect, the first test will just confirm that given a ship somewhere in the middle of the screen, with no inputs (keys all up, game pad zeroed), when updating the player, the position does not change. This seems like an obvious test but it will give us a lot of guidance on how to write the rest of the tests and possibly make some changes to help testing along.&lt;/p&gt;
 
-&lt;p&gt;I'm using &lt;a href=&quot;https://github.com/xunit/xunit&quot;&gt;xUnit&lt;/a&gt; as the testing framework but the tests should be pretty much the same whether you're using xUnit, NUnit or some other framework. I have a post on &lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;how to set up xUnit for a Windows 8 Store app&lt;/a&gt; if that's what you're targeting. To install xUnit, open the Package Manager Console, select the tests assembly, and enter &lt;code&gt;install-package xunit&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I’m using &lt;a href=&quot;https://github.com/xunit/xunit&quot;&gt;xUnit&lt;/a&gt; as the testing framework but the tests should be pretty much the same whether you’re using xUnit, NUnit or some other framework. I have a post on &lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;how to set up xUnit for a Windows 8 Store app&lt;/a&gt; if that’s what you’re targeting. To install xUnit, open the Package Manager Console, select the tests assembly, and enter &lt;code&gt;install-package xunit&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/trq8uv3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;I will need to create some mock objects to pass into the &lt;code&gt;Player&lt;/code&gt; constructor. I'm going to use &lt;a href=&quot;http://nsubstitute.github.io/&quot;&gt;NSubstitute&lt;/a&gt; (&lt;code&gt;install-package nsubstitute&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;I will need to create some mock objects to pass into the &lt;code&gt;Player&lt;/code&gt; constructor. I’m going to use &lt;a href=&quot;http://nsubstitute.github.io/&quot;&gt;NSubstitute&lt;/a&gt; (&lt;code&gt;install-package nsubstitute&lt;/code&gt;).&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;[Fact]
 public void ThePositionStaysTheSame()
@@ -615,13 +615,13 @@ public void ThePositionStaysTheSame()
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;I'm creating some substitutes for the player's dependencies and constructing the player object. If I run the tests at this point everything is successful, which is good because it means the player class is happy to construct itself using the substituted dependencies.&lt;/p&gt;
+&lt;p&gt;I’m creating some substitutes for the player’s dependencies and constructing the player object. If I run the tests at this point everything is successful, which is good because it means the player class is happy to construct itself using the substituted dependencies.&lt;/p&gt;
 
-&lt;p&gt;Now for the &quot;act&quot; part of the test. I'll set an initial position, then call &lt;code&gt;Update()&lt;/code&gt; with no mocked inputs.&lt;/p&gt;
+&lt;p&gt;Now for the “act” part of the test. I’ll set an initial position, then call &lt;code&gt;Update()&lt;/code&gt; with no mocked inputs.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/I4C0vsi.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Creating these test input states are going to be a problem in the long term. For now I'll just move it into a seperate method. I'll revisit this in the next test.&lt;/p&gt;
+&lt;p&gt;Creating these test input states are going to be a problem in the long term. For now I’ll just move it into a seperate method. I’ll revisit this in the next test.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var initialPosition = new Vector2(4, 5);
 player.Position = initialPosition;
@@ -632,18 +632,18 @@ player.Update(state);
 
 &lt;p&gt;&lt;code&gt;GetInputState()&lt;/code&gt; returns a new &lt;code&gt;ShooterGameInputState&lt;/code&gt; instance with default game pad, keyboard and mouse states and a default &lt;code&gt;GameTime&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;I run my test again to make sure everything is still happy, and I'm pleased to see it fail. It seems that the &lt;code&gt;Player.Update()&lt;/code&gt; method was using some static &lt;code&gt;TouchPanel&lt;/code&gt; calls, which resulted in a null reference exception outside of the game. I simply updated the &lt;code&gt;ShooterGameInputState&lt;/code&gt; class with the touch panel state, although it looks like mocking out touch panel inputs will be problematic unless they are fully abstracted.&lt;/p&gt;
+&lt;p&gt;I run my test again to make sure everything is still happy, and I’m pleased to see it fail. It seems that the &lt;code&gt;Player.Update()&lt;/code&gt; method was using some static &lt;code&gt;TouchPanel&lt;/code&gt; calls, which resulted in a null reference exception outside of the game. I simply updated the &lt;code&gt;ShooterGameInputState&lt;/code&gt; class with the touch panel state, although it looks like mocking out touch panel inputs will be problematic unless they are fully abstracted.&lt;/p&gt;
 
-&lt;p&gt;Now I need to assert that the player didn't move. I'm using &lt;a href=&quot;http://shouldly.github.io/&quot;&gt;Shouldly&lt;/a&gt; as the assertions library (&lt;code&gt;install-package shouldly&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;Now I need to assert that the player didn’t move. I’m using &lt;a href=&quot;http://shouldly.github.io/&quot;&gt;Shouldly&lt;/a&gt; as the assertions library (&lt;code&gt;install-package shouldly&lt;/code&gt;).&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;player.Position.ShouldBe(initialPosition);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;My test passes! I make sure the comparison is working by testing the position against &lt;code&gt;Vector2.Zero&lt;/code&gt; (because I can't trust the tests quite yet).&lt;/p&gt;
+&lt;p&gt;My test passes! I make sure the comparison is working by testing the position against &lt;code&gt;Vector2.Zero&lt;/code&gt; (because I can’t trust the tests quite yet).&lt;/p&gt;
 
-&lt;h3&gt;Testing the player's movement&lt;/h3&gt;
+&lt;h3 id=&quot;testing-the-players-movement&quot;&gt;Testing the player’s movement&lt;/h3&gt;
 
-&lt;p&gt;If the left thumbstick is fully up and left, with the player's default speed of 8, the player should move up 8 and left 8 after one update (note that this isn't actually true, read on for an explanation). This will be the second test.&lt;/p&gt;
+&lt;p&gt;If the left thumbstick is fully up and left, with the player’s default speed of 8, the player should move up 8 and left 8 after one update (note that this isn’t actually true, read on for an explanation). This will be the second test.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class WhenLeftThumbStickFullyLeftAndUp
 {
@@ -654,7 +654,7 @@ player.Update(state);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;I don't want to simply copy the player initialization code, especially since I know I'm going to write a pile of these tests. So I'm going to extract out the creation using the &lt;a href=&quot;http://martinfowler.com/bliki/ObjectMother.html&quot;&gt;Object Mother&lt;/a&gt; pattern.&lt;/p&gt;
+&lt;p&gt;I don’t want to simply copy the player initialization code, especially since I know I’m going to write a pile of these tests. So I’m going to extract out the creation using the &lt;a href=&quot;http://martinfowler.com/bliki/ObjectMother.html&quot;&gt;Object Mother&lt;/a&gt; pattern.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public static partial class ObjectMother
 {
@@ -684,7 +684,7 @@ player.Update(state);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The nested classes are so we can add to the object mothers and use the same naming convention as the object's namespace. If managed properly, the Object Mother pattern can scale out to hundreds of builders with a consistent interface, allowing a high amount of control using the domain language but keeping a very high level of code reuse.&lt;/p&gt;
+&lt;p&gt;The nested classes are so we can add to the object mothers and use the same naming convention as the object’s namespace. If managed properly, the Object Mother pattern can scale out to hundreds of builders with a consistent interface, allowing a high amount of control using the domain language but keeping a very high level of code reuse.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var player = ObjectMother.Sprites.PlayerSprite.Players.Default.Build();
 
@@ -692,7 +692,7 @@ var initialPosition = new Vector2(4, 5);
 player.Position = initialPosition;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;I'm also going to move the input state creation into an object mother but I'll add an entry point to set the left thumbstick position. I'll add an object mother for &lt;code&gt;GamePadState&lt;/code&gt; since that's what will be passed into the input state. Here is the builder part:&lt;/p&gt;
+&lt;p&gt;I’m also going to move the input state creation into an object mother but I’ll add an entry point to set the left thumbstick position. I’ll add an object mother for &lt;code&gt;GamePadState&lt;/code&gt; since that’s what will be passed into the input state. Here is the builder part:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class GamePadStateBuilder
     : BuilderFor&amp;lt;GamePadState&amp;gt;
@@ -712,7 +712,7 @@ player.Position = initialPosition;
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;BuilderFor&lt;/code&gt; class has some 'magic' to let you record the builder configuration using a &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs&quot;&gt;DIY fluent interface&lt;/a&gt;. Here's next part of the test, creating the input state with the left gamepad stick fully up and right. Note that thumbstick vector's Y value is &lt;em&gt;positive&lt;/em&gt; in the &lt;em&gt;up&lt;/em&gt; direction and &lt;em&gt;negative&lt;/em&gt; in the &lt;em&gt;down&lt;/em&gt; direction, which is the opposite to the screen, which decreases to zero at you approach the top of the screen.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;BuilderFor&lt;/code&gt; class has some ‘magic’ to let you record the builder configuration using a &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs&quot;&gt;DIY fluent interface&lt;/a&gt;. Here’s next part of the test, creating the input state with the left gamepad stick fully up and right. Note that thumbstick vector’s Y value is &lt;em&gt;positive&lt;/em&gt; in the &lt;em&gt;up&lt;/em&gt; direction and &lt;em&gt;negative&lt;/em&gt; in the &lt;em&gt;down&lt;/em&gt; direction, which is the opposite to the screen, which decreases to zero at you approach the top of the screen.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var gamePadState = ObjectMother.Input.GamePadStates.Default
     .WithLeftThumbstick(new Vector2(1, 1))
@@ -722,18 +722,18 @@ var state = ObjectMother.Core.ShooterGameInputStates.Default
     .Build();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;With that I add the 'act' and 'assert' parts of the test:&lt;/p&gt;
+&lt;p&gt;With that I add the ‘act’ and ‘assert’ parts of the test:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;player.Update(state);
 
 player.Position.ShouldBe(initialPosition + new Vector2(player.Speed, -player.Speed));
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;When running this I found something interesting about the game pad thumbsticks. When creating the &lt;code&gt;GamePadThumbSticks&lt;/code&gt; object used to represent the thumbsticks, a static value &lt;code&gt;GamePadThumbSticks.GateType&lt;/code&gt; is used to normalize the input value. The default gate is &lt;code&gt;Round&lt;/code&gt;, which gates the position to a circular shape. Stand back, I'm going to do some math.&lt;/p&gt;
+&lt;p&gt;When running this I found something interesting about the game pad thumbsticks. When creating the &lt;code&gt;GamePadThumbSticks&lt;/code&gt; object used to represent the thumbsticks, a static value &lt;code&gt;GamePadThumbSticks.GateType&lt;/code&gt; is used to normalize the input value. The default gate is &lt;code&gt;Round&lt;/code&gt;, which gates the position to a circular shape. Stand back, I’m going to do some math.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/azB0IGU.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;So the thumbstick at full extension to the top right is actually &lt;code&gt;(0.7071, 0.7071)&lt;/code&gt;, so the player sprite will move &lt;code&gt;8 * 0.7071&lt;/code&gt; pixels per update in the X and Y axes. I'll update the test accordingly:&lt;/p&gt;
+&lt;p&gt;So the thumbstick at full extension to the top right is actually &lt;code&gt;(0.7071, 0.7071)&lt;/code&gt;, so the player sprite will move &lt;code&gt;8 * 0.7071&lt;/code&gt; pixels per update in the X and Y axes. I’ll update the test accordingly:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;player.Update(state);
 
@@ -745,9 +745,9 @@ var changeInPosition = new Vector2(
 player.Position.ShouldBe(initialPosition + changeInPosition);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This test finally passes. This revealed something about the keyboard, mouse and d-pad inputs which I hadn't noticed. When those inputs are triggering diagonal movement my player is moving with a velocity of &lt;code&gt;(1, 1)&lt;/code&gt;, which is significantly faster than the thumbpad's velocity of &lt;code&gt;(0.7071, 0.7071)&lt;/code&gt;. This will eventually have to be corrected.&lt;/p&gt;
+&lt;p&gt;This test finally passes. This revealed something about the keyboard, mouse and d-pad inputs which I hadn’t noticed. When those inputs are triggering diagonal movement my player is moving with a velocity of &lt;code&gt;(1, 1)&lt;/code&gt;, which is significantly faster than the thumbpad’s velocity of &lt;code&gt;(0.7071, 0.7071)&lt;/code&gt;. This will eventually have to be corrected.&lt;/p&gt;
 
-&lt;h3&gt;Configuring the player's boundaries&lt;/h3&gt;
+&lt;h3 id=&quot;configuring-the-players-boundaries&quot;&gt;Configuring the player’s boundaries&lt;/h3&gt;
 
 &lt;p&gt;I want to be able to configure parts of the player. To be able to unit test the player I need to be able to set the configuration outside of the player class. I could do this by passing things into the constructor:&lt;/p&gt;
 
@@ -766,7 +766,7 @@ player.Position.ShouldBe(initialPosition + changeInPosition);
 new Player(contentManager, viewport, ..., playerConfiguration);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Because I'm creating the player using Autofac I can make this more generic and let the runtime configuration be baked in. The sprite's width and height should also be in the configuration, because determining width and height using the animation is going to be messy for unit tests.&lt;/p&gt;
+&lt;p&gt;Because I’m creating the player using Autofac I can make this more generic and let the runtime configuration be baked in. The sprite’s width and height should also be in the configuration, because determining width and height using the animation is going to be messy for unit tests.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public interface IPlayerConfiguration
 {
@@ -791,7 +791,7 @@ public class PlayerConfiguration : IPlayerConfiguration, IRegistering
 
 &lt;p&gt;By the way, the boundaries are going to be like padding. The player class will calculate the actual boundaries using the viewport later on.&lt;/p&gt;
 
-&lt;p&gt;I need to add the new player configuration to the player's object mother's &lt;code&gt;PlayerBuilder&lt;/code&gt; class:&lt;/p&gt;
+&lt;p&gt;I need to add the new player configuration to the player’s object mother’s &lt;code&gt;PlayerBuilder&lt;/code&gt; class:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class PlayerBuilder
     : BuilderFor&amp;lt;Player&amp;gt;
@@ -880,9 +880,9 @@ public class PlayerConfiguration : IPlayerConfiguration, IRegistering
 
 &lt;p&gt;I also need to provide the player with a sensible viewport in the tests. To do this I created an &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs&quot;&gt;object mother for the viewport&lt;/a&gt; and added a &lt;code&gt;WithViewport()&lt;/code&gt; method to the player object mother.&lt;/p&gt;
 
-&lt;h3&gt;Testing the left boundary&lt;/h3&gt;
+&lt;h3 id=&quot;testing-the-left-boundary&quot;&gt;Testing the left boundary&lt;/h3&gt;
 
-&lt;p&gt;I'm guessing that the easiest boundaries to test will be the left and top, since I don't have to worry about the size of the viewport yet. So my first test will be, with a left boundary of 10, with the player sitting on that boundary, with the the thumbstick to the left, the player's X position doesn't change.&lt;/p&gt;
+&lt;p&gt;I’m guessing that the easiest boundaries to test will be the left and top, since I don’t have to worry about the size of the viewport yet. So my first test will be, with a left boundary of 10, with the player sitting on that boundary, with the the thumbstick to the left, the player’s X position doesn’t change.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnLeftBoundaryWithLeftThumbStickFullyLeft
 {
@@ -912,7 +912,7 @@ public class PlayerConfiguration : IPlayerConfiguration, IRegistering
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Initially this fails because the boundary isn't implemented:&lt;/p&gt;
+&lt;p&gt;Initially this fails because the boundary isn’t implemented:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;Shouldly.ChuckedAWobblyplayer.Position.X
         should be
@@ -959,7 +959,7 @@ Position += new Vector2(deltaX, deltaY);
 &lt;pre&gt;&lt;code&gt;Position += new Vector2(deltaX, deltaY);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt; with:&lt;/p&gt;
+&lt;p&gt;with:   &lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var newPosition = Position + new Vector2(deltaX, deltaY);
 if (CheckNewPosition(newPosition))
@@ -976,7 +976,7 @@ if (CheckNewPosition(newPosition))
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;When I run the game, the player now can't be moved at all. I need to change the &lt;code&gt;CheckNewPosition&lt;/code&gt; method to use the boundaries:&lt;/p&gt;
+&lt;p&gt;When I run the game, the player now can’t be moved at all. I need to change the &lt;code&gt;CheckNewPosition&lt;/code&gt; method to use the boundaries:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;protected override bool CheckNewPosition(Vector2 newPosition)
 {
@@ -1007,7 +1007,7 @@ if (CheckNewPosition(newPosition))
     ScaledHeight);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The destination rectangle (the rectangle the sprite is being drawn at) is shifted by half the height and width, so the origin of the sprite is the center of the animation. This actually makes sense, so I need to change my logic to suit. The player's &lt;code&gt;GetBounds()&lt;/code&gt; method is changed to this:&lt;/p&gt;
+&lt;p&gt;The destination rectangle (the rectangle the sprite is being drawn at) is shifted by half the height and width, so the origin of the sprite is the center of the animation. This actually makes sense, so I need to change my logic to suit. The player’s &lt;code&gt;GetBounds()&lt;/code&gt; method is changed to this:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public override Rectangle GetBounds()
 {
@@ -1044,7 +1044,7 @@ protected Rectangle GetBoundsAt(Vector2 position)
 
 &lt;p&gt;My tests still pass because the player has a default width and height of 0. I will update my tests to make sure the width of the player is handled correctly but this will do for now. When I start the game I need to push the starting position right a bit so I can move the player.&lt;/p&gt;
 
-&lt;h3&gt;Testing the other boundaries&lt;/h3&gt;
+&lt;h3 id=&quot;testing-the-other-boundaries&quot;&gt;Testing the other boundaries&lt;/h3&gt;
 
 &lt;p&gt;Implementing and testing the other boundaries is basically a rinse and repeat of the left boundary. Here is the test for the right boundary:&lt;/p&gt;
 
@@ -1092,20 +1092,19 @@ protected Rectangle GetBoundsAt(Vector2 position)
 };
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h3&gt;Coming up next&lt;/h3&gt;
+&lt;h3 id=&quot;coming-up-next&quot;&gt;Coming up next&lt;/h3&gt;
 
-&lt;p&gt;In my next post I'm going to refactor my tests to use a BDD format, which will simplify the tests and reduce some duplication. That will pave the way for implementing killing the player when it gets hit by an enemy.&lt;/p&gt;
+&lt;p&gt;In my next post I’m going to refactor my tests to use a BDD format, which will simplify the tests and reduce some duplication. That will pave the way for implementing killing the player when it gets hit by an enemy.&lt;/p&gt;
 
-&lt;h3&gt;Resources&lt;/h3&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;Up and Running with MonoGame&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;xUnit tests in a Windows 8.1 Store App&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html&quot;&gt;Adding dependency injection to a MonoGame application&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's original Shooter Game tutorial&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;John Sonmez' Introduction to 2D Programming with XNA (Pluralsight video)&lt;/a&gt; ($)&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;Up and Running with MonoGame&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;xUnit tests in a Windows 8.1 Store App&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html&quot;&gt;Adding dependency injection to a MonoGame application&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s original Shooter Game tutorial&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;John Sonmez’ Introduction to 2D Programming with XNA (Pluralsight video)&lt;/a&gt; ($)&lt;/li&gt;
 &lt;/ul&gt;
-
 </description>
 				<pubDate>Sat, 07 Jun 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html</link>
@@ -1114,41 +1113,40 @@ protected Rectangle GetBoundsAt(Vector2 position)
 		
 			<item>
 				<title>Adding dependency injection to a MonoGame application</title>
-				<description>&lt;h3&gt;Disclaimer&lt;/h3&gt;
+				<description>&lt;h3 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h3&gt;
 
 &lt;p&gt;&lt;strong&gt;This is not a tutorial!&lt;/strong&gt; This is an explanation of how I have modified the code that I ended up with at the end of the tutorials. These modifications lay the foundation for a cleaner codebase that I will extend upon in the future.&lt;/p&gt;
 
-&lt;p&gt;For people who are familiar with dependency injection, and more familiar with dependency injection than MonoGame, &lt;strong&gt;this is not for you&lt;/strong&gt;. This is a basic explanation of how I pulled apart a slightly complex spaghetti-coded solution and added dependency injection to make it easier to work with in the future. Think of it as 'using dependency injection in a MonoGame app for people that don't do dependency injection but have started to learn MonoGame'. &lt;strong&gt;I am only learning MonoGame&lt;/strong&gt;. These probably aren't best practices and will have numerous issues that expert game developers will laugh at. &lt;em&gt;Laugh away, experts.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;For people who are familiar with dependency injection, and more familiar with dependency injection than MonoGame, &lt;strong&gt;this is not for you&lt;/strong&gt;. This is a basic explanation of how I pulled apart a slightly complex spaghetti-coded solution and added dependency injection to make it easier to work with in the future. Think of it as ‘using dependency injection in a MonoGame app for people that don’t do dependency injection but have started to learn MonoGame’. &lt;strong&gt;I am only learning MonoGame&lt;/strong&gt;. These probably aren’t best practices and will have numerous issues that expert game developers will laugh at. &lt;em&gt;Laugh away, experts.&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;This also doesn't go into dependency injection in a lot of detail. There are plenty of places to learn about dependency injection but I found the best way to learn was to work in a basic system that uses dependency injection. Which I'm conveniently building here. You're welcome.&lt;/p&gt;
+&lt;p&gt;This also doesn’t go into dependency injection in a lot of detail. There are plenty of places to learn about dependency injection but I found the best way to learn was to work in a basic system that uses dependency injection. Which I’m conveniently building here. You’re welcome.&lt;/p&gt;
 
-&lt;h3&gt;Building a Shooter Game&lt;/h3&gt;
+&lt;h3 id=&quot;building-a-shooter-game&quot;&gt;Building a Shooter Game&lt;/h3&gt;
 
-&lt;p&gt;I worked my way through all six of &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's &quot;Building a Shooter Game&quot;&lt;/a&gt; tutorials, but the series ends abruptly and hasn't been updated for nine months. So I'm going to continue with my experimenting with the game, and I'll try to document the process as I go.&lt;/p&gt;
+&lt;p&gt;I worked my way through all six of &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s “Building a Shooter Game”&lt;/a&gt; tutorials, but the series ends abruptly and hasn’t been updated for nine months. So I’m going to continue with my experimenting with the game, and I’ll try to document the process as I go.&lt;/p&gt;
 
-&lt;p&gt;If you want to play along (sorry) you can either go through Tara's tutorials then tackle this yourself, or download my solution either &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36&quot;&gt;before&lt;/a&gt; or &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007&quot;&gt;after&lt;/a&gt; these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to &lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;install and configure MonoGame with Visual Studio&lt;/a&gt; before starting.&lt;/p&gt;
+&lt;p&gt;If you want to play along (sorry) you can either go through Tara’s tutorials then tackle this yourself, or download my solution either &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36&quot;&gt;before&lt;/a&gt; or &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007&quot;&gt;after&lt;/a&gt; these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to &lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;install and configure MonoGame with Visual Studio&lt;/a&gt; before starting.&lt;/p&gt;
 
 &lt;p&gt;The first thing I wanted to do is to refactor the code so I can use dependency injection. I have two reasons for this:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Refactoring and dependency injection will clean up a lot of the dependencies through the project&lt;/li&gt;
-&lt;li&gt;Math is hard, and to be able to easily unit test my calculations I need the cleaner dependencies&lt;/li&gt;
+  &lt;li&gt;Refactoring and dependency injection will clean up a lot of the dependencies through the project&lt;/li&gt;
+  &lt;li&gt;Math is hard, and to be able to easily unit test my calculations I need the cleaner dependencies&lt;/li&gt;
 &lt;/ul&gt;
 
+&lt;h3 id=&quot;math-is-hard-dependency-injection-is-easy&quot;&gt;Math is hard, dependency injection is easy&lt;/h3&gt;
 
-&lt;h3&gt;Math is hard, dependency injection is easy&lt;/h3&gt;
-
-&lt;p&gt;I started by adding Autofac to the &lt;code&gt;Win8ShooterGame&lt;/code&gt; solution - the solution that contains all of the game code. This is a Windows 8 Store App. Autofac should work whether you're targeting Win 8 store apps, Windows desktop games, or Windows Phone 8. I'm not sure about iOS but it might also work for Android, Linux and Mac OS X if you're targeting those platforms.&lt;/p&gt;
+&lt;p&gt;I started by adding Autofac to the &lt;code&gt;Win8ShooterGame&lt;/code&gt; solution - the solution that contains all of the game code. This is a Windows 8 Store App. Autofac should work whether you’re targeting Win 8 store apps, Windows desktop games, or Windows Phone 8. I’m not sure about iOS but it might also work for Android, Linux and Mac OS X if you’re targeting those platforms.&lt;/p&gt;
 
 &lt;p&gt;Then I had to decide where the DI container was going to be configured and live. The &lt;code&gt;Main()&lt;/code&gt; method is usually a good place, but in a MonoGame application the &lt;code&gt;Main()&lt;/code&gt; method just calls a factory that creates the game instance and runs it. There are no obvious entry points to configure the game. So I decided to do the configuration in the game instance itself. In my repo this is the &lt;code&gt;ShooterGame&lt;/code&gt; class.&lt;/p&gt;
 
-&lt;p&gt;Initially I wanted to put the configuration in the game class's constructor. It already had the initial configuration and seemed like the obvious choice. However due to the game's lifecycle, few of the things I need to configure Autofac with exist in the constructor. In fact the best place I found was in the &lt;code&gt;LoadContent()&lt;/code&gt; method. By this stage the constructor and &lt;code&gt;Initialize()&lt;/code&gt; methods have already been executed. Here's the basic game lifecycle for reference:&lt;/p&gt;
+&lt;p&gt;Initially I wanted to put the configuration in the game class’s constructor. It already had the initial configuration and seemed like the obvious choice. However due to the game’s lifecycle, few of the things I need to configure Autofac with exist in the constructor. In fact the best place I found was in the &lt;code&gt;LoadContent()&lt;/code&gt; method. By this stage the constructor and &lt;code&gt;Initialize()&lt;/code&gt; methods have already been executed. Here’s the basic game lifecycle for reference:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;ShooterGame() -&amp;gt; Initialize() -&amp;gt; LoadContent() -&amp;gt; Update() -&amp;gt; Draw() -&amp;gt; UnloadContent()
                                        ^------------/               
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This seems a little late to be configuring the container so I hope this won't come back to bite me later, but it's working fine for now. Here is my trimmed down constructor:&lt;/p&gt;
+&lt;p&gt;This seems a little late to be configuring the container so I hope this won’t come back to bite me later, but it’s working fine for now. Here is my trimmed down constructor:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public ShooterGame()
 {
@@ -1156,9 +1154,9 @@ protected Rectangle GetBoundsAt(Vector2 position)
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Here's something interesting. Note that I still need the constructor to create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; instance. This instance isn't actually directly used anywhere in the code - I could remove it and the project would still compile, but as soon as I try to run it I get an exception:&lt;/p&gt;
+&lt;p&gt;Here’s something interesting. Note that I still need the constructor to create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; instance. This instance isn’t actually directly used anywhere in the code - I could remove it and the project would still compile, but as soon as I try to run it I get an exception:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;An unhandled exception of type 'System.InvalidOperationException' occurred in MonoGame.Framework.DLL
+&lt;pre&gt;&lt;code&gt;An unhandled exception of type &#39;System.InvalidOperationException&#39; occurred in MonoGame.Framework.DLL
 Additional information: No Graphics Device Manager
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1166,23 +1164,23 @@ Additional information: No Graphics Device Manager
 
 &lt;pre&gt;&lt;code&gt;public GraphicsDeviceManager(Game game)
 {
-    if (game == null)
-        throw new ArgumentNullException(&quot;The game cannot be null!&quot;);
-    this._game = game;
-    this._supportedOrientations = DisplayOrientation.Default;
-    this._preferredBackBufferWidth = Math.Max(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
-    this._preferredBackBufferHeight = Math.Min(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
-    this._preferredBackBufferFormat = SurfaceFormat.Color;
-    this._preferredDepthStencilFormat = DepthFormat.Depth24;
-    this._synchronizedWithVerticalRetrace = true;
-    if (this._game.Services.GetService(typeof (IGraphicsDeviceManager)) != null)
-        throw new ArgumentException(&quot;Graphics Device Manager Already Present&quot;);
-    this._game.Services.AddService(typeof (IGraphicsDeviceManager), (object) this);
-    this._game.Services.AddService(typeof (IGraphicsDeviceService), (object) this);
+	if (game == null)
+		throw new ArgumentNullException(&quot;The game cannot be null!&quot;);
+	this._game = game;
+	this._supportedOrientations = DisplayOrientation.Default;
+	this._preferredBackBufferWidth = Math.Max(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
+	this._preferredBackBufferHeight = Math.Min(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
+	this._preferredBackBufferFormat = SurfaceFormat.Color;
+	this._preferredDepthStencilFormat = DepthFormat.Depth24;
+	this._synchronizedWithVerticalRetrace = true;
+	if (this._game.Services.GetService(typeof (IGraphicsDeviceManager)) != null)
+		throw new ArgumentException(&quot;Graphics Device Manager Already Present&quot;);
+	this._game.Services.AddService(typeof (IGraphicsDeviceManager), (object) this);
+	this._game.Services.AddService(typeof (IGraphicsDeviceService), (object) this);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The last two lines assign &lt;code&gt;this&lt;/code&gt; - the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; - back to the game. This constructor has side effects. I'm sure there's reasons for this very nasty piece of work but I would rather not know them. The result is I can't create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; anywhere except for in the game's constructor.&lt;/p&gt;
+&lt;p&gt;The last two lines assign &lt;code&gt;this&lt;/code&gt; - the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; - back to the game. This constructor has side effects. I’m sure there’s reasons for this very nasty piece of work but I would rather not know them. The result is I can’t create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; anywhere except for in the game’s constructor.&lt;/p&gt;
 
 &lt;p&gt;Moving on.&lt;/p&gt;
 
@@ -1193,7 +1191,7 @@ Additional information: No Graphics Device Manager
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This hasn't changed. It enables the free drag gesture to light up on touch, and calls the &lt;code&gt;base.Initialize()&lt;/code&gt; method. It seems that a lot of inherited classes need to call the base method. In my opinion this design is a bit fragile and another good reason to replace it with some abstractions.&lt;/p&gt;
+&lt;p&gt;This hasn’t changed. It enables the free drag gesture to light up on touch, and calls the &lt;code&gt;base.Initialize()&lt;/code&gt; method. It seems that a lot of inherited classes need to call the base method. In my opinion this design is a bit fragile and another good reason to replace it with some abstractions.&lt;/p&gt;
 
 &lt;p&gt;Now here are the first few lines of my new &lt;code&gt;LoadContent()&lt;/code&gt; method:&lt;/p&gt;
 
@@ -1209,17 +1207,17 @@ Additional information: No Graphics Device Manager
     //...
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;code&gt;AutofacConfig&lt;/code&gt; is a new class that I've created in the &lt;code&gt;Configuration&lt;/code&gt; folder. I'll go through it soon. The &lt;code&gt;Register()&lt;/code&gt; method returns an &lt;code&gt;IContainer&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;AutofacConfig&lt;/code&gt; is a new class that I’ve created in the &lt;code&gt;Configuration&lt;/code&gt; folder. I’ll go through it soon. The &lt;code&gt;Register()&lt;/code&gt; method returns an &lt;code&gt;IContainer&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class ShooterGame : Game
 {
-    // ...
+	// ...
     private IContainer _container;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This container is then used to resolve the parts of the game. I'll go through the rest of the &lt;code&gt;LoadContent()&lt;/code&gt; method at the end of this post.&lt;/p&gt;
+&lt;p&gt;This container is then used to resolve the parts of the game. I’ll go through the rest of the &lt;code&gt;LoadContent()&lt;/code&gt; method at the end of this post.&lt;/p&gt;
 
-&lt;h3&gt;Configuring Autofac&lt;/h3&gt;
+&lt;h3 id=&quot;configuring-autofac&quot;&gt;Configuring Autofac&lt;/h3&gt;
 
 &lt;p&gt;Here is the entire Autofac configuration class and registration method:&lt;/p&gt;
 
@@ -1250,17 +1248,17 @@ Additional information: No Graphics Device Manager
 &lt;pre&gt;&lt;code&gt;builder.RegisterInstance(new SpriteBatch(game.GraphicsDevice)).AsSelf();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Previously the &lt;code&gt;spriteBatch&lt;/code&gt; was created in the game's &lt;code&gt;LoadContent()&lt;/code&gt; method. Autofac is being configured in the &lt;code&gt;LoadContent()&lt;/code&gt; method, so this is at the same stage in the application lifecycle. We tell Autofac to provide the created sprite batch instance whenever any component requests a sprite batch instance. This avoids having to pass the sprite batch object to anything that wants to draw itself. It also avoids keeping a reference to the sprite batch in the game object itself. There are some extra abstractions around the sprite batch and other objects which I will discuss below.&lt;/p&gt;
+&lt;p&gt;Previously the &lt;code&gt;spriteBatch&lt;/code&gt; was created in the game’s &lt;code&gt;LoadContent()&lt;/code&gt; method. Autofac is being configured in the &lt;code&gt;LoadContent()&lt;/code&gt; method, so this is at the same stage in the application lifecycle. We tell Autofac to provide the created sprite batch instance whenever any component requests a sprite batch instance. This avoids having to pass the sprite batch object to anything that wants to draw itself. It also avoids keeping a reference to the sprite batch in the game object itself. There are some extra abstractions around the sprite batch and other objects which I will discuss below.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;builder.RegisterInstance(game.Content).AsSelf();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This line tells Autofac to pass the &lt;code&gt;game.Content&lt;/code&gt; instance whenever any component requests a &lt;code&gt;ContentManager&lt;/code&gt; instance. This avoids having to pass &lt;code&gt;Content&lt;/code&gt; around wherever anything wants to load up a texture or a sound, or to have to do all of the loading in the game class's &lt;code&gt;LoadContent()&lt;/code&gt; method then pass the loaded textures or sounds around the application.&lt;/p&gt;
+&lt;p&gt;This line tells Autofac to pass the &lt;code&gt;game.Content&lt;/code&gt; instance whenever any component requests a &lt;code&gt;ContentManager&lt;/code&gt; instance. This avoids having to pass &lt;code&gt;Content&lt;/code&gt; around wherever anything wants to load up a texture or a sound, or to have to do all of the loading in the game class’s &lt;code&gt;LoadContent()&lt;/code&gt; method then pass the loaded textures or sounds around the application.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;builder.RegisterInstance(game.GraphicsDevice).AsSelf();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This does the same thing for the game's &lt;code&gt;GraphicDevice&lt;/code&gt; instance.&lt;/p&gt;
+&lt;p&gt;This does the same thing for the game’s &lt;code&gt;GraphicDevice&lt;/code&gt; instance.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
     .Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IRegistering&amp;gt;())
@@ -1268,7 +1266,7 @@ Additional information: No Graphics Device Manager
     .InstancePerLifetimeScope();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This part is a bit more complicated. I'll go through it line by line.&lt;/p&gt;
+&lt;p&gt;This part is a bit more complicated. I’ll go through it line by line.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
 &lt;/code&gt;&lt;/pre&gt;
@@ -1278,7 +1276,7 @@ Additional information: No Graphics Device Manager
 &lt;pre&gt;&lt;code&gt;.Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IRegistering&amp;gt;())
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This limits the search to types that implement the &lt;code&gt;IRegistering&lt;/code&gt; interface - I'll explain this more later.&lt;/p&gt;
+&lt;p&gt;This limits the search to types that implement the &lt;code&gt;IRegistering&lt;/code&gt; interface - I’ll explain this more later.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;.AsImplementedInterfaces()
 &lt;/code&gt;&lt;/pre&gt;
@@ -1288,13 +1286,13 @@ Additional information: No Graphics Device Manager
 &lt;pre&gt;&lt;code&gt;.InstancePerLifetimeScope();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This registers the types as a single instance per the scope of the container's lifetime. The lifetime is only a consideration if you resolve dependencies within nested lifetime scopes. So far for this application there is only ever going to be a single scope, so the instances are essentially singletons - the same instance of a &lt;code&gt;Foo&lt;/code&gt; will be provided to all components that request it.&lt;/p&gt;
+&lt;p&gt;This registers the types as a single instance per the scope of the container’s lifetime. The lifetime is only a consideration if you resolve dependencies within nested lifetime scopes. So far for this application there is only ever going to be a single scope, so the instances are essentially singletons - the same instance of a &lt;code&gt;Foo&lt;/code&gt; will be provided to all components that request it.&lt;/p&gt;
 
-&lt;h3&gt;Components and dependencies&lt;/h3&gt;
+&lt;h3 id=&quot;components-and-dependencies&quot;&gt;Components and dependencies&lt;/h3&gt;
 
-&lt;p&gt;It's probably a good time to step back and look at what is meant by 'injecting a dependency' and how components can 'request' dependencies.&lt;/p&gt;
+&lt;p&gt;It’s probably a good time to step back and look at what is meant by ‘injecting a dependency’ and how components can ‘request’ dependencies.&lt;/p&gt;
 
-&lt;p&gt;At the top level our game class gets a container - &lt;code&gt;IContainer&lt;/code&gt;. This container is used to resolve the game's high level dependencies:&lt;/p&gt;
+&lt;p&gt;At the top level our game class gets a container - &lt;code&gt;IContainer&lt;/code&gt;. This container is used to resolve the game’s high level dependencies:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var player = _container.Resolve&amp;lt;IPlayer&amp;gt;()
 &lt;/code&gt;&lt;/pre&gt;
@@ -1303,33 +1301,33 @@ Additional information: No Graphics Device Manager
 
 &lt;pre&gt;&lt;code&gt;public class Player : IPlayer, IRegistering
 {
-    //...
+	//...
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;It creates an instance of the player, automatically resolving the dependencies required by the &lt;code&gt;Player&lt;/code&gt; class's constructor.&lt;/p&gt;
+&lt;p&gt;It creates an instance of the player, automatically resolving the dependencies required by the &lt;code&gt;Player&lt;/code&gt; class’s constructor.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public Player(IContentManager contentManager, IViewport viewport, IAnimationFactory animationFactory)
 {
-    //...
+	//...
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This means that the game class doesn't have to know anything about the player class's dependencies, and the player class doesn't rely on particular implementations of its dependencies. Because the player class depends on interfaces, we can easily pass in mock dependencies in our unit tests.&lt;/p&gt;
+&lt;p&gt;This means that the game class doesn’t have to know anything about the player class’s dependencies, and the player class doesn’t rely on particular implementations of its dependencies. Because the player class depends on interfaces, we can easily pass in mock dependencies in our unit tests.&lt;/p&gt;
 
 &lt;p&gt;Resolving a dependency using Autofac is slower than just creating a player manually, like &lt;code&gt;var player = new Player(_contentManager, this.Viewport, ....&lt;/code&gt;. But a player is only created once at the start of the game, so the cost is negligible. For things that need to be created multiple times within the game loop (such as projectiles or particles) we will use other methods like factories, which will speed up object creation while still allowing dependency injection.&lt;/p&gt;
 
-&lt;h3&gt;The IRegistering interface&lt;/h3&gt;
+&lt;h3 id=&quot;the-iregistering-interface&quot;&gt;The IRegistering interface&lt;/h3&gt;
 
-&lt;p&gt;The &lt;code&gt;IRegistering&lt;/code&gt; interface is an empty interface that is used as a marker for classes that should be registered with Autofac. Without using a marker interface, the registration will either apply across all types found in the assembly (which could include types that shouldn't be registered) or each type needs to be registered manually.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;IRegistering&lt;/code&gt; interface is an empty interface that is used as a marker for classes that should be registered with Autofac. Without using a marker interface, the registration will either apply across all types found in the assembly (which could include types that shouldn’t be registered) or each type needs to be registered manually.&lt;/p&gt;
 
-&lt;p&gt;The scanning registration process isn't free but it would generally take much less than a second. This is another once-off cost of speed at the start of the application.&lt;/p&gt;
+&lt;p&gt;The scanning registration process isn’t free but it would generally take much less than a second. This is another once-off cost of speed at the start of the application.&lt;/p&gt;
 
-&lt;h3&gt;Abstractions and wrappers&lt;/h3&gt;
+&lt;h3 id=&quot;abstractions-and-wrappers&quot;&gt;Abstractions and wrappers&lt;/h3&gt;
 
 &lt;p&gt;I introduced Autofac to the application so I could easily manage some changes to the code that will support adding unit tests.&lt;/p&gt;
 
-&lt;p&gt;An example is the &lt;code&gt;Player&lt;/code&gt; class. I eventually want to add some tests around the player's screen edge detection. To do that before my changes I would have to pass in test implementations of the content manager, sprite batch and viewport. I don't know if those implementations would work in a test harness without actually creating a window with its own game loop. I avoid this complexity by passing in abstractions. For example, I could create a mock content manager that will provide a mock texture, without having to configure a real content manager with a texture.&lt;/p&gt;
+&lt;p&gt;An example is the &lt;code&gt;Player&lt;/code&gt; class. I eventually want to add some tests around the player’s screen edge detection. To do that before my changes I would have to pass in test implementations of the content manager, sprite batch and viewport. I don’t know if those implementations would work in a test harness without actually creating a window with its own game loop. I avoid this complexity by passing in abstractions. For example, I could create a mock content manager that will provide a mock texture, without having to configure a real content manager with a texture.&lt;/p&gt;
 
-&lt;p&gt;MonoGame doesn't have any abstractions around the main elements, which makes testing using the build in system difficult. For example, the &lt;code&gt;SpriteBatch&lt;/code&gt; class has a hard dependency on &lt;code&gt;GraphicsDevice&lt;/code&gt; and none of the methods are virtual, so even subclassing wouldn't work. To get around these dependencies with my own game objects, I've created a small set of wrapper classes with interfaces to replace the MonoGame elements.&lt;/p&gt;
+&lt;p&gt;MonoGame doesn’t have any abstractions around the main elements, which makes testing using the build in system difficult. For example, the &lt;code&gt;SpriteBatch&lt;/code&gt; class has a hard dependency on &lt;code&gt;GraphicsDevice&lt;/code&gt; and none of the methods are virtual, so even subclassing wouldn’t work. To get around these dependencies with my own game objects, I’ve created a small set of wrapper classes with interfaces to replace the MonoGame elements.&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;ContentManagerWrapper&lt;/code&gt; is a wrapper for the MonoGame &lt;code&gt;ContentManager&lt;/code&gt; class:&lt;/p&gt;
 
@@ -1351,7 +1349,7 @@ Additional information: No Graphics Device Manager
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;It exposes the &lt;code&gt;Load()&lt;/code&gt; method, which just calls the underlying &lt;code&gt;ContentManager&lt;/code&gt; instance's method and returns the &lt;code&gt;Texture2D&lt;/code&gt; result wrapped in a &lt;code&gt;Texture2DWrapper&lt;/code&gt;, which implements &lt;code&gt;ITexture2D&lt;/code&gt;. It has the &lt;code&gt;IRegistering&lt;/code&gt; marker interface so it will be automatically registered with Autofac when the application starts, and the &lt;code&gt;ContentManager&lt;/code&gt; instance is provided by Autofac from the registered instance (the one belonging to the game). It also implements the &lt;code&gt;IContentManager&lt;/code&gt; interface:&lt;/p&gt;
+&lt;p&gt;It exposes the &lt;code&gt;Load()&lt;/code&gt; method, which just calls the underlying &lt;code&gt;ContentManager&lt;/code&gt; instance’s method and returns the &lt;code&gt;Texture2D&lt;/code&gt; result wrapped in a &lt;code&gt;Texture2DWrapper&lt;/code&gt;, which implements &lt;code&gt;ITexture2D&lt;/code&gt;. It has the &lt;code&gt;IRegistering&lt;/code&gt; marker interface so it will be automatically registered with Autofac when the application starts, and the &lt;code&gt;ContentManager&lt;/code&gt; instance is provided by Autofac from the registered instance (the one belonging to the game). It also implements the &lt;code&gt;IContentManager&lt;/code&gt; interface:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public interface IContentManager
 {
@@ -1363,7 +1361,7 @@ Additional information: No Graphics Device Manager
 
 &lt;pre&gt;&lt;code&gt;public class Player : IPlayer, IRegistering
 {
-    //...
+	//...
 
     public Player(IContentManager contentManager, IViewport viewport, IAnimationFactory animationFactory)
     {
@@ -1377,7 +1375,7 @@ Additional information: No Graphics Device Manager
 // ...
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Here the &lt;code&gt;Player&lt;/code&gt; class has a dependency on an &lt;code&gt;IContentManager&lt;/code&gt; instance. When the application is running Autofac will provide an instance of &lt;code&gt;ContentManagerWrapper&lt;/code&gt;, which just wraps the usual content manager, primed with the application's content. Calling &lt;code&gt;contentManager.Load()&lt;/code&gt; calls the underlying content manager.&lt;/p&gt;
+&lt;p&gt;Here the &lt;code&gt;Player&lt;/code&gt; class has a dependency on an &lt;code&gt;IContentManager&lt;/code&gt; instance. When the application is running Autofac will provide an instance of &lt;code&gt;ContentManagerWrapper&lt;/code&gt;, which just wraps the usual content manager, primed with the application’s content. Calling &lt;code&gt;contentManager.Load()&lt;/code&gt; calls the underlying content manager.&lt;/p&gt;
 
 &lt;p&gt;If I want to write some unit tests around the &lt;code&gt;Player&lt;/code&gt; class I can just pass in a mock implementation of &lt;code&gt;IContentManager&lt;/code&gt;, without having to worry about any underlying implementations. Here is an example using &lt;a href=&quot;http://nsubstitute.github.io/&quot;&gt;NSubstitute&lt;/a&gt;:&lt;/p&gt;
 
@@ -1391,13 +1389,13 @@ var player = new Player(contentManager, ...);
 // test the Player instance
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;At the moment only enough is abstracted and exposed to get the game running. I've also created factories and abstractions for the the &lt;code&gt;Animation&lt;/code&gt; and &lt;code&gt;ParallaxingBackground&lt;/code&gt; classes created in the original tutorials.&lt;/p&gt;
+&lt;p&gt;At the moment only enough is abstracted and exposed to get the game running. I’ve also created factories and abstractions for the the &lt;code&gt;Animation&lt;/code&gt; and &lt;code&gt;ParallaxingBackground&lt;/code&gt; classes created in the original tutorials.&lt;/p&gt;
 
-&lt;h3&gt;LoadContent() and the game structure&lt;/h3&gt;
+&lt;h3 id=&quot;loadcontent-and-the-game-structure&quot;&gt;LoadContent() and the game structure&lt;/h3&gt;
 
-&lt;p&gt;Dependency injection simplifies the game's structure because it takes care of injecting all of the dependencies of the different components that build up the game. The game class itself is the only place where Autofac is directly used to instantiate the elements that the game class is directly responsible for.&lt;/p&gt;
+&lt;p&gt;Dependency injection simplifies the game’s structure because it takes care of injecting all of the dependencies of the different components that build up the game. The game class itself is the only place where Autofac is directly used to instantiate the elements that the game class is directly responsible for.&lt;/p&gt;
 
-&lt;p&gt;The game's content is loaded in the &lt;code&gt;LoadContent()&lt;/code&gt; method as before, except for the addition of Autofac and the use of some factories:&lt;/p&gt;
+&lt;p&gt;The game’s content is loaded in the &lt;code&gt;LoadContent()&lt;/code&gt; method as before, except for the addition of Autofac and the use of some factories:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;protected override void LoadContent()
 {
@@ -1421,7 +1419,7 @@ var player = new Player(contentManager, ...);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;code&gt;_enemyFactory&lt;/code&gt; is a factory used to create 'enemies' without using Autofac 'in the loop'. The &lt;code&gt;EnemyFactory&lt;/code&gt; implementation loads up the texture once, then creates a new enemy object when requested.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;_enemyFactory&lt;/code&gt; is a factory used to create ‘enemies’ without using Autofac ‘in the loop’. The &lt;code&gt;EnemyFactory&lt;/code&gt; implementation loads up the texture once, then creates a new enemy object when requested.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class EnemyFactory : IEnemyFactory, IRegistering
 {
@@ -1456,15 +1454,15 @@ var player = new Player(contentManager, ...);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Note we're still using the core MonoGame objects in places. I would expect the &lt;code&gt;enemy.SetPosition&lt;/code&gt; call to eventually happen in the factory.&lt;/p&gt;
+&lt;p&gt;Note we’re still using the core MonoGame objects in places. I would expect the &lt;code&gt;enemy.SetPosition&lt;/code&gt; call to eventually happen in the factory.&lt;/p&gt;
 
 &lt;p&gt;The rest of the application structure is pretty much the same as before, exept that it is calling the abstractions rather than directly talking to the underlying MonoGame objects.&lt;/p&gt;
 
-&lt;h3&gt;Conclusion&lt;/h3&gt;
+&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
 
-&lt;p&gt;I've added dependency injection to a simple game that was going to be potentially difficult to maintain and extend, and the resulting abstractions should be easier to work with and refactor further down the track. I've also made it a lot easier to add unit tests.&lt;/p&gt;
+&lt;p&gt;I’ve added dependency injection to a simple game that was going to be potentially difficult to maintain and extend, and the resulting abstractions should be easier to work with and refactor further down the track. I’ve also made it a lot easier to add unit tests.&lt;/p&gt;
 
-&lt;p&gt;My next post in this series will be around adding unit tests to the &lt;code&gt;Player&lt;/code&gt; class, to help with some issues with viewport edge detection that have been plaguing me. I'll then add the ability for the ship to fire, then start displaying and keeping track of the score.&lt;/p&gt;
+&lt;p&gt;My next post in this series will be around adding unit tests to the &lt;code&gt;Player&lt;/code&gt; class, to help with some issues with viewport edge detection that have been plaguing me. I’ll then add the ability for the ship to fire, then start displaying and keeping track of the score.&lt;/p&gt;
 
 &lt;p&gt;Oh, and here is an obligatory screenshot:&lt;/p&gt;
 
@@ -1487,7 +1485,7 @@ var player = new Player(contentManager, ...);
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/kbtfRkN.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;I also use the &lt;a href=&quot;https://github.com/xunit/resharper-xunit&quot;&gt;xUnit.net Test Support&lt;/a&gt; test runner for Resharper, which has a pre-release version that supports xUnit 2. Install that by opening Resharper's &lt;code&gt;Extension Manager&lt;/code&gt; and selecting &lt;code&gt;Include Prerelease&lt;/code&gt; before searching for xUnit:&lt;/p&gt;
+&lt;p&gt;I also use the &lt;a href=&quot;https://github.com/xunit/resharper-xunit&quot;&gt;xUnit.net Test Support&lt;/a&gt; test runner for Resharper, which has a pre-release version that supports xUnit 2. Install that by opening Resharper’s &lt;code&gt;Extension Manager&lt;/code&gt; and selecting &lt;code&gt;Include Prerelease&lt;/code&gt; before searching for xUnit:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/eIp0x04.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
@@ -1504,111 +1502,109 @@ var player = new Player(contentManager, ...);
 				<title>Up and Running with MonoGame</title>
 				<description>&lt;p&gt;&lt;em&gt;or, XNA is dead! Long live XNA!&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;WARNING!&lt;/strong&gt; Learning in the open&amp;trade;! There are a few moving parts when starting with MonoGame, so I'm just documenting the steps I took.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;WARNING!&lt;/strong&gt; Learning in the open™! There are a few moving parts when starting with MonoGame, so I’m just documenting the steps I took.&lt;/p&gt;
 
-&lt;h3&gt;Microsoft XNA&lt;/h3&gt;
+&lt;h3 id=&quot;microsoft-xna&quot;&gt;Microsoft XNA&lt;/h3&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Microsoft_XNA&quot;&gt;Microsoft XNA&lt;/a&gt; is/was a set of tools and a frameworks that provided a relatively easy way to create games using the CLR, sitting on top of DirectX.&lt;/p&gt;
 
-&lt;p&gt;Microsoft stopped active development of XNA around 2011, and last year &lt;a href=&quot;http://www.polygon.com/2013/1/31/3939230/microsoft-has-no-plans-for-future-versions-of-xna-software&quot;&gt;it became obvious&lt;/a&gt; that XNA would be retired. The former XNA home page now redirects to MSDN's &lt;a href=&quot;http://msdn.microsoft.com/dn629515&quot;&gt;Games development page&lt;/a&gt;, which (apart from not actually having any useful information about game development on Microsoft's platforms) is mainly spruiking Microsoft's partnership with &lt;a href=&quot;http://unity3d.com/&quot;&gt;Unity&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Microsoft stopped active development of XNA around 2011, and last year &lt;a href=&quot;http://www.polygon.com/2013/1/31/3939230/microsoft-has-no-plans-for-future-versions-of-xna-software&quot;&gt;it became obvious&lt;/a&gt; that XNA would be retired. The former XNA home page now redirects to MSDN’s &lt;a href=&quot;http://msdn.microsoft.com/dn629515&quot;&gt;Games development page&lt;/a&gt;, which (apart from not actually having any useful information about game development on Microsoft’s platforms) is mainly spruiking Microsoft’s partnership with &lt;a href=&quot;http://unity3d.com/&quot;&gt;Unity&lt;/a&gt;.&lt;/p&gt;
 
-&lt;h3&gt;A quick note about Unity&lt;/h3&gt;
+&lt;h3 id=&quot;a-quick-note-about-unity&quot;&gt;A quick note about Unity&lt;/h3&gt;
 
-&lt;p&gt;Unity is both a game engine and a component oriented game development environment, with Mono-based scripting using C#. What this means for the average code monkey such as I is that when firing up Unity you are confronted with a drafting board. No comforting &lt;code&gt;10 PRINT 'HELLO, WORLD!'&lt;/code&gt; here folks.&lt;/p&gt;
+&lt;p&gt;Unity is both a game engine and a component oriented game development environment, with Mono-based scripting using C#. What this means for the average code monkey such as I is that when firing up Unity you are confronted with a drafting board. No comforting &lt;code&gt;10 PRINT &#39;HELLO, WORLD!&#39;&lt;/code&gt; here folks.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/zjQrmdlR9ZCM/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;h3&gt;MonoGame to the rescue!&lt;/h3&gt;
+&lt;h3 id=&quot;monogame-to-the-rescue&quot;&gt;MonoGame to the rescue!&lt;/h3&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://monogame.net&quot;&gt;MonoGame&lt;/a&gt; is an open-source rewrite of XNA 4 (the last version), using the same namespaces and with support for both DirectX 11 and OpenGL. Since it is based on Mono, it allows applications to be written and ported to most platforms, including PS4, Wii U, Xbox 360, Windows Desktop and Store, Android, iOS, Windows Phone, Mac OSX and Linux. The big player missing from that list is Xbox One, which currently does not support applications targeting the CLR.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt; Unity apparently &lt;em&gt;will&lt;/em&gt; (soon) support Xbox One so I guess it deploys native code, much like how Xamarin can deploy native code written in C# to target platforms that don't support the CLR such as iOS. Which begs the question, why not just do the same in MonoGame? A question for smarter cookies than myself. &lt;code&gt;&amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt; Unity apparently &lt;em&gt;will&lt;/em&gt; (soon) support Xbox One so I guess it deploys native code, much like how Xamarin can deploy native code written in C# to target platforms that don’t support the CLR such as iOS. Which begs the question, why not just do the same in MonoGame? A question for smarter cookies than myself. &lt;code&gt;&amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;MonoGame also has some official M$ love with several games published by Microsoft Studio.&lt;/p&gt;
 
 &lt;p&gt;Given these weighty credentials, I put the key in the ignition and powered up for a full throttle hello world.&lt;/p&gt;
 
-&lt;h3&gt;Obligatory false start&lt;/h3&gt;
+&lt;h3 id=&quot;obligatory-false-start&quot;&gt;Obligatory false start&lt;/h3&gt;
 
-&lt;p&gt;Don't try this at home.&lt;/p&gt;
+&lt;p&gt;Don’t try this at home.&lt;/p&gt;
 
-&lt;p&gt;I cloned the &lt;a href=&quot;https://github.com/Mono-Game/MonoGame.Samples&quot;&gt;samples repo&lt;/a&gt; and just tried to run the &lt;code&gt;WindowsDX&lt;/code&gt; (Windows desktop DirectX) solution. No dice. Couldn't copy resource files, couldn't resolve all the referenced assemblies.&lt;/p&gt;
+&lt;p&gt;I cloned the &lt;a href=&quot;https://github.com/Mono-Game/MonoGame.Samples&quot;&gt;samples repo&lt;/a&gt; and just tried to run the &lt;code&gt;WindowsDX&lt;/code&gt; (Windows desktop DirectX) solution. No dice. Couldn’t copy resource files, couldn’t resolve all the referenced assemblies.&lt;/p&gt;
 
 &lt;p&gt;MonoGame has some &lt;a href=&quot;http://www.nuget.org/packages/MonoGame/&quot;&gt;NuGet packages&lt;/a&gt; so I pulled them into the project. I got it building but still had the same problem with the resource files.&lt;/p&gt;
 
-&lt;p&gt;I then installed MonoGame using the installer. This let me create new projects using MonoGame's templates, so I created a new project and started following &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;this tutorial series&lt;/a&gt; by &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/&quot;&gt;Tara Walker&lt;/a&gt;. The first part went well, which involved showing a simple image on a surface. The tutorial links to an &lt;code&gt;.xnb&lt;/code&gt; file containing the image, which loads correctly. So far so good, I've got stuff on the screen, I'm a game developer.&lt;/p&gt;
+&lt;p&gt;I then installed MonoGame using the installer. This let me create new projects using MonoGame’s templates, so I created a new project and started following &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;this tutorial series&lt;/a&gt; by &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/&quot;&gt;Tara Walker&lt;/a&gt;. The first part went well, which involved showing a simple image on a surface. The tutorial links to an &lt;code&gt;.xnb&lt;/code&gt; file containing the image, which loads correctly. So far so good, I’ve got stuff on the screen, I’m a game developer.&lt;/p&gt;
 
 &lt;p&gt;The third part of the series goes through creating that &lt;code&gt;.xnb&lt;/code&gt; file from a source image. This is where I became unstuck.&lt;/p&gt;
 
-&lt;h3&gt;Content Pipeline&lt;/h3&gt;
+&lt;h3 id=&quot;content-pipeline&quot;&gt;Content Pipeline&lt;/h3&gt;
 
 &lt;p&gt;Images and other assets are relatively easy to use in the web and desktop application space. To add an image to a web site, you drop a JPEG, PNG or GIF onto a server and add a &lt;code&gt;&amp;lt;img&amp;gt;&lt;/code&gt; tag to your markup. To add an image to a WPF, Store, Phone or WinForms application, you add the file to the project as an embedded resource and then use it in a similar way.&lt;/p&gt;
 
 &lt;p&gt;Asset management is a much bigger part of game development. There are textures, meshes, sound effects, background music, graphics shader programs and probably a heap of other stuff that I will never understand, and it these assets need to be available to the game code in a way that is efficient and managable. For example, a texture used for a wall may have a number of resolutions, ranging from a very small resolution without much detail for display at a distance to a very large resolution with a lot of detail for display at a short distance.&lt;/p&gt;
 
-&lt;p&gt;The content pipeline is a preprocessing step that takes the game assets and converts them into a format suitable for the engine. In MonoGame's (and XNA's) case, this is the &lt;code&gt;.xnb&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;The content pipeline is a preprocessing step that takes the game assets and converts them into a format suitable for the engine. In MonoGame’s (and XNA’s) case, this is the &lt;code&gt;.xnb&lt;/code&gt; file.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt; Note that I don't have a full knowledge of the reasons and techniques used in the content pipeline, this is just my understanding of the ideas.&lt;code&gt;&amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt; Note that I don’t have a full knowledge of the reasons and techniques used in the content pipeline, this is just my understanding of the ideas.&lt;code&gt; &amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;MonoGame doesn't have its own content pipeline management system, although it does use XNA's &lt;code&gt;.xnb&lt;/code&gt; format. For this reason we have to use XNA.&lt;/p&gt;
+&lt;p&gt;MonoGame doesn’t have its own content pipeline management system, although it does use XNA’s &lt;code&gt;.xnb&lt;/code&gt; format. For this reason we have to use XNA.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Lhpog1k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;XNA 4 only targets VS2010 so it can be tricky to get it working with VS2013. I found a nice post &lt;a href=&quot;http://rbwhitaker.wikidot.com/setting-up-xna&quot;&gt;here&lt;/a&gt;, Mr Whitaker has written a &lt;a href=&quot;https://bitbucket.org/rbwhitaker/xna-beyond-vs-2010/downloads/XnaFor2013.ps1&quot;&gt;script&lt;/a&gt; that downloads the XNA installer and sets it up in whatever versions of Visual Studio from 2010 to 2013 that it can find. I went through the script manually and got it going. Here are the steps:&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;Download the installer from here: &lt;a href=&quot;http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe&quot;&gt;http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Close Visual Studio&lt;/li&gt;
-&lt;li&gt;Open a shell where the installer was downloaded&lt;/li&gt;
-&lt;li&gt;Execute: &lt;code&gt;XNAGS40_setup.exe /extract:XNA&lt;/code&gt;, this will extract the installer files into a &lt;code&gt;.\XNA&lt;/code&gt; folder&lt;/li&gt;
-&lt;li&gt;Browse to that folder&lt;/li&gt;
-&lt;li&gt;Run &lt;code&gt;redists.msi&lt;/code&gt;, this installs some more installers to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio&lt;/code&gt;. Yo dawg.&lt;/li&gt;
-&lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio\Setup&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Execute: &lt;code&gt;XLiveRedist.msi&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio\Redist\XNA FX Redist&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Execute: &lt;code&gt;xnaliveproxy.msi&lt;/code&gt; (this actually failed for me but it hasn't caused any dramas so far)&lt;/li&gt;
-&lt;li&gt;Execute: &lt;code&gt;xnags_platform_tools.msi&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Execute: &lt;code&gt;xnags_shared.msi&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Execute: &lt;code&gt;xnags_visualstudio.msi&lt;/code&gt;. This installs the VS2010 extension, we'll get back to this one.&lt;/li&gt;
-&lt;li&gt;Browse back to the &lt;code&gt;XNA&lt;/code&gt; folder in step 4 (possibly order is important)&lt;/li&gt;
-&lt;li&gt;Execute: &lt;code&gt;arpentry.msi&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\Extensions\Microsoft&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Find the &lt;code&gt;XNA Game Studio 4.0&lt;/code&gt; folder. This is the VS2010 extension installed in step 13.&lt;/li&gt;
-&lt;li&gt;Copy the folder to &lt;code&gt;X:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\Extensions\Microsoft&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Edit the &lt;code&gt;extension.vsixmanifest&lt;/code&gt; file in the new &lt;code&gt;XNA Game Studio 4.0&lt;/code&gt; folder (this is in &lt;code&gt;Program Files&lt;/code&gt; so you'll probably need to open notepad as an administrator)&lt;/li&gt;
-&lt;li&gt;Find the line that says &lt;code&gt;Version=&quot;10.0&quot;&lt;/code&gt; and change it to &lt;code&gt;Version=&quot;12.0&quot;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Insert a new line after that line and add &lt;code&gt;&amp;lt;Edition&amp;gt;WDExpress&amp;lt;/Edition&amp;gt;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Clear your cached extensions by browsing to &lt;code&gt;%userprofile%\AppData\Local\Microsoft\VisualStudio\12.0&lt;/code&gt; and deleting the &lt;code&gt;Extensions&lt;/code&gt; folder&lt;/li&gt;
-&lt;li&gt;Restart Visual Studio&lt;/li&gt;
+  &lt;li&gt;Download the installer from here: &lt;a href=&quot;http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe&quot;&gt;http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Close Visual Studio&lt;/li&gt;
+  &lt;li&gt;Open a shell where the installer was downloaded&lt;/li&gt;
+  &lt;li&gt;Execute: &lt;code&gt;XNAGS40_setup.exe /extract:XNA&lt;/code&gt;, this will extract the installer files into a &lt;code&gt;.\XNA&lt;/code&gt; folder&lt;/li&gt;
+  &lt;li&gt;Browse to that folder&lt;/li&gt;
+  &lt;li&gt;Run &lt;code&gt;redists.msi&lt;/code&gt;, this installs some more installers to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio&lt;/code&gt;. Yo dawg.&lt;/li&gt;
+  &lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio\Setup&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Execute: &lt;code&gt;XLiveRedist.msi&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio\Redist\XNA FX Redist&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Execute: &lt;code&gt;xnaliveproxy.msi&lt;/code&gt; (this actually failed for me but it hasn’t caused any dramas so far)&lt;/li&gt;
+  &lt;li&gt;Execute: &lt;code&gt;xnags_platform_tools.msi&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Execute: &lt;code&gt;xnags_shared.msi&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Execute: &lt;code&gt;xnags_visualstudio.msi&lt;/code&gt;. This installs the VS2010 extension, we’ll get back to this one.&lt;/li&gt;
+  &lt;li&gt;Browse back to the &lt;code&gt;XNA&lt;/code&gt; folder in step 4 (possibly order is important)&lt;/li&gt;
+  &lt;li&gt;Execute: &lt;code&gt;arpentry.msi&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\Extensions\Microsoft&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Find the &lt;code&gt;XNA Game Studio 4.0&lt;/code&gt; folder. This is the VS2010 extension installed in step 13.&lt;/li&gt;
+  &lt;li&gt;Copy the folder to &lt;code&gt;X:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\Extensions\Microsoft&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Edit the &lt;code&gt;extension.vsixmanifest&lt;/code&gt; file in the new &lt;code&gt;XNA Game Studio 4.0&lt;/code&gt; folder (this is in &lt;code&gt;Program Files&lt;/code&gt; so you’ll probably need to open notepad as an administrator)&lt;/li&gt;
+  &lt;li&gt;Find the line that says &lt;code&gt;Version=&quot;10.0&quot;&lt;/code&gt; and change it to &lt;code&gt;Version=&quot;12.0&quot;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Insert a new line after that line and add &lt;code&gt;&amp;lt;Edition&amp;gt;WDExpress&amp;lt;/Edition&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Clear your cached extensions by browsing to &lt;code&gt;%userprofile%\AppData\Local\Microsoft\VisualStudio\12.0&lt;/code&gt; and deleting the &lt;code&gt;Extensions&lt;/code&gt; folder&lt;/li&gt;
+  &lt;li&gt;Restart Visual Studio&lt;/li&gt;
 &lt;/ol&gt;
-
 
 &lt;p&gt;Now when you create a new project you should have XNA Game Studio 4.0 templates available. Create a new &lt;code&gt;Empty Content Project (4.0)&lt;/code&gt; and compile it to make sure the content pipeline is working.&lt;/p&gt;
 
-&lt;h3&gt;Bringing MonoGame back into the picture&lt;/h3&gt;
+&lt;h3 id=&quot;bringing-monogame-back-into-the-picture&quot;&gt;Bringing MonoGame back into the picture&lt;/h3&gt;
 
-&lt;p&gt;As I said above, I also installed the MonoGame binaries, which adds the MonoGame templates to Visual Studio. Download the bits from &lt;a href=&quot;http://www.monogame.net/downloads/&quot;&gt;MonoGame's Downloads page&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;As I said above, I also installed the MonoGame binaries, which adds the MonoGame templates to Visual Studio. Download the bits from &lt;a href=&quot;http://www.monogame.net/downloads/&quot;&gt;MonoGame’s Downloads page&lt;/a&gt;. &lt;/p&gt;
 
-&lt;p&gt;I kept working through &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's tutorial series&lt;/a&gt; and to prove that the content pipeline is working, here's a handy screenshot (&lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/9945c675303c35e61888de6816a5b165c074cada&quot;&gt;Github repo at this revision&lt;/a&gt;):&lt;/p&gt;
+&lt;p&gt;I kept working through &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s tutorial series&lt;/a&gt; and to prove that the content pipeline is working, here’s a handy screenshot (&lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/9945c675303c35e61888de6816a5b165c074cada&quot;&gt;Github repo at this revision&lt;/a&gt;):&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/pE2DmVf.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;h3&gt;Resources&lt;/h3&gt;
+&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://rbwhitaker.wikidot.com/setting-up-xna&quot;&gt;RB Whitaker - Setting up XNA&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://rbwhitaker.wikidot.com/monogame-accessing-the-xna-content-pipeline&quot;&gt;RB Whitaker - Accessing the XNA Content Pipeline&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.monogame.net/documentation/?page=tutorials_md&quot;&gt;MonoGame Tutorials&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker's &quot;Building a Shooter Game&quot; tutorial series, part 1&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://www.monogame.net/downloads/&quot;&gt;MonoGame - Downloads&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Pluralsight ($) (note I haven't watched all of these):
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;Introduction to 2D Game Programming with XNA&lt;/a&gt; by John Sonmez&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=monogame&amp;amp;highlight=john-sonmez_monogame-m1-introduction*4!john-sonmez_monogame-m6-wp7!john-sonmez_monogame-m2-building-pong#monogame-m1-introduction&quot;&gt;Cross Platform Game Development with MonoGame&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial&quot;&gt;My repo going through TW's above tutorial&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://rbwhitaker.wikidot.com/setting-up-xna&quot;&gt;RB Whitaker - Setting up XNA&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://rbwhitaker.wikidot.com/monogame-accessing-the-xna-content-pipeline&quot;&gt;RB Whitaker - Accessing the XNA Content Pipeline&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.monogame.net/documentation/?page=tutorials_md&quot;&gt;MonoGame Tutorials&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s “Building a Shooter Game” tutorial series, part 1&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.monogame.net/downloads/&quot;&gt;MonoGame - Downloads&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Pluralsight ($) (note I haven’t watched all of these):
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;Introduction to 2D Game Programming with XNA&lt;/a&gt; by John Sonmez&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=monogame&amp;amp;highlight=john-sonmez_monogame-m1-introduction*4!john-sonmez_monogame-m6-wp7!john-sonmez_monogame-m2-building-pong#monogame-m1-introduction&quot;&gt;Cross Platform Game Development with MonoGame&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial&quot;&gt;My repo going through TW’s above tutorial&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>
@@ -1618,10 +1614,10 @@ var player = new Player(contentManager, ...);
 			</item>
 		
 			<item>
-				<title>Telerik's WPF RadScheduleView - Double-click to create an appointment gotcha</title>
-				<description>&lt;p&gt;I'm using &lt;a href=&quot;http://www.telerik.com/help/wpf/radscheduleview-overview.html&quot;&gt;Telerik's RadScheduleView&lt;/a&gt; in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.&lt;/p&gt;
+				<title>Telerik&#39;s WPF RadScheduleView - Double-click to create an appointment gotcha</title>
+				<description>&lt;p&gt;I’m using &lt;a href=&quot;http://www.telerik.com/help/wpf/radscheduleview-overview.html&quot;&gt;Telerik’s RadScheduleView&lt;/a&gt; in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.&lt;/p&gt;
 
-&lt;p&gt;&lt;em&gt;Turns out&lt;/em&gt; I had changed my custom appointment subclass's default constructor from &lt;code&gt;public&lt;/code&gt; to &lt;code&gt;protected&lt;/code&gt;. The schedule view needs a public default constructor or it will just silently not create new appointments:&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Turns out&lt;/em&gt; I had changed my custom appointment subclass’s default constructor from &lt;code&gt;public&lt;/code&gt; to &lt;code&gt;protected&lt;/code&gt;. The schedule view needs a public default constructor or it will just silently not create new appointments:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class MyCustomAppointment
 {

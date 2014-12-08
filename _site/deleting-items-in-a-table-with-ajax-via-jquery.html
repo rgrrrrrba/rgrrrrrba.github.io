@@ -55,7 +55,7 @@ $(function(){
         init: function(){
             $('a.delete').live('click', ui.delete_click);
         },
-
+ 
         delete_click: function(){
             link = this;
             $.get(link.href, function(data, status) {
@@ -64,13 +64,14 @@ $(function(){
             return false;
         }
     };
-
+ 
     ui.init();
 });
 &lt;/script&gt;
 </code></pre>
 
 <p>Very basic stuff but it works. It could be jazzed up by fading out the items first or updating a status label. If there is a significant delay between calling the delete action and getting a response the user may not think anything has happened, so perhaps the delete link should change or be disabled.</p>
+
 
 
 

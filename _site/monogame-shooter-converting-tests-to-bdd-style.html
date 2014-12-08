@@ -31,22 +31,21 @@
 
 
 <ol>
-<li><a href="http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html">Better boundary detection for the player</a></li>
-<li>Converting tests to BDD style</li>
+  <li><a href="http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html">Better boundary detection for the player</a></li>
+  <li>Converting tests to BDD style</li>
 </ol>
-
 
 <p>This is the second post of hopefully many as I learn MonoGame by extending on a <a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">tutorial series by Tara Walker</a>. The source code is available, both <a href="https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d">before</a> and <a href="https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b">after</a>.</p>
 
 <p>In this post I convert the player boundary detection tests I wrote in the last post to a behavior-driven development (BDD) style to remove some duplication and simplify the tests.</p>
 
-<h3>Behavior-driven development</h3>
+<h3 id="behavior-driven-development">Behavior-driven development</h3>
 
 <p>BDD is an approach to test-driven development that works from the outside in. A BDD test is described using a language that the business understands (the <a href="http://martinfowler.com/bliki/UbiquitousLanguage.html">ubiquitous language</a>). It then describes the conditions, events and results that make up the desired behavior.</p>
 
-<h3>Existing tests</h3>
+<h3 id="existing-tests">Existing tests</h3>
 
-<p>The existing tests written in the previous post were quite repetitive. They were all around what happens to a player's position given some user inputs, such as if the player is at the top of the screen and the gamepad is pushed up, the player shouldn't move any further up.</p>
+<p>The existing tests written in the previous post were quite repetitive. They were all around what happens to a player’s position given some user inputs, such as if the player is at the top of the screen and the gamepad is pushed up, the player shouldn’t move any further up.</p>
 
 <pre><code>public class WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUp
 {
@@ -83,9 +82,9 @@
 
 <p>A lot of the initial setup and state creation is common across all of the tests. The naming convention used for the test class and method is describing the behaviors appropriately but it is still difficult to scan through the body of the test and immediately see what is happening.</p>
 
-<h3>BDDfy</h3>
+<h3 id="bddfy">BDDfy</h3>
 
-<p>I'm going to use a framework called <a href="http://docs.teststack.net/bddfy/index.html">BDDfy</a>, which uses reflection to step through the methods in the test class and execute them in the 'given, when, then' order. Here's a really simple example:</p>
+<p>I’m going to use a framework called <a href="http://docs.teststack.net/bddfy/index.html">BDDfy</a>, which uses reflection to step through the methods in the test class and execute them in the ‘given, when, then’ order. Here’s a really simple example:</p>
 
 <pre><code>public class WhenEnemyIsDestroyedScenario
 {
@@ -117,13 +116,13 @@
 }
 </code></pre>
 
-<p>The benefits in this example aren't huge or immediately compelling, but scanning through the method names makes the intent and structure of the test clear. If there were multiple outcomes, say if the enemy's state changes, then additional <code>Then</code> steps can be added. Parts of this could be shared as well, such as moving <code>GivenAnEnemyThatIsAlive()</code> into a <code>GivenAnEnemyThatIsAliveScenarioBase</code> base class.</p>
+<p>The benefits in this example aren’t huge or immediately compelling, but scanning through the method names makes the intent and structure of the test clear. If there were multiple outcomes, say if the enemy’s state changes, then additional <code>Then</code> steps can be added. Parts of this could be shared as well, such as moving <code>GivenAnEnemyThatIsAlive()</code> into a <code>GivenAnEnemyThatIsAliveScenarioBase</code> base class.</p>
 
 <p>BDD is a great way of revealing intent and increasing the value of the test suite, and BDDfy in particular gives us an easy implementation of BDD in a way that makes our test suites composable.</p>
 
 <p>Install BDDfy using the package manager console with <code>install-package TestStack.BDDfy</code>.</p>
 
-<h3>Reconstructing the first test</h3>
+<h3 id="reconstructing-the-first-test">Reconstructing the first test</h3>
 
 <p>The tests are already in a consistent arrange/act/assert format. Rename the <code>WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUp</code> class to <code>WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario</code>, because the name of the test class is going to be the <code>When</code> part of the BDD style test.</p>
 
@@ -158,7 +157,7 @@ public void GivenThePlayer()
 }
 </code></pre>
 
-<p>The other tests set the other boundaries so as I convert them I'll add their boundaries to this shared method.</p>
+<p>The other tests set the other boundaries so as I convert them I’ll add their boundaries to this shared method.</p>
 
 <p>I like to prefix my class variables with an underscore. You should too, so fix the old references from <code>player</code> to <code>_player</code> then extract out the <code>AndGivenThePlayerIsAtTheTopOfTheScreen()</code> and <code>AndGivenTheThumbstickIsFullyUp()</code> methods.</p>
 
@@ -188,7 +187,7 @@ public void AndGivenTheThumbstickIsFullyUp()
 }
 </code></pre>
 
-<p>The <code>ThenThePositionIsNotChanged()</code> method should now just be the position assertion. The name of the method already follows BDDfy's naming convention so it will be executed last.</p>
+<p>The <code>ThenThePositionIsNotChanged()</code> method should now just be the position assertion. The name of the method already follows BDDfy’s naming convention so it will be executed last.</p>
 
 <pre><code>public void ThenThePositionIsNotChanged()
 {
@@ -198,11 +197,11 @@ public void AndGivenTheThumbstickIsFullyUp()
 
 <p>Running the test is successful so we can move on.</p>
 
-<h3>Creating a scenario base</h3>
+<h3 id="creating-a-scenario-base">Creating a scenario base</h3>
 
 <p>You may have noticed that although the test is now broken into easy to understand chunks, the test itself is now significantly larger than the original single method test. The next step is to extract the common part into a base class.</p>
 
-<p>The only method I'm going to put into the base class is the <code>GivenThePlayer()</code> method. There will still be some duplication mainly with the <code>WhenUpdatingThePlayerState</code> but I would rather be able to see the main steps in each test.</p>
+<p>The only method I’m going to put into the base class is the <code>GivenThePlayer()</code> method. There will still be some duplication mainly with the <code>WhenUpdatingThePlayerState</code> but I would rather be able to see the main steps in each test.</p>
 
 <p>Create a new class called <code>GivenThePlayerScenarioBase</code> and move the <code>GivenThePlayer()</code> method into the new class, making it <code>virtual</code> along the way. The <code>_player</code> instance should be moved as well and made protected (and renamed to <code>Player</code> to match C# naming conventions).</p>
 
@@ -227,13 +226,13 @@ public void AndGivenTheThumbstickIsFullyUp()
 }
 </code></pre>
 
-<p>I've made the <code>GivenThePlayer()</code> method virtual because I still want to have a method named <code>GivenThePlayer()</code> in the concrete scenario class. This is a matter of taste and doesn't affect BDDfy's operation, but it keeps all the steps in the scenario class which I find valuable.</p>
+<p>I’ve made the <code>GivenThePlayer()</code> method virtual because I still want to have a method named <code>GivenThePlayer()</code> in the concrete scenario class. This is a matter of taste and doesn’t affect BDDfy’s operation, but it keeps all the steps in the scenario class which I find valuable.</p>
 
 <p>Change <code>WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario</code> to inherit from <code>GivenThePlayerScenarioBase</code> and rename the <code>_player</code> references to <code>Player</code>. The test still passes! Now we can go through the other classes and convert them to the hot new BDD style tests.</p>
 
-<h3>Wrap-up</h3>
+<h3 id="wrap-up">Wrap-up</h3>
 
-<p>I won't go through the other conversions but for reference here is the complete <code>WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario</code> class:</p>
+<p>I won’t go through the other conversions but for reference here is the complete <code>WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario</code> class:</p>
 
 <pre><code>public class WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario
     : GivenThePlayerScenarioBase
@@ -306,18 +305,18 @@ public void AndGivenTheThumbstickIsFullyUp()
 
 <p>As always you can refer to <a href="https://github.com/bendetat/monogame-tw-tutorial">the current source code</a> or <a href="https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b">the source code as at the finish of this post</a>.</p>
 
-<h3>Coming up next</h3>
+<h3 id="coming-up-next">Coming up next</h3>
 
-<p>In my next post I'm going to implement killing the player when it gets hit by an enemy.</p>
+<p>In my next post I’m going to implement killing the player when it gets hit by an enemy.</p>
 
-<h3>Resources</h3>
+<h3 id="resources">Resources</h3>
 
 <ul>
-<li><a href="http://bendetat.com/up-and-running-with-monogame.html">Up and Running with MonoGame</a></li>
-<li><a href="http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html">xUnit tests in a Windows 8.1 Store App</a></li>
-<li><a href="http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html">Adding dependency injection to a MonoGame application</a></li>
-<li><a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker's original Shooter Game tutorial</a></li>
-<li><a href="http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">John Sonmez' Introduction to 2D Programming with XNA (Pluralsight video)</a> ($)</li>
+  <li><a href="http://bendetat.com/up-and-running-with-monogame.html">Up and Running with MonoGame</a></li>
+  <li><a href="http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html">xUnit tests in a Windows 8.1 Store App</a></li>
+  <li><a href="http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html">Adding dependency injection to a MonoGame application</a></li>
+  <li><a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s original Shooter Game tutorial</a></li>
+  <li><a href="http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">John Sonmez’ Introduction to 2D Programming with XNA (Pluralsight video)</a> ($)</li>
 </ul>
 
 

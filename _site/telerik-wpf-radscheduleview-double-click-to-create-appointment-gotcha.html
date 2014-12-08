@@ -30,9 +30,9 @@
 
 
 
-<p>I'm using <a href="http://www.telerik.com/help/wpf/radscheduleview-overview.html">Telerik's RadScheduleView</a> in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.</p>
+<p>I’m using <a href="http://www.telerik.com/help/wpf/radscheduleview-overview.html">Telerik’s RadScheduleView</a> in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.</p>
 
-<p><em>Turns out</em> I had changed my custom appointment subclass's default constructor from <code>public</code> to <code>protected</code>. The schedule view needs a public default constructor or it will just silently not create new appointments:</p>
+<p><em>Turns out</em> I had changed my custom appointment subclass’s default constructor from <code>public</code> to <code>protected</code>. The schedule view needs a public default constructor or it will just silently not create new appointments:</p>
 
 <pre><code>public class MyCustomAppointment
 {

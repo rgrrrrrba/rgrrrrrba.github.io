@@ -30,9 +30,9 @@
 
 
 
-<p>Resetting the world refers to resetting a build environment (usually just a database) to a known state. This could include running SSIS scripts to migrate data from existing systems, creating web sites, or setting up dependent services. For a simple system or a system in its infancy it usually just refers to creating or upgrading a database for development, and that is what I'm going to show now. There will be two execution paths here - the first drops any existing database and recreates it from the scripts, and the second just executes any new scripts on an existing database. This technique is taken from several projects that I've worked in at Readify. The scripts are run in a console - Powershell if you know what's good for you :trollface:</p>
+<p>Resetting the world refers to resetting a build environment (usually just a database) to a known state. This could include running SSIS scripts to migrate data from existing systems, creating web sites, or setting up dependent services. For a simple system or a system in its infancy it usually just refers to creating or upgrading a database for development, and that is what I’m going to show now. There will be two execution paths here - the first drops any existing database and recreates it from the scripts, and the second just executes any new scripts on an existing database. This technique is taken from several projects that I’ve worked in at Readify. The scripts are run in a console - Powershell if you know what’s good for you :trollface:</p>
 
-<p><a href="http://dbup.github.io/">DbUp</a> is a fantastic tool for running scripts against a database in a known, repeatable way. In the past I've used a <a href="https://github.com/swxben/Shu-Er/tree/master/ruby/database_migrations">Ruby script</a> to run my migrations but DbUp allows much more integration with the application.</p>
+<p><a href="http://dbup.github.io/">DbUp</a> is a fantastic tool for running scripts against a database in a known, repeatable way. In the past I’ve used a <a href="https://github.com/swxben/Shu-Er/tree/master/ruby/database_migrations">Ruby script</a> to run my migrations but DbUp allows much more integration with the application.</p>
 
 <p>My DbUp scripts are contained in a DLL which is called by the reset/update scripts in development. My database upgrader looks like this:</p>
 
@@ -46,10 +46,10 @@
         {
             var connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringName].ConnectionString;
             var upgrader = DeployChanges.To
-                .SqlDatabase(connectionString)
-                .WithScriptsEmbeddedInAssembly(Assembly.GetAssembly(typeof (DatabaseUpgrader)))
-                .LogTo(upgradeLog ?? new ConsoleUpgradeLog())
-                .Build();
+				.SqlDatabase(connectionString)
+				.WithScriptsEmbeddedInAssembly(Assembly.GetAssembly(typeof (DatabaseUpgrader)))
+				.LogTo(upgradeLog ?? new ConsoleUpgradeLog())
+				.Build();
 
             var result = upgrader.PerformUpgrade();
 
@@ -61,17 +61,17 @@
 
         public static void SetConnectionString(string connectionString)
         {
-            typeof (ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
-                .SetValue(ConfigurationManager.ConnectionStrings, false);
-            ConfigurationManager.ConnectionStrings.Add(new ConnectionStringSettings(ConnectionStringName,
-                connectionString,
-                "System.Data.SqlClient"));
+			typeof (ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
+				.SetValue(ConfigurationManager.ConnectionStrings, false);
+			ConfigurationManager.ConnectionStrings.Add(new ConnectionStringSettings(ConnectionStringName,
+				connectionString,
+				"System.Data.SqlClient"));
         }
     }
 }
 </code></pre>
 
-<p>The <code>SetConnectionString</code> method is used by the reset script below. <code>"xyz"</code> is the name of the connection string to use as defined in the <code>app.config</code> or <code>web.config</code>. This gives a default execution mode that doesn't rely on running the scripts manually. <code>ConsoleUpgradeLog</code> is part of DbUp and an alternative impementation can be passed in. Both of these features will be used when <a href="/dbup-in-appharbor.html">running the DbUp scripts on AppHarbor</a>.</p>
+<p>The <code>SetConnectionString</code> method is used by the reset script below. <code>"xyz"</code> is the name of the connection string to use as defined in the <code>app.config</code> or <code>web.config</code>. This gives a default execution mode that doesn’t rely on running the scripts manually. <code>ConsoleUpgradeLog</code> is part of DbUp and an alternative impementation can be passed in. Both of these features will be used when <a href="/dbup-in-appharbor.html">running the DbUp scripts on AppHarbor</a>.</p>
 
 <p>The script to upgrade an existing database - <code>UpdateTheWorld.bat</code> - is trivial, it just calls the reset script with a flag:</p>
 
@@ -95,7 +95,7 @@ if(!$?) { exit 1; }
 
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SMO") | out-null;
 if(!$?) { 
-    throw "Exception loading SMO";
+	throw "Exception loading SMO";
 }
 
 $dataAssembly = [System.Reflection.Assembly]::LoadFrom("$DataProjectPath\bin\Debug\$DataProjectName.dll") | out-null;
@@ -105,21 +105,21 @@ $SmoServer = New-Object Microsoft.SqlServer.Management.Smo.Server($SqlServer);
 
 if($UpdateOnly -eq $False)
 {
-    if ($SmoServer.Databases[$Database] -eq $null)  
-    {  
-        Write-Host -ForegroundColor Yellow  "Database does not exist";
-    } 
-    else    
-    {
-        Write-Host -ForegroundColor Green  "Dropping database $Database on $SqlServer";
-        $SmoServer.KillDatabase($Database);
-        Write-Host -ForegroundColor Green  "Dropped";
-    }
+	if ($SmoServer.Databases[$Database] -eq $null)  
+	{  
+		Write-Host -ForegroundColor Yellow  "Database does not exist";
+	} 
+	else	
+	{
+		Write-Host -ForegroundColor Green  "Dropping database $Database on $SqlServer";
+		$SmoServer.KillDatabase($Database);
+		Write-Host -ForegroundColor Green  "Dropped";
+	}
 
-    Write-Host -ForegroundColor Green "Recreating Database"
-    $databaseObj = New-Object ('Microsoft.SqlServer.Management.Smo.Database') -argumentlist $SmoServer, $Database;
-    $databaseObj.Create();
-    if(!$?) { exit 1; }
+	Write-Host -ForegroundColor Green "Recreating Database"
+	$databaseObj = New-Object ('Microsoft.SqlServer.Management.Smo.Database') -argumentlist $SmoServer, $Database;
+	$databaseObj.Create();
+	if(!$?) { exit 1; }
 }
 
 Write-Host -ForegroundColor Green "Setting Connection String"
@@ -134,6 +134,7 @@ Write-Host -ForegroundColor Green "Updating Database"
 [ResetTheWorld.DatabaseUpgrader]::Upgrade();
 if(!$?) { exit 1; }
 </code></pre>
+
 
 
 

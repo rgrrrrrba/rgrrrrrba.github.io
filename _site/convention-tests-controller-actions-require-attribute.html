@@ -32,13 +32,12 @@
 
 <p>I looove convention tests. The idea is you have some assumption about the system that you want to test and enforce. In this case, I want all controller actions (bar some exceptions) to be decorated with the <code>AuthorizeAttribute</code>.</p>
 
-<p>I'm using <a href="http://nunit.org/">NUnit</a> for the tests and <a href="http://shouldly.github.io/">Shouldly</a> to help with assertions. I'm also using <a href="http://autofac.org/">Autofac</a>, which shouldn't affect the tests except that it gives me a nice extension method.</p>
+<p>I’m using <a href="http://nunit.org/">NUnit</a> for the tests and <a href="http://shouldly.github.io/">Shouldly</a> to help with assertions. I’m also using <a href="http://autofac.org/">Autofac</a>, which shouldn’t affect the tests except that it gives me a nice extension method.</p>
 
-<h3>Test cases in NUnit</h3>
-
+<h3 id="test-cases-in-nunit">Test cases in NUnit</h3>
 <p>NUnit has a concept of <a href="http://nunit.org/index.php?p=testCase&amp;r=2.6.2">test cases</a> where a <a href="http://nunit.org/index.php?p=testCaseSource&amp;r=2.6.2">test case source</a> provides test casees to a test method. Each test case is executed in the test method as an individual test.</p>
 
-<p>Here's a simple example of a test cases. It tests integers from 1 to 10 and fails on any odd values:</p>
+<p>Here’s a simple example of a test cases. It tests integers from 1 to 10 and fails on any odd values:</p>
 
 <pre><code>public class TestCaseExample
 {
@@ -60,21 +59,20 @@
 
 <p>Note that the <code>TestCases()</code> method needs to be public and the <code>TestCaseSource</code> attribute allows NUnit to find the test case source by name.</p>
 
-<h3>Finding all controller actions</h3>
-
-<p>Convention tests generally use reflection to build up a set of test cases. In this case I want all controller actions. First I find all classes that are <code>Controller</code>s. Then I find all methods in those classes that return something that is an <code>ActionResult</code>. It is a reasonable assumption that all of these methods are the controller actions that I'm interested in:</p>
+<h3 id="finding-all-controller-actions">Finding all controller actions</h3>
+<p>Convention tests generally use reflection to build up a set of test cases. In this case I want all controller actions. First I find all classes that are <code>Controller</code>s. Then I find all methods in those classes that return something that is an <code>ActionResult</code>. It is a reasonable assumption that all of these methods are the controller actions that I’m interested in:</p>
 
 <pre><code>public IEnumerable&lt;TestCaseData&gt; TestCases()
 {
-    return typeof (MainController).Assembly
-        .GetExportedTypes()
-        .Where(t =&gt; t.IsAssignableTo&lt;Controller&gt;())
-        .Where(t =&gt; !t.IsAbstract)
-        .SelectMany(t =&gt; t.GetMethods())
-        .Where(m =&gt; m.ReturnType.IsAssignableTo&lt;ActionResult&gt;())
-        .Select(m =&gt; new TestCaseData(m).SetName(
-            string.Format("{0}.{1}", m.DeclaringType.FullName, m.Name)))
-        .ToArray();
+	return typeof (MainController).Assembly
+		.GetExportedTypes()
+		.Where(t =&gt; t.IsAssignableTo&lt;Controller&gt;())
+		.Where(t =&gt; !t.IsAbstract)
+		.SelectMany(t =&gt; t.GetMethods())
+		.Where(m =&gt; m.ReturnType.IsAssignableTo&lt;ActionResult&gt;())
+		.Select(m =&gt; new TestCaseData(m).SetName(
+			string.Format("{0}.{1}", m.DeclaringType.FullName, m.Name)))
+		.ToArray();
 }
 </code></pre>
 
@@ -82,7 +80,7 @@
 
 <p><code>.Where(t =&gt; t.IsAssignableTo&lt;Controller&gt;())</code> limits the classes to those that subclass <code>Controller</code>. <code>Type.IsAssignableTo</code> is an extension method provided by Autofac which just inverts <code>Type.IsAssignableFrom</code>. This line could be replaced with <code>.Where(t =&gt; typeof(Controller).IsAssignableFrom(t))</code>.</p>
 
-<p><code>.Where(t =&gt; !t.IsAbstract)</code> ignores any classes that are abstract. We're only interested in controllers that could be instantiated. Any methods declared in an abstract base type that don't pass the convention test should be picked up when testing subclasses of the abstract base type.</p>
+<p><code>.Where(t =&gt; !t.IsAbstract)</code> ignores any classes that are abstract. We’re only interested in controllers that could be instantiated. Any methods declared in an abstract base type that don’t pass the convention test should be picked up when testing subclasses of the abstract base type.</p>
 
 <p><code>.SelectMany(t =&gt; t.GetMethods())</code> selects all of the methods (<code>MethodInfo</code>) exposed by the controllers.</p>
 
@@ -90,51 +88,51 @@
 
 <p>Finally each method is bundled in to a <code>TestCaseData</code> instance which allows setting the name of the test case. <code>TestCases()</code> could just return <code>IEnumerable&lt;MethodInfo&gt;</code> but finding failing test sources would be a problem.</p>
 
-<h3>Testing the cases</h3>
-
+<h3 id="testing-the-cases">Testing the cases</h3>
 <p>Ease test case is tested seperately. All that needs to be done is check that the method is decorated with the required attribute.</p>
 
 <pre><code>[Test]
 [TestCase("TestCases")]
 public void MethodShouldHaveAuthorizeAttribute(MethodInfo methodInfo)
 {
-    methodInfo
-        .GetCustomAttributes&lt;AuthorizeAttribute&gt;()
-        .ShouldNotBeEmpty();
+	methodInfo
+		.GetCustomAttributes&lt;AuthorizeAttribute&gt;()
+		.ShouldNotBeEmpty();
 }
 </code></pre>
 
-<h3>Ignoring some controllers</h3>
+<h3 id="ignoring-some-controllers">Ignoring some controllers</h3>
 
 <p>I have a <code>LogInController</code> which I wish to ignore, so that anybody can at least see the log in page:</p>
 
 <pre><code>public IEnumerable&lt;TestCaseData&gt; TestCases()
 {
-    return typeof (MainController).Assembly
-        .GetExportedTypes()
-        .Where(t =&gt; t.IsAssignableTo&lt;Controller&gt;())
-        .Where(t =&gt; !t.IsAbstract)
+	return typeof (MainController).Assembly
+		.GetExportedTypes()
+		.Where(t =&gt; t.IsAssignableTo&lt;Controller&gt;())
+		.Where(t =&gt; !t.IsAbstract)
+		
+		// Ignore some types:
+		.Where(t =&gt; !IsIgnored(t))
 
-        // Ignore some types:
-        .Where(t =&gt; !IsIgnored(t))
-
-        .SelectMany(t =&gt; t.GetMethods())
-        .Where(m =&gt; m.ReturnType.IsAssignableTo&lt;ActionResult&gt;())
-        .Select(m =&gt; new TestCaseData(m).SetName(
-            string.Format("{0}.{1}", m.DeclaringType.FullName, m.Name)))
-        .ToArray();
+		.SelectMany(t =&gt; t.GetMethods())
+		.Where(m =&gt; m.ReturnType.IsAssignableTo&lt;ActionResult&gt;())
+		.Select(m =&gt; new TestCaseData(m).SetName(
+			string.Format("{0}.{1}", m.DeclaringType.FullName, m.Name)))
+		.ToArray();
 }
 
 readonly Type[] _ignoredTypes = new[] 
-    {
-        typeof(LogInController) 
-    };
+	{
+		typeof(LogInController) 
+	};
 
 bool IsIgnored(Type type)
 {
-    return _ignoredTypes.Contains(type);
+	return _ignoredTypes.Contains(type);
 }
 </code></pre>
+
 
 
 

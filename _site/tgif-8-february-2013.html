@@ -30,43 +30,40 @@
 
 
 
-<p>I've been brutally busy over the holidays and since then. A lot of the client work I have done has included a number of improvements and additions to SWXBEN's OSS swag.</p>
+<p>I’ve been brutally busy over the holidays and since then. A lot of the client work I have done has included a number of improvements and additions to SWXBEN’s OSS swag.</p>
 
-<h2><a href="https://github.com/swxben/swxben.dataaccess/">swxben.dataaccess</a></h2>
+<h2 id="swxbendataaccesshttpsgithubcomswxbenswxbendataaccess"><a href="https://github.com/swxben/swxben.dataaccess/">swxben.dataaccess</a></h2>
 
-<p>I've added a number of features to my little data access layer:</p>
-
-<ul>
-<li>decorating identifier fields, which is used when generating <code>UPDATE</code> and <code>INSERT</code> statements
+<p>I’ve added a number of features to my little data access layer:</p>
 
 <ul>
-<li><code>int</code> identifiers are skipped in <code>INSERT</code> statements</li>
-</ul>
-</li>
-<li>insert operations returns <code>SELECT @@IDENTITY</code> so you can do <code>foo.FooId = (int)dataAccess.Insert(foo);</code></li>
-<li>table names can be explicitly passed in to <code>Update</code>, <code>Select</code> and <code>Insert</code></li>
+  <li>decorating identifier fields, which is used when generating <code>UPDATE</code> and <code>INSERT</code> statements
+    <ul>
+      <li><code>int</code> identifiers are skipped in <code>INSERT</code> statements</li>
+    </ul>
+  </li>
+  <li>insert operations returns <code>SELECT @@IDENTITY</code> so you can do <code>foo.FooId = (int)dataAccess.Insert(foo);</code></li>
+  <li>table names can be explicitly passed in to <code>Update</code>, <code>Select</code> and <code>Insert</code></li>
 </ul>
 
-
-<h2><a href="https://github.com/swxben/swxben.reporting">swxben.reporting</a></h2>
+<h2 id="swxbenreportinghttpsgithubcomswxbenswxbenreporting"><a href="https://github.com/swxben/swxben.reporting">swxben.reporting</a></h2>
 
 <ul>
-<li>started on some documentation on the <a href="https://github.com/swxben/swxben.reporting/blob/master/xrpt.md">XRPT format</a></li>
-<li>added a <code>System.Web</code> drop-in replacement so Razor features such as <code>Html.Raw()</code> work without requiring <code>System.Web</code> (which makes client deploys needlessly complex). This isn’t included in the <code>swxben.reporting</code> core, but as a <a href="http://nuget.org/packages/swxben.reporting.System.Web">separate NuGet package</a>.</li>
+  <li>started on some documentation on the <a href="https://github.com/swxben/swxben.reporting/blob/master/xrpt.md">XRPT format</a></li>
+  <li>added a <code>System.Web</code> drop-in replacement so Razor features such as <code>Html.Raw()</code> work without requiring <code>System.Web</code> (which makes client deploys needlessly complex). This isn’t included in the <code>swxben.reporting</code> core, but as a <a href="http://nuget.org/packages/swxben.reporting.System.Web">separate NuGet package</a>.</li>
 </ul>
 
+<h2 id="swxbenhelpershttpsgithubcomswxbenswxbenhelpers"><a href="https://github.com/swxben/swxben.helpers">swxben.helpers</a></h2>
 
-<h2><a href="https://github.com/swxben/swxben.helpers">swxben.helpers</a></h2>
+<p>Pulled out a small suite of extension methods, some based on Ruby, some on PHP madness, some just shoddy implementations of things that I need to frequently do such as sentence casing a <code>"PascalCasedString"</code> or formatting decimals. This was mostly for my own benefit rather than something I thought would be useful as OSS, but it’s managed a few downloads <a href="http://nuget.org/packages/swxben.helpers">on NuGet</a>.</p>
 
-<p>Pulled out a small suite of extension methods, some based on Ruby, some on PHP madness, some just shoddy implementations of things that I need to frequently do such as sentence casing a <code>"PascalCasedString"</code> or formatting decimals. This was mostly for my own benefit rather than something I thought would be useful as OSS, but it's managed a few downloads <a href="http://nuget.org/packages/swxben.helpers">on NuGet</a>.</p>
-
-<h2><a href="https://github.com/swxben/swxben.Windows.Forms">swxben.Windows.Forms</a></h2>
+<h2 id="swxbenwindowsformshttpsgithubcomswxbenswxbenwindowsforms"><a href="https://github.com/swxben/swxben.Windows.Forms">swxben.Windows.Forms</a></h2>
 
 <p>A small collection of WinForms dialogs and helpers. List search dialogs are pretty cool. <a href="http://nuget.org/packages/swxben.Windows.Forms">Available on NuGet</a>.</p>
 
-<h2><a href="https://github.com/swxben/slab">Slab</a></h2>
+<h2 id="slabhttpsgithubcomswxbenslab"><a href="https://github.com/swxben/slab">Slab</a></h2>
 
-<p>I’m resurrecting my PHP MVC-ish framework Slab – hitting it with a lightning bolt if you will (ah I'm so funny) – in response to an upcoming project that will use it. PHP may not be the sexiest of environments but it is still pretty ubiquitous and simple to set up a shared host, so it is nice to be able to work with a relatively stable home-brewed framework.</p>
+<p>I’m resurrecting my PHP MVC-ish framework Slab – hitting it with a lightning bolt if you will (ah I’m so funny) – in response to an upcoming project that will use it. PHP may not be the sexiest of environments but it is still pretty ubiquitous and simple to set up a shared host, so it is nice to be able to work with a relatively stable home-brewed framework.</p>
 
 
 

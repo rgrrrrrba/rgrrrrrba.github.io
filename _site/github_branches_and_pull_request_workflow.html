@@ -33,22 +33,20 @@
 <p>This is a workflow for contributing a pull request (PR) to a project on GitHub using feature branches:</p>
 
 <ol>
-<li>Open an issue on the target project through GitHub.</li>
-<li>Make a note of the issue number.</li>
-<li>Make sure your local copy is up to date via <code>git pull upstream master</code>.
-
-<ul>
-<li>If you are pushing to a branch, such as the target’s <code>gh-pages</code> branch, make sure you're on the correct branch (<code>git checkout -b gh-pages</code>) and pull from the upstream branch (<code>git pull upstream gh-pages</code>).</li>
-</ul>
-</li>
-<li>Create a new branch: <code>git checkout -b issue123_name_of_branch</code>.</li>
-<li>Make changes, make commits, etc. Commits should reference the issue by including the issue number: <code>git com -m "#123 fixes some issue"</code>.</li>
-<li>Push to a new branch on your GH fork: <code>git push -u origin issue123_name_of_branch</code>.</li>
-<li>Open the new branch on GitHub and create a pull request.</li>
-<li>Checkout local master to return to the master branch, before your feature branch: <code>git checkout master</code>.</li>
-<li>Once the PR has been accepted pull from upstream (<code>git pull upstream master</code>) and push back to your master (<code>git push</code>).</li>
+  <li>Open an issue on the target project through GitHub.</li>
+  <li>Make a note of the issue number.</li>
+  <li>Make sure your local copy is up to date via <code>git pull upstream master</code>.
+    <ul>
+      <li>If you are pushing to a branch, such as the target’s <code>gh-pages</code> branch, make sure you’re on the correct branch (<code>git checkout -b gh-pages</code>) and pull from the upstream branch (<code>git pull upstream gh-pages</code>).</li>
+    </ul>
+  </li>
+  <li>Create a new branch: <code>git checkout -b issue123_name_of_branch</code>.</li>
+  <li>Make changes, make commits, etc. Commits should reference the issue by including the issue number: <code>git com -m "#123 fixes some issue"</code>.</li>
+  <li>Push to a new branch on your GH fork: <code>git push -u origin issue123_name_of_branch</code>.</li>
+  <li>Open the new branch on GitHub and create a pull request.</li>
+  <li>Checkout local master to return to the master branch, before your feature branch: <code>git checkout master</code>.</li>
+  <li>Once the PR has been accepted pull from upstream (<code>git pull upstream master</code>) and push back to your master (<code>git push</code>).</li>
 </ol>
-
 
 <p>If you are pushing to a branch when creating the pull request (for example to <code>gh-pages</code>) you have to select the source branch to compare to. The branch name has to be typed manually. The branch selection screen is also a bit dodgy with text selection (for me in any case).</p>
 

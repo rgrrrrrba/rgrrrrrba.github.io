@@ -30,11 +30,11 @@
 
 
 
-<p><a href="https://twitter.com/PawelPabich">Pawel Pabich</a> has a good way to <a href="http://www.pabich.eu/2011/03/automated-database-deployments-to.html">run DbUp as part of AppHarbor's build process</a> which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up <a href="http://dbup.github.io/">DbUp</a> with a web hook.</p>
+<p><a href="https://twitter.com/PawelPabich">Pawel Pabich</a> has a good way to <a href="http://www.pabich.eu/2011/03/automated-database-deployments-to.html">run DbUp as part of AppHarbor’s build process</a> which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up <a href="http://dbup.github.io/">DbUp</a> with a web hook.</p>
 
 <p>Something important to note is that there is no security around this. It relies on an obfuscated controller path, so it is only really useful for bootstrapping an early project. The controller should be moved behind security as soon as possible.</p>
 
-<p>I'm assuming that DbUp has been set up as per my post on <a href="/reset-the-world.html">resetting the world</a>. Specifically, the DbUp DLL should have an upgrader that looks like this:</p>
+<p>I’m assuming that DbUp has been set up as per my post on <a href="/reset-the-world.html">resetting the world</a>. Specifically, the DbUp DLL should have an upgrader that looks like this:</p>
 
 <pre><code>namespace ResetTheWorld
 {
@@ -46,10 +46,10 @@
         {
             var connectionString = ConfigurationManager.ConnectionStrings[ConnectionStringName].ConnectionString;
             var upgrader = DeployChanges.To
-                .SqlDatabase(connectionString)
-                .WithScriptsEmbeddedInAssembly(Assembly.GetAssembly(typeof (DatabaseUpgrader)))
-                .LogTo(upgradeLog ?? new ConsoleUpgradeLog())
-                .Build();
+				.SqlDatabase(connectionString)
+				.WithScriptsEmbeddedInAssembly(Assembly.GetAssembly(typeof (DatabaseUpgrader)))
+				.LogTo(upgradeLog ?? new ConsoleUpgradeLog())
+				.Build();
 
             var result = upgrader.PerformUpgrade();
 
@@ -61,57 +61,57 @@
 
         public static void SetConnectionString(string connectionString)
         {
-            typeof (ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
-                .SetValue(ConfigurationManager.ConnectionStrings, false);
-            ConfigurationManager.ConnectionStrings.Add(new ConnectionStringSettings(ConnectionStringName,
-                connectionString,
-                "System.Data.SqlClient"));
+			typeof (ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
+				.SetValue(ConfigurationManager.ConnectionStrings, false);
+			ConfigurationManager.ConnectionStrings.Add(new ConnectionStringSettings(ConnectionStringName,
+				connectionString,
+				"System.Data.SqlClient"));
         }
     }
 }
 </code></pre>
 
-<p>I've just created a controller with a long random name:</p>
+<p>I’ve just created a controller with a long random name:</p>
 
 <pre><code>public class njvfdklnvfjdkslndsieController : Controller
 {
-    public ActionResult UpdateTheWorld()
-    {
-        var log = new HtmlLog();
+	public ActionResult UpdateTheWorld()
+	{
+		var log = new HtmlLog();
 
-        DatabaseUpgrader.Upgrade(log);
+		DatabaseUpgrader.Upgrade(log);
 
-        ViewBag.Log = log.ToString();
+		ViewBag.Log = log.ToString();
 
-        return View();
-    }
+		return View();
+	}
 }
 </code></pre>
 
-<p>The <code>HtmlLog</code> is a basic replacement for DbUp's console log that just builds up a HTML string:</p>
+<p>The <code>HtmlLog</code> is a basic replacement for DbUp’s console log that just builds up a HTML string:</p>
 
 <pre><code>class HtmlLog : IUpgradeLog
 {
-    readonly StringBuilder _stringBuilder = new StringBuilder();
-    public override string ToString()
-    {
-        return _stringBuilder.ToString();
-    }
+	readonly StringBuilder _stringBuilder = new StringBuilder();
+	public override string ToString()
+	{
+		return _stringBuilder.ToString();
+	}
 
-    public void WriteError(string format, params object[] args)
-    {
-        _stringBuilder.AppendFormat("&lt;p class='error'&gt;" + format + "&lt;/p&gt;", args);
-    }
+	public void WriteError(string format, params object[] args)
+	{
+		_stringBuilder.AppendFormat("&lt;p class='error'&gt;" + format + "&lt;/p&gt;", args);
+	}
 
-    public void WriteInformation(string format, params object[] args)
-    {
-        _stringBuilder.AppendFormat("&lt;p class='information'&gt;" + format + "&lt;/p&gt;", args);
-    }
+	public void WriteInformation(string format, params object[] args)
+	{
+		_stringBuilder.AppendFormat("&lt;p class='information'&gt;" + format + "&lt;/p&gt;", args);
+	}
 
-    public void WriteWarning(string format, params object[] args)
-    {
-        _stringBuilder.AppendFormat("&lt;p class='warning'&gt;" + format + "&lt;/p&gt;", args);
-    }
+	public void WriteWarning(string format, params object[] args)
+	{
+		_stringBuilder.AppendFormat("&lt;p class='warning'&gt;" + format + "&lt;/p&gt;", args);
+	}
 }
 </code></pre>
 
@@ -120,13 +120,13 @@
 <pre><code>@model dynamic
 
 @{
-    ViewBag.Title = "UpdateTheWorld";
+	ViewBag.Title = "UpdateTheWorld";
 }
 
 &lt;style&gt;
-    p.error{color:red}
-    p.information{color:#000}
-    p.warning{color:orange}
+	p.error{color:red}
+	p.information{color:#000}
+	p.warning{color:orange}
 &lt;/style&gt;
 
 &lt;h1&gt;UpdateTheWorld&lt;/h1&gt;
@@ -134,6 +134,7 @@
 </code></pre>
 
 <p>Now browsing to <code>http://&lt;app&gt;.apphb.com/njvfdklnvfjdkslndsie/UpdateTheWorld</code> will update the existing database. A <code>ResetTheWorld</code> action could be added which drops the database before running the scripts.</p>
+
 
 
 

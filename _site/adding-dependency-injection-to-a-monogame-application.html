@@ -30,41 +30,40 @@
 
 
 
-<h3>Disclaimer</h3>
+<h3 id="disclaimer">Disclaimer</h3>
 
 <p><strong>This is not a tutorial!</strong> This is an explanation of how I have modified the code that I ended up with at the end of the tutorials. These modifications lay the foundation for a cleaner codebase that I will extend upon in the future.</p>
 
-<p>For people who are familiar with dependency injection, and more familiar with dependency injection than MonoGame, <strong>this is not for you</strong>. This is a basic explanation of how I pulled apart a slightly complex spaghetti-coded solution and added dependency injection to make it easier to work with in the future. Think of it as 'using dependency injection in a MonoGame app for people that don't do dependency injection but have started to learn MonoGame'. <strong>I am only learning MonoGame</strong>. These probably aren't best practices and will have numerous issues that expert game developers will laugh at. <em>Laugh away, experts.</em></p>
+<p>For people who are familiar with dependency injection, and more familiar with dependency injection than MonoGame, <strong>this is not for you</strong>. This is a basic explanation of how I pulled apart a slightly complex spaghetti-coded solution and added dependency injection to make it easier to work with in the future. Think of it as ‘using dependency injection in a MonoGame app for people that don’t do dependency injection but have started to learn MonoGame’. <strong>I am only learning MonoGame</strong>. These probably aren’t best practices and will have numerous issues that expert game developers will laugh at. <em>Laugh away, experts.</em></p>
 
-<p>This also doesn't go into dependency injection in a lot of detail. There are plenty of places to learn about dependency injection but I found the best way to learn was to work in a basic system that uses dependency injection. Which I'm conveniently building here. You're welcome.</p>
+<p>This also doesn’t go into dependency injection in a lot of detail. There are plenty of places to learn about dependency injection but I found the best way to learn was to work in a basic system that uses dependency injection. Which I’m conveniently building here. You’re welcome.</p>
 
-<h3>Building a Shooter Game</h3>
+<h3 id="building-a-shooter-game">Building a Shooter Game</h3>
 
-<p>I worked my way through all six of <a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker's "Building a Shooter Game"</a> tutorials, but the series ends abruptly and hasn't been updated for nine months. So I'm going to continue with my experimenting with the game, and I'll try to document the process as I go.</p>
+<p>I worked my way through all six of <a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s “Building a Shooter Game”</a> tutorials, but the series ends abruptly and hasn’t been updated for nine months. So I’m going to continue with my experimenting with the game, and I’ll try to document the process as I go.</p>
 
-<p>If you want to play along (sorry) you can either go through Tara's tutorials then tackle this yourself, or download my solution either <a href="https://github.com/bendetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36">before</a> or <a href="https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007">after</a> these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to <a href="http://bendetat.com/up-and-running-with-monogame.html">install and configure MonoGame with Visual Studio</a> before starting.</p>
+<p>If you want to play along (sorry) you can either go through Tara’s tutorials then tackle this yourself, or download my solution either <a href="https://github.com/bendetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36">before</a> or <a href="https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007">after</a> these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to <a href="http://bendetat.com/up-and-running-with-monogame.html">install and configure MonoGame with Visual Studio</a> before starting.</p>
 
 <p>The first thing I wanted to do is to refactor the code so I can use dependency injection. I have two reasons for this:</p>
 
 <ul>
-<li>Refactoring and dependency injection will clean up a lot of the dependencies through the project</li>
-<li>Math is hard, and to be able to easily unit test my calculations I need the cleaner dependencies</li>
+  <li>Refactoring and dependency injection will clean up a lot of the dependencies through the project</li>
+  <li>Math is hard, and to be able to easily unit test my calculations I need the cleaner dependencies</li>
 </ul>
 
+<h3 id="math-is-hard-dependency-injection-is-easy">Math is hard, dependency injection is easy</h3>
 
-<h3>Math is hard, dependency injection is easy</h3>
-
-<p>I started by adding Autofac to the <code>Win8ShooterGame</code> solution - the solution that contains all of the game code. This is a Windows 8 Store App. Autofac should work whether you're targeting Win 8 store apps, Windows desktop games, or Windows Phone 8. I'm not sure about iOS but it might also work for Android, Linux and Mac OS X if you're targeting those platforms.</p>
+<p>I started by adding Autofac to the <code>Win8ShooterGame</code> solution - the solution that contains all of the game code. This is a Windows 8 Store App. Autofac should work whether you’re targeting Win 8 store apps, Windows desktop games, or Windows Phone 8. I’m not sure about iOS but it might also work for Android, Linux and Mac OS X if you’re targeting those platforms.</p>
 
 <p>Then I had to decide where the DI container was going to be configured and live. The <code>Main()</code> method is usually a good place, but in a MonoGame application the <code>Main()</code> method just calls a factory that creates the game instance and runs it. There are no obvious entry points to configure the game. So I decided to do the configuration in the game instance itself. In my repo this is the <code>ShooterGame</code> class.</p>
 
-<p>Initially I wanted to put the configuration in the game class's constructor. It already had the initial configuration and seemed like the obvious choice. However due to the game's lifecycle, few of the things I need to configure Autofac with exist in the constructor. In fact the best place I found was in the <code>LoadContent()</code> method. By this stage the constructor and <code>Initialize()</code> methods have already been executed. Here's the basic game lifecycle for reference:</p>
+<p>Initially I wanted to put the configuration in the game class’s constructor. It already had the initial configuration and seemed like the obvious choice. However due to the game’s lifecycle, few of the things I need to configure Autofac with exist in the constructor. In fact the best place I found was in the <code>LoadContent()</code> method. By this stage the constructor and <code>Initialize()</code> methods have already been executed. Here’s the basic game lifecycle for reference:</p>
 
 <pre><code>ShooterGame() -&gt; Initialize() -&gt; LoadContent() -&gt; Update() -&gt; Draw() -&gt; UnloadContent()
                                        ^------------/               
 </code></pre>
 
-<p>This seems a little late to be configuring the container so I hope this won't come back to bite me later, but it's working fine for now. Here is my trimmed down constructor:</p>
+<p>This seems a little late to be configuring the container so I hope this won’t come back to bite me later, but it’s working fine for now. Here is my trimmed down constructor:</p>
 
 <pre><code>public ShooterGame()
 {
@@ -72,7 +71,7 @@
 }
 </code></pre>
 
-<p>Here's something interesting. Note that I still need the constructor to create the <code>GraphicsDeviceManager</code> instance. This instance isn't actually directly used anywhere in the code - I could remove it and the project would still compile, but as soon as I try to run it I get an exception:</p>
+<p>Here’s something interesting. Note that I still need the constructor to create the <code>GraphicsDeviceManager</code> instance. This instance isn’t actually directly used anywhere in the code - I could remove it and the project would still compile, but as soon as I try to run it I get an exception:</p>
 
 <pre><code>An unhandled exception of type 'System.InvalidOperationException' occurred in MonoGame.Framework.DLL
 Additional information: No Graphics Device Manager
@@ -82,23 +81,23 @@ Additional information: No Graphics Device Manager
 
 <pre><code>public GraphicsDeviceManager(Game game)
 {
-    if (game == null)
-        throw new ArgumentNullException("The game cannot be null!");
-    this._game = game;
-    this._supportedOrientations = DisplayOrientation.Default;
-    this._preferredBackBufferWidth = Math.Max(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
-    this._preferredBackBufferHeight = Math.Min(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
-    this._preferredBackBufferFormat = SurfaceFormat.Color;
-    this._preferredDepthStencilFormat = DepthFormat.Depth24;
-    this._synchronizedWithVerticalRetrace = true;
-    if (this._game.Services.GetService(typeof (IGraphicsDeviceManager)) != null)
-        throw new ArgumentException("Graphics Device Manager Already Present");
-    this._game.Services.AddService(typeof (IGraphicsDeviceManager), (object) this);
-    this._game.Services.AddService(typeof (IGraphicsDeviceService), (object) this);
+	if (game == null)
+		throw new ArgumentNullException("The game cannot be null!");
+	this._game = game;
+	this._supportedOrientations = DisplayOrientation.Default;
+	this._preferredBackBufferWidth = Math.Max(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
+	this._preferredBackBufferHeight = Math.Min(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
+	this._preferredBackBufferFormat = SurfaceFormat.Color;
+	this._preferredDepthStencilFormat = DepthFormat.Depth24;
+	this._synchronizedWithVerticalRetrace = true;
+	if (this._game.Services.GetService(typeof (IGraphicsDeviceManager)) != null)
+		throw new ArgumentException("Graphics Device Manager Already Present");
+	this._game.Services.AddService(typeof (IGraphicsDeviceManager), (object) this);
+	this._game.Services.AddService(typeof (IGraphicsDeviceService), (object) this);
 }
 </code></pre>
 
-<p>The last two lines assign <code>this</code> - the <code>GraphicsDeviceManager</code> - back to the game. This constructor has side effects. I'm sure there's reasons for this very nasty piece of work but I would rather not know them. The result is I can't create the <code>GraphicsDeviceManager</code> anywhere except for in the game's constructor.</p>
+<p>The last two lines assign <code>this</code> - the <code>GraphicsDeviceManager</code> - back to the game. This constructor has side effects. I’m sure there’s reasons for this very nasty piece of work but I would rather not know them. The result is I can’t create the <code>GraphicsDeviceManager</code> anywhere except for in the game’s constructor.</p>
 
 <p>Moving on.</p>
 
@@ -109,7 +108,7 @@ Additional information: No Graphics Device Manager
 }
 </code></pre>
 
-<p>This hasn't changed. It enables the free drag gesture to light up on touch, and calls the <code>base.Initialize()</code> method. It seems that a lot of inherited classes need to call the base method. In my opinion this design is a bit fragile and another good reason to replace it with some abstractions.</p>
+<p>This hasn’t changed. It enables the free drag gesture to light up on touch, and calls the <code>base.Initialize()</code> method. It seems that a lot of inherited classes need to call the base method. In my opinion this design is a bit fragile and another good reason to replace it with some abstractions.</p>
 
 <p>Now here are the first few lines of my new <code>LoadContent()</code> method:</p>
 
@@ -125,17 +124,17 @@ Additional information: No Graphics Device Manager
     //...
 </code></pre>
 
-<p><code>AutofacConfig</code> is a new class that I've created in the <code>Configuration</code> folder. I'll go through it soon. The <code>Register()</code> method returns an <code>IContainer</code>:</p>
+<p><code>AutofacConfig</code> is a new class that I’ve created in the <code>Configuration</code> folder. I’ll go through it soon. The <code>Register()</code> method returns an <code>IContainer</code>:</p>
 
 <pre><code>public class ShooterGame : Game
 {
-    // ...
+	// ...
     private IContainer _container;
 </code></pre>
 
-<p>This container is then used to resolve the parts of the game. I'll go through the rest of the <code>LoadContent()</code> method at the end of this post.</p>
+<p>This container is then used to resolve the parts of the game. I’ll go through the rest of the <code>LoadContent()</code> method at the end of this post.</p>
 
-<h3>Configuring Autofac</h3>
+<h3 id="configuring-autofac">Configuring Autofac</h3>
 
 <p>Here is the entire Autofac configuration class and registration method:</p>
 
@@ -166,17 +165,17 @@ Additional information: No Graphics Device Manager
 <pre><code>builder.RegisterInstance(new SpriteBatch(game.GraphicsDevice)).AsSelf();
 </code></pre>
 
-<p>Previously the <code>spriteBatch</code> was created in the game's <code>LoadContent()</code> method. Autofac is being configured in the <code>LoadContent()</code> method, so this is at the same stage in the application lifecycle. We tell Autofac to provide the created sprite batch instance whenever any component requests a sprite batch instance. This avoids having to pass the sprite batch object to anything that wants to draw itself. It also avoids keeping a reference to the sprite batch in the game object itself. There are some extra abstractions around the sprite batch and other objects which I will discuss below.</p>
+<p>Previously the <code>spriteBatch</code> was created in the game’s <code>LoadContent()</code> method. Autofac is being configured in the <code>LoadContent()</code> method, so this is at the same stage in the application lifecycle. We tell Autofac to provide the created sprite batch instance whenever any component requests a sprite batch instance. This avoids having to pass the sprite batch object to anything that wants to draw itself. It also avoids keeping a reference to the sprite batch in the game object itself. There are some extra abstractions around the sprite batch and other objects which I will discuss below.</p>
 
 <pre><code>builder.RegisterInstance(game.Content).AsSelf();
 </code></pre>
 
-<p>This line tells Autofac to pass the <code>game.Content</code> instance whenever any component requests a <code>ContentManager</code> instance. This avoids having to pass <code>Content</code> around wherever anything wants to load up a texture or a sound, or to have to do all of the loading in the game class's <code>LoadContent()</code> method then pass the loaded textures or sounds around the application.</p>
+<p>This line tells Autofac to pass the <code>game.Content</code> instance whenever any component requests a <code>ContentManager</code> instance. This avoids having to pass <code>Content</code> around wherever anything wants to load up a texture or a sound, or to have to do all of the loading in the game class’s <code>LoadContent()</code> method then pass the loaded textures or sounds around the application.</p>
 
 <pre><code>builder.RegisterInstance(game.GraphicsDevice).AsSelf();
 </code></pre>
 
-<p>This does the same thing for the game's <code>GraphicDevice</code> instance.</p>
+<p>This does the same thing for the game’s <code>GraphicDevice</code> instance.</p>
 
 <pre><code>builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
     .Where(t =&gt; t.IsAssignableTo&lt;IRegistering&gt;())
@@ -184,7 +183,7 @@ Additional information: No Graphics Device Manager
     .InstancePerLifetimeScope();
 </code></pre>
 
-<p>This part is a bit more complicated. I'll go through it line by line.</p>
+<p>This part is a bit more complicated. I’ll go through it line by line.</p>
 
 <pre><code>builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
 </code></pre>
@@ -194,7 +193,7 @@ Additional information: No Graphics Device Manager
 <pre><code>.Where(t =&gt; t.IsAssignableTo&lt;IRegistering&gt;())
 </code></pre>
 
-<p>This limits the search to types that implement the <code>IRegistering</code> interface - I'll explain this more later.</p>
+<p>This limits the search to types that implement the <code>IRegistering</code> interface - I’ll explain this more later.</p>
 
 <pre><code>.AsImplementedInterfaces()
 </code></pre>
@@ -204,13 +203,13 @@ Additional information: No Graphics Device Manager
 <pre><code>.InstancePerLifetimeScope();
 </code></pre>
 
-<p>This registers the types as a single instance per the scope of the container's lifetime. The lifetime is only a consideration if you resolve dependencies within nested lifetime scopes. So far for this application there is only ever going to be a single scope, so the instances are essentially singletons - the same instance of a <code>Foo</code> will be provided to all components that request it.</p>
+<p>This registers the types as a single instance per the scope of the container’s lifetime. The lifetime is only a consideration if you resolve dependencies within nested lifetime scopes. So far for this application there is only ever going to be a single scope, so the instances are essentially singletons - the same instance of a <code>Foo</code> will be provided to all components that request it.</p>
 
-<h3>Components and dependencies</h3>
+<h3 id="components-and-dependencies">Components and dependencies</h3>
 
-<p>It's probably a good time to step back and look at what is meant by 'injecting a dependency' and how components can 'request' dependencies.</p>
+<p>It’s probably a good time to step back and look at what is meant by ‘injecting a dependency’ and how components can ‘request’ dependencies.</p>
 
-<p>At the top level our game class gets a container - <code>IContainer</code>. This container is used to resolve the game's high level dependencies:</p>
+<p>At the top level our game class gets a container - <code>IContainer</code>. This container is used to resolve the game’s high level dependencies:</p>
 
 <pre><code>var player = _container.Resolve&lt;IPlayer&gt;()
 </code></pre>
@@ -219,33 +218,33 @@ Additional information: No Graphics Device Manager
 
 <pre><code>public class Player : IPlayer, IRegistering
 {
-    //...
+	//...
 </code></pre>
 
-<p>It creates an instance of the player, automatically resolving the dependencies required by the <code>Player</code> class's constructor.</p>
+<p>It creates an instance of the player, automatically resolving the dependencies required by the <code>Player</code> class’s constructor.</p>
 
 <pre><code>public Player(IContentManager contentManager, IViewport viewport, IAnimationFactory animationFactory)
 {
-    //...
+	//...
 </code></pre>
 
-<p>This means that the game class doesn't have to know anything about the player class's dependencies, and the player class doesn't rely on particular implementations of its dependencies. Because the player class depends on interfaces, we can easily pass in mock dependencies in our unit tests.</p>
+<p>This means that the game class doesn’t have to know anything about the player class’s dependencies, and the player class doesn’t rely on particular implementations of its dependencies. Because the player class depends on interfaces, we can easily pass in mock dependencies in our unit tests.</p>
 
 <p>Resolving a dependency using Autofac is slower than just creating a player manually, like <code>var player = new Player(_contentManager, this.Viewport, ....</code>. But a player is only created once at the start of the game, so the cost is negligible. For things that need to be created multiple times within the game loop (such as projectiles or particles) we will use other methods like factories, which will speed up object creation while still allowing dependency injection.</p>
 
-<h3>The IRegistering interface</h3>
+<h3 id="the-iregistering-interface">The IRegistering interface</h3>
 
-<p>The <code>IRegistering</code> interface is an empty interface that is used as a marker for classes that should be registered with Autofac. Without using a marker interface, the registration will either apply across all types found in the assembly (which could include types that shouldn't be registered) or each type needs to be registered manually.</p>
+<p>The <code>IRegistering</code> interface is an empty interface that is used as a marker for classes that should be registered with Autofac. Without using a marker interface, the registration will either apply across all types found in the assembly (which could include types that shouldn’t be registered) or each type needs to be registered manually.</p>
 
-<p>The scanning registration process isn't free but it would generally take much less than a second. This is another once-off cost of speed at the start of the application.</p>
+<p>The scanning registration process isn’t free but it would generally take much less than a second. This is another once-off cost of speed at the start of the application.</p>
 
-<h3>Abstractions and wrappers</h3>
+<h3 id="abstractions-and-wrappers">Abstractions and wrappers</h3>
 
 <p>I introduced Autofac to the application so I could easily manage some changes to the code that will support adding unit tests.</p>
 
-<p>An example is the <code>Player</code> class. I eventually want to add some tests around the player's screen edge detection. To do that before my changes I would have to pass in test implementations of the content manager, sprite batch and viewport. I don't know if those implementations would work in a test harness without actually creating a window with its own game loop. I avoid this complexity by passing in abstractions. For example, I could create a mock content manager that will provide a mock texture, without having to configure a real content manager with a texture.</p>
+<p>An example is the <code>Player</code> class. I eventually want to add some tests around the player’s screen edge detection. To do that before my changes I would have to pass in test implementations of the content manager, sprite batch and viewport. I don’t know if those implementations would work in a test harness without actually creating a window with its own game loop. I avoid this complexity by passing in abstractions. For example, I could create a mock content manager that will provide a mock texture, without having to configure a real content manager with a texture.</p>
 
-<p>MonoGame doesn't have any abstractions around the main elements, which makes testing using the build in system difficult. For example, the <code>SpriteBatch</code> class has a hard dependency on <code>GraphicsDevice</code> and none of the methods are virtual, so even subclassing wouldn't work. To get around these dependencies with my own game objects, I've created a small set of wrapper classes with interfaces to replace the MonoGame elements.</p>
+<p>MonoGame doesn’t have any abstractions around the main elements, which makes testing using the build in system difficult. For example, the <code>SpriteBatch</code> class has a hard dependency on <code>GraphicsDevice</code> and none of the methods are virtual, so even subclassing wouldn’t work. To get around these dependencies with my own game objects, I’ve created a small set of wrapper classes with interfaces to replace the MonoGame elements.</p>
 
 <p><code>ContentManagerWrapper</code> is a wrapper for the MonoGame <code>ContentManager</code> class:</p>
 
@@ -267,7 +266,7 @@ Additional information: No Graphics Device Manager
 }
 </code></pre>
 
-<p>It exposes the <code>Load()</code> method, which just calls the underlying <code>ContentManager</code> instance's method and returns the <code>Texture2D</code> result wrapped in a <code>Texture2DWrapper</code>, which implements <code>ITexture2D</code>. It has the <code>IRegistering</code> marker interface so it will be automatically registered with Autofac when the application starts, and the <code>ContentManager</code> instance is provided by Autofac from the registered instance (the one belonging to the game). It also implements the <code>IContentManager</code> interface:</p>
+<p>It exposes the <code>Load()</code> method, which just calls the underlying <code>ContentManager</code> instance’s method and returns the <code>Texture2D</code> result wrapped in a <code>Texture2DWrapper</code>, which implements <code>ITexture2D</code>. It has the <code>IRegistering</code> marker interface so it will be automatically registered with Autofac when the application starts, and the <code>ContentManager</code> instance is provided by Autofac from the registered instance (the one belonging to the game). It also implements the <code>IContentManager</code> interface:</p>
 
 <pre><code>public interface IContentManager
 {
@@ -279,7 +278,7 @@ Additional information: No Graphics Device Manager
 
 <pre><code>public class Player : IPlayer, IRegistering
 {
-    //...
+	//...
 
     public Player(IContentManager contentManager, IViewport viewport, IAnimationFactory animationFactory)
     {
@@ -293,7 +292,7 @@ Additional information: No Graphics Device Manager
 // ...
 </code></pre>
 
-<p>Here the <code>Player</code> class has a dependency on an <code>IContentManager</code> instance. When the application is running Autofac will provide an instance of <code>ContentManagerWrapper</code>, which just wraps the usual content manager, primed with the application's content. Calling <code>contentManager.Load()</code> calls the underlying content manager.</p>
+<p>Here the <code>Player</code> class has a dependency on an <code>IContentManager</code> instance. When the application is running Autofac will provide an instance of <code>ContentManagerWrapper</code>, which just wraps the usual content manager, primed with the application’s content. Calling <code>contentManager.Load()</code> calls the underlying content manager.</p>
 
 <p>If I want to write some unit tests around the <code>Player</code> class I can just pass in a mock implementation of <code>IContentManager</code>, without having to worry about any underlying implementations. Here is an example using <a href="http://nsubstitute.github.io/">NSubstitute</a>:</p>
 
@@ -307,13 +306,13 @@ var player = new Player(contentManager, ...);
 // test the Player instance
 </code></pre>
 
-<p>At the moment only enough is abstracted and exposed to get the game running. I've also created factories and abstractions for the the <code>Animation</code> and <code>ParallaxingBackground</code> classes created in the original tutorials.</p>
+<p>At the moment only enough is abstracted and exposed to get the game running. I’ve also created factories and abstractions for the the <code>Animation</code> and <code>ParallaxingBackground</code> classes created in the original tutorials.</p>
 
-<h3>LoadContent() and the game structure</h3>
+<h3 id="loadcontent-and-the-game-structure">LoadContent() and the game structure</h3>
 
-<p>Dependency injection simplifies the game's structure because it takes care of injecting all of the dependencies of the different components that build up the game. The game class itself is the only place where Autofac is directly used to instantiate the elements that the game class is directly responsible for.</p>
+<p>Dependency injection simplifies the game’s structure because it takes care of injecting all of the dependencies of the different components that build up the game. The game class itself is the only place where Autofac is directly used to instantiate the elements that the game class is directly responsible for.</p>
 
-<p>The game's content is loaded in the <code>LoadContent()</code> method as before, except for the addition of Autofac and the use of some factories:</p>
+<p>The game’s content is loaded in the <code>LoadContent()</code> method as before, except for the addition of Autofac and the use of some factories:</p>
 
 <pre><code>protected override void LoadContent()
 {
@@ -337,7 +336,7 @@ var player = new Player(contentManager, ...);
 }
 </code></pre>
 
-<p><code>_enemyFactory</code> is a factory used to create 'enemies' without using Autofac 'in the loop'. The <code>EnemyFactory</code> implementation loads up the texture once, then creates a new enemy object when requested.</p>
+<p><code>_enemyFactory</code> is a factory used to create ‘enemies’ without using Autofac ‘in the loop’. The <code>EnemyFactory</code> implementation loads up the texture once, then creates a new enemy object when requested.</p>
 
 <pre><code>public class EnemyFactory : IEnemyFactory, IRegistering
 {
@@ -372,15 +371,15 @@ var player = new Player(contentManager, ...);
 }
 </code></pre>
 
-<p>Note we're still using the core MonoGame objects in places. I would expect the <code>enemy.SetPosition</code> call to eventually happen in the factory.</p>
+<p>Note we’re still using the core MonoGame objects in places. I would expect the <code>enemy.SetPosition</code> call to eventually happen in the factory.</p>
 
 <p>The rest of the application structure is pretty much the same as before, exept that it is calling the abstractions rather than directly talking to the underlying MonoGame objects.</p>
 
-<h3>Conclusion</h3>
+<h3 id="conclusion">Conclusion</h3>
 
-<p>I've added dependency injection to a simple game that was going to be potentially difficult to maintain and extend, and the resulting abstractions should be easier to work with and refactor further down the track. I've also made it a lot easier to add unit tests.</p>
+<p>I’ve added dependency injection to a simple game that was going to be potentially difficult to maintain and extend, and the resulting abstractions should be easier to work with and refactor further down the track. I’ve also made it a lot easier to add unit tests.</p>
 
-<p>My next post in this series will be around adding unit tests to the <code>Player</code> class, to help with some issues with viewport edge detection that have been plaguing me. I'll then add the ability for the ship to fire, then start displaying and keeping track of the score.</p>
+<p>My next post in this series will be around adding unit tests to the <code>Player</code> class, to help with some issues with viewport edge detection that have been plaguing me. I’ll then add the ability for the ship to fire, then start displaying and keeping track of the score.</p>
 
 <p>Oh, and here is an obligatory screenshot:</p>
 

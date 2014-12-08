@@ -34,12 +34,15 @@
 
 <p>Say I pull in some dependency which adds a readme file somewhere, then I delete the readme file, then I update the dependency which pulls in the file again.</p>
 
-<blockquote><p>we use Git's cherry-pick command, which applies it as a patch and immediately commits it with the same commit message):</p></blockquote>
+<blockquote>
+  <p>we use Git’s cherry-pick command, which applies it as a patch and immediately commits it with the same commit message):</p>
+</blockquote>
 
 <pre><code>git cherry-pick 89bec60
 </code></pre>
 
 <p><a href="http://definitivedrupal.org/suggestions/using-git-re-apply-old-over-written-change"><em>Turns out</em></a>.</p>
+
 
 
 

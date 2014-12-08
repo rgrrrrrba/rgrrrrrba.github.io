@@ -8,7 +8,7 @@ It's a Jekyll site, remember?
 
 - install [chocolatey](http://chocolatey.org)
 - `cinst ruby`
-- `cinst ruby.devkit`
+- `cinst ruby.devkit` (or possibly `cinst ruby2.devkit` if Ruby is > v2)
 - `gem install jekyll`
 - `gem install rdiscount`
 - `chcp 65001` if [running on windows](http://joseoncode.com/2011/11/27/solving-utf-problem-with-jekyll-on-windows/)

@@ -39,7 +39,7 @@ require 'json'
 ...
 queryURI = "http://ajax.google....."
 queryURI = URI.parse(queryURI)
-
+ 
 data = Net::HTTP.get_response(queryURI)
 data = data.body
 data = JSON.parse(data)
@@ -53,7 +53,7 @@ data = JSON.parse(data)
   `start #{url}`
   command = ''
 end
-
+ 
 page += 1 if command == '+'
 page -= 1 if command == '-'
 </code></pre>
@@ -76,6 +76,7 @@ end
 </code></pre>
 
 <p>All up it was very educational spending some time building something a bit significant in Ruby, and the result should hopefully be pretty fun to use.</p>
+
 
 
 

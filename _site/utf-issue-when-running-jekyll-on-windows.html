@@ -44,15 +44,19 @@ error: incompatible character encodings: UTF-8 and CP850. Use --trace to view ba
 
 <p>The important thing here is the <code>incompatible character encodings: UTF-8 and CP850</code>. I tried various things like blowing away the site and resaving the files using UTF-8 to no avail. I eventually found a blog post (in French) that gives an answer (<a href="http://translate.google.com/#auto/en/Ces%20erreurs%20peuvent%20avoir%20un%20impact%20sur%20l'affichage%20du%20blog.%20Et%20m%C3%AAme%20dans%20certains%20cas%2C%20cela%20peut%20emp%C3%AAcher%20le%20bon%20fonctionnement%20de%20Jekyll.%20Il%20existe%20une%20parade%20%C3%A0%20ce%20probl%C3%A8me.%20Il%20suffit%20simplement%20de%20lancer%20les%20commandes%20suivantes%20avant%20de%20lancer%20le%20serveur%20Jekyll%20%3A%0A%0Aset%20LC_ALL%3Den_US.UTF-8%0Aset%20LANG%3Den_US.UTF-8%0ACette%20commande%20permet%20de%20dire%20%C3%A0%20Windows%20que%20l'encodage%20a%20utilis%C3%A9%20est%20l'UTF-8.%20Si%20vous%20relancez%20Jekyll%20apr%C3%A8s%20cette%20manipulation%2C%20ces%20errurs%20auront%20disparus.">translated by Google</a>):</p>
 
-<blockquote><p>These errors can have an impact on the blog posting. And in some cases, it may prevent the proper functioning of Jekyll. There is a workaround to this problem. Simply run the following commands before starting the Jekyll server:</p></blockquote>
+<blockquote>
+  <p>These errors can have an impact on the blog posting. And in some cases, it may prevent the proper functioning of Jekyll. There is a workaround to this problem. Simply run the following commands before starting the Jekyll server:</p>
+</blockquote>
 
 <pre><code>set LC_ALL = en_US.UTF-8
 set LANG = en_US.UTF-8
 </code></pre>
 
-<blockquote><p>This command is used to tell Windows that the encoding used is UTF-8. If you raise Jekyll after handling these errurs are gone.</p></blockquote>
+<blockquote>
+  <p>This command is used to tell Windows that the encoding used is UTF-8. If you raise Jekyll after handling these errurs are gone.</p>
+</blockquote>
 
-<p>Add the <code>LC_ALL</code> and <code>LANG</code> settings to <em>System -> System Properties -> Environment Variables</em> (under either <em>User variables</em> or <em>System variables</em>) and restart your shell.</p>
+<p>Add the <code>LC_ALL</code> and <code>LANG</code> settings to <em>System -&gt; System Properties -&gt; Environment Variables</em> (under either <em>User variables</em> or <em>System variables</em>) and restart your shell.</p>
 
 <p>Wooo. Go Jekyll.</p>
 

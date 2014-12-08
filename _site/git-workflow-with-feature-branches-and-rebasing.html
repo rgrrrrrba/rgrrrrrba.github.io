@@ -30,58 +30,57 @@
 
 
 
-<h3>1. Start a feature branch and do work in it</h3>
+<h3 id="start-a-feature-branch-and-do-work-in-it">1. Start a feature branch and do work in it</h3>
 
 <ol>
-<li><code>git checkout -b name_of_branch</code></li>
-<li>do things</li>
-<li><code>git com -m "message"</code></li>
-<li>repeat 2-3</li>
-<li><code>git push origin name_of_branch</code></li>
-<li>repeat 2-5</li>
+  <li><code>git checkout -b name_of_branch</code></li>
+  <li>do things</li>
+  <li><code>git com -m "message"</code></li>
+  <li>repeat 2-3</li>
+  <li><code>git push origin name_of_branch</code></li>
+  <li>repeat 2-5</li>
 </ol>
 
+<h3 id="rebase-from-master">2. Rebase from master</h3>
 
-<h3>2. Rebase from master</h3>
-
-<p>You do this to prepare to a pull request. Usually I've just <code>git pull origin master</code> and do a merge commit, but this leaves the history a bit cleaner. It basically reverts to the branch point, pulls from master, then reapplies the changesets in the branch.</p>
+<p>You do this to prepare to a pull request. Usually I’ve just <code>git pull origin master</code> and do a merge commit, but this leaves the history a bit cleaner. It basically reverts to the branch point, pulls from master, then reapplies the changesets in the branch.</p>
 
 <p>So instead of:
-    a
-    b
-    |\    branch
-    | c
-    | d
-    e |
-    ||
-    | f   merge commit
-    g/    pull request</p>
+	a
+	b
+	|\    branch
+	| c
+	| d
+	e |
+	||
+	| f   merge commit
+	g/    pull request</p>
 
 <p>You get:
-    a
-    b
-    e
-    |\    branch
-    | c
-    | d
-    g/    pull commit</p>
+	a
+	b
+	e
+	|\    branch
+	| c
+	| d
+	g/    pull commit</p>
 
 <ol>
-<li><code>git pull --rebase origin master</code></li>
-<li>There may be conflicts as the changesets are reapplied. Resolve them with <code>git mergetool</code> or similar, then <code>git rebase --continue</code> and repeat until everything is applied. The branch name should go yellow if using PoshGit. Some of those merges can be brutal.</li>
-<li>Test the rebased code by rebuilding, running tests, manual tests, etc. Commit any changes that are required.</li>
+  <li><code>git pull --rebase origin master</code></li>
+  <li>There may be conflicts as the changesets are reapplied. Resolve them with <code>git mergetool</code> or similar, then <code>git rebase --continue</code> and repeat until everything is applied. The branch name should go yellow if using PoshGit. Some of those merges can be brutal.</li>
+  <li>Test the rebased code by rebuilding, running tests, manual tests, etc. Commit any changes that are required.</li>
 </ol>
 
+<h3 id="push-the-rebased-branch">3. Push the rebased branch</h3>
 
-<h3>3. Push the rebased branch</h3>
-
-<p>The push needs to be 'forced' to overwrite the exising branch (since it has been updated - rebased). So you NEVER do to the <code>master</code> branch as it rewrites history.</p>
+<p>The push needs to be ‘forced’ to overwrite the exising branch (since it has been updated - rebased). So you NEVER do to the <code>master</code> branch as it rewrites history.</p>
 
 <p>`git push -f origin name_of_branch</p>
 
-<h3>4. Submit pull request or merge to master</h3>
+<h3 id="submit-pull-request-or-merge-to-master">4. Submit pull request or merge to master</h3>
 
 <p>The feature branch should now be ok to create a pull request or merge to master.</p>
+
 
 
 

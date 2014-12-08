@@ -30,13 +30,13 @@
 
 
 
-<p>So all I'm doing here is creating a button that has a different images depending on the enum value that is bound to the control.</p>
+<p>So all I’m doing here is creating a button that has a different images depending on the enum value that is bound to the control.</p>
 
 <p>The images used are linked as resources in a resource project - the build action is <code>Resource</code>:</p>
 
 <p><img src="http://snag.gy/o9v6X.jpg" alt="Images are linked using a build action of Resource" /></p>
 
-<p>The button's view model (<code>ToggleMyEnumViewModel.cs</code>):</p>
+<p>The button’s view model (<code>ToggleMyEnumViewModel.cs</code>):</p>
 
 <pre><code>public class ToggleMyEnumViewModel : Screen
 {
@@ -65,7 +65,7 @@ public enum MyEnum {
 }
 </code></pre>
 
-<p>The button's XAML (<code>ToggleMyEnumView.xaml</code>):</p>
+<p>The button’s XAML (<code>ToggleMyEnumView.xaml</code>):</p>
 
 <pre><code>&lt;Button x:Class="MyNamespace.ToggleMyEnumButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -91,7 +91,7 @@ public enum MyEnum {
             &lt;/Style&gt;
         &lt;/Image.Resources&gt;
     &lt;/Image&gt;
-
+ 
 &lt;i:Interaction.Triggers&gt;
     &lt;i:EventTrigger EventName="Click"&gt;
         &lt;cal:ActionMessage MethodName="ToggleMyThing"/&gt;
@@ -99,19 +99,18 @@ public enum MyEnum {
 &lt;/i:Interaction.Triggers&gt;
 </code></pre>
 
-<p>   </Button></p>
+<p>&lt;/Button&gt;</p>
 
 <p>The <code>&lt;cal:ActionMessage MethodName="ToggleMyThing"/&gt;</code> part is what binds the button click to the <code>ToggleMyThing</code> method in the view model.</p>
 
-<p>Things to note in the view's XAML:</p>
+<p>Things to note in the view’s XAML:</p>
 
 <ul>
-<li>The style sits in the image's resources</li>
-<li>The target type of the style is set to the <code>Image</code> type</li>
-<li>The trigger has to be a data trigger</li>
-<li>The trigger just sets the <code>Source</code> property of the image based on the value of the <code>MyEnum</code> property</li>
+  <li>The style sits in the image’s resources</li>
+  <li>The target type of the style is set to the <code>Image</code> type</li>
+  <li>The trigger has to be a data trigger</li>
+  <li>The trigger just sets the <code>Source</code> property of the image based on the value of the <code>MyEnum</code> property</li>
 </ul>
-
 
 <p>This is then used as a content control bound to an instance of a <code>ToggleMyEnumViewModel</code>. Consuming XAML:</p>
 
@@ -129,7 +128,7 @@ public ConsumingViewModel()
 }
 </code></pre>
 
-<p>This isn't exactly what I want, I would prefer to bind directly to a property on the consuming view model rather than indirectly with the <code>ToggleMyEnumViewModel</code>.</p>
+<p>This isn’t exactly what I want, I would prefer to bind directly to a property on the consuming view model rather than indirectly with the <code>ToggleMyEnumViewModel</code>.</p>
 
 
 

@@ -34,16 +34,16 @@
 
 <pre><code>class Consumer
 {
-    public Consumer(IEnumerable&lt;Func&lt;IFoo&gt;&gt; fooFactories)
-    {
-        // ...
-    }
+	public Consumer(IEnumerable&lt;Func&lt;IFoo&gt;&gt; fooFactories)
+	{
+		// ...
+	}
 }
 </code></pre>
 
-<p>What I really need is something like <code>Consumer(IEnumerable&lt;Type&gt; fooTypes)</code> where the types are everything implementing <code>IFoo</code>, but of course Autofac can't resolve that.</p>
+<p>What I really need is something like <code>Consumer(IEnumerable&lt;Type&gt; fooTypes)</code> where the types are everything implementing <code>IFoo</code>, but of course Autofac can’t resolve that.</p>
 
-<p>Inspired by <a href="http://stackoverflow.com/a/9503695/149259">this StackOverflow answer</a>, here's an extension method that does what I need:</p>
+<p>Inspired by <a href="http://stackoverflow.com/a/9503695/149259">this StackOverflow answer</a>, here’s an extension method that does what I need:</p>
 
 <pre><code>public static class LifetimeScopeExtensions
 {
@@ -62,7 +62,7 @@
 
 <pre><code>public Consumer(ILifetimeScope scope) 
 {
-    var fooTypes = scope.GetImplementingTypes&lt;IFoo&gt;();
+	var fooTypes = scope.GetImplementingTypes&lt;IFoo&gt;();
 }
 </code></pre>
 
@@ -77,6 +77,7 @@
 </code></pre>
 
 <p><img src="http://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif" alt="" /></p>
+
 
 
 
