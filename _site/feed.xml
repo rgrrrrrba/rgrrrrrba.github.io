@@ -1,10 +1,129 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ben d&#39;état - Ben Scott&#39;s blog</title>
+		<title>Ben d'état - Ben Scott's blog</title>
 		<description></description>		
 		<link>http://bendetat.com</link>
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<title>Set up TeamCity on an Azure virtual machine - Redux</title>
+				<description>&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This is a repost of an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance.html&quot;&gt;earlier post&lt;/a&gt; with some refinements based on feedback and tips from my friend and collegue &lt;a href=&quot;http://robdmoore.id.au/&quot;&gt;Rob Moore&lt;/a&gt;. &lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. I have barely used Azure and have only ever used already established TeamCity instances, so I’m really just messing around with two new things at the same time here. I’m sure I’m missing a heap of very important points.&lt;/p&gt;
+
+&lt;h2 id=&quot;set-up-the-vm&quot;&gt;Set up the VM&lt;/h2&gt;
+
+&lt;h3 id=&quot;get-started-on-azure&quot;&gt;Get started on Azure&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/AsSmaMo.png&quot; style=&quot;float:right&quot; /&gt; Setting up a new Azure account is pretty much as easy as hitting &lt;a href=&quot;http://windowsazure.com&quot;&gt;http://windowsazure.com&lt;/a&gt; and starting a free trial. You land in a sweet management console that is a lot easier to use than I expected, based on my experiences with Office 365 (early versions), OWA and SharePoint. &lt;a href=&quot;http://www.troyhunt.com/&quot;&gt;Troy Hunt&lt;/a&gt; recently released an awesome Azure demo video - &lt;a href=&quot;http://worldsgreatestazuredemo.com/&quot;&gt;http://worldsgreatestazuredemo.com/&lt;/a&gt; - which is a good introduction to Azure.&lt;/p&gt;
+
+&lt;h3 id=&quot;create-a-new-virtual-machine&quot;&gt;Create a new virtual machine&lt;/h3&gt;
+
+&lt;p&gt;Select the VIRTUAL MACHINES tab and click NEW from the bottom menu. Select FROM GALLERY and pick ‘Windows Server 2012 R2 Datacenter’ (or whatever is most current). Hit next and give it a cool name. I left the size on the standard tier at A1 for now and selected SE Asia as the location of the VM. According to the &lt;a href=&quot;http://azure.microsoft.com/en-us/pricing/details/virtual-machines/&quot;&gt;Azure pricing calculator&lt;/a&gt; this costs around AU$68 per month. Enter a username and password, which you will need to remote into the VM. Next through the rest of the pages and the VM will soon be provisioned:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/SzdGki7.png&quot; alt=&quot;http://i.imgur.com/SzdGki7.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Click that arrow to start managing the VM. &lt;/p&gt;
+
+&lt;h3 id=&quot;open-up-the-firewall&quot;&gt;Open up the firewall&lt;/h3&gt;
+
+&lt;p&gt;We’ll want to open up port 80 for TeamCity. It will actually run on port 8080 but I’ll use IIS to reverse proxy it to port 80. This should make it easier to move to SSL in the future. Select the ENDPOINTS tab and ADD a new one. &lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/nelGyMd.png&quot; alt=&quot;http://i.imgur.com/nelGyMd.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Note that you’re ADDing an endpoint. The NEW button will start creating a new VM. It’s like Microsoft wants you to keep adding more and more VMs.&lt;/p&gt;
+
+&lt;p&gt;Accept the first screen to add a stand-alone endpoint. Pick HTTP from the NAME drop-down, which will automatically fill in the port number. Complete the screen.&lt;/p&gt;
+
+&lt;p&gt;This opens port 80 on the &lt;em&gt;external&lt;/em&gt; firewall. The server’s internal firewall will still need to be configured (below).&lt;/p&gt;
+
+&lt;h3 id=&quot;attach-a-new-disk&quot;&gt;Attach a new disk&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/4Znf3hr.png&quot; style=&quot;float: left; padding-right: 1em;&quot; /&gt; The VM has two drives configured by default - C:, which contains the Windows installation, and D:, which is ‘temporary storage’. I’m going to attach a third disk that will contain the TeamCity host (and later Octopus Deploy). The TeamCity agent will use D: as it is local to the VM, so it should be faster for building the residents. Attach a new disk by selecting the ATTACH option from the bottom menu. Select Empty Disk.  Accept the defaults, I gave it a size of 20 GB. Apparently resizing the disk later on involves downloading the VHD, using a tool to resize it, and uploading it again. Seems a bit awkward. 20 GB should do for now. Select ‘READ/WRITE’ under the ‘HOST CACHE PREFERENCE’, which should speed up access. The disk will be attached and the status should return to running.&lt;/p&gt;
+
+&lt;h3 id=&quot;remote-in-and-start-configuring-the-vm&quot;&gt;Remote in and start configuring the VM&lt;/h3&gt;
+
+&lt;p&gt;Go to the DASHBOARD tab and select CONNECT from the bottom menu. This will download an .RDP file which will should open in Remote Desktop. Enter the username and password and you should get connected to the server’s desktop.&lt;/p&gt;
+
+&lt;h4 id=&quot;ie-enhanced-security&quot;&gt;IE Enhanced Security&lt;/h4&gt;
+&lt;p&gt;Turn off IE Enhanced Security from the Server Manager, in the Local Server Tab. This will let you use Internet Explorer to download TeamCity (or to install Chrome to download TeamCity and lolcats).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/N5ouyt1.png&quot; alt=&quot;IE Enhanced Security&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;open-port-80-in-the-firewall&quot;&gt;Open port 80 in the firewall&lt;/h4&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/376xLMi.png&quot; style=&quot;float:right&quot; /&gt; Open the Windows Firewall with Advanved Security MMC snap-in. Easiest way to find it is to search for &lt;code&gt;firewall&lt;/code&gt; from the start screen. Create a new inbound rule.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/MlQbntP.png&quot; alt=&quot;http://i.imgur.com/MlQbntP.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Select Port, specify local TCP port 80, Allow the connection, apply the rule to all profiles, and call the rule &lt;code&gt;TeamCity&lt;/code&gt; (so you can find it again ;-) ).&lt;/p&gt;
+
+&lt;h4 id=&quot;format-and-assign-the-empty-disk&quot;&gt;Format and assign the empty disk&lt;/h4&gt;
+
+&lt;p&gt;The empty disk that we attached needs to be formatted and assigned to a drive letter in the server as well. You can think of attaching an empty disk as plugging in a new disk to any normal machine - the disk still needs be configured in the OS.&lt;/p&gt;
+
+&lt;p&gt;In the Server Manager, select File and Storage Services, then Disks (under Volumes). The new disk should be online with a partition type of ‘Unknown’. Right-click the disk and select New Volume…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/vgarRGg.png&quot; alt=&quot;File and Storage Services - New Volume&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Next through everything and accept the defaults. It should be assigned to drive E:.&lt;/p&gt;
+
+&lt;h2 id=&quot;whew&quot;&gt;Whew…&lt;/h2&gt;
+
+&lt;p&gt;Just sit back for a moment and look at what we’ve achieved. We’ve got a new VM running the latest Windows Server OS, firewalls configured and remote desktop enabled. I haven’t even taken out my credit card yet. Compare with the amount of work needed to boot up a new physical server in a network, or even provisioning a new VM in Hyper-V. Squeeeee? Indeed.&lt;/p&gt;
+
+&lt;h2 id=&quot;install-teamcity&quot;&gt;Install TeamCity&lt;/h2&gt;
+
+&lt;p&gt;Download the ‘default free professional edition’ of TeamCity from &lt;a href=&quot;http://www.jetbrains.com/teamcity/download/&quot;&gt;here&lt;/a&gt;. The version at the time of writing was 9.0.&lt;/p&gt;
+
+&lt;p&gt;Start up the installer. Select &lt;code&gt;e:\TeamCity&lt;/code&gt; as the destination folder (or wherever the new disk was assigned). Leave the components as default, which installs a build agent and the server with Windows services. Change the TeamCity data directory to somewhere on the new disk - I used &lt;code&gt;e:\TeamCity-data&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After installation the Build Agent properties configuration appears. Change the systemDir, workDir and tempDir to point to &lt;code&gt;D:\TeamCity\buildAgent\___&lt;/code&gt; (the temporary drive). You have to select each of the paths and edit them in turn. Save this then select the SYSTEM account. It would probably be more secure to set up a restricted user account but the system account should do for now. Do the same for the TeamCity Agent service account. ‘Next’ through and the services will start. After you finish the installation, ‘TeamCity First Start’ should open in IE / your browser of choice.&lt;/p&gt;
+
+&lt;p&gt;Start working through this wizard. I used the ‘Internal (HSQLDB)’ database type. Initializing the server components can take a few minutes so be patient! It’s a good idea to configure the admin credentials in TeamCity before setting up the reverse proxy (below) so that your new server isn’t exposed on the ‘first start’ wizard.&lt;/p&gt;
+
+&lt;h2 id=&quot;set-up-the-reverse-proxy-in-iis&quot;&gt;Set up the reverse proxy in IIS&lt;/h2&gt;
+
+&lt;p&gt;First you need to install IIS. Open the Server Manager and select ‘Add roles and features’. Select ‘Role-based or feature-based installation’. Then ‘Select a server from the server pool’ and make sure the correct VM is selected. In the list of roles, check ‘Web Server (IIS)’. If it prompts you to add the ‘IIS Management Console’, click ‘Add Features’. Click ‘Next’. Leae the other features at the default values and continue. Leave the role services for Web Server (IIS) at the default. Next then Install.&lt;/p&gt;
+
+&lt;p&gt;I used &lt;a href=&quot;http://serverfault.com/a/152411&quot;&gt;this ServerFault answer&lt;/a&gt; to set up the reverse proxy. It requires the &lt;a href=&quot;http://www.iis.net/download/URLRewrite&quot;&gt;URL Rewrite&lt;/a&gt; and &lt;a href=&quot;http://www.iis.net/download/ApplicationRequestRouting&quot;&gt;Application Request Routing&lt;/a&gt; IIS modules. Either follow those links or use &lt;a href=&quot;http://www.microsoft.com/web/downloads/platform.aspx&quot;&gt;Web Platform Installer&lt;/a&gt; to install them. Start up IIS Manger and select &lt;code&gt;&amp;lt;your server&amp;gt;/Sites/Default Web Site&lt;/code&gt;. There should be a URL Rewrite modul. Open it, right-click on the inbound rules list and select ‘Add Rules’. Select ‘Reverse Proxy’ then OK. Allow enabling proxy functionality. Enter &lt;code&gt;localhost:8080&lt;/code&gt; in the inbound rule server name, then OK. This creates a &lt;code&gt;web.config&lt;/code&gt; file in &lt;code&gt;c:\inetpub\wwwroot&lt;/code&gt; that looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&amp;gt;
+&amp;lt;configuration&amp;gt;
+    &amp;lt;system.webServer&amp;gt;
+        &amp;lt;rewrite&amp;gt;
+            &amp;lt;rules&amp;gt;
+                &amp;lt;rule name=&quot;ReverseProxyInboundRule1&quot; stopProcessing=&quot;true&quot;&amp;gt;
+                    &amp;lt;match url=&quot;(.*)&quot; /&amp;gt;
+                    &amp;lt;action type=&quot;Rewrite&quot; url=&quot;http://localhost:8080/{R:1}&quot; /&amp;gt;
+                &amp;lt;/rule&amp;gt;
+            &amp;lt;/rules&amp;gt;
+        &amp;lt;/rewrite&amp;gt;
+    &amp;lt;/system.webServer&amp;gt;
+&amp;lt;/configuration&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At this point, &lt;a href=&quot;http://your-server-name.cloudapp.net&quot;&gt;http://your-server-name.cloudapp.net&lt;/a&gt; should publicly resolve to the new TeamCity instance.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blog.virtew.com/2012/08/18/setup-teamcity-on-an-azure-virtual-machine-for-windows-8-metro-style-apps/&quot;&gt;virtew - Setup TeamCity on an Azure Virtual Machine for Windows 8 Metro Style Apps&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://worldsgreatestazuredemo.com/&quot;&gt;World’s Greatest Azure Demo&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;see-also&quot;&gt;See also&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://jake.ginnivan.net/teamcity-ui-test-agent/&quot;&gt;Jake Ginnivan’s blog - TeamCity UI Test Agent&lt;/a&gt; - Jake uses Sysinternals Autologon and TightVNC to get a VM with an open desktop session so that automated UI tests will work&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Sat, 13 Dec 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html</link>
+				<guid isPermaLink="true">http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html</guid>
+			</item>
 		
 			<item>
 				<title>Uninstrumented statistical .NET profiling using open source tools</title>
@@ -110,8 +229,8 @@
 
 &lt;p&gt;Now that’s in you can hand edit the config to add some or all of &lt;a href=&quot;http://haacked.com/archive/2014/07/28/github-flow-aliases/&quot;&gt;Phil Haack’s GitHub Flow aliases&lt;/a&gt;. I usually just use ‘wipe’, ‘save’ and ‘undo’:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;wipe = !git add -A &amp;amp;&amp;amp; git commit -qm &#39;WIPE SAVEPOINT&#39; &amp;amp;&amp;amp; git reset HEAD~1 --hard
-save = !git add -A &amp;amp;&amp;amp; git commit -m &#39;SAVEPOINT&#39;
+&lt;pre&gt;&lt;code&gt;wipe = !git add -A &amp;amp;&amp;amp; git commit -qm 'WIPE SAVEPOINT' &amp;amp;&amp;amp; git reset HEAD~1 --hard
+save = !git add -A &amp;amp;&amp;amp; git commit -m 'SAVEPOINT'
 undo = reset HEAD~1 --mixed
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1156,7 +1275,7 @@ protected Rectangle GetBoundsAt(Vector2 position)
 
 &lt;p&gt;Here’s something interesting. Note that I still need the constructor to create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; instance. This instance isn’t actually directly used anywhere in the code - I could remove it and the project would still compile, but as soon as I try to run it I get an exception:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;An unhandled exception of type &#39;System.InvalidOperationException&#39; occurred in MonoGame.Framework.DLL
+&lt;pre&gt;&lt;code&gt;An unhandled exception of type 'System.InvalidOperationException' occurred in MonoGame.Framework.DLL
 Additional information: No Graphics Device Manager
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1512,7 +1631,7 @@ var player = new Player(contentManager, ...);
 
 &lt;h3 id=&quot;a-quick-note-about-unity&quot;&gt;A quick note about Unity&lt;/h3&gt;
 
-&lt;p&gt;Unity is both a game engine and a component oriented game development environment, with Mono-based scripting using C#. What this means for the average code monkey such as I is that when firing up Unity you are confronted with a drafting board. No comforting &lt;code&gt;10 PRINT &#39;HELLO, WORLD!&#39;&lt;/code&gt; here folks.&lt;/p&gt;
+&lt;p&gt;Unity is both a game engine and a component oriented game development environment, with Mono-based scripting using C#. What this means for the average code monkey such as I is that when firing up Unity you are confronted with a drafting board. No comforting &lt;code&gt;10 PRINT 'HELLO, WORLD!'&lt;/code&gt; here folks.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/zjQrmdlR9ZCM/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
@@ -1611,33 +1730,6 @@ var player = new Player(contentManager, ...);
 				<pubDate>Sat, 24 May 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/up-and-running-with-monogame.html</link>
 				<guid isPermaLink="true">http://bendetat.com/up-and-running-with-monogame.html</guid>
-			</item>
-		
-			<item>
-				<title>Telerik&#39;s WPF RadScheduleView - Double-click to create an appointment gotcha</title>
-				<description>&lt;p&gt;I’m using &lt;a href=&quot;http://www.telerik.com/help/wpf/radscheduleview-overview.html&quot;&gt;Telerik’s RadScheduleView&lt;/a&gt; in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Turns out&lt;/em&gt; I had changed my custom appointment subclass’s default constructor from &lt;code&gt;public&lt;/code&gt; to &lt;code&gt;protected&lt;/code&gt;. The schedule view needs a public default constructor or it will just silently not create new appointments:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class MyCustomAppointment
-{
-    // this is required to double-click to create
-    public MyCustomAppointment()
-    {
-        // ...
-    }
-
-    // non-default constructor can still be called in code
-    public MyCustomAppointment(...)
-    {
-        // ...
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-				<pubDate>Tue, 29 Apr 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/telerik-wpf-radscheduleview-double-click-to-create-appointment-gotcha.html</link>
-				<guid isPermaLink="true">http://bendetat.com/telerik-wpf-radscheduleview-double-click-to-create-appointment-gotcha.html</guid>
 			</item>
 		
 	</channel>
