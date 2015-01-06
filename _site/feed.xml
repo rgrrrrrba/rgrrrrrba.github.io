@@ -7,6 +7,69 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Access IIS Express from another machine</title>
+				<description>&lt;p&gt;By default, IIS Express (via Visual Studio) will only allow connections from the local machine. This is a Good Thing but sometimes you need to test sites and services from another machine. I’ve found several guide that explain how to do this but they always seem to miss some steps. This will show how to share an IIS Express site via the host’s IP address. Using the machine name is also possible as is using the HOSTS file to fake a domain (like &lt;code&gt;api.mysite.example.com&lt;/code&gt;) but both of these scenarios are outside the scope of these instructions. This has only been tested on computers on the same subnet which should be sufficient for most test scenarios.&lt;/p&gt;
+
+&lt;h2 id=&quot;site-works-locally&quot;&gt;1. Site works locally&lt;/h2&gt;
+
+&lt;p&gt;First, your project’s Web properties should look something like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/yDI4IZs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This is the default for a new website. The port may be different and ‘Apply server settings to all users (store in project file)’ doesn’t have to be checked. The site should also run locally without issues. Make a note of the port.&lt;/p&gt;
+
+&lt;h2 id=&quot;set-up-httpsys&quot;&gt;2. Set up HTTP.sys&lt;/h2&gt;
+
+&lt;p&gt;HTTP.sys is a component of Windows (Vista and above) that handles HTTP requests. The url that is going to be shared needs to be reserved in HTTP.sys’s access control list (ACL). Open an &lt;em&gt;administrative&lt;/em&gt; console. If the console doesn’t have admin rights, this won’t work. Find out your IP address and run this code to reserve the url in the ACL.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;netsh http add urlacl url=http://192.168.0.6:60985/ user=everyone
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should get back this message:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;URL reservation successfully added
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If not, check that the console has admin rights and that the url hasn’t already been reserved in the ACL. If you need to, the reservation can be deleted:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;netsh http delete urlacl url=http://192.168.0.6:60985/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;open-up-the-firewall&quot;&gt;3. Open up the firewall&lt;/h2&gt;
+
+&lt;p&gt;Open the Windows Firewall (or whatever firewall you may have) and create an inbound rule allowing the above port (eg. 60985). Make sure it’s &lt;strong&gt;incoming&lt;/strong&gt;! Yes I burned time when I accidently made it outgoing. Uncheck ‘Public’ if you don’t want the port to be open at cafes and airports.&lt;/p&gt;
+
+&lt;h2 id=&quot;add-the-new-site-to-iss-expresss-configuration&quot;&gt;4. Add the new site to ISS Express’s configuration&lt;/h2&gt;
+
+&lt;p&gt;At this point, the port should actually be available from another computer, but IIS Express will only respond to requests for &lt;code&gt;localhost&lt;/code&gt;. Edit &lt;code&gt;%USERPROFILE%\Documents\iisexpress\config\applicationhost.config&lt;/code&gt; and find the site definition for your project. The easiest way might be to search for the port as it should be unique across the IIS Express instance.  Add a new binding to the site for the external facing address:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/vz9OSBl.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Make sure the application isn’t running and kill IIS Express:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/sfSkFrQ.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;strikeprofitstrike-troubleshooting&quot;&gt;5. &lt;strike&gt;Profit!&lt;/strike&gt; Troubleshooting!&lt;/h2&gt;
+
+&lt;p&gt;Restart Visual Studio as administrator and relaunch the application. It should now work on an external machine. If it doesn’t work:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;See if you can access the site locally using the IP address. If you cannot, make sure the IIS Express configuration is correct and that it did in fact restart.&lt;/li&gt;
+  &lt;li&gt;Make sure the firewall is configured correctly - it should be an &lt;em&gt;inbound&lt;/em&gt; rule allowing traffic on the required port from your subnet.&lt;/li&gt;
+  &lt;li&gt;Check the error on the remote machine.
+    &lt;ul&gt;
+      &lt;li&gt;If it is a timeout (&lt;code&gt;x.x.x.x took too long to respond&lt;/code&gt;) it’s probably the host’s firewall or ACL, or an unrelated network issue.&lt;/li&gt;
+      &lt;li&gt;if it is a 503 Service Unavailable (which should return immediately) it’s probably the IIS Express configuration.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Wed, 07 Jan 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/access-iis-express-from-another-machine.html</link>
+				<guid isPermaLink="true">http://bendetat.com/access-iis-express-from-another-machine.html</guid>
+			</item>
+		
+			<item>
 				<title>Set up TeamCity on an Azure virtual machine - Redux</title>
 				<description>&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This is a repost of an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance.html&quot;&gt;earlier post&lt;/a&gt; with some refinements based on feedback and tips from my friend and collegue &lt;a href=&quot;http://robdmoore.id.au/&quot;&gt;Rob Moore&lt;/a&gt;. &lt;/p&gt;
 
@@ -1615,121 +1678,6 @@ var player = new Player(contentManager, ...);
 				<pubDate>Sun, 25 May 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html</link>
 				<guid isPermaLink="true">http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html</guid>
-			</item>
-		
-			<item>
-				<title>Up and Running with MonoGame</title>
-				<description>&lt;p&gt;&lt;em&gt;or, XNA is dead! Long live XNA!&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;WARNING!&lt;/strong&gt; Learning in the open™! There are a few moving parts when starting with MonoGame, so I’m just documenting the steps I took.&lt;/p&gt;
-
-&lt;h3 id=&quot;microsoft-xna&quot;&gt;Microsoft XNA&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Microsoft_XNA&quot;&gt;Microsoft XNA&lt;/a&gt; is/was a set of tools and a frameworks that provided a relatively easy way to create games using the CLR, sitting on top of DirectX.&lt;/p&gt;
-
-&lt;p&gt;Microsoft stopped active development of XNA around 2011, and last year &lt;a href=&quot;http://www.polygon.com/2013/1/31/3939230/microsoft-has-no-plans-for-future-versions-of-xna-software&quot;&gt;it became obvious&lt;/a&gt; that XNA would be retired. The former XNA home page now redirects to MSDN’s &lt;a href=&quot;http://msdn.microsoft.com/dn629515&quot;&gt;Games development page&lt;/a&gt;, which (apart from not actually having any useful information about game development on Microsoft’s platforms) is mainly spruiking Microsoft’s partnership with &lt;a href=&quot;http://unity3d.com/&quot;&gt;Unity&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&quot;a-quick-note-about-unity&quot;&gt;A quick note about Unity&lt;/h3&gt;
-
-&lt;p&gt;Unity is both a game engine and a component oriented game development environment, with Mono-based scripting using C#. What this means for the average code monkey such as I is that when firing up Unity you are confronted with a drafting board. No comforting &lt;code&gt;10 PRINT 'HELLO, WORLD!'&lt;/code&gt; here folks.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/zjQrmdlR9ZCM/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;monogame-to-the-rescue&quot;&gt;MonoGame to the rescue!&lt;/h3&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://monogame.net&quot;&gt;MonoGame&lt;/a&gt; is an open-source rewrite of XNA 4 (the last version), using the same namespaces and with support for both DirectX 11 and OpenGL. Since it is based on Mono, it allows applications to be written and ported to most platforms, including PS4, Wii U, Xbox 360, Windows Desktop and Store, Android, iOS, Windows Phone, Mac OSX and Linux. The big player missing from that list is Xbox One, which currently does not support applications targeting the CLR.&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt; Unity apparently &lt;em&gt;will&lt;/em&gt; (soon) support Xbox One so I guess it deploys native code, much like how Xamarin can deploy native code written in C# to target platforms that don’t support the CLR such as iOS. Which begs the question, why not just do the same in MonoGame? A question for smarter cookies than myself. &lt;code&gt;&amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;MonoGame also has some official M$ love with several games published by Microsoft Studio.&lt;/p&gt;
-
-&lt;p&gt;Given these weighty credentials, I put the key in the ignition and powered up for a full throttle hello world.&lt;/p&gt;
-
-&lt;h3 id=&quot;obligatory-false-start&quot;&gt;Obligatory false start&lt;/h3&gt;
-
-&lt;p&gt;Don’t try this at home.&lt;/p&gt;
-
-&lt;p&gt;I cloned the &lt;a href=&quot;https://github.com/Mono-Game/MonoGame.Samples&quot;&gt;samples repo&lt;/a&gt; and just tried to run the &lt;code&gt;WindowsDX&lt;/code&gt; (Windows desktop DirectX) solution. No dice. Couldn’t copy resource files, couldn’t resolve all the referenced assemblies.&lt;/p&gt;
-
-&lt;p&gt;MonoGame has some &lt;a href=&quot;http://www.nuget.org/packages/MonoGame/&quot;&gt;NuGet packages&lt;/a&gt; so I pulled them into the project. I got it building but still had the same problem with the resource files.&lt;/p&gt;
-
-&lt;p&gt;I then installed MonoGame using the installer. This let me create new projects using MonoGame’s templates, so I created a new project and started following &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;this tutorial series&lt;/a&gt; by &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/&quot;&gt;Tara Walker&lt;/a&gt;. The first part went well, which involved showing a simple image on a surface. The tutorial links to an &lt;code&gt;.xnb&lt;/code&gt; file containing the image, which loads correctly. So far so good, I’ve got stuff on the screen, I’m a game developer.&lt;/p&gt;
-
-&lt;p&gt;The third part of the series goes through creating that &lt;code&gt;.xnb&lt;/code&gt; file from a source image. This is where I became unstuck.&lt;/p&gt;
-
-&lt;h3 id=&quot;content-pipeline&quot;&gt;Content Pipeline&lt;/h3&gt;
-
-&lt;p&gt;Images and other assets are relatively easy to use in the web and desktop application space. To add an image to a web site, you drop a JPEG, PNG or GIF onto a server and add a &lt;code&gt;&amp;lt;img&amp;gt;&lt;/code&gt; tag to your markup. To add an image to a WPF, Store, Phone or WinForms application, you add the file to the project as an embedded resource and then use it in a similar way.&lt;/p&gt;
-
-&lt;p&gt;Asset management is a much bigger part of game development. There are textures, meshes, sound effects, background music, graphics shader programs and probably a heap of other stuff that I will never understand, and it these assets need to be available to the game code in a way that is efficient and managable. For example, a texture used for a wall may have a number of resolutions, ranging from a very small resolution without much detail for display at a distance to a very large resolution with a lot of detail for display at a short distance.&lt;/p&gt;
-
-&lt;p&gt;The content pipeline is a preprocessing step that takes the game assets and converts them into a format suitable for the engine. In MonoGame’s (and XNA’s) case, this is the &lt;code&gt;.xnb&lt;/code&gt; file.&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;&amp;lt;aside&amp;gt;&lt;/code&gt; Note that I don’t have a full knowledge of the reasons and techniques used in the content pipeline, this is just my understanding of the ideas.&lt;code&gt; &amp;lt;/aside&amp;gt;&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;MonoGame doesn’t have its own content pipeline management system, although it does use XNA’s &lt;code&gt;.xnb&lt;/code&gt; format. For this reason we have to use XNA.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Lhpog1k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;XNA 4 only targets VS2010 so it can be tricky to get it working with VS2013. I found a nice post &lt;a href=&quot;http://rbwhitaker.wikidot.com/setting-up-xna&quot;&gt;here&lt;/a&gt;, Mr Whitaker has written a &lt;a href=&quot;https://bitbucket.org/rbwhitaker/xna-beyond-vs-2010/downloads/XnaFor2013.ps1&quot;&gt;script&lt;/a&gt; that downloads the XNA installer and sets it up in whatever versions of Visual Studio from 2010 to 2013 that it can find. I went through the script manually and got it going. Here are the steps:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Download the installer from here: &lt;a href=&quot;http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe&quot;&gt;http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Close Visual Studio&lt;/li&gt;
-  &lt;li&gt;Open a shell where the installer was downloaded&lt;/li&gt;
-  &lt;li&gt;Execute: &lt;code&gt;XNAGS40_setup.exe /extract:XNA&lt;/code&gt;, this will extract the installer files into a &lt;code&gt;.\XNA&lt;/code&gt; folder&lt;/li&gt;
-  &lt;li&gt;Browse to that folder&lt;/li&gt;
-  &lt;li&gt;Run &lt;code&gt;redists.msi&lt;/code&gt;, this installs some more installers to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio&lt;/code&gt;. Yo dawg.&lt;/li&gt;
-  &lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio\Setup&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Execute: &lt;code&gt;XLiveRedist.msi&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft XNA\XNA Game Studio\Redist\XNA FX Redist&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Execute: &lt;code&gt;xnaliveproxy.msi&lt;/code&gt; (this actually failed for me but it hasn’t caused any dramas so far)&lt;/li&gt;
-  &lt;li&gt;Execute: &lt;code&gt;xnags_platform_tools.msi&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Execute: &lt;code&gt;xnags_shared.msi&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Execute: &lt;code&gt;xnags_visualstudio.msi&lt;/code&gt;. This installs the VS2010 extension, we’ll get back to this one.&lt;/li&gt;
-  &lt;li&gt;Browse back to the &lt;code&gt;XNA&lt;/code&gt; folder in step 4 (possibly order is important)&lt;/li&gt;
-  &lt;li&gt;Execute: &lt;code&gt;arpentry.msi&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Browse to &lt;code&gt;X:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\Extensions\Microsoft&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Find the &lt;code&gt;XNA Game Studio 4.0&lt;/code&gt; folder. This is the VS2010 extension installed in step 13.&lt;/li&gt;
-  &lt;li&gt;Copy the folder to &lt;code&gt;X:\Program Files (x86)\Microsoft Visual Studio 12.0\Common7\IDE\Extensions\Microsoft&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Edit the &lt;code&gt;extension.vsixmanifest&lt;/code&gt; file in the new &lt;code&gt;XNA Game Studio 4.0&lt;/code&gt; folder (this is in &lt;code&gt;Program Files&lt;/code&gt; so you’ll probably need to open notepad as an administrator)&lt;/li&gt;
-  &lt;li&gt;Find the line that says &lt;code&gt;Version=&quot;10.0&quot;&lt;/code&gt; and change it to &lt;code&gt;Version=&quot;12.0&quot;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Insert a new line after that line and add &lt;code&gt;&amp;lt;Edition&amp;gt;WDExpress&amp;lt;/Edition&amp;gt;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Clear your cached extensions by browsing to &lt;code&gt;%userprofile%\AppData\Local\Microsoft\VisualStudio\12.0&lt;/code&gt; and deleting the &lt;code&gt;Extensions&lt;/code&gt; folder&lt;/li&gt;
-  &lt;li&gt;Restart Visual Studio&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Now when you create a new project you should have XNA Game Studio 4.0 templates available. Create a new &lt;code&gt;Empty Content Project (4.0)&lt;/code&gt; and compile it to make sure the content pipeline is working.&lt;/p&gt;
-
-&lt;h3 id=&quot;bringing-monogame-back-into-the-picture&quot;&gt;Bringing MonoGame back into the picture&lt;/h3&gt;
-
-&lt;p&gt;As I said above, I also installed the MonoGame binaries, which adds the MonoGame templates to Visual Studio. Download the bits from &lt;a href=&quot;http://www.monogame.net/downloads/&quot;&gt;MonoGame’s Downloads page&lt;/a&gt;. &lt;/p&gt;
-
-&lt;p&gt;I kept working through &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s tutorial series&lt;/a&gt; and to prove that the content pipeline is working, here’s a handy screenshot (&lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/9945c675303c35e61888de6816a5b165c074cada&quot;&gt;Github repo at this revision&lt;/a&gt;):&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/pE2DmVf.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://rbwhitaker.wikidot.com/setting-up-xna&quot;&gt;RB Whitaker - Setting up XNA&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://rbwhitaker.wikidot.com/monogame-accessing-the-xna-content-pipeline&quot;&gt;RB Whitaker - Accessing the XNA Content Pipeline&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://www.monogame.net/documentation/?page=tutorials_md&quot;&gt;MonoGame Tutorials&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s “Building a Shooter Game” tutorial series, part 1&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://www.monogame.net/downloads/&quot;&gt;MonoGame - Downloads&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Pluralsight ($) (note I haven’t watched all of these):
-    &lt;ul&gt;
-      &lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;Introduction to 2D Game Programming with XNA&lt;/a&gt; by John Sonmez&lt;/li&gt;
-      &lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=monogame&amp;amp;highlight=john-sonmez_monogame-m1-introduction*4!john-sonmez_monogame-m6-wp7!john-sonmez_monogame-m2-building-pong#monogame-m1-introduction&quot;&gt;Cross Platform Game Development with MonoGame&lt;/a&gt;&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial&quot;&gt;My repo going through TW’s above tutorial&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sat, 24 May 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/up-and-running-with-monogame.html</link>
-				<guid isPermaLink="true">http://bendetat.com/up-and-running-with-monogame.html</guid>
 			</item>
 		
 	</channel>
