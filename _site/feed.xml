@@ -7,6 +7,38 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Xamarin Studio borking on a Unified API project</title>
+				<description>&lt;p&gt;I created a Unified API iOS Binding Project in Xamarin Studio (but this may happen for all unified API projects). This is in Xamarin Studio 5.5.4. When I went to build the project I got an error, something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Error: could not import 'blah'
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://forums.xamarin.com/discussion/27217&quot;&gt;Turns out&lt;/a&gt; the generated project file &lt;a href=&quot;http://forums.xamarin.com/discussion/comment/87535/#Comment_87535&quot;&gt;has some errors&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hi, i did succeed in the end. Here was the solution for me: For some reason, the binding project with Unified API has some errors in it’s project file. After creating the project, i saved it. and opened it with a text editor.
+Look for the Importproject element that claims to import the ObjCruntime, this line has a faulty path. It should be:&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;Import Project=&quot;$(MSBuildExtensionsPath)\Xamarin\Xamarin.ObjcBinding.CSharp.targets&quot; /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Also, i added this to the propertygroups:&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;TargetFrameworkIdentifier&amp;gt;Xamarin.iOS&amp;lt;/TargetFrameworkIdentifier&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;(Note: add the framework identifier to each of the &lt;code&gt;PropertyGroup&lt;/code&gt; elements)&lt;/p&gt;
+
+</description>
+				<pubDate>Mon, 12 Jan 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/xamarin-studio-borking-on-unified-api-project.html</link>
+				<guid isPermaLink="true">http://bendetat.com/xamarin-studio-borking-on-unified-api-project.html</guid>
+			</item>
+		
+			<item>
 				<title>Access IIS Express from another machine</title>
 				<description>&lt;p&gt;By default, IIS Express (via Visual Studio) will only allow connections from the local machine. This is a Good Thing but sometimes you need to test sites and services from another machine. I’ve found several guide that explain how to do this but they always seem to miss some steps. This will show how to share an IIS Express site via the host’s IP address. Using the machine name is also possible as is using the HOSTS file to fake a domain (like &lt;code&gt;api.mysite.example.com&lt;/code&gt;) but both of these scenarios are outside the scope of these instructions. This has only been tested on computers on the same subnet which should be sufficient for most test scenarios.&lt;/p&gt;
 
@@ -62,6 +94,7 @@
       &lt;li&gt;if it is a 503 Service Unavailable (which should return immediately) it’s probably the IIS Express configuration.&lt;/li&gt;
     &lt;/ul&gt;
   &lt;/li&gt;
+  &lt;li&gt;If Visual Studio can’t run the project locally saying something like ‘The site http://x.x.x.x:41234 could not be created’, make sure the ACL reservation was created.&lt;/li&gt;
 &lt;/ul&gt;
 </description>
 				<pubDate>Wed, 07 Jan 2015 00:00:00 +1000</pubDate>
@@ -1653,31 +1686,6 @@ var player = new Player(contentManager, ...);
 				<pubDate>Tue, 27 May 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html</link>
 				<guid isPermaLink="true">http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html</guid>
-			</item>
-		
-			<item>
-				<title>xUnit tests in a Windows 8.1 Store App</title>
-				<description>&lt;p&gt;At the time of writing the current version of xUnit (1.9.2) does not support Windows 8.1 Store applications. The pre-release version (2.0.0-beta-build2650) however has the core library built as a PCL (Portable Class Library). So to add a xUnit test assembly to a Windows 8.1 Store application we need to add a PCL library and add the pre-release xUnit NuGet package.&lt;/p&gt;
-
-&lt;p&gt;Add a new project. Under &lt;code&gt;Visual C#&lt;/code&gt;, then &lt;code&gt;Store Apps&lt;/code&gt;, then &lt;code&gt;Windows Apps&lt;/code&gt;, select &lt;code&gt;Class Library (Windows)&lt;/code&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/L9hKws2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Install the pre-release version of xUnit by either picking &lt;code&gt;Include Prelease&lt;/code&gt; in the Package Manager, or open the Package Manager Console (&lt;code&gt;Tools&lt;/code&gt;, &lt;code&gt;NuGet Packager Manager&lt;/code&gt;, &lt;code&gt;Package Manager Console&lt;/code&gt;), select the new test assembly project, and execute &lt;code&gt;install-package xunit -Pre&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/kbtfRkN.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;I also use the &lt;a href=&quot;https://github.com/xunit/resharper-xunit&quot;&gt;xUnit.net Test Support&lt;/a&gt; test runner for Resharper, which has a pre-release version that supports xUnit 2. Install that by opening Resharper’s &lt;code&gt;Extension Manager&lt;/code&gt; and selecting &lt;code&gt;Include Prerelease&lt;/code&gt; before searching for xUnit:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/eIp0x04.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Results are fields of green:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/gMjneQL.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-</description>
-				<pubDate>Sun, 25 May 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html</link>
-				<guid isPermaLink="true">http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html</guid>
 			</item>
 		
 	</channel>
