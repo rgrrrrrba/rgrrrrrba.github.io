@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>A convention test for projects referencing other project references instead of NuGet packages</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>A convention test for projects referencing other project references instead of NuGet packages <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>17 Jan 2015</em></small></h2>
+
+
+
+<p>Earlier this week I was running into problems when adding a solution to a CI build server. Although there were no problems running the solution locally, the build server was complaining about not being able to resolve a reference for a project.</p>
+
+<p>The solution was using NuGet package restore, which I happen to prefer over checking in the <code>packages</code> folder (at least for smaller projects with few developers), but I was confident that the packages were being restored correctly, including the unresolved reference.</p>
+
+<p>The problem was that the project was referencing an assembly from the <code>/bin/debug</code> folder of another project, rather than the project referencing the correct NuGet package. This usually happens when using something like Resharper to automatically add a reference. The fix itself is easy:</p>
+
+<ol>
+  <li>Delete the reference from the project</li>
+  <li>Right-click the solution</li>
+  <li>Select ‘Manage NuGet Packages for Solution’</li>
+  <li>‘Manage’ the package</li>
+  <li>Add the project to the package:</li>
+</ol>
+
+<p><img src="http://i.imgur.com/Zr5S9VX.png" alt="" /></p>
+
+<p>What I really want to do is add a convention test to make sure this doesn’t happen again. Why? Because this happens fairly infrequently, but when it does it can be hard to diagnose because it could potentially be caused by a number of things. In my experience, most of the time it is caused by a bad reference. Nevertheless I always seem to burn too much time figuring it out. In my opinion, the ROI of this convention test will probably make it worthwhile.</p>
+
+<h2 id="turns-out">Turns out</h2>
+
+<p>It’s a bit tricky to get to the projects in a solution file. I didn’t want to waste too much time in the internals of the build system so I found an <a href="http://stackoverflow.com/a/4634505/149259">answer on Stack Overflow</a> that includes two wrapper classes for getting the solution, then iterating on the projects. The wrapper classes can be copied from <a href="https://gist.github.com/bendetat/9a5a336d82b51ac0b564">this gist</a>.</p>
+
+<p>You’ll need to add a reference to <code>Microsoft.Build</code>. Some of the classes that are used are actually deprecated, but this should work for long enough to get a good return on this test. The <code>Solution</code> wrapper class reads a <code>.sln</code> file and exposes a list of <code>SolutionProject</code> instance. Each <code>SolutionProject</code> exposes some of the properties of the project within the solution including the relative path, which I use to build a set of <code>Microsoft.Build.Project</code> instances for the convention test.</p>
+
+<h2 id="test-cases">Test cases</h2>
+
+<p>I’m using NUnit, so my <a href="http://www.nunit.org/index.php?p=testCaseSource&amp;r=2.5">test cases</a> come from a public method that returns an enumeration of <code>TestCastData</code> instances:</p>
+
+<pre><code>public IEnumerable&lt;TestCaseData&gt; AllProjects
+{
+    get
+    {
+        var solution = new Solution("../../../../MySolution.sln");
+        var allProjects = solution.Projects
+            .Where(x =&gt; x.RelativePath != ".nuget")
+            .Where(x =&gt; x.ProjectName != "Microsoft.Build.Evaluation.Project")
+            .ToArray();
+        var allProjectNames = allProjects.Select(x =&gt; x.ProjectName).ToArray();
+        
+        return allProjects.Select(x =&gt;
+        {
+            var project = new Project("../../../../" + x.RelativePath);
+            var testCase = new TestCaseData(project, allProjectNames);
+            testCase.SetName(x.ProjectName);
+
+            return testCase;
+        });
+    }
+}
+</code></pre>
+
+<p>This:</p>
+
+<ol>
+  <li>Opens the solution file (as an instance of the above <code>Solution</code> wrapper). I’ve hard-coded the relative path to the solution because there’s no need to get fancy - the tests are running in <code>src/MyProject/bin/[debug|release]/</code> relative to the solution file. If you don’t keep the projects in a <code>/src</code> subdirectory then take out one of the <code>../</code> bits.</li>
+  <li>Get all of the projects (as an instance of the above <code>SolutionProject</code> wrapper), except for <code>.nuget</code> and <code>Microsoft.Build.Evaluation.Project</code>, which are included in the solution as project references.</li>
+  <li>Select out all the names of the projects. This is passed into each <code>TestCaseData</code> for comparison in the actual test.</li>
+  <li>Build up and return the <code>TestCaseData</code> enumeration:
+    <ol>
+      <li>Construct a new <code>Microsoft.Build.Project</code> instance using the relative path. Note that this hasn’t been tested with solution folder (it would <em>probably</em> work because I would hope that the relative path includes the solution folder).</li>
+      <li>Build a new <code>TestCaseData</code> instance with the project and the list of project names build up above.</li>
+      <li>Set the name of the test case to the name of the project.</li>
+    </ol>
+  </li>
+</ol>
+
+<h2 id="bangarang">Bangarang</h2>
+
+<p>That’s a <a href="http://www.imdb.com/title/tt0102057/">Hook</a> reference, not some ‘popular’ EDM song.</p>
+
+<p>I’m using Shouldly for the assertion.</p>
+
+<pre><code>[Test, TestCaseSource("AllProjects")]
+public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, string[] allProjectNames)
+{
+        var startsWithProjectName = new Func&lt;string, string, bool&gt;((x, projectName) =&gt; x.StartsWith("..\\" + projectName + "\\"));
+        var isReferenceInAnotherProject = new Func&lt;string, bool&gt;(x =&gt; allProjectNames.Any(projectName =&gt; startsWithProjectName(x, projectName)));
+
+        var badReferences = from projectItem in project.GetItems("Reference")
+                            from metaData in projectItem.Metadata
+                            let reference = metaData.EvaluatedValue
+                            where isReferenceInAnotherProject(reference)
+                            select reference;
+
+        badReferences.ShouldBeEmpty();
+}
+</code></pre>
+
+<p>This was jammed together in LinqPad, but it’s pretty straightforward. The first two lines set up some helpers to simplify the query. Then the bad references are determined by finding the references in the project, then checking if the reference is in another project using a fairly naive path check.</p>
+
+<p>Failures look like this, showing the bad reference in the <code>Tests</code> assembly:</p>
+
+<p><img src="http://i.imgur.com/Hkc6y9a.png" alt="" /></p>
+
+<p>Viz.</p>
+
+<iframe width="420" height="315" src="//www.youtube.com/embed/E2VCwBzGdPM" frameborder="0" allowfullscreen=""></iframe>
+
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2014 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>

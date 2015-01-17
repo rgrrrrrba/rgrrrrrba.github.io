@@ -7,6 +7,112 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>A convention test for projects referencing other project references instead of NuGet packages</title>
+				<description>&lt;p&gt;Earlier this week I was running into problems when adding a solution to a CI build server. Although there were no problems running the solution locally, the build server was complaining about not being able to resolve a reference for a project.&lt;/p&gt;
+
+&lt;p&gt;The solution was using NuGet package restore, which I happen to prefer over checking in the &lt;code&gt;packages&lt;/code&gt; folder (at least for smaller projects with few developers), but I was confident that the packages were being restored correctly, including the unresolved reference.&lt;/p&gt;
+
+&lt;p&gt;The problem was that the project was referencing an assembly from the &lt;code&gt;/bin/debug&lt;/code&gt; folder of another project, rather than the project referencing the correct NuGet package. This usually happens when using something like Resharper to automatically add a reference. The fix itself is easy:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Delete the reference from the project&lt;/li&gt;
+  &lt;li&gt;Right-click the solution&lt;/li&gt;
+  &lt;li&gt;Select ‘Manage NuGet Packages for Solution’&lt;/li&gt;
+  &lt;li&gt;‘Manage’ the package&lt;/li&gt;
+  &lt;li&gt;Add the project to the package:&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Zr5S9VX.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;What I really want to do is add a convention test to make sure this doesn’t happen again. Why? Because this happens fairly infrequently, but when it does it can be hard to diagnose because it could potentially be caused by a number of things. In my experience, most of the time it is caused by a bad reference. Nevertheless I always seem to burn too much time figuring it out. In my opinion, the ROI of this convention test will probably make it worthwhile.&lt;/p&gt;
+
+&lt;h2 id=&quot;turns-out&quot;&gt;Turns out&lt;/h2&gt;
+
+&lt;p&gt;It’s a bit tricky to get to the projects in a solution file. I didn’t want to waste too much time in the internals of the build system so I found an &lt;a href=&quot;http://stackoverflow.com/a/4634505/149259&quot;&gt;answer on Stack Overflow&lt;/a&gt; that includes two wrapper classes for getting the solution, then iterating on the projects. The wrapper classes can be copied from &lt;a href=&quot;https://gist.github.com/bendetat/9a5a336d82b51ac0b564&quot;&gt;this gist&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;You’ll need to add a reference to &lt;code&gt;Microsoft.Build&lt;/code&gt;. Some of the classes that are used are actually deprecated, but this should work for long enough to get a good return on this test. The &lt;code&gt;Solution&lt;/code&gt; wrapper class reads a &lt;code&gt;.sln&lt;/code&gt; file and exposes a list of &lt;code&gt;SolutionProject&lt;/code&gt; instance. Each &lt;code&gt;SolutionProject&lt;/code&gt; exposes some of the properties of the project within the solution including the relative path, which I use to build a set of &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instances for the convention test.&lt;/p&gt;
+
+&lt;h2 id=&quot;test-cases&quot;&gt;Test cases&lt;/h2&gt;
+
+&lt;p&gt;I’m using NUnit, so my &lt;a href=&quot;http://www.nunit.org/index.php?p=testCaseSource&amp;amp;r=2.5&quot;&gt;test cases&lt;/a&gt; come from a public method that returns an enumeration of &lt;code&gt;TestCastData&lt;/code&gt; instances:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public IEnumerable&amp;lt;TestCaseData&amp;gt; AllProjects
+{
+    get
+    {
+        var solution = new Solution(&quot;../../../../MySolution.sln&quot;);
+        var allProjects = solution.Projects
+            .Where(x =&amp;gt; x.RelativePath != &quot;.nuget&quot;)
+            .Where(x =&amp;gt; x.ProjectName != &quot;Microsoft.Build.Evaluation.Project&quot;)
+            .ToArray();
+        var allProjectNames = allProjects.Select(x =&amp;gt; x.ProjectName).ToArray();
+        
+        return allProjects.Select(x =&amp;gt;
+        {
+            var project = new Project(&quot;../../../../&quot; + x.RelativePath);
+            var testCase = new TestCaseData(project, allProjectNames);
+            testCase.SetName(x.ProjectName);
+
+            return testCase;
+        });
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Opens the solution file (as an instance of the above &lt;code&gt;Solution&lt;/code&gt; wrapper). I’ve hard-coded the relative path to the solution because there’s no need to get fancy - the tests are running in &lt;code&gt;src/MyProject/bin/[debug|release]/&lt;/code&gt; relative to the solution file. If you don’t keep the projects in a &lt;code&gt;/src&lt;/code&gt; subdirectory then take out one of the &lt;code&gt;../&lt;/code&gt; bits.&lt;/li&gt;
+  &lt;li&gt;Get all of the projects (as an instance of the above &lt;code&gt;SolutionProject&lt;/code&gt; wrapper), except for &lt;code&gt;.nuget&lt;/code&gt; and &lt;code&gt;Microsoft.Build.Evaluation.Project&lt;/code&gt;, which are included in the solution as project references.&lt;/li&gt;
+  &lt;li&gt;Select out all the names of the projects. This is passed into each &lt;code&gt;TestCaseData&lt;/code&gt; for comparison in the actual test.&lt;/li&gt;
+  &lt;li&gt;Build up and return the &lt;code&gt;TestCaseData&lt;/code&gt; enumeration:
+    &lt;ol&gt;
+      &lt;li&gt;Construct a new &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instance using the relative path. Note that this hasn’t been tested with solution folder (it would &lt;em&gt;probably&lt;/em&gt; work because I would hope that the relative path includes the solution folder).&lt;/li&gt;
+      &lt;li&gt;Build a new &lt;code&gt;TestCaseData&lt;/code&gt; instance with the project and the list of project names build up above.&lt;/li&gt;
+      &lt;li&gt;Set the name of the test case to the name of the project.&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;bangarang&quot;&gt;Bangarang&lt;/h2&gt;
+
+&lt;p&gt;That’s a &lt;a href=&quot;http://www.imdb.com/title/tt0102057/&quot;&gt;Hook&lt;/a&gt; reference, not some ‘popular’ EDM song.&lt;/p&gt;
+
+&lt;p&gt;I’m using Shouldly for the assertion.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[Test, TestCaseSource(&quot;AllProjects&quot;)]
+public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, string[] allProjectNames)
+{
+        var startsWithProjectName = new Func&amp;lt;string, string, bool&amp;gt;((x, projectName) =&amp;gt; x.StartsWith(&quot;..\\&quot; + projectName + &quot;\\&quot;));
+        var isReferenceInAnotherProject = new Func&amp;lt;string, bool&amp;gt;(x =&amp;gt; allProjectNames.Any(projectName =&amp;gt; startsWithProjectName(x, projectName)));
+
+        var badReferences = from projectItem in project.GetItems(&quot;Reference&quot;)
+                            from metaData in projectItem.Metadata
+                            let reference = metaData.EvaluatedValue
+                            where isReferenceInAnotherProject(reference)
+                            select reference;
+
+        badReferences.ShouldBeEmpty();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This was jammed together in LinqPad, but it’s pretty straightforward. The first two lines set up some helpers to simplify the query. Then the bad references are determined by finding the references in the project, then checking if the reference is in another project using a fairly naive path check.&lt;/p&gt;
+
+&lt;p&gt;Failures look like this, showing the bad reference in the &lt;code&gt;Tests&lt;/code&gt; assembly:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Hkc6y9a.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Viz.&lt;/p&gt;
+
+&lt;iframe width=&quot;420&quot; height=&quot;315&quot; src=&quot;//www.youtube.com/embed/E2VCwBzGdPM&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+
+</description>
+				<pubDate>Sat, 17 Jan 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/convention-test-for-projects-referencing-other-project-references-instead-of-nuget-packages.html</link>
+				<guid isPermaLink="true">http://bendetat.com/convention-test-for-projects-referencing-other-project-references-instead-of-nuget-packages.html</guid>
+			</item>
+		
+			<item>
 				<title>Xamarin Studio borking on a Unified API project</title>
 				<description>&lt;p&gt;I created a Unified API iOS Binding Project in Xamarin Studio (but this may happen for all unified API projects). This is in Xamarin Studio 5.5.4. When I went to build the project I got an error, something like this:&lt;/p&gt;
 
@@ -1324,368 +1430,6 @@ protected Rectangle GetBoundsAt(Vector2 position)
 				<pubDate>Sat, 07 Jun 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html</link>
 				<guid isPermaLink="true">http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html</guid>
-			</item>
-		
-			<item>
-				<title>Adding dependency injection to a MonoGame application</title>
-				<description>&lt;h3 id=&quot;disclaimer&quot;&gt;Disclaimer&lt;/h3&gt;
-
-&lt;p&gt;&lt;strong&gt;This is not a tutorial!&lt;/strong&gt; This is an explanation of how I have modified the code that I ended up with at the end of the tutorials. These modifications lay the foundation for a cleaner codebase that I will extend upon in the future.&lt;/p&gt;
-
-&lt;p&gt;For people who are familiar with dependency injection, and more familiar with dependency injection than MonoGame, &lt;strong&gt;this is not for you&lt;/strong&gt;. This is a basic explanation of how I pulled apart a slightly complex spaghetti-coded solution and added dependency injection to make it easier to work with in the future. Think of it as ‘using dependency injection in a MonoGame app for people that don’t do dependency injection but have started to learn MonoGame’. &lt;strong&gt;I am only learning MonoGame&lt;/strong&gt;. These probably aren’t best practices and will have numerous issues that expert game developers will laugh at. &lt;em&gt;Laugh away, experts.&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;This also doesn’t go into dependency injection in a lot of detail. There are plenty of places to learn about dependency injection but I found the best way to learn was to work in a basic system that uses dependency injection. Which I’m conveniently building here. You’re welcome.&lt;/p&gt;
-
-&lt;h3 id=&quot;building-a-shooter-game&quot;&gt;Building a Shooter Game&lt;/h3&gt;
-
-&lt;p&gt;I worked my way through all six of &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s “Building a Shooter Game”&lt;/a&gt; tutorials, but the series ends abruptly and hasn’t been updated for nine months. So I’m going to continue with my experimenting with the game, and I’ll try to document the process as I go.&lt;/p&gt;
-
-&lt;p&gt;If you want to play along (sorry) you can either go through Tara’s tutorials then tackle this yourself, or download my solution either &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36&quot;&gt;before&lt;/a&gt; or &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007&quot;&gt;after&lt;/a&gt; these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to &lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;install and configure MonoGame with Visual Studio&lt;/a&gt; before starting.&lt;/p&gt;
-
-&lt;p&gt;The first thing I wanted to do is to refactor the code so I can use dependency injection. I have two reasons for this:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Refactoring and dependency injection will clean up a lot of the dependencies through the project&lt;/li&gt;
-  &lt;li&gt;Math is hard, and to be able to easily unit test my calculations I need the cleaner dependencies&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&quot;math-is-hard-dependency-injection-is-easy&quot;&gt;Math is hard, dependency injection is easy&lt;/h3&gt;
-
-&lt;p&gt;I started by adding Autofac to the &lt;code&gt;Win8ShooterGame&lt;/code&gt; solution - the solution that contains all of the game code. This is a Windows 8 Store App. Autofac should work whether you’re targeting Win 8 store apps, Windows desktop games, or Windows Phone 8. I’m not sure about iOS but it might also work for Android, Linux and Mac OS X if you’re targeting those platforms.&lt;/p&gt;
-
-&lt;p&gt;Then I had to decide where the DI container was going to be configured and live. The &lt;code&gt;Main()&lt;/code&gt; method is usually a good place, but in a MonoGame application the &lt;code&gt;Main()&lt;/code&gt; method just calls a factory that creates the game instance and runs it. There are no obvious entry points to configure the game. So I decided to do the configuration in the game instance itself. In my repo this is the &lt;code&gt;ShooterGame&lt;/code&gt; class.&lt;/p&gt;
-
-&lt;p&gt;Initially I wanted to put the configuration in the game class’s constructor. It already had the initial configuration and seemed like the obvious choice. However due to the game’s lifecycle, few of the things I need to configure Autofac with exist in the constructor. In fact the best place I found was in the &lt;code&gt;LoadContent()&lt;/code&gt; method. By this stage the constructor and &lt;code&gt;Initialize()&lt;/code&gt; methods have already been executed. Here’s the basic game lifecycle for reference:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;ShooterGame() -&amp;gt; Initialize() -&amp;gt; LoadContent() -&amp;gt; Update() -&amp;gt; Draw() -&amp;gt; UnloadContent()
-                                       ^------------/               
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This seems a little late to be configuring the container so I hope this won’t come back to bite me later, but it’s working fine for now. Here is my trimmed down constructor:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public ShooterGame()
-{
-    _graphics = new GraphicsDeviceManager(this);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Here’s something interesting. Note that I still need the constructor to create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; instance. This instance isn’t actually directly used anywhere in the code - I could remove it and the project would still compile, but as soon as I try to run it I get an exception:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;An unhandled exception of type 'System.InvalidOperationException' occurred in MonoGame.Framework.DLL
-Additional information: No Graphics Device Manager
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The reason for this lies in the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; constructor:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public GraphicsDeviceManager(Game game)
-{
-	if (game == null)
-		throw new ArgumentNullException(&quot;The game cannot be null!&quot;);
-	this._game = game;
-	this._supportedOrientations = DisplayOrientation.Default;
-	this._preferredBackBufferWidth = Math.Max(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
-	this._preferredBackBufferHeight = Math.Min(this._game.Window.ClientBounds.Height, this._game.Window.ClientBounds.Width);
-	this._preferredBackBufferFormat = SurfaceFormat.Color;
-	this._preferredDepthStencilFormat = DepthFormat.Depth24;
-	this._synchronizedWithVerticalRetrace = true;
-	if (this._game.Services.GetService(typeof (IGraphicsDeviceManager)) != null)
-		throw new ArgumentException(&quot;Graphics Device Manager Already Present&quot;);
-	this._game.Services.AddService(typeof (IGraphicsDeviceManager), (object) this);
-	this._game.Services.AddService(typeof (IGraphicsDeviceService), (object) this);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The last two lines assign &lt;code&gt;this&lt;/code&gt; - the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; - back to the game. This constructor has side effects. I’m sure there’s reasons for this very nasty piece of work but I would rather not know them. The result is I can’t create the &lt;code&gt;GraphicsDeviceManager&lt;/code&gt; anywhere except for in the game’s constructor.&lt;/p&gt;
-
-&lt;p&gt;Moving on.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;protected override void Initialize()
-{
-    TouchPanel.EnabledGestures = GestureType.FreeDrag;
-    base.Initialize();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This hasn’t changed. It enables the free drag gesture to light up on touch, and calls the &lt;code&gt;base.Initialize()&lt;/code&gt; method. It seems that a lot of inherited classes need to call the base method. In my opinion this design is a bit fragile and another good reason to replace it with some abstractions.&lt;/p&gt;
-
-&lt;p&gt;Now here are the first few lines of my new &lt;code&gt;LoadContent()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;protected override void LoadContent()
-{
-    _container = AutofacConfig.Register(this);
-
-    _spriteBatch = _container.Resolve&amp;lt;ISpriteBatch&amp;gt;();
-    _enemyFactory = _container.Resolve&amp;lt;IEnemyFactory&amp;gt;();
-
-    _player = _container.Resolve&amp;lt;IPlayer&amp;gt;();
-
-    //...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;AutofacConfig&lt;/code&gt; is a new class that I’ve created in the &lt;code&gt;Configuration&lt;/code&gt; folder. I’ll go through it soon. The &lt;code&gt;Register()&lt;/code&gt; method returns an &lt;code&gt;IContainer&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class ShooterGame : Game
-{
-	// ...
-    private IContainer _container;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This container is then used to resolve the parts of the game. I’ll go through the rest of the &lt;code&gt;LoadContent()&lt;/code&gt; method at the end of this post.&lt;/p&gt;
-
-&lt;h3 id=&quot;configuring-autofac&quot;&gt;Configuring Autofac&lt;/h3&gt;
-
-&lt;p&gt;Here is the entire Autofac configuration class and registration method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static class AutofacConfig
-{
-    public static IContainer Register(Game game)
-    {
-        var builder = new ContainerBuilder();
-
-        game.Content.RootDirectory = &quot;Content&quot;;
-
-        builder.RegisterInstance(new SpriteBatch(game.GraphicsDevice)).AsSelf();
-        builder.RegisterInstance(game.Content).AsSelf();
-        builder.RegisterInstance(game.GraphicsDevice).AsSelf();
-
-        builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
-            .Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IRegistering&amp;gt;())
-            .AsImplementedInterfaces()
-            .InstancePerLifetimeScope();
-
-        return builder.Build();
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;First we make a container builder. This builder is used to configure the container before use. The content root directory is also set here, just to keep the configuration in one place.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;builder.RegisterInstance(new SpriteBatch(game.GraphicsDevice)).AsSelf();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Previously the &lt;code&gt;spriteBatch&lt;/code&gt; was created in the game’s &lt;code&gt;LoadContent()&lt;/code&gt; method. Autofac is being configured in the &lt;code&gt;LoadContent()&lt;/code&gt; method, so this is at the same stage in the application lifecycle. We tell Autofac to provide the created sprite batch instance whenever any component requests a sprite batch instance. This avoids having to pass the sprite batch object to anything that wants to draw itself. It also avoids keeping a reference to the sprite batch in the game object itself. There are some extra abstractions around the sprite batch and other objects which I will discuss below.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;builder.RegisterInstance(game.Content).AsSelf();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This line tells Autofac to pass the &lt;code&gt;game.Content&lt;/code&gt; instance whenever any component requests a &lt;code&gt;ContentManager&lt;/code&gt; instance. This avoids having to pass &lt;code&gt;Content&lt;/code&gt; around wherever anything wants to load up a texture or a sound, or to have to do all of the loading in the game class’s &lt;code&gt;LoadContent()&lt;/code&gt; method then pass the loaded textures or sounds around the application.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;builder.RegisterInstance(game.GraphicsDevice).AsSelf();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This does the same thing for the game’s &lt;code&gt;GraphicDevice&lt;/code&gt; instance.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
-    .Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IRegistering&amp;gt;())
-    .AsImplementedInterfaces()
-    .InstancePerLifetimeScope();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This part is a bit more complicated. I’ll go through it line by line.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;builder.RegisterAssemblyTypes(typeof (AutofacConfig).GetTypeInfo().Assembly)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This finds all types declared in the specified assembly - the &lt;code&gt;Win8ShooterGame&lt;/code&gt; application.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;.Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IRegistering&amp;gt;())
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This limits the search to types that implement the &lt;code&gt;IRegistering&lt;/code&gt; interface - I’ll explain this more later.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;.AsImplementedInterfaces()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This registers each of the found types by the interfaces that the type implements. Say we have &lt;code&gt;class Foo : IFoo, IRegistering&lt;/code&gt;. If a component requests an &lt;code&gt;IFoo&lt;/code&gt; dependency, Autofac will provide an instance of &lt;code&gt;Foo&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;.InstancePerLifetimeScope();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This registers the types as a single instance per the scope of the container’s lifetime. The lifetime is only a consideration if you resolve dependencies within nested lifetime scopes. So far for this application there is only ever going to be a single scope, so the instances are essentially singletons - the same instance of a &lt;code&gt;Foo&lt;/code&gt; will be provided to all components that request it.&lt;/p&gt;
-
-&lt;h3 id=&quot;components-and-dependencies&quot;&gt;Components and dependencies&lt;/h3&gt;
-
-&lt;p&gt;It’s probably a good time to step back and look at what is meant by ‘injecting a dependency’ and how components can ‘request’ dependencies.&lt;/p&gt;
-
-&lt;p&gt;At the top level our game class gets a container - &lt;code&gt;IContainer&lt;/code&gt;. This container is used to resolve the game’s high level dependencies:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var player = _container.Resolve&amp;lt;IPlayer&amp;gt;()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To resolve the player object Autofac searches through its registrations and finds a concrete class that implements the &lt;code&gt;IPlayer&lt;/code&gt; class.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class Player : IPlayer, IRegistering
-{
-	//...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It creates an instance of the player, automatically resolving the dependencies required by the &lt;code&gt;Player&lt;/code&gt; class’s constructor.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public Player(IContentManager contentManager, IViewport viewport, IAnimationFactory animationFactory)
-{
-	//...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This means that the game class doesn’t have to know anything about the player class’s dependencies, and the player class doesn’t rely on particular implementations of its dependencies. Because the player class depends on interfaces, we can easily pass in mock dependencies in our unit tests.&lt;/p&gt;
-
-&lt;p&gt;Resolving a dependency using Autofac is slower than just creating a player manually, like &lt;code&gt;var player = new Player(_contentManager, this.Viewport, ....&lt;/code&gt;. But a player is only created once at the start of the game, so the cost is negligible. For things that need to be created multiple times within the game loop (such as projectiles or particles) we will use other methods like factories, which will speed up object creation while still allowing dependency injection.&lt;/p&gt;
-
-&lt;h3 id=&quot;the-iregistering-interface&quot;&gt;The IRegistering interface&lt;/h3&gt;
-
-&lt;p&gt;The &lt;code&gt;IRegistering&lt;/code&gt; interface is an empty interface that is used as a marker for classes that should be registered with Autofac. Without using a marker interface, the registration will either apply across all types found in the assembly (which could include types that shouldn’t be registered) or each type needs to be registered manually.&lt;/p&gt;
-
-&lt;p&gt;The scanning registration process isn’t free but it would generally take much less than a second. This is another once-off cost of speed at the start of the application.&lt;/p&gt;
-
-&lt;h3 id=&quot;abstractions-and-wrappers&quot;&gt;Abstractions and wrappers&lt;/h3&gt;
-
-&lt;p&gt;I introduced Autofac to the application so I could easily manage some changes to the code that will support adding unit tests.&lt;/p&gt;
-
-&lt;p&gt;An example is the &lt;code&gt;Player&lt;/code&gt; class. I eventually want to add some tests around the player’s screen edge detection. To do that before my changes I would have to pass in test implementations of the content manager, sprite batch and viewport. I don’t know if those implementations would work in a test harness without actually creating a window with its own game loop. I avoid this complexity by passing in abstractions. For example, I could create a mock content manager that will provide a mock texture, without having to configure a real content manager with a texture.&lt;/p&gt;
-
-&lt;p&gt;MonoGame doesn’t have any abstractions around the main elements, which makes testing using the build in system difficult. For example, the &lt;code&gt;SpriteBatch&lt;/code&gt; class has a hard dependency on &lt;code&gt;GraphicsDevice&lt;/code&gt; and none of the methods are virtual, so even subclassing wouldn’t work. To get around these dependencies with my own game objects, I’ve created a small set of wrapper classes with interfaces to replace the MonoGame elements.&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;ContentManagerWrapper&lt;/code&gt; is a wrapper for the MonoGame &lt;code&gt;ContentManager&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;internal class ContentManagerWrapper
-    : IContentManager, IRegistering
-{
-    private readonly ContentManager _contentManager;
-
-    public ContentManagerWrapper(ContentManager contentManager)
-    {
-        _contentManager = contentManager;
-    }
-
-    public ITexture2D Load(string assetName)
-    {
-        var texture = _contentManager.Load&amp;lt;Texture2D&amp;gt;(assetName);
-        return new Texture2DWrapper(texture);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It exposes the &lt;code&gt;Load()&lt;/code&gt; method, which just calls the underlying &lt;code&gt;ContentManager&lt;/code&gt; instance’s method and returns the &lt;code&gt;Texture2D&lt;/code&gt; result wrapped in a &lt;code&gt;Texture2DWrapper&lt;/code&gt;, which implements &lt;code&gt;ITexture2D&lt;/code&gt;. It has the &lt;code&gt;IRegistering&lt;/code&gt; marker interface so it will be automatically registered with Autofac when the application starts, and the &lt;code&gt;ContentManager&lt;/code&gt; instance is provided by Autofac from the registered instance (the one belonging to the game). It also implements the &lt;code&gt;IContentManager&lt;/code&gt; interface:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public interface IContentManager
-{
-    ITexture2D Load(string assetName);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This means that classes that want to use the content manager just take a dependency on &lt;code&gt;IContentManager&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class Player : IPlayer, IRegistering
-{
-	//...
-
-    public Player(IContentManager contentManager, IViewport viewport, IAnimationFactory animationFactory)
-    {
-        _animation = animationFactory.Build(
-            contentManager.Load(@&quot;Graphics\shipAnimation&quot;),
-            115, 30, 8);
-
-        _position = new Vector2(viewport.TitleSafeArea.X, viewport.TitleSafeArea.Y + viewport.TitleSafeArea.Height/2);
-    }
-
-// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Here the &lt;code&gt;Player&lt;/code&gt; class has a dependency on an &lt;code&gt;IContentManager&lt;/code&gt; instance. When the application is running Autofac will provide an instance of &lt;code&gt;ContentManagerWrapper&lt;/code&gt;, which just wraps the usual content manager, primed with the application’s content. Calling &lt;code&gt;contentManager.Load()&lt;/code&gt; calls the underlying content manager.&lt;/p&gt;
-
-&lt;p&gt;If I want to write some unit tests around the &lt;code&gt;Player&lt;/code&gt; class I can just pass in a mock implementation of &lt;code&gt;IContentManager&lt;/code&gt;, without having to worry about any underlying implementations. Here is an example using &lt;a href=&quot;http://nsubstitute.github.io/&quot;&gt;NSubstitute&lt;/a&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var texture = Substitute.For&amp;lt;ITexture2D&amp;gt;();
-
-var contentManager = Substitute.For&amp;lt;IContentManager&amp;gt;();
-content.Load(@&quot;Graphics\shipAnimation&quot;).Returns(texture);
-
-var player = new Player(contentManager, ...);
-
-// test the Player instance
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;At the moment only enough is abstracted and exposed to get the game running. I’ve also created factories and abstractions for the the &lt;code&gt;Animation&lt;/code&gt; and &lt;code&gt;ParallaxingBackground&lt;/code&gt; classes created in the original tutorials.&lt;/p&gt;
-
-&lt;h3 id=&quot;loadcontent-and-the-game-structure&quot;&gt;LoadContent() and the game structure&lt;/h3&gt;
-
-&lt;p&gt;Dependency injection simplifies the game’s structure because it takes care of injecting all of the dependencies of the different components that build up the game. The game class itself is the only place where Autofac is directly used to instantiate the elements that the game class is directly responsible for.&lt;/p&gt;
-
-&lt;p&gt;The game’s content is loaded in the &lt;code&gt;LoadContent()&lt;/code&gt; method as before, except for the addition of Autofac and the use of some factories:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;protected override void LoadContent()
-{
-    _container = AutofacConfig.Register(this);
-
-    _spriteBatch = _container.Resolve&amp;lt;ISpriteBatch&amp;gt;();
-    _enemyFactory = _container.Resolve&amp;lt;IEnemyFactory&amp;gt;();
-
-    _player = _container.Resolve&amp;lt;IPlayer&amp;gt;();
-
-    var contentManager = _container.Resolve&amp;lt;IContentManager&amp;gt;();
-    var parallaxingBackgroundFactory = _container.Resolve&amp;lt;IParallaxingBackgroundFactory&amp;gt;();
-
-    _background1 = parallaxingBackgroundFactory.Build(contentManager.Load(&quot;Graphics/bgLayer1&quot;), -1,
-        GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-    _background2 = parallaxingBackgroundFactory.Build(contentManager.Load(&quot;Graphics/bgLayer2&quot;), -2,
-        GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-
-    _mainBackground = contentManager.Load(&quot;Graphics/mainBackground&quot;);
-    _mainBackgroundRect = new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;_enemyFactory&lt;/code&gt; is a factory used to create ‘enemies’ without using Autofac ‘in the loop’. The &lt;code&gt;EnemyFactory&lt;/code&gt; implementation loads up the texture once, then creates a new enemy object when requested.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class EnemyFactory : IEnemyFactory, IRegistering
-{
-    private readonly IContentManager _contentManager;
-    private readonly IAnimationFactory _animationFactory;
-    private ITexture2D _texture;
-
-    public EnemyFactory(IContentManager contentManager, IAnimationFactory animationFactory)
-    {
-        _contentManager = contentManager;
-        _animationFactory = animationFactory;
-        _texture = _contentManager.Load(&quot;Graphics/mineAnimation&quot;);
-    }
-
-    public IEnemy Build()
-    {
-        var animation = _animationFactory.Build(_texture, 47, 30, 8);
-        return new Enemy(animation);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Adding an enemy just calls the factory to create a new enemy:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;void AddEmemy()
-{
-    var enemy = _enemyFactory.Build();
-    enemy.SetPosition(new Vector2(
-        GraphicsDevice.Viewport.Width + enemy.Width / 2,
-        _random.Next(100, GraphicsDevice.Viewport.Height - 100)));
-    _enemies.Add(enemy);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note we’re still using the core MonoGame objects in places. I would expect the &lt;code&gt;enemy.SetPosition&lt;/code&gt; call to eventually happen in the factory.&lt;/p&gt;
-
-&lt;p&gt;The rest of the application structure is pretty much the same as before, exept that it is calling the abstractions rather than directly talking to the underlying MonoGame objects.&lt;/p&gt;
-
-&lt;h3 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h3&gt;
-
-&lt;p&gt;I’ve added dependency injection to a simple game that was going to be potentially difficult to maintain and extend, and the resulting abstractions should be easier to work with and refactor further down the track. I’ve also made it a lot easier to add unit tests.&lt;/p&gt;
-
-&lt;p&gt;My next post in this series will be around adding unit tests to the &lt;code&gt;Player&lt;/code&gt; class, to help with some issues with viewport edge detection that have been plaguing me. I’ll then add the ability for the ship to fire, then start displaying and keeping track of the score.&lt;/p&gt;
-
-&lt;p&gt;Oh, and here is an obligatory screenshot:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/XkRIKoX.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-</description>
-				<pubDate>Tue, 27 May 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html</link>
-				<guid isPermaLink="true">http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html</guid>
 			</item>
 		
 	</channel>
