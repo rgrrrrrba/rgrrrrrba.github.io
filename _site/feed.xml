@@ -7,6 +7,232 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Hello World! It's Gulp!</title>
+				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://gulpjs.org&quot;&gt;Gulp&lt;/a&gt; is a Node.js based build tool. It executes &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.&lt;/p&gt;
+
+&lt;p&gt;This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as &lt;a href=&quot;http://bower.io&quot;&gt;Bower&lt;/a&gt; can be used to manage these complex client-side sites.&lt;/p&gt;
+
+&lt;p&gt;The static site that I’ll hopefully end up generating in the next post will be used with a &lt;a href=&quot;http://nancyfx.org&quot;&gt;Nancy&lt;/a&gt; website. The end result of this post is a Gulp build script that simply copies an &lt;code&gt;index.html&lt;/code&gt; file from &lt;code&gt;/src/client&lt;/code&gt; to &lt;code&gt;/src/client-dist&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
+
+&lt;p&gt;Install Node and NPM. The easiest way may be via &lt;a href=&quot;http://chocolatey.org&quot;&gt;Chocolatey&lt;/a&gt;, this does both:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cinst nodejs.install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Get NPM to create a &lt;code&gt;package.json&lt;/code&gt; file in the project root by running &lt;code&gt;npm install&lt;/code&gt; and working through the wizard. Now install Gulp using NPM:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;--save-dev&lt;/code&gt; flag adds the dependencies to &lt;code&gt;package.json&lt;/code&gt;. This means that when you open the repository in a new environment you can just do &lt;code&gt;npm install&lt;/code&gt; to automatically install the project’s NPM dependencies.&lt;/p&gt;
+
+&lt;h2 id=&quot;helloworlding-gulp&quot;&gt;helloworlding Gulp&lt;/h2&gt;
+
+&lt;p&gt;Create a file &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root. Start out by importing the Gulp module:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;gulp.task()&lt;/code&gt; defines a task that’s available from the command line.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('hello', function() {
+	console.log('Hello world!')
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you run &lt;code&gt;gulp hello&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;λ gulp hello
+[10:22:08] Using gulpfile c:\source\angular-learnings\gulpfile.js
+[10:22:08] Starting 'hello'...
+Hello world!
+[10:22:08] Finished 'hello' after 316 μs
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;gulp.task&lt;/code&gt; also lets you run prerequisite tasks:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('hello', ['one', 'two', 'three'], function() {
+	console.log('Hello world!')
+});
+
+gulp.task('one', function(){
+	console.log('one');
+});
+
+gulp.task('two', function(){
+	console.log('two');
+});
+
+gulp.task('three', function(){
+	console.log('three');
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now &lt;code&gt;gulp hello&lt;/code&gt; does this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[10:24:49] Starting 'one'...
+one
+[10:24:49] Finished 'one' after 200 μs
+[10:24:49] Starting 'two'...
+two
+[10:24:49] Finished 'two' after 151 μs
+[10:24:49] Starting 'three'...
+three
+[10:24:49] Finished 'three' after 154 μs
+[10:24:49] Starting 'hello'...
+Hello world!
+[10:24:49] Finished 'hello' after 135 μs
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now make you a build pipeline. Empty out &lt;code&gt;gulpfile.js&lt;/code&gt; and start again, partner.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/a1wyl0YQrCGm4/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;lots-of-scripting-just-to-copy-a-file&quot;&gt;Lots of scripting just to copy a file!&lt;/h2&gt;
+
+&lt;p&gt;I’m just going to start out with a simple build pipeline that basically copies &lt;code&gt;index.html&lt;/code&gt; to the server.&lt;/p&gt;
+
+&lt;p&gt;Install some more NPM packages. &lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-load-plugins&quot;&gt;&lt;code&gt;gulp-load-plugins&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Loads in any gulp plugins and attaches them to the global scope, or an object of your choice.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Eg.:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var gutil = require('gulp-load-plugins')([
+	'colors', 'env', 'log', 'pipeline'
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-notify&quot;&gt;&lt;code&gt;gulp-notify&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-notify
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;gulp plugin to send messages based on Vinyl Files or Errors to Mac OS X, Linux or Windows using the node-notifier module. Fallbacks to Growl or simply logging&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-filter&quot;&gt;&lt;code&gt;gulp-filter&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-filter
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/chalk&quot;&gt;&lt;code&gt;chalk&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev chalk
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Terminal string styling done right&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/dateformat&quot;&gt;&lt;code&gt;dateformat&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev dateformat
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;A node.js package for Steven Levithan’s excellent dateFormat() function.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/del&quot;&gt;&lt;code&gt;del&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev del
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Delete files/folders using globs&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Whew, that’s a bunch of dependencies. At the top of &lt;code&gt;gulpfile.js&lt;/code&gt;, pull them in using &lt;code&gt;require()&lt;/code&gt; and get some utility dependencies into scope:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
+var notify = require('gulp-notify');
+var filter = require('gulp-filter');
+var plugins = require('gulp-load-plugins')();
+var del = require('del');
+var path = require('path');
+
+var gutil = plugins.loadUtils([
+	'colors', 'log'
+]);
+
+var log = gutil.log;
+var colors = gutil.colors;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To centralise the build paths, add this next:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var config = {
+	&quot;paths&quot;: {
+		&quot;source&quot;: &quot;src/client&quot;,
+		&quot;distribution&quot;: &quot;src/client-dist&quot;
+	}
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This could be put into another file like &lt;code&gt;gulp-config.json&lt;/code&gt; and pulled in with a &lt;code&gt;require()&lt;/code&gt; but for now this will do.&lt;/p&gt;
+
+&lt;p&gt;I’ll split out the actual copy process into a gulp task called &lt;code&gt;rev-and-inject&lt;/code&gt;. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', function() {
+	var indexPath = path.join(config.paths.source, 'index.html');
+
+	return gulp
+		// set source
+		.src([].concat(indexPath))
+		// write to dest
+		.pipe(gulp.dest(config.paths.distribution))
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;build&lt;/code&gt; task calls &lt;code&gt;rev--and-inject&lt;/code&gt; before displaying a notification (using a toast!):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('build', function(){
+	return gulp
+		.src('')
+		.pipe(notify({
+			onLast: true,
+			message: 'Build complete'
+	}));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In &lt;code&gt;src/client&lt;/code&gt; I’ve added an &lt;code&gt;index.html&lt;/code&gt; just for testing. Run &lt;code&gt;gulp build&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[15:05:05] Starting 'rev-and-inject'...
+[15:05:05] Finished 'rev-and-inject' after 24 ms
+[15:05:05] Starting 'build'...
+[15:05:05] gulp-notify: [Gulp notification] Build complete
+[15:05:05] Finished 'build' after 35 ms
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can add a quick &lt;code&gt;clean&lt;/code&gt; task too, which will delete the &lt;code&gt;src/client-dist&lt;/code&gt; folder:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('clean', function(){
+	log('Cleaning: ' + config.paths.distribution);
+
+	del([].concat(config.paths.distribution));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next I’ll add some value to the build pipeline by minifying and bundling JS and CSS, and injecting the results into &lt;code&gt;index.html&lt;/code&gt;. The result will be a static website set up for some AngularJS work.&lt;/p&gt;
+
+</description>
+				<pubDate>Tue, 27 Jan 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/hello-world-its-gulp.html</link>
+				<guid isPermaLink="true">http://bendetat.com/hello-world-its-gulp.html</guid>
+			</item>
+		
+			<item>
 				<title>A convention test for projects referencing other project references instead of NuGet packages</title>
 				<description>&lt;p&gt;Earlier this week I was running into problems when adding a solution to a CI build server. Although there were no problems running the solution locally, the build server was complaining about not being able to resolve a reference for a project.&lt;/p&gt;
 
@@ -867,569 +1093,6 @@ public void AndGivenTheThumbstickIsFullyUp()
 				<pubDate>Sun, 08 Jun 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html</link>
 				<guid isPermaLink="true">http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html</guid>
-			</item>
-		
-			<item>
-				<title>MonoGame Shooter - Better boundary detection for the player</title>
-				<description>&lt;ol&gt;
-  &lt;li&gt;Better boundary detection for the player&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html&quot;&gt;Converting tests to BDD style&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;This is the first post of hopefully many as I learn MonoGame by extending on a &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;tutorial series by Tara Walker&lt;/a&gt;. The source code is available, both &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007&quot;&gt;before&lt;/a&gt; and &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d&quot;&gt;after&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;In this post I walk through adding screen edge detection to the player’s ship, using Test-Driven Development practices where possible to keep a high quality of code.&lt;/p&gt;
-
-&lt;h3 id=&quot;changes-since-last-post&quot;&gt;Changes since last post&lt;/h3&gt;
-
-&lt;p&gt;I have created a &lt;code&gt;Sprite&lt;/code&gt; class, which is the base class for both the &lt;code&gt;Player&lt;/code&gt; class and the &lt;code&gt;Enemy&lt;/code&gt; class. The &lt;code&gt;Sprite&lt;/code&gt; class uses a velocity and maximum speed to calculate the position in each frame. I changed the &lt;code&gt;ViewportWrapper&lt;/code&gt; to expose the &lt;code&gt;Viewport&lt;/code&gt; directly. Turns out the &lt;code&gt;Viewport&lt;/code&gt; object is just a basic &lt;code&gt;struct&lt;/code&gt; without any dependencies, so it should play nice with tests. Because it is a &lt;code&gt;struct&lt;/code&gt;, which is a value type, it can’t be directly registered with AutoFac, so I need to keep the &lt;code&gt;IViewport&lt;/code&gt; abstraction. I also added an &lt;code&gt;IDrawMyself&lt;/code&gt; interface. MonoGame has an &lt;code&gt;IDrawable&lt;/code&gt; interface but it comes with some baggage. &lt;code&gt;IDrawMyself&lt;/code&gt; is implemented by &lt;code&gt;IAnimation&lt;/code&gt; and will eventually be implemented by &lt;code&gt;ITexture2D&lt;/code&gt; and &lt;code&gt;IParallaxingBackground&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Implementations of the &lt;code&gt;Sprite&lt;/code&gt; class use events to hook into the &lt;code&gt;Update()&lt;/code&gt; and &lt;code&gt;Draw()&lt;/code&gt; methods. Here is how the &lt;code&gt;Enemy&lt;/code&gt; class updates its &lt;code&gt;IsActive&lt;/code&gt; state before the position is recalculated (the event is subscribed to in the &lt;code&gt;Enemy&lt;/code&gt; constructor):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public Enemy(..) 
-{
-    // ..
-
-    BeforeUpdate += state =&amp;gt;
-    {
-        if (Position.X &amp;lt; -Width || _health &amp;lt;= 0)
-        {
-            IsActive = false;
-        }
-    };
-
-    // ...
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I also moved to a normal Windows (DirectX) project instead of the Windows 8 Store app that I started with. The only reason for this is so I can use a nice mocking library with little friction, as the portable class libraries that you have to use with Windows 8 Store apps don’t support &lt;code&gt;Reflection.Emit&lt;/code&gt;. I only had to change one line of code to retarget the game, so I’m pretty sure moving to different targets further along will be straightforward.&lt;/p&gt;
-
-&lt;h3 id=&quot;boundary-technique&quot;&gt;Boundary technique&lt;/h3&gt;
-
-&lt;p&gt;This technique is borrowed from a &lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;Pluralsight course&lt;/a&gt; by &lt;a href=&quot;https://twitter.com/jsonmez&quot;&gt;John Sonmez&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Basically we’ll describe four rectangles around the boundary we want to limit the player’s ship to. In practice these will be slightly inset from the screen and a bit further in on the right hand side, to keep the player from going too far forward.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/sMbJiiv.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;To keep things simple, these rectanges will be ‘owned’ by the player.&lt;/p&gt;
-
-&lt;h3 id=&quot;writing-the-first-test&quot;&gt;Writing the first test&lt;/h3&gt;
-
-&lt;p&gt;To make sure that everything is working as we expect, the first test will just confirm that given a ship somewhere in the middle of the screen, with no inputs (keys all up, game pad zeroed), when updating the player, the position does not change. This seems like an obvious test but it will give us a lot of guidance on how to write the rest of the tests and possibly make some changes to help testing along.&lt;/p&gt;
-
-&lt;p&gt;I’m using &lt;a href=&quot;https://github.com/xunit/xunit&quot;&gt;xUnit&lt;/a&gt; as the testing framework but the tests should be pretty much the same whether you’re using xUnit, NUnit or some other framework. I have a post on &lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;how to set up xUnit for a Windows 8 Store app&lt;/a&gt; if that’s what you’re targeting. To install xUnit, open the Package Manager Console, select the tests assembly, and enter &lt;code&gt;install-package xunit&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/trq8uv3.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;I will need to create some mock objects to pass into the &lt;code&gt;Player&lt;/code&gt; constructor. I’m going to use &lt;a href=&quot;http://nsubstitute.github.io/&quot;&gt;NSubstitute&lt;/a&gt; (&lt;code&gt;install-package nsubstitute&lt;/code&gt;).&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Fact]
-public void ThePositionStaysTheSame()
-{
-    var contentManager = Substitute.For&amp;lt;IContentManager&amp;gt;();
-    var viewport = Substitute.For&amp;lt;IViewport&amp;gt;();
-    var animationFactory = Substitute.For&amp;lt;IAnimationFactory&amp;gt;();
-    var spriteBatch = Substitute.For&amp;lt;ISpriteBatch&amp;gt;();
-
-    var player = new Player(contentManager, viewport, animationFactory, spriteBatch);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’m creating some substitutes for the player’s dependencies and constructing the player object. If I run the tests at this point everything is successful, which is good because it means the player class is happy to construct itself using the substituted dependencies.&lt;/p&gt;
-
-&lt;p&gt;Now for the “act” part of the test. I’ll set an initial position, then call &lt;code&gt;Update()&lt;/code&gt; with no mocked inputs.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/I4C0vsi.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Creating these test input states are going to be a problem in the long term. For now I’ll just move it into a seperate method. I’ll revisit this in the next test.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var initialPosition = new Vector2(4, 5);
-player.Position = initialPosition;
-
-var state = GetInputState();
-player.Update(state);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;GetInputState()&lt;/code&gt; returns a new &lt;code&gt;ShooterGameInputState&lt;/code&gt; instance with default game pad, keyboard and mouse states and a default &lt;code&gt;GameTime&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;I run my test again to make sure everything is still happy, and I’m pleased to see it fail. It seems that the &lt;code&gt;Player.Update()&lt;/code&gt; method was using some static &lt;code&gt;TouchPanel&lt;/code&gt; calls, which resulted in a null reference exception outside of the game. I simply updated the &lt;code&gt;ShooterGameInputState&lt;/code&gt; class with the touch panel state, although it looks like mocking out touch panel inputs will be problematic unless they are fully abstracted.&lt;/p&gt;
-
-&lt;p&gt;Now I need to assert that the player didn’t move. I’m using &lt;a href=&quot;http://shouldly.github.io/&quot;&gt;Shouldly&lt;/a&gt; as the assertions library (&lt;code&gt;install-package shouldly&lt;/code&gt;).&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;player.Position.ShouldBe(initialPosition);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;My test passes! I make sure the comparison is working by testing the position against &lt;code&gt;Vector2.Zero&lt;/code&gt; (because I can’t trust the tests quite yet).&lt;/p&gt;
-
-&lt;h3 id=&quot;testing-the-players-movement&quot;&gt;Testing the player’s movement&lt;/h3&gt;
-
-&lt;p&gt;If the left thumbstick is fully up and left, with the player’s default speed of 8, the player should move up 8 and left 8 after one update (note that this isn’t actually true, read on for an explanation). This will be the second test.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class WhenLeftThumbStickFullyLeftAndUp
-{
-    [Fact]
-    public void ThenThePositionMovesUpAndLeftAtFullSpeed()
-    {
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I don’t want to simply copy the player initialization code, especially since I know I’m going to write a pile of these tests. So I’m going to extract out the creation using the &lt;a href=&quot;http://martinfowler.com/bliki/ObjectMother.html&quot;&gt;Object Mother&lt;/a&gt; pattern.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static partial class ObjectMother
-{
-    public static partial class Sprites
-    {
-        public static partial class PlayerSprite
-        {
-            public static partial class Players
-            {
-                public static PlayerBuilder Default { get { return new PlayerBuilder();} }
-
-                public class PlayerBuilder
-                    : BuilderFor&amp;lt;Player&amp;gt;
-                {
-                    public override Player Build()
-                    {
-                        return new Player(
-                            Substitute.For&amp;lt;IContentManager&amp;gt;(),
-                            Substitute.For&amp;lt;IViewport&amp;gt;(),
-                            Substitute.For&amp;lt;IAnimationFactory&amp;gt;(),
-                            Substitute.For&amp;lt;ISpriteBatch&amp;gt;());
-                    }
-                }
-            }
-        }
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The nested classes are so we can add to the object mothers and use the same naming convention as the object’s namespace. If managed properly, the Object Mother pattern can scale out to hundreds of builders with a consistent interface, allowing a high amount of control using the domain language but keeping a very high level of code reuse.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var player = ObjectMother.Sprites.PlayerSprite.Players.Default.Build();
-
-var initialPosition = new Vector2(4, 5);
-player.Position = initialPosition;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’m also going to move the input state creation into an object mother but I’ll add an entry point to set the left thumbstick position. I’ll add an object mother for &lt;code&gt;GamePadState&lt;/code&gt; since that’s what will be passed into the input state. Here is the builder part:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class GamePadStateBuilder
-    : BuilderFor&amp;lt;GamePadState&amp;gt;
-{
-    private Vector2 _leftThumbStick = Vector2.Zero;
-
-    public override GamePadState Build()
-    {
-        return new GamePadState(_leftThumbStick, Vector2.Zero, 0, 0);
-    }
-
-    public GamePadStateBuilder WithLeftThumbstick(Vector2 position)
-    {
-        _leftThumbStick = position;
-        return this;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;BuilderFor&lt;/code&gt; class has some ‘magic’ to let you record the builder configuration using a &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs&quot;&gt;DIY fluent interface&lt;/a&gt;. Here’s next part of the test, creating the input state with the left gamepad stick fully up and right. Note that thumbstick vector’s Y value is &lt;em&gt;positive&lt;/em&gt; in the &lt;em&gt;up&lt;/em&gt; direction and &lt;em&gt;negative&lt;/em&gt; in the &lt;em&gt;down&lt;/em&gt; direction, which is the opposite to the screen, which decreases to zero at you approach the top of the screen.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var gamePadState = ObjectMother.Input.GamePadStates.Default
-    .WithLeftThumbstick(new Vector2(1, 1))
-    .Build();
-var state = ObjectMother.Core.ShooterGameInputStates.Default
-    .WithCurrentGamePadState(gamePadState)
-    .Build();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;With that I add the ‘act’ and ‘assert’ parts of the test:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;player.Update(state);
-
-player.Position.ShouldBe(initialPosition + new Vector2(player.Speed, -player.Speed));
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When running this I found something interesting about the game pad thumbsticks. When creating the &lt;code&gt;GamePadThumbSticks&lt;/code&gt; object used to represent the thumbsticks, a static value &lt;code&gt;GamePadThumbSticks.GateType&lt;/code&gt; is used to normalize the input value. The default gate is &lt;code&gt;Round&lt;/code&gt;, which gates the position to a circular shape. Stand back, I’m going to do some math.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/azB0IGU.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;So the thumbstick at full extension to the top right is actually &lt;code&gt;(0.7071, 0.7071)&lt;/code&gt;, so the player sprite will move &lt;code&gt;8 * 0.7071&lt;/code&gt; pixels per update in the X and Y axes. I’ll update the test accordingly:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;player.Update(state);
-
-var normalisedVelocity = Math.Sqrt(2)/2.0d;
-var changeInPosition = new Vector2(
-    player.Speed*(float) normalisedVelocity,
-    -player.Speed*(float) normalisedVelocity);
-
-player.Position.ShouldBe(initialPosition + changeInPosition);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This test finally passes. This revealed something about the keyboard, mouse and d-pad inputs which I hadn’t noticed. When those inputs are triggering diagonal movement my player is moving with a velocity of &lt;code&gt;(1, 1)&lt;/code&gt;, which is significantly faster than the thumbpad’s velocity of &lt;code&gt;(0.7071, 0.7071)&lt;/code&gt;. This will eventually have to be corrected.&lt;/p&gt;
-
-&lt;h3 id=&quot;configuring-the-players-boundaries&quot;&gt;Configuring the player’s boundaries&lt;/h3&gt;
-
-&lt;p&gt;I want to be able to configure parts of the player. To be able to unit test the player I need to be able to set the configuration outside of the player class. I could do this by passing things into the constructor:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;new Player(contentManager, viewport, ...., leftBoundary, topBoundary, rightBoundary, ...)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is a bit unwieldy and will get worse as new configurable things get added to the player. Instead I could wrap the configuration in another class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;class PlayerConfiguration
-{
-    public int LeftBoundary { get; set; }
-    public int TopBoundary { get; set; }
-    // ...
-}
-
-new Player(contentManager, viewport, ..., playerConfiguration);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Because I’m creating the player using Autofac I can make this more generic and let the runtime configuration be baked in. The sprite’s width and height should also be in the configuration, because determining width and height using the animation is going to be messy for unit tests.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public interface IPlayerConfiguration
-{
-    int LeftBoundary { get; }
-    int TopBoundary { get; }
-    int RightBoundary { get; }
-    int BottomBoundary { get; }
-    int Width { get; }
-    int Height { get; }
-}
-
-public class PlayerConfiguration : IPlayerConfiguration, IRegistering
-{
-    public int LeftBoundary { get { return 20; } }
-    public int TopBoundary { get { return 20; } }
-    public int RightBoundary { get { return 60; } }
-    public int BottomBoundary { get { return 20; } }
-    public int Width { get { return 115; } }
-    public int Height { get { return 69; } }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;By the way, the boundaries are going to be like padding. The player class will calculate the actual boundaries using the viewport later on.&lt;/p&gt;
-
-&lt;p&gt;I need to add the new player configuration to the player’s object mother’s &lt;code&gt;PlayerBuilder&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class PlayerBuilder
-    : BuilderFor&amp;lt;Player&amp;gt;
-{
-    private IPlayerConfiguration _playerConfiguration;
-
-    public override Player Build()
-    {
-        return new Player(
-            Substitute.For&amp;lt;IContentManager&amp;gt;(),
-            Substitute.For&amp;lt;IViewport&amp;gt;(),
-            Substitute.For&amp;lt;IAnimationFactory&amp;gt;(),
-            Substitute.For&amp;lt;ISpriteBatch&amp;gt;(),
-            _playerConfiguration ?? Substitute.For&amp;lt;IPlayerConfiguration&amp;gt;());
-    }
-
-    public PlayerBuilder WithPlayerConfiguration(IPlayerConfiguration playerConfiguration)
-    {
-        _playerConfiguration = playerConfiguration;
-        return this;
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This lets me either use a default &lt;code&gt;IPlayerConfiguration&lt;/code&gt; make with NSubstitute (which will return a default of &lt;code&gt;0&lt;/code&gt; for the boundaries), or pass in my own &lt;code&gt;IPlayerConfiguration&lt;/code&gt; instance. To make this easier to work with I also made an object mother for &lt;code&gt;IPlayerConfiguration&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static partial class ObjectMother
-{
-    public static partial class Sprites
-    {
-        public static partial class PlayerSprite
-        {
-            public static partial class PlayerConfigurations
-            {
-                public static PlayerConfigurationBuilder Default
-                {
-                    get { return new PlayerConfigurationBuilder(); }
-                }
-
-                public class PlayerConfigurationBuilder
-                    : BuilderFor&amp;lt;IPlayerConfiguration&amp;gt;
-                {
-                    private readonly IPlayerConfiguration _playerConfiguration =
-                        Substitute.For&amp;lt;IPlayerConfiguration&amp;gt;();
-
-                    public PlayerConfigurationBuilder()
-                    {
-                        _playerConfiguration.Width.Returns(10);
-                        _playerConfiguration.Height.Returns(10);
-                    }
-
-                    public override IPlayerConfiguration Build()
-                    {
-                        return _playerConfiguration;
-                    }
-
-                    public PlayerConfigurationBuilder WithLeftBoundary(int boundary)
-                    {
-                        _playerConfiguration.LeftBoundary.Returns(boundary);
-                        return this;
-                    }
-
-                    public PlayerConfigurationBuilder WithRightBoundary(int boundary)
-                    {
-                        _playerConfiguration.RightBoundary.Returns(boundary);
-                        return this;
-                    }
-
-                    public PlayerConfigurationBuilder WithTopBoundary(int boundary)
-                    {
-                        _playerConfiguration.TopBoundary.Returns(boundary);
-                        return this;
-                    }
-
-                    public PlayerConfigurationBuilder WithBottomBoundary(int boundary)
-                    {
-                        _playerConfiguration.BottomBoundary.Returns(boundary);
-                        return this;
-                    }
-                }
-            }
-        }
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I also need to provide the player with a sensible viewport in the tests. To do this I created an &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs&quot;&gt;object mother for the viewport&lt;/a&gt; and added a &lt;code&gt;WithViewport()&lt;/code&gt; method to the player object mother.&lt;/p&gt;
-
-&lt;h3 id=&quot;testing-the-left-boundary&quot;&gt;Testing the left boundary&lt;/h3&gt;
-
-&lt;p&gt;I’m guessing that the easiest boundaries to test will be the left and top, since I don’t have to worry about the size of the viewport yet. So my first test will be, with a left boundary of 10, with the player sitting on that boundary, with the the thumbstick to the left, the player’s X position doesn’t change.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnLeftBoundaryWithLeftThumbStickFullyLeft
-{
-    [Fact]
-    public void ThenThePositionIsNotChanged()
-    {
-        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
-            .WithLeftBoundary(10)
-            .Build();
-        var player = ObjectMother.Sprites.PlayerSprite.Players.Default
-            .WithPlayerConfiguration(configuration)
-            .Build();
-        var initialPosition = new Vector2(10, 5);
-        player.Position = initialPosition;
-
-        var gamePadState = ObjectMother.Input.GamePadStates.Default
-            .WithLeftThumbstickFullyLeft()
-            .Build();
-        var state = ObjectMother.Core.ShooterGameInputStates.Default
-            .WithCurrentGamePadState(gamePadState)
-            .Build();
-
-        player.Update(state);
-
-        player.Position.X.ShouldBe(initialPosition.X);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Initially this fails because the boundary isn’t implemented:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Shouldly.ChuckedAWobblyplayer.Position.X
-        should be
-    10
-        but was
-    2
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This first boundary is pretty easy to describe. The player has a set of boundaries:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class Player : //...
-{
-    private readonly Rectangle[] _boundaries;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The left boundary is created in the &lt;code&gt;Player&lt;/code&gt; constructor:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;_boundaries = new[]
-{
-    new Rectangle(-100, 0, 100 + _configuration.LeftBoundary, _viewport.Height),
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is a rectangle starting 100 pixels to the left of the viewport, finishing at the left boundary, and the full height of the viewport.&lt;/p&gt;
-
-&lt;p&gt;Now I need a way of stopping the player from moving into that boundary. In the &lt;code&gt;Sprite&lt;/code&gt; class (the base class for the player and the enemies) the position is set in the &lt;code&gt;Update&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var deltaX = Velocity.X*Speed;
-var deltaY = Velocity.Y*Speed;
-
-Position += new Vector2(deltaX, deltaY);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;So I can add a new virtual method to &lt;code&gt;Sprite&lt;/code&gt; which checks the new position:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;protected virtual bool CheckNewPosition(Vector2 newPosition)
-{
-    return true;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The update method needs to be changed to use this method. Replace:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Position += new Vector2(deltaX, deltaY);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;with:   &lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var newPosition = Position + new Vector2(deltaX, deltaY);
-if (CheckNewPosition(newPosition))
-{
-    Position = newPosition;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;Player&lt;/code&gt; class now just needs to override the &lt;code&gt;CheckNewPosition&lt;/code&gt; method. If I make it return &lt;code&gt;false&lt;/code&gt; my new test passes but my existing test fails, but this is a good check to make sure everything is working as expected:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;protected override bool CheckNewPosition(Vector2 newPosition)
-{
-    return false;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When I run the game, the player now can’t be moved at all. I need to change the &lt;code&gt;CheckNewPosition&lt;/code&gt; method to use the boundaries:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;protected override bool CheckNewPosition(Vector2 newPosition)
-{
-    var newBounds = new Rectangle((int)newPosition.X, (int)newPosition.Y, Width, Height);
-
-    foreach (var boundary in _boundaries)
-    {
-        if (boundary.Intersects(newBounds))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This gets the tests passing, but something strange is going on with the boundaries in the game:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/96xaBhi.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;By debugging the game this is aparrently at &lt;code&gt;X=20&lt;/code&gt;, which is obviously being clipped by the edge of the screen, so one of my assumptions is incorrect. The culprit turns out to be in the &lt;code&gt;Animation.Draw&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var destRect = new Rectangle(
-    (int) position.X - ScaledWidth/2,
-    (int) position.Y - ScaledHeight/2,
-    ScaledWidth,
-    ScaledHeight);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The destination rectangle (the rectangle the sprite is being drawn at) is shifted by half the height and width, so the origin of the sprite is the center of the animation. This actually makes sense, so I need to change my logic to suit. The player’s &lt;code&gt;GetBounds()&lt;/code&gt; method is changed to this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public override Rectangle GetBounds()
-{
-    return GetBoundsAt(Position);
-}
-
-protected Rectangle GetBoundsAt(Vector2 position)
-{
-    return new Rectangle(
-        (int) position.X - _configuration.Width / 2,
-        (int) position.Y - _configuration.Height / 2,
-        _configuration.Width,
-        _configuration.Height);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And the &lt;code&gt;CheckNewPosition()&lt;/code&gt; method uses the new &lt;code&gt;GetBoundsAt()&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;protected override bool CheckNewPosition(Vector2 newPosition)
-{
-    var newBounds = GetBoundsAt(newPosition);
-
-    foreach (var boundary in _boundaries)
-    {
-        if (boundary.Intersects(newBounds))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;My tests still pass because the player has a default width and height of 0. I will update my tests to make sure the width of the player is handled correctly but this will do for now. When I start the game I need to push the starting position right a bit so I can move the player.&lt;/p&gt;
-
-&lt;h3 id=&quot;testing-the-other-boundaries&quot;&gt;Testing the other boundaries&lt;/h3&gt;
-
-&lt;p&gt;Implementing and testing the other boundaries is basically a rinse and repeat of the left boundary. Here is the test for the right boundary:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnRightBoundaryWithLeftThumbStickFullyRight
-{
-    [Fact]
-    public void ThenThePositionIsNotChanged()
-    {
-        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
-            .WithRightBoundary(10)
-            .Build();
-        var viewport = ObjectMother.Core.Viewports.Default
-            .WithHeight(100)
-            .WithWidth(100)
-            .Build();
-        var player = ObjectMother.Sprites.PlayerSprite.Players.Default
-            .WithPlayerConfiguration(configuration)
-            .WithViewport(viewport)
-            .Build();
-        var initialPosition = new Vector2(90, 5);
-        player.Position = initialPosition;
-
-        var gamePadState = ObjectMother.Input.GamePadStates.Default
-            .WithLeftThumbstickFullyRight()
-            .Build();
-        var state = ObjectMother.Core.ShooterGameInputStates.Default
-            .WithCurrentGamePadState(gamePadState)
-            .Build();
-
-        player.Update(state);
-
-        player.Position.X.ShouldBe(90);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And here are the final set of boundaries, fully unit tested and configurable:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;_boundaries = new[]
-{
-    new Rectangle(-100, 0, 100 + _configuration.LeftBoundary, _viewport.Height),
-    new Rectangle(_viewport.Width - _configuration.RightBoundary, 0, 100, _viewport.Height), 
-    new Rectangle(0, -100, _viewport.Width, 100 + _configuration.TopBoundary), 
-    new Rectangle(0, _viewport.Height - _configuration.BottomBoundary, _viewport.Width, 100), 
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;coming-up-next&quot;&gt;Coming up next&lt;/h3&gt;
-
-&lt;p&gt;In my next post I’m going to refactor my tests to use a BDD format, which will simplify the tests and reduce some duplication. That will pave the way for implementing killing the player when it gets hit by an enemy.&lt;/p&gt;
-
-&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;Up and Running with MonoGame&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;xUnit tests in a Windows 8.1 Store App&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html&quot;&gt;Adding dependency injection to a MonoGame application&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s original Shooter Game tutorial&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;John Sonmez’ Introduction to 2D Programming with XNA (Pluralsight video)&lt;/a&gt; ($)&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-				<pubDate>Sat, 07 Jun 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html</link>
-				<guid isPermaLink="true">http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html</guid>
 			</item>
 		
 	</channel>

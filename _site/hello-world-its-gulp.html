@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Hello World! It's Gulp!</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Hello World! It's Gulp! <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>27 Jan 2015</em></small></h2>
+
+
+
+<p><strong>DISCLAIMER:</strong> I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!</p>
+
+<p><a href="http://gulpjs.org">Gulp</a> is a Node.js based build tool. It executes <code>gulpfile.js</code> in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.</p>
+
+<p>This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as <a href="http://bower.io">Bower</a> can be used to manage these complex client-side sites.</p>
+
+<p>The static site that I’ll hopefully end up generating in the next post will be used with a <a href="http://nancyfx.org">Nancy</a> website. The end result of this post is a Gulp build script that simply copies an <code>index.html</code> file from <code>/src/client</code> to <code>/src/client-dist</code>.</p>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<p>Install Node and NPM. The easiest way may be via <a href="http://chocolatey.org">Chocolatey</a>, this does both:</p>
+
+<pre><code>cinst nodejs.install
+</code></pre>
+
+<p>Get NPM to create a <code>package.json</code> file in the project root by running <code>npm install</code> and working through the wizard. Now install Gulp using NPM:</p>
+
+<pre><code>npm install --save-dev gulp
+</code></pre>
+
+<p>The <code>--save-dev</code> flag adds the dependencies to <code>package.json</code>. This means that when you open the repository in a new environment you can just do <code>npm install</code> to automatically install the project’s NPM dependencies.</p>
+
+<h2 id="helloworlding-gulp">helloworlding Gulp</h2>
+
+<p>Create a file <code>gulpfile.js</code> in the project root. Start out by importing the Gulp module:</p>
+
+<pre><code>var gulp = require('gulp');
+</code></pre>
+
+<p><code>gulp.task()</code> defines a task that’s available from the command line.</p>
+
+<pre><code>gulp.task('hello', function() {
+	console.log('Hello world!')
+});
+</code></pre>
+
+<p>If you run <code>gulp hello</code>:</p>
+
+<pre><code>λ gulp hello
+[10:22:08] Using gulpfile c:\source\angular-learnings\gulpfile.js
+[10:22:08] Starting 'hello'...
+Hello world!
+[10:22:08] Finished 'hello' after 316 μs
+</code></pre>
+
+<p><code>gulp.task</code> also lets you run prerequisite tasks:</p>
+
+<pre><code>gulp.task('hello', ['one', 'two', 'three'], function() {
+	console.log('Hello world!')
+});
+
+gulp.task('one', function(){
+	console.log('one');
+});
+
+gulp.task('two', function(){
+	console.log('two');
+});
+
+gulp.task('three', function(){
+	console.log('three');
+});
+</code></pre>
+
+<p>Now <code>gulp hello</code> does this:</p>
+
+<pre><code>[10:24:49] Starting 'one'...
+one
+[10:24:49] Finished 'one' after 200 μs
+[10:24:49] Starting 'two'...
+two
+[10:24:49] Finished 'two' after 151 μs
+[10:24:49] Starting 'three'...
+three
+[10:24:49] Finished 'three' after 154 μs
+[10:24:49] Starting 'hello'...
+Hello world!
+[10:24:49] Finished 'hello' after 135 μs
+</code></pre>
+
+<p>Now make you a build pipeline. Empty out <code>gulpfile.js</code> and start again, partner.</p>
+
+<p><img src="http://media.giphy.com/media/a1wyl0YQrCGm4/giphy.gif" alt="" /></p>
+
+<h2 id="lots-of-scripting-just-to-copy-a-file">Lots of scripting just to copy a file!</h2>
+
+<p>I’m just going to start out with a simple build pipeline that basically copies <code>index.html</code> to the server.</p>
+
+<p>Install some more NPM packages. </p>
+
+<p><a href="https://www.npmjs.com/package/gulp-load-plugins"><code>gulp-load-plugins</code></a></p>
+
+<blockquote>
+  <p>Loads in any gulp plugins and attaches them to the global scope, or an object of your choice.</p>
+</blockquote>
+
+<p>Eg.:</p>
+
+<pre><code>var gutil = require('gulp-load-plugins')([
+	'colors', 'env', 'log', 'pipeline'
+]);
+</code></pre>
+
+<p><a href="https://www.npmjs.com/package/gulp-notify"><code>gulp-notify</code></a></p>
+
+<pre><code>npm install --save-dev gulp-notify
+</code></pre>
+
+<blockquote>
+  <p>gulp plugin to send messages based on Vinyl Files or Errors to Mac OS X, Linux or Windows using the node-notifier module. Fallbacks to Growl or simply logging</p>
+</blockquote>
+
+<p><a href="https://www.npmjs.com/package/gulp-filter"><code>gulp-filter</code></a></p>
+
+<pre><code>npm install --save-dev gulp-filter
+</code></pre>
+
+<p><a href="https://www.npmjs.com/package/chalk"><code>chalk</code></a></p>
+
+<pre><code>npm install --save-dev chalk
+</code></pre>
+
+<blockquote>
+  <p>Terminal string styling done right</p>
+</blockquote>
+
+<p><a href="https://www.npmjs.com/package/dateformat"><code>dateformat</code></a></p>
+
+<pre><code>npm install --save-dev dateformat
+</code></pre>
+
+<blockquote>
+  <p>A node.js package for Steven Levithan’s excellent dateFormat() function.</p>
+</blockquote>
+
+<p><a href="https://www.npmjs.com/package/del"><code>del</code></a></p>
+
+<pre><code>npm install --save-dev del
+</code></pre>
+
+<blockquote>
+  <p>Delete files/folders using globs</p>
+</blockquote>
+
+<p>Whew, that’s a bunch of dependencies. At the top of <code>gulpfile.js</code>, pull them in using <code>require()</code> and get some utility dependencies into scope:</p>
+
+<pre><code>var gulp = require('gulp');
+var notify = require('gulp-notify');
+var filter = require('gulp-filter');
+var plugins = require('gulp-load-plugins')();
+var del = require('del');
+var path = require('path');
+
+var gutil = plugins.loadUtils([
+	'colors', 'log'
+]);
+
+var log = gutil.log;
+var colors = gutil.colors;
+</code></pre>
+
+<p>To centralise the build paths, add this next:</p>
+
+<pre><code>var config = {
+	"paths": {
+		"source": "src/client",
+		"distribution": "src/client-dist"
+	}
+};
+</code></pre>
+
+<p>This could be put into another file like <code>gulp-config.json</code> and pulled in with a <code>require()</code> but for now this will do.</p>
+
+<p>I’ll split out the actual copy process into a gulp task called <code>rev-and-inject</code>. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.</p>
+
+<pre><code>gulp.task('rev-and-inject', function() {
+	var indexPath = path.join(config.paths.source, 'index.html');
+
+	return gulp
+		// set source
+		.src([].concat(indexPath))
+		// write to dest
+		.pipe(gulp.dest(config.paths.distribution))
+});
+</code></pre>
+
+<p>The <code>build</code> task calls <code>rev--and-inject</code> before displaying a notification (using a toast!):</p>
+
+<pre><code>gulp.task('build', function(){
+	return gulp
+		.src('')
+		.pipe(notify({
+			onLast: true,
+			message: 'Build complete'
+	}));
+});
+</code></pre>
+
+<p>In <code>src/client</code> I’ve added an <code>index.html</code> just for testing. Run <code>gulp build</code>:</p>
+
+<pre><code>[15:05:05] Starting 'rev-and-inject'...
+[15:05:05] Finished 'rev-and-inject' after 24 ms
+[15:05:05] Starting 'build'...
+[15:05:05] gulp-notify: [Gulp notification] Build complete
+[15:05:05] Finished 'build' after 35 ms
+</code></pre>
+
+<p>You can add a quick <code>clean</code> task too, which will delete the <code>src/client-dist</code> folder:</p>
+
+<pre><code>gulp.task('clean', function(){
+	log('Cleaning: ' + config.paths.distribution);
+
+	del([].concat(config.paths.distribution));
+});
+</code></pre>
+
+<p>Next I’ll add some value to the build pipeline by minifying and bundling JS and CSS, and injecting the results into <code>index.html</code>. The result will be a static website set up for some AngularJS work.</p>
+
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2014 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
