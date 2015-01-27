@@ -226,6 +226,15 @@ var colors = gutil.colors;
 
 &lt;p&gt;Next I’ll add some value to the build pipeline by minifying and bundling JS and CSS, and injecting the results into &lt;code&gt;index.html&lt;/code&gt;. The result will be a static website set up for some AngularJS work.&lt;/p&gt;
 
+&lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/li&gt;
+  &lt;li&gt;https://github.com/gertjvr/ng-template&lt;/li&gt;
+  &lt;li&gt;http://gulpjs.com/&lt;/li&gt;
+  &lt;li&gt;http://nodejs.org/api/&lt;/li&gt;
+&lt;/ul&gt;
+
 </description>
 				<pubDate>Tue, 27 Jan 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/hello-world-its-gulp.html</link>

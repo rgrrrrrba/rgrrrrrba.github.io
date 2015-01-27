@@ -198,6 +198,11 @@ You can add a quick `clean` task too, which will delete the `src/client-dist` fo
 Next I'll add some value to the build pipeline by minifying and bundling JS and CSS, and injecting the results into `index.html`. The result will be a static website set up for some AngularJS work.
 
 
+## Further reading and resources
 
+- https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js
+- https://github.com/gertjvr/ng-template
+- http://gulpjs.com/
+- http://nodejs.org/api/
 
 
