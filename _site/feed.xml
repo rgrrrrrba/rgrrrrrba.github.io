@@ -229,10 +229,10 @@ var colors = gutil.colors;
 &lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/li&gt;
-  &lt;li&gt;https://github.com/gertjvr/ng-template&lt;/li&gt;
-  &lt;li&gt;http://gulpjs.com/&lt;/li&gt;
-  &lt;li&gt;http://nodejs.org/api/&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&quot;&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;https://github.com/gertjvr/ng-template&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://gulpjs.com/&quot;&gt;http://gulpjs.com/&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://nodejs.org/api/&quot;&gt;http://nodejs.org/api/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 </description>
