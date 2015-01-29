@@ -20,6 +20,8 @@ Install Node and NPM. The easiest way may be via [Chocolatey](http://chocolatey.
 
 	cinst nodejs.install
 
+After installation, you may need to add `C:\Program Files\nodejs` to the system path and create a new folder in `C:\Users\ben_000\AppData\Roaming` named `npm`.
+
 Get NPM to create a `package.json` file in the project root by running `npm install` and working through the wizard. Now install Gulp using NPM:
 
 	npm install --save-dev gulp

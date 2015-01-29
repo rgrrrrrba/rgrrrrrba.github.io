@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ben d'état - Ben Scott's blog</title>
+		<title>Ben d&#39;état - Ben Scott&#39;s blog</title>
 		<description></description>		
 		<link>http://bendetat.com</link>
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<title>Hello World! It's Gulp!</title>
+				<title>Hello World! It&#39;s Gulp!</title>
 				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://gulpjs.org&quot;&gt;Gulp&lt;/a&gt; is a Node.js based build tool. It executes &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.&lt;/p&gt;
@@ -23,6 +23,8 @@
 &lt;pre&gt;&lt;code&gt;cinst nodejs.install
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;After installation, you may need to add &lt;code&gt;C:\Program Files\nodejs&lt;/code&gt; to the system path and create a new folder in &lt;code&gt;C:\Users\ben_000\AppData\Roaming&lt;/code&gt; named &lt;code&gt;npm&lt;/code&gt;.&lt;/p&gt;
+
 &lt;p&gt;Get NPM to create a &lt;code&gt;package.json&lt;/code&gt; file in the project root by running &lt;code&gt;npm install&lt;/code&gt; and working through the wizard. Now install Gulp using NPM:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;npm install --save-dev gulp
@@ -34,13 +36,13 @@
 
 &lt;p&gt;Create a file &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root. Start out by importing the Gulp module:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
+&lt;pre&gt;&lt;code&gt;var gulp = require(&#39;gulp&#39;);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;code&gt;gulp.task()&lt;/code&gt; defines a task that’s available from the command line.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('hello', function() {
-	console.log('Hello world!')
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;hello&#39;, function() {
+	console.log(&#39;Hello world!&#39;)
 });
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -48,44 +50,44 @@
 
 &lt;pre&gt;&lt;code&gt;λ gulp hello
 [10:22:08] Using gulpfile c:\source\angular-learnings\gulpfile.js
-[10:22:08] Starting 'hello'...
+[10:22:08] Starting &#39;hello&#39;...
 Hello world!
-[10:22:08] Finished 'hello' after 316 μs
+[10:22:08] Finished &#39;hello&#39; after 316 μs
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;code&gt;gulp.task&lt;/code&gt; also lets you run prerequisite tasks:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('hello', ['one', 'two', 'three'], function() {
-	console.log('Hello world!')
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;hello&#39;, [&#39;one&#39;, &#39;two&#39;, &#39;three&#39;], function() {
+	console.log(&#39;Hello world!&#39;)
 });
 
-gulp.task('one', function(){
-	console.log('one');
+gulp.task(&#39;one&#39;, function(){
+	console.log(&#39;one&#39;);
 });
 
-gulp.task('two', function(){
-	console.log('two');
+gulp.task(&#39;two&#39;, function(){
+	console.log(&#39;two&#39;);
 });
 
-gulp.task('three', function(){
-	console.log('three');
+gulp.task(&#39;three&#39;, function(){
+	console.log(&#39;three&#39;);
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now &lt;code&gt;gulp hello&lt;/code&gt; does this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[10:24:49] Starting 'one'...
+&lt;pre&gt;&lt;code&gt;[10:24:49] Starting &#39;one&#39;...
 one
-[10:24:49] Finished 'one' after 200 μs
-[10:24:49] Starting 'two'...
+[10:24:49] Finished &#39;one&#39; after 200 μs
+[10:24:49] Starting &#39;two&#39;...
 two
-[10:24:49] Finished 'two' after 151 μs
-[10:24:49] Starting 'three'...
+[10:24:49] Finished &#39;two&#39; after 151 μs
+[10:24:49] Starting &#39;three&#39;...
 three
-[10:24:49] Finished 'three' after 154 μs
-[10:24:49] Starting 'hello'...
+[10:24:49] Finished &#39;three&#39; after 154 μs
+[10:24:49] Starting &#39;hello&#39;...
 Hello world!
-[10:24:49] Finished 'hello' after 135 μs
+[10:24:49] Finished &#39;hello&#39; after 135 μs
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now make you a build pipeline. Empty out &lt;code&gt;gulpfile.js&lt;/code&gt; and start again, partner.&lt;/p&gt;
@@ -106,8 +108,8 @@ Hello world!
 
 &lt;p&gt;Eg.:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gutil = require('gulp-load-plugins')([
-	'colors', 'env', 'log', 'pipeline'
+&lt;pre&gt;&lt;code&gt;var gutil = require(&#39;gulp-load-plugins&#39;)([
+	&#39;colors&#39;, &#39;env&#39;, &#39;log&#39;, &#39;pipeline&#39;
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -154,15 +156,15 @@ Hello world!
 
 &lt;p&gt;Whew, that’s a bunch of dependencies. At the top of &lt;code&gt;gulpfile.js&lt;/code&gt;, pull them in using &lt;code&gt;require()&lt;/code&gt; and get some utility dependencies into scope:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
-var notify = require('gulp-notify');
-var filter = require('gulp-filter');
-var plugins = require('gulp-load-plugins')();
-var del = require('del');
-var path = require('path');
+&lt;pre&gt;&lt;code&gt;var gulp = require(&#39;gulp&#39;);
+var notify = require(&#39;gulp-notify&#39;);
+var filter = require(&#39;gulp-filter&#39;);
+var plugins = require(&#39;gulp-load-plugins&#39;)();
+var del = require(&#39;del&#39;);
+var path = require(&#39;path&#39;);
 
 var gutil = plugins.loadUtils([
-	'colors', 'log'
+	&#39;colors&#39;, &#39;log&#39;
 ]);
 
 var log = gutil.log;
@@ -183,8 +185,8 @@ var colors = gutil.colors;
 
 &lt;p&gt;I’ll split out the actual copy process into a gulp task called &lt;code&gt;rev-and-inject&lt;/code&gt;. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', function() {
-	var indexPath = path.join(config.paths.source, 'index.html');
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, function() {
+	var indexPath = path.join(config.paths.source, &#39;index.html&#39;);
 
 	return gulp
 		// set source
@@ -196,29 +198,29 @@ var colors = gutil.colors;
 
 &lt;p&gt;The &lt;code&gt;build&lt;/code&gt; task calls &lt;code&gt;rev--and-inject&lt;/code&gt; before displaying a notification (using a toast!):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('build', function(){
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, function(){
 	return gulp
-		.src('')
+		.src(&#39;&#39;)
 		.pipe(notify({
 			onLast: true,
-			message: 'Build complete'
+			message: &#39;Build complete&#39;
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;In &lt;code&gt;src/client&lt;/code&gt; I’ve added an &lt;code&gt;index.html&lt;/code&gt; just for testing. Run &lt;code&gt;gulp build&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[15:05:05] Starting 'rev-and-inject'...
-[15:05:05] Finished 'rev-and-inject' after 24 ms
-[15:05:05] Starting 'build'...
+&lt;pre&gt;&lt;code&gt;[15:05:05] Starting &#39;rev-and-inject&#39;...
+[15:05:05] Finished &#39;rev-and-inject&#39; after 24 ms
+[15:05:05] Starting &#39;build&#39;...
 [15:05:05] gulp-notify: [Gulp notification] Build complete
-[15:05:05] Finished 'build' after 35 ms
+[15:05:05] Finished &#39;build&#39; after 35 ms
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;You can add a quick &lt;code&gt;clean&lt;/code&gt; task too, which will delete the &lt;code&gt;src/client-dist&lt;/code&gt; folder:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('clean', function(){
-	log('Cleaning: ' + config.paths.distribution);
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;clean&#39;, function(){
+	log(&#39;Cleaning: &#39; + config.paths.distribution);
 
 	del([].concat(config.paths.distribution));
 });
@@ -351,7 +353,7 @@ public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, 
 				<title>Xamarin Studio borking on a Unified API project</title>
 				<description>&lt;p&gt;I created a Unified API iOS Binding Project in Xamarin Studio (but this may happen for all unified API projects). This is in Xamarin Studio 5.5.4. When I went to build the project I got an error, something like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;Error: could not import 'blah'
+&lt;pre&gt;&lt;code&gt;Error: could not import &#39;blah&#39;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://forums.xamarin.com/discussion/27217&quot;&gt;Turns out&lt;/a&gt; the generated project file &lt;a href=&quot;http://forums.xamarin.com/discussion/comment/87535/#Comment_87535&quot;&gt;has some errors&lt;/a&gt;:&lt;/p&gt;
@@ -666,8 +668,8 @@ Look for the Importproject element that claims to import the ObjCruntime, this l
 
 &lt;p&gt;Now that’s in you can hand edit the config to add some or all of &lt;a href=&quot;http://haacked.com/archive/2014/07/28/github-flow-aliases/&quot;&gt;Phil Haack’s GitHub Flow aliases&lt;/a&gt;. I usually just use ‘wipe’, ‘save’ and ‘undo’:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;wipe = !git add -A &amp;amp;&amp;amp; git commit -qm 'WIPE SAVEPOINT' &amp;amp;&amp;amp; git reset HEAD~1 --hard
-save = !git add -A &amp;amp;&amp;amp; git commit -m 'SAVEPOINT'
+&lt;pre&gt;&lt;code&gt;wipe = !git add -A &amp;amp;&amp;amp; git commit -qm &#39;WIPE SAVEPOINT&#39; &amp;amp;&amp;amp; git reset HEAD~1 --hard
+save = !git add -A &amp;amp;&amp;amp; git commit -m &#39;SAVEPOINT&#39;
 undo = reset HEAD~1 --mixed
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -720,6 +722,59 @@ git config --global mergetool.keepBackup false
 				<pubDate>Sat, 29 Nov 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</link>
 				<guid isPermaLink="true">http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</guid>
+			</item>
+		
+			<item>
+				<title>Generating a subclass of an abstract base class on the fly</title>
+				<description>&lt;p&gt;Often I may want to create an instance of an abstract type. The usual place this would be required is in a unit test, where the subject of the test takes an argument, and I don’t want the test rely on a specific implmentation of the argument type.&lt;/p&gt;
+
+&lt;p&gt;In a unit test, I would create my mock object using a tool such as &lt;a href=&quot;http://nsubstitute.github.io/&quot;&gt;NSubstitute&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public abstract class TaxCalculator
+{
+	public abstract decimal CalculateTax(decimal gross);
+}
+
+var taxCalculator = Substitute.For&amp;lt;TaxCalculator&amp;gt;();
+taxCalculator.CalculateTax(Arg.Any&amp;lt;decimal&amp;gt;()).Returns(20.0m);
+
+var subject = new InvoiceCalculator(taxCalulator);
+//...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;NSubstitute uses quite a lot of magic under the covers to provide fully working implementations of abstract classes or even just interfaces, but it is mainly used only in test frameworks.&lt;/p&gt;
+
+&lt;p&gt;I needed a relatively lightweight way just to generate an implementation of an abstract base class, without trying to implement abstract methods or properties or provide NSubstitute’s rich set of features for rigging the mock. This was to be used in the production code, not in a test itself.&lt;/p&gt;
+
+&lt;p&gt;My use case is as follows:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I have a base, abstract &lt;code&gt;ReportConfiguration&lt;/code&gt; class&lt;/li&gt;
+  &lt;li&gt;I have abstract implementations of the &lt;code&gt;ReportConfiguration&lt;/code&gt; class for a number of report categories, for example:
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code&gt;FinancialReportConfiguration&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;code&gt;ContactReportConfiguration&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Then each report can have its own concrete implementation of the appropriate category level configuration class - most reports have a method that provides an empty instance of its concrete implementation:&lt;/p&gt;
+
+    &lt;p&gt;class MyReport : Report 
+  { 
+      public ReportConfiguration GetEmptyConfiguration()
+      { 
+          return new MyReportConfiguration();
+   	}
+  }&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;BUT not all reports have to have a concrete implementation at all, and just return &lt;code&gt;default(ReportConfiguration)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;The &lt;/li&gt;
+  &lt;li&gt;I have a data retriever for each report category which takes the report category level implementation&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+				<pubDate>Fri, 14 Nov 2014 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/generating-a-subclass-of-an-abstract-base-class-on-the-fly.html</link>
+				<guid isPermaLink="true">http://bendetat.com/generating-a-subclass-of-an-abstract-base-class-on-the-fly.html</guid>
 			</item>
 		
 			<item>
@@ -805,303 +860,6 @@ git config --global mergetool.keepBackup false
 				<pubDate>Thu, 26 Jun 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/autofac-get-registration-types.html</link>
 				<guid isPermaLink="true">http://bendetat.com/autofac-get-registration-types.html</guid>
-			</item>
-		
-			<item>
-				<title>MonoGame Shooter - Converting tests to BDD style</title>
-				<description>&lt;ol&gt;
-  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html&quot;&gt;Better boundary detection for the player&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Converting tests to BDD style&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;This is the second post of hopefully many as I learn MonoGame by extending on a &lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;tutorial series by Tara Walker&lt;/a&gt;. The source code is available, both &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d&quot;&gt;before&lt;/a&gt; and &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b&quot;&gt;after&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;In this post I convert the player boundary detection tests I wrote in the last post to a behavior-driven development (BDD) style to remove some duplication and simplify the tests.&lt;/p&gt;
-
-&lt;h3 id=&quot;behavior-driven-development&quot;&gt;Behavior-driven development&lt;/h3&gt;
-
-&lt;p&gt;BDD is an approach to test-driven development that works from the outside in. A BDD test is described using a language that the business understands (the &lt;a href=&quot;http://martinfowler.com/bliki/UbiquitousLanguage.html&quot;&gt;ubiquitous language&lt;/a&gt;). It then describes the conditions, events and results that make up the desired behavior.&lt;/p&gt;
-
-&lt;h3 id=&quot;existing-tests&quot;&gt;Existing tests&lt;/h3&gt;
-
-&lt;p&gt;The existing tests written in the previous post were quite repetitive. They were all around what happens to a player’s position given some user inputs, such as if the player is at the top of the screen and the gamepad is pushed up, the player shouldn’t move any further up.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUp
-{
-    [Fact]
-    public void ThenThePositionIsNotChanged()
-    {
-        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
-            .WithTopBoundary(10)
-            .Build();
-        var viewport = ObjectMother.Core.Viewports.Default
-            .WithHeight(100)
-            .WithWidth(100)
-            .Build();
-        var player = ObjectMother.Sprites.PlayerSprite.Players.Default
-            .WithPlayerConfiguration(configuration)
-            .WithViewport(viewport)
-            .Build();
-        var initialPosition = new Vector2(20, 10);
-        player.Position = initialPosition;
-
-        var gamePadState = ObjectMother.Input.GamePadStates.Default
-            .WithLeftThumbstickFullyUp()
-            .Build();
-        var state = ObjectMother.Core.ShooterGameInputStates.Default
-            .WithCurrentGamePadState(gamePadState)
-            .Build();
-
-        player.Update(state);
-
-        player.Position.Y.ShouldBe(10);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;A lot of the initial setup and state creation is common across all of the tests. The naming convention used for the test class and method is describing the behaviors appropriately but it is still difficult to scan through the body of the test and immediately see what is happening.&lt;/p&gt;
-
-&lt;h3 id=&quot;bddfy&quot;&gt;BDDfy&lt;/h3&gt;
-
-&lt;p&gt;I’m going to use a framework called &lt;a href=&quot;http://docs.teststack.net/bddfy/index.html&quot;&gt;BDDfy&lt;/a&gt;, which uses reflection to step through the methods in the test class and execute them in the ‘given, when, then’ order. Here’s a really simple example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class WhenEnemyIsDestroyedScenario
-{
-    private Enemy _enemy;
-
-    public void GivenAnEnemyThatIsAlive()
-    {
-        var animation = Substitute.For&amp;lt;IAnimation&amp;gt;();
-        var spriteBatch = Substitute.For&amp;lt;ISpriteBatch&amp;gt;();
-
-        _enemy = new Enemy(animation, spriteBatch);
-    }
-
-    public void WhenEnemyIsDestroyed()
-    {
-        _enemy.Destroy();
-    }
-
-    public void ThenTheEnemyHealthIsZero()
-    {
-        _enemy.Health.ShouldBe(0);
-    }
-
-    [Fact]
-    public void Execute()
-    {
-        this.BDDfy();
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The benefits in this example aren’t huge or immediately compelling, but scanning through the method names makes the intent and structure of the test clear. If there were multiple outcomes, say if the enemy’s state changes, then additional &lt;code&gt;Then&lt;/code&gt; steps can be added. Parts of this could be shared as well, such as moving &lt;code&gt;GivenAnEnemyThatIsAlive()&lt;/code&gt; into a &lt;code&gt;GivenAnEnemyThatIsAliveScenarioBase&lt;/code&gt; base class.&lt;/p&gt;
-
-&lt;p&gt;BDD is a great way of revealing intent and increasing the value of the test suite, and BDDfy in particular gives us an easy implementation of BDD in a way that makes our test suites composable.&lt;/p&gt;
-
-&lt;p&gt;Install BDDfy using the package manager console with &lt;code&gt;install-package TestStack.BDDfy&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h3 id=&quot;reconstructing-the-first-test&quot;&gt;Reconstructing the first test&lt;/h3&gt;
-
-&lt;p&gt;The tests are already in a consistent arrange/act/assert format. Rename the &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUp&lt;/code&gt; class to &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt;, because the name of the test class is going to be the &lt;code&gt;When&lt;/code&gt; part of the BDD style test.&lt;/p&gt;
-
-&lt;p&gt;Add an &lt;code&gt;Execute()&lt;/code&gt; method to the bottom of the test&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Fact]
-public void Execute()
-{
-    this.BDDfy();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is needed to tell BDDfy to reflect over the class and execute the given/when/then methods. Remove the &lt;code&gt;[Fact]&lt;/code&gt; attribute from the &lt;code&gt;ThenThePositionIsNotChanged()&lt;/code&gt; method, otherwise it will be executed twice.&lt;/p&gt;
-
-&lt;p&gt;The first &lt;code&gt;Given&lt;/code&gt; is the player. Setting the position will be the second &lt;code&gt;Given&lt;/code&gt;, because this will change between tests. Copy down to where the player is built and extract this out into a new &lt;code&gt;GivenThePlayer()&lt;/code&gt; method. The &lt;code&gt;player&lt;/code&gt; object will be made into a class variable so it can be shared between the other test methods in the class.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;private Player _player;
-
-public void GivenThePlayer()
-{
-    var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
-        .WithTopBoundary(10)
-        .Build();
-    var viewport = ObjectMother.Core.Viewports.Default
-        .WithHeight(100)
-        .WithWidth(100)
-        .Build();
-    _player = ObjectMother.Sprites.PlayerSprite.Players.Default
-        .WithPlayerConfiguration(configuration)
-        .WithViewport(viewport)
-        .Build();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The other tests set the other boundaries so as I convert them I’ll add their boundaries to this shared method.&lt;/p&gt;
-
-&lt;p&gt;I like to prefix my class variables with an underscore. You should too, so fix the old references from &lt;code&gt;player&lt;/code&gt; to &lt;code&gt;_player&lt;/code&gt; then extract out the &lt;code&gt;AndGivenThePlayerIsAtTheTopOfTheScreen()&lt;/code&gt; and &lt;code&gt;AndGivenTheThumbstickIsFullyUp()&lt;/code&gt; methods.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public void AndGivenThePlayerIsAtTheTopOfTheScreen()
-{
-    _player.Position = new Vector2(20, 10);
-}
-
-private ShooterGameInputState _state;
-
-public void AndGivenTheThumbstickIsFullyUp()
-{
-    var gamePadState = ObjectMother.Input.GamePadStates.Default
-        .WithLeftThumbstickFullyUp()
-        .Build();
-    _state = ObjectMother.Core.ShooterGameInputStates.Default
-        .WithCurrentGamePadState(gamePadState)
-        .Build();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now extract the &lt;code&gt;_player.Update()&lt;/code&gt; call into the &lt;code&gt;When&lt;/code&gt; method:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public void WhenUpdatingThePlayerState()
-{
-    _player.Update(_state);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;ThenThePositionIsNotChanged()&lt;/code&gt; method should now just be the position assertion. The name of the method already follows BDDfy’s naming convention so it will be executed last.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public void ThenThePositionIsNotChanged()
-{
-    _player.Position.Y.ShouldBe(10);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running the test is successful so we can move on.&lt;/p&gt;
-
-&lt;h3 id=&quot;creating-a-scenario-base&quot;&gt;Creating a scenario base&lt;/h3&gt;
-
-&lt;p&gt;You may have noticed that although the test is now broken into easy to understand chunks, the test itself is now significantly larger than the original single method test. The next step is to extract the common part into a base class.&lt;/p&gt;
-
-&lt;p&gt;The only method I’m going to put into the base class is the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method. There will still be some duplication mainly with the &lt;code&gt;WhenUpdatingThePlayerState&lt;/code&gt; but I would rather be able to see the main steps in each test.&lt;/p&gt;
-
-&lt;p&gt;Create a new class called &lt;code&gt;GivenThePlayerScenarioBase&lt;/code&gt; and move the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method into the new class, making it &lt;code&gt;virtual&lt;/code&gt; along the way. The &lt;code&gt;_player&lt;/code&gt; instance should be moved as well and made protected (and renamed to &lt;code&gt;Player&lt;/code&gt; to match C# naming conventions).&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public abstract class GivenThePlayerScenarioBase
-{
-    protected Player Player;
-
-    public virtual void GivenThePlayer()
-    {
-        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
-            .WithTopBoundary(10)
-            .Build();
-        var viewport = ObjectMother.Core.Viewports.Default
-            .WithHeight(100)
-            .WithWidth(100)
-            .Build();
-        Player = ObjectMother.Sprites.PlayerSprite.Players.Default
-            .WithPlayerConfiguration(configuration)
-            .WithViewport(viewport)
-            .Build();
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’ve made the &lt;code&gt;GivenThePlayer()&lt;/code&gt; method virtual because I still want to have a method named &lt;code&gt;GivenThePlayer()&lt;/code&gt; in the concrete scenario class. This is a matter of taste and doesn’t affect BDDfy’s operation, but it keeps all the steps in the scenario class which I find valuable.&lt;/p&gt;
-
-&lt;p&gt;Change &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt; to inherit from &lt;code&gt;GivenThePlayerScenarioBase&lt;/code&gt; and rename the &lt;code&gt;_player&lt;/code&gt; references to &lt;code&gt;Player&lt;/code&gt;. The test still passes! Now we can go through the other classes and convert them to the hot new BDD style tests.&lt;/p&gt;
-
-&lt;h3 id=&quot;wrap-up&quot;&gt;Wrap-up&lt;/h3&gt;
-
-&lt;p&gt;I won’t go through the other conversions but for reference here is the complete &lt;code&gt;WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario&lt;/code&gt; class:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class WhenPlayerIsOnTopBoundaryWithLeftThumbStickFullyUpScenario
-    : GivenThePlayerScenarioBase
-{
-    private ShooterGameInputState _state;
-
-    public override void GivenThePlayer()
-    {
-        base.GivenThePlayer();
-    }
-
-    public void AndGivenThePlayerIsAtTheTopOfTheScreen()
-    {
-        Player.Position = new Vector2(20, 10);
-    }
-
-    public void AndGivenTheThumbstickIsFullyUp()
-    {
-        var gamePadState = ObjectMother.Input.GamePadStates.Default
-            .WithLeftThumbstickFullyUp()
-            .Build();
-        _state = ObjectMother.Core.ShooterGameInputStates.Default
-            .WithCurrentGamePadState(gamePadState)
-            .Build();
-    }
-
-    public void WhenUpdatingThePlayerState()
-    {
-        Player.Update(_state);
-    }
-
-    public void ThenThePositionIsNotChanged()
-    {
-        Player.Position.Y.ShouldBe(10);
-    }
-
-    [Fact]
-    public void Execute()
-    {
-        this.BDDfy();
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The completed &lt;code&gt;GivenThePlayerScenarioBase&lt;/code&gt; with the different boundaries is here:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public abstract class GivenThePlayerScenarioBase
-{
-    protected Player Player;
-
-    public virtual void GivenThePlayer()
-    {
-        var configuration = ObjectMother.Sprites.PlayerSprite.PlayerConfigurations.Default
-            .WithTopBoundary(10)
-            .WithRightBoundary(10)
-            .WithBottomBoundary(10)
-            .WithLeftBoundary(10)
-            .Build();
-        var viewport = ObjectMother.Core.Viewports.Default
-            .WithHeight(100)
-            .WithWidth(100)
-            .Build();
-        Player = ObjectMother.Sprites.PlayerSprite.Players.Default
-            .WithPlayerConfiguration(configuration)
-            .WithViewport(viewport)
-            .Build();
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;As always you can refer to &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial&quot;&gt;the current source code&lt;/a&gt; or &lt;a href=&quot;https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b&quot;&gt;the source code as at the finish of this post&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h3 id=&quot;coming-up-next&quot;&gt;Coming up next&lt;/h3&gt;
-
-&lt;p&gt;In my next post I’m going to implement killing the player when it gets hit by an enemy.&lt;/p&gt;
-
-&lt;h3 id=&quot;resources&quot;&gt;Resources&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/up-and-running-with-monogame.html&quot;&gt;Up and Running with MonoGame&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html&quot;&gt;xUnit tests in a Windows 8.1 Store App&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html&quot;&gt;Adding dependency injection to a MonoGame application&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx&quot;&gt;Tara Walker’s original Shooter Game tutorial&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction&quot;&gt;John Sonmez’ Introduction to 2D Programming with XNA (Pluralsight video)&lt;/a&gt; ($)&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sun, 08 Jun 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html</link>
-				<guid isPermaLink="true">http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html</guid>
 			</item>
 		
 	</channel>
