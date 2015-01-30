@@ -32,6 +32,11 @@
 
 <p><strong>DISCLAIMER:</strong> I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!</p>
 
+<ul>
+  <li>Part 1: Hello World! It’s Gulp!</li>
+  <li>Part 2: <a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">A useful build pipeline using Gulp and Bower</a></li>
+</ul>
+
 <p><a href="http://gulpjs.org">Gulp</a> is a Node.js based build tool. It executes <code>gulpfile.js</code> in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.</p>
 
 <p>This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as <a href="http://bower.io">Bower</a> can be used to manage these complex client-side sites.</p>
@@ -52,7 +57,12 @@
 <pre><code>npm install --save-dev gulp
 </code></pre>
 
-<p>The <code>--save-dev</code> flag adds the dependencies to <code>package.json</code>. This means that when you open the repository in a new environment you can just do <code>npm install</code> to automatically install the project’s NPM dependencies.</p>
+<p>The <code>--save-dev</code> flag adds the dependencies to <code>package.json</code>. This means that when you open the repository in a new environment you can just do <code>npm install</code> to automatically install the project’s NPM dependencies. </p>
+
+<p>Note that Gulp itself should also be installed globally so you can use <code>gulp</code> on the command line:</p>
+
+<pre><code>npm install -g gulp
+</code></pre>
 
 <h2 id="helloworlding-gulp">helloworlding Gulp</h2>
 
@@ -248,7 +258,7 @@ var colors = gutil.colors;
 });
 </code></pre>
 
-<p>Next I’ll add some value to the build pipeline by minifying and bundling JS and CSS, and injecting the results into <code>index.html</code>. The result will be a static website set up for some AngularJS work.</p>
+<p><a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">Next I’ll add some value to the build pipeline</a> by minifying and bundling JS and CSS, and injecting the results into <code>index.html</code>. The result will be a static website set up for some AngularJS work.</p>
 
 <h2 id="further-reading-and-resources">Further reading and resources</h2>
 

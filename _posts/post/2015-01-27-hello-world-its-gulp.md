@@ -7,6 +7,9 @@ category: post
 
 **DISCLAIMER:** I'm learning in the open here. This is the first time I've used Gulp and I'm sure I'm missing a heap of really important stuff. Enjoy!
 
+- Part 1: Hello World! It's Gulp!
+- Part 2: [A useful build pipeline using Gulp and Bower](http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html)
+
 [Gulp](http://gulpjs.org) is a Node.js based build tool. It executes `gulpfile.js` in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.
 
 This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as [Bower](http://bower.io) can be used to manage these complex client-side sites.
@@ -26,7 +29,11 @@ Get NPM to create a `package.json` file in the project root by running `npm inst
 
 	npm install --save-dev gulp
 
-The `--save-dev` flag adds the dependencies to `package.json`. This means that when you open the repository in a new environment you can just do `npm install` to automatically install the project's NPM dependencies.
+The `--save-dev` flag adds the dependencies to `package.json`. This means that when you open the repository in a new environment you can just do `npm install` to automatically install the project's NPM dependencies. 
+
+Note that Gulp itself should also be installed globally so you can use `gulp` on the command line:
+
+	npm install -g gulp
 
 
 ##  helloworlding Gulp
@@ -197,7 +204,7 @@ You can add a quick `clean` task too, which will delete the `src/client-dist` fo
 		del([].concat(config.paths.distribution));
 	});
 
-Next I'll add some value to the build pipeline by minifying and bundling JS and CSS, and injecting the results into `index.html`. The result will be a static website set up for some AngularJS work.
+[Next I'll add some value to the build pipeline](http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html) by minifying and bundling JS and CSS, and injecting the results into `index.html`. The result will be a static website set up for some AngularJS work.
 
 
 ## Further reading and resources
