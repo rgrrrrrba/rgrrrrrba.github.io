@@ -9,6 +9,7 @@ category: post
 
 - Part 1: Hello World! It's Gulp!
 - Part 2: [A useful build pipeline using Gulp and Bower](http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html)
+- Part 3: [Cleaning and simplifying the Gulp pipeline](http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html)
 
 [Gulp](http://gulpjs.org) is a Node.js based build tool. It executes `gulpfile.js` in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.
 
@@ -101,6 +102,8 @@ I'm just going to start out with a simple build pipeline that basically copies `
 Install some more NPM packages. 
 
 [`gulp-load-plugins`](https://www.npmjs.com/package/gulp-load-plugins)
+
+	npm install --save-dev gulp-load-plugins
 
 > Loads in any gulp plugins and attaches them to the global scope, or an object of your choice.
 

@@ -7,12 +7,134 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Cleaning and simplifying the Gulp pipeline</title>
+				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It’s Gulp!&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Part 3: Cleaning and simplifying the Gulp pipeline&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I wasn’t entirely happy with how the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js&quot;&gt;previous build script&lt;/a&gt; wrote out the minified JS and CSS files next to &lt;code&gt;index.html&lt;/code&gt;, or how the vendor files had to be specified in the configuration, so I did some playing with the &lt;code&gt;gulp-useref&lt;/code&gt; plugin and cleaned things up significantly.&lt;/p&gt;
+
+&lt;p&gt;I installed two new dependencies.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-useref&quot;&gt;&lt;code&gt;gulp-usered&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-useref
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Parse build blocks in HTML files to replace references to non-optimized scripts or stylesheets.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-if&quot;&gt;&lt;code&gt;gulp-if&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-if
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Conditionally run a task&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I moved all the dependencies into &lt;code&gt;$&lt;/code&gt;, deleted the dependencies I wouldn’t need any more and added &lt;code&gt;useref&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var $ = {
+	if: require(&#39;gulp-if&#39;),
+	notify: require(&#39;gulp-notify&#39;),
+	rev: require(&#39;gulp-rev&#39;),
+	revReplace: require(&#39;gulp-rev-replace&#39;),
+	useref: require(&#39;gulp-useref&#39;),
+	filter: require(&#39;gulp-filter&#39;),
+	uglify: require(&#39;gulp-uglify&#39;),
+	minifyCss: require(&#39;gulp-minify-css&#39;),
+	del: require(&#39;del&#39;),
+	path: require(&#39;path&#39;),
+	connect: require(&#39;connect&#39;),
+	serveStatic: require(&#39;serve-static&#39;),
+	log: require(&#39;gulp-load-plugins&#39;)()
+		.loadUtils([&#39;log&#39;])
+		.log
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then I deleted the &lt;code&gt;rev-and-inject&lt;/code&gt; task plus all of the CSS and JS tasks, and replaced the &lt;code&gt;build&lt;/code&gt; task with this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;fonts&#39;, &#39;images&#39;], function() {
+	var cssFilter = $.filter(&#39;**/*.css&#39;);
+	var jsFilter = $.filter(&#39;**/*.js&#39;);
+	var assets = $.useref.assets();
+
+	return gulp
+		.src($.path.join(config.paths.client, &#39;*.html&#39;))
+		.pipe(assets)
+		.pipe($.if(&#39;*.js&#39;, $.uglify()))
+		.pipe($.if(&#39;*.css&#39;, $.minifyCss()))
+		.pipe($.rev())
+		.pipe(assets.restore())
+		.pipe($.useref())
+		.pipe($.revReplace())
+		.pipe(gulp.dest(config.paths.destination))
+
+		.pipe($.notify({
+			onLast: true,
+			message: &#39;Build complete&#39;
+		}))
+		;
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;$useref.assets()&lt;/code&gt; scans the &lt;code&gt;.html&lt;/code&gt; files for JS and CSS references. The &lt;code&gt;gulp-if&lt;/code&gt; plugin lets you do basic logic, this replaces the &lt;code&gt;gulp-filter&lt;/code&gt; plugin to perform conditional minification. &lt;code&gt;rev&lt;/code&gt; and &lt;code&gt;revReplace&lt;/code&gt; do the same cache busting as before.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;index.html&lt;/code&gt; now contains the relative references to the JS and CSS files. CSS is in the header:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;head&amp;gt;
+    &amp;lt;!-- build:css content/site.min.css --&amp;gt;
+    &amp;lt;link href=&quot;../../bower_components/bootstrap/dist/css/bootstrap.css&quot; rel=&quot;stylesheet&quot;&amp;gt;
+    &amp;lt;link href=&quot;../../bower_components/bootstrap/dist/css/bootstrap-theme.css&quot; rel=&quot;stylesheet&quot;&amp;gt;
+    &amp;lt;link href=&quot;content/css/site.css&quot;/&amp;gt;
+    &amp;lt;!-- endbuild --&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;JS at the end of the body:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;	&amp;lt;!-- build:js content/site.min.js --&amp;gt;
+	&amp;lt;script type=&quot;text/javascript&quot; src=&quot;../../bower_components/jquery/dist/jquery.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+	&amp;lt;script type=&quot;text/javascript&quot; src=&quot;../../bower_components/bootstrap/dist/bootstrap.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+	&amp;lt;script type=&quot;text/javascript&quot; src=&quot;content/script/site.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+	&amp;lt;!-- endbuild --&amp;gt;
+&amp;lt;/body&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The output path is specified in the &lt;code&gt;build:css&lt;/code&gt; / &lt;code&gt;build.js&lt;/code&gt; placeholder.&lt;/p&gt;
+
+&lt;p&gt;Here is the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as at this post&lt;/a&gt;. Next I’ll get some AngularJS happening.&lt;/p&gt;
+
+&lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&quot;&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;https://github.com/gertjvr/ng-template&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://gulpjs.com/&quot;&gt;http://gulpjs.com/&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://nodejs.org/api/&quot;&gt;http://nodejs.org/api/&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as of this post&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Fri, 30 Jan 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html</link>
+				<guid isPermaLink="true">http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html</guid>
+			</item>
+		
+			<item>
 				<title>A useful build pipeline using Gulp and Bower</title>
 				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It’s Gulp!&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;Part 2: A useful build pipeline using Gulp and Bower&lt;/li&gt;
+  &lt;li&gt;Part 3: &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;Cleaning and simplifying the Gulp pipeline&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;Big thanks to my colleague &lt;a href=&quot;http://blog.gertjvr.com/&quot;&gt;Gert JvR&lt;/a&gt; whose &lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;ng-template&lt;/a&gt; project I am deconstructing.&lt;/p&gt;
@@ -630,7 +752,7 @@ return gulp
 &amp;lt;/html&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;And I’m spent. Next I’ll get an AngularJS workflow happening.&lt;/p&gt;
+&lt;p&gt;I’m not entirely happy with this so &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;next I’ll try to simplify things&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
 
@@ -656,6 +778,7 @@ return gulp
 &lt;ul&gt;
   &lt;li&gt;Part 1: Hello World! It’s Gulp!&lt;/li&gt;
   &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Part 3: &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;Cleaning and simplifying the Gulp pipeline&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://gulpjs.org&quot;&gt;Gulp&lt;/a&gt; is a Node.js based build tool. It executes &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.&lt;/p&gt;
@@ -754,6 +877,9 @@ Hello world!
 &lt;p&gt;Install some more NPM packages. &lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-load-plugins&quot;&gt;&lt;code&gt;gulp-load-plugins&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-load-plugins
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;blockquote&gt;
   &lt;p&gt;Loads in any gulp plugins and attaches them to the global scope, or an object of your choice.&lt;/p&gt;
@@ -1404,62 +1530,6 @@ git config --global mergetool.keepBackup false
 				<pubDate>Thu, 07 Aug 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/compare-branches-in-tortoise-git.html</link>
 				<guid isPermaLink="true">http://bendetat.com/compare-branches-in-tortoise-git.html</guid>
-			</item>
-		
-			<item>
-				<title>Resolving a list of type registrations from Autofac</title>
-				<description>&lt;p&gt;I needed to get all types that implemented a given interface that were registered with Autofac. Not a set of factories, that would be as simple as this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;class Consumer
-{
-	public Consumer(IEnumerable&amp;lt;Func&amp;lt;IFoo&amp;gt;&amp;gt; fooFactories)
-	{
-		// ...
-	}
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;What I really need is something like &lt;code&gt;Consumer(IEnumerable&amp;lt;Type&amp;gt; fooTypes)&lt;/code&gt; where the types are everything implementing &lt;code&gt;IFoo&lt;/code&gt;, but of course Autofac can’t resolve that.&lt;/p&gt;
-
-&lt;p&gt;Inspired by &lt;a href=&quot;http://stackoverflow.com/a/9503695/149259&quot;&gt;this StackOverflow answer&lt;/a&gt;, here’s an extension method that does what I need:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public static class LifetimeScopeExtensions
-{
-    public static IEnumerable&amp;lt;Type&amp;gt; GetImplementingTypes&amp;lt;T&amp;gt;(this ILifetimeScope scope)
-    {
-        return scope.ComponentRegistry
-            .RegistrationsFor(new TypedService(typeof (T)))
-            .Select(x =&amp;gt; x.Activator)
-            .OfType&amp;lt;ReflectionActivator&amp;gt;()
-            .Select(x =&amp;gt; x.LimitType);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To use it my consumer just takes an &lt;code&gt;ILifetimeScope&lt;/code&gt; dependency:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public Consumer(ILifetimeScope scope) 
-{
-	var fooTypes = scope.GetImplementingTypes&amp;lt;IFoo&amp;gt;();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that I needed to register the types both as the base type &lt;code&gt;IFoo&lt;/code&gt; (for the implementing type resolution) and as self, so I could later resolve using &lt;code&gt;scope.Resolve(fooType)&lt;/code&gt;. My registration looks like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;        builder.RegisterAssemblyTypes(typeof (IFoo).Assembly)
-            .Where(t =&amp;gt; t.IsAssignableTo&amp;lt;IFoo&amp;gt;())
-            .Where(t =&amp;gt; !t.IsAbstract)
-            .As&amp;lt;IFoo&amp;gt;()
-            .AsSelf()
-            .InstancePerDependency();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-</description>
-				<pubDate>Thu, 26 Jun 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/autofac-get-registration-types.html</link>
-				<guid isPermaLink="true">http://bendetat.com/autofac-get-registration-types.html</guid>
 			</item>
 		
 	</channel>

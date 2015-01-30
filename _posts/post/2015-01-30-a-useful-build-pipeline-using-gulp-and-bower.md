@@ -9,6 +9,7 @@ category: post
 
 - Part 1: [Hello World! It's Gulp!](http://bendetat.com/hello-world-its-gulp.html)
 - Part 2: A useful build pipeline using Gulp and Bower
+- Part 3: [Cleaning and simplifying the Gulp pipeline](http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html)
 
 Big thanks to my colleague [Gert JvR](http://blog.gertjvr.com/) whose [ng-template](https://github.com/gertjvr/ng-template) project I am deconstructing.
 
@@ -559,7 +560,7 @@ The end result looks like this:
 		</body>
 	</html>
 
-And I'm spent. Next I'll get an AngularJS workflow happening.
+I'm not entirely happy with this so [next I'll try to simplify things](http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html).
 
 
 
