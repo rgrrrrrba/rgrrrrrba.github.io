@@ -7,6 +7,7 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Karma and Mocha for AngularJS testing</title>
 				<description>&lt;h2 id=&quot;setting-up-karma-with-mocha-phantomjs-and-chai&quot;&gt;Setting up Karma with Mocha, PhantomJS and Chai&lt;/h2&gt;
 
@@ -315,6 +316,7 @@ $http.get(&#39;api/get-instruments&#39;)
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Cleaning and simplifying the Gulp pipeline</title>
 				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
@@ -445,6 +447,7 @@ $http.get(&#39;api/get-instruments&#39;)
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>A useful build pipeline using Gulp and Bower</title>
 				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
@@ -1089,6 +1092,7 @@ return gulp
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Hello World! It&#39;s Gulp!</title>
 				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
@@ -1340,6 +1344,7 @@ var colors = gutil.colors;
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>A convention test for projects referencing other project references instead of NuGet packages</title>
 				<description>&lt;p&gt;Earlier this week I was running into problems when adding a solution to a CI build server. Although there were no problems running the solution locally, the build server was complaining about not being able to resolve a reference for a project.&lt;/p&gt;
 
@@ -1446,6 +1451,7 @@ public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, 
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Xamarin Studio borking on a Unified API project</title>
 				<description>&lt;p&gt;I created a Unified API iOS Binding Project in Xamarin Studio (but this may happen for all unified API projects). This is in Xamarin Studio 5.5.4. When I went to build the project I got an error, something like this:&lt;/p&gt;
 
@@ -1478,6 +1484,7 @@ Look for the Importproject element that claims to import the ObjCruntime, this l
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Access IIS Express from another machine</title>
 				<description>&lt;p&gt;By default, IIS Express (via Visual Studio) will only allow connections from the local machine. This is a Good Thing but sometimes you need to test sites and services from another machine. I’ve found several guide that explain how to do this but they always seem to miss some steps. This will show how to share an IIS Express site via the host’s IP address. Using the machine name is also possible as is using the HOSTS file to fake a domain (like &lt;code&gt;api.mysite.example.com&lt;/code&gt;) but both of these scenarios are outside the scope of these instructions. This has only been tested on computers on the same subnet which should be sufficient for most test scenarios.&lt;/p&gt;
 
@@ -1542,6 +1549,7 @@ Look for the Importproject element that claims to import the ObjCruntime, this l
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Set up TeamCity on an Azure virtual machine - Redux</title>
 				<description>&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This is a repost of an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance.html&quot;&gt;earlier post&lt;/a&gt; with some refinements based on feedback and tips from my friend and collegue &lt;a href=&quot;http://robdmoore.id.au/&quot;&gt;Rob Moore&lt;/a&gt;. &lt;/p&gt;
 
@@ -1661,6 +1669,7 @@ Look for the Importproject element that claims to import the ObjCruntime, this l
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Uninstrumented statistical .NET profiling using open source tools</title>
 				<description>&lt;p&gt;Profilers are unusual tools in that you generally never need one, right up to just past the point where users are melting down and you desperately need one. Usually you get a condition that involves many different pieces of code and internal services and libraries put together in way that quickly grinds your application to a painful halt. Those conditions are (hopefully) pretty rare and in my experience come up when you change something in one area that turns out to badly affect a seemingly unrelated area.&lt;/p&gt;
 
@@ -1724,6 +1733,7 @@ Look for the Importproject element that claims to import the ObjCruntime, this l
 			</item>
 		
 			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Get running fast on GitHub and BitBucket</title>
 				<description>&lt;p&gt;These are the steps I use to set up a new PC with Git. I mainly use Git on the command line, with TortoiseGit for staging commits and visualising logs and Beyond Compare for diffs and merges.&lt;/p&gt;
 
