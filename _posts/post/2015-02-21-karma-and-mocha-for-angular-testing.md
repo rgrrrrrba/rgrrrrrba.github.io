@@ -286,7 +286,9 @@ To simulate the error, you can just tell the `$httpBackend` to respond with an e
 
 ## Here is a cat doing some TDD
 
-![Source: http://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg](images/tdd-cat.jpg)
+Please imagine that this cat is really stoked about now being able to test front-end JavaScript.
+
+![Source: http://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg](http://bendetat.com/images/tdd-cat.jpg)
 
 
 

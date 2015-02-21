@@ -304,7 +304,9 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;h2 id=&quot;here-is-a-cat-doing-some-tdd&quot;&gt;Here is a cat doing some TDD&lt;/h2&gt;
 
-&lt;p&gt;&lt;img src=&quot;images/tdd-cat.jpg&quot; alt=&quot;Source: http://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Please imagine that this cat is really stoked about now being able to test front-end JavaScript.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://bendetat.com/images/tdd-cat.jpg&quot; alt=&quot;Source: http://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg&quot; /&gt;&lt;/p&gt;
 
 </description>
 				<pubDate>Sat, 21 Feb 2015 00:00:00 +1000</pubDate>
