@@ -25,9 +25,9 @@ I want to use Bootstrap, but...
 
 Bower is a JavaScript package manager. So is NPM, in fact we'll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM [can be used for client-side package management](http://browserify.org) but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.
 
-Install Bower to the project using NPM:
+Install Bower to the project (and globally) using NPM:
 
-	npm install --save-dev bower
+	npm install --save-dev -g bower
 
 Now create `bower.json` by running `bower init` and following the instructions. Bower should not be ready to install Bootstrap:
 

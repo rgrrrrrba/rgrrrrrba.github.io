@@ -1,17 +1,26 @@
 ---
-title: Cleaning and simplifying the Gulp pipeline
+title: Some angular...
 layout: post
 date: 2015-01-30
 category: post
 ---
 
-**DISCLAIMER:** I'm learning in the open here. This is the first time I've used Gulp and Bower and I'm sure I'm missing a heap of really important stuff. Enjoy!
+**DISCLAIMER:** I'm learning in the open here. I am not an AngularJS thought leader and I'm sure I'm missing a heap of really important stuff. Enjoy!
 
 - Part 1: [Hello World! It's Gulp!](http://bendetat.com/hello-world-its-gulp.html)
 - Part 2: [A useful build pipeline using Gulp and Bower](http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html)
-- Part 3: Cleaning and simplifying the Gulp pipeline
+- Part 3: [Cleaning and simplifying the Gulp pipeline](http://bendetat.com)
+- Part 4: some angularsz
 
-I wasn't entirely happy with how the [previous build script](https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js) wrote out the minified JS and CSS files next to `index.html`, or how the vendor files had to be specified in the configuration, so I did some playing with the `gulp-useref` plugin and cleaned things up significantly.
+
+## Prerequisites
+
+I'm going to use Bower to install Toastr and AngularJS:
+
+	bower install --save toastr
+	bower install --save angularjs
+
+
 
 I installed two new dependencies.
 
@@ -92,7 +101,7 @@ JS at the end of the body:
 		<!-- endbuild -->
 	</body>
 
-The output path is specified in the `build:css` / `build.js` placeholder. Another benefit of this approach is that the development `index.html` is actually usable as is - those `<script>` and `<link>` will resolve to the un-mangled originals.
+The output path is specified in the `build:css` / `build.js` placeholder.
 
 
 ## File watching

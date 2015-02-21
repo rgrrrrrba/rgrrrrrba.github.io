@@ -7,12 +7,318 @@
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
+				<title>Karma and Mocha for AngularJS testing</title>
+				<description>&lt;h2 id=&quot;setting-up-karma-with-mocha-phantomjs-and-chai&quot;&gt;Setting up Karma with Mocha, PhantomJS and Chai&lt;/h2&gt;
+
+&lt;p&gt;I’m following the &lt;a href=&quot;http://karma-runner.github.io/0.12/intro/installation.html&quot;&gt;installation guide&lt;/a&gt; at &lt;a href=&quot;http://karma-runner.github.io&quot;&gt;karma-runner.github.io&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I already have Node.js and NPM installed so I won’t go through the process for that, but I’ve found the easiest way to get running is via &lt;a href=&quot;https://chocolatey.org/packages/nodejs.install&quot;&gt;Chocolatey NuGet&lt;/a&gt; using &lt;code&gt;choco install nodejs.install&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;First up, install Karma:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev karma
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now install some plugins for Karma. The installation instructions are for Jasmine and the Chrome launcher, but I want &lt;a href=&quot;http://mochajs.org/&quot;&gt;Mocha&lt;/a&gt; as the testing framework and &lt;a href=&quot;http://phantomjs.org/&quot;&gt;PhantomJS&lt;/a&gt; for a headless (window-less) test environment.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;em&gt;Huh? I thought Karma was the test environment&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Karma is a test &lt;em&gt;runner&lt;/em&gt;. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I’m setting up tests for client-side JavaScript - in particular, I’m going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.&lt;/p&gt;
+
+&lt;p&gt;So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use &lt;a href=&quot;http://chaijs.com/&quot;&gt;Chai&lt;/a&gt; as the assertion library.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev karma-mocha
+npm install --save-dev karma-phantomjs-launcher
+npm install --save-dev karma-chai
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To make it easier to run &lt;code&gt;karma&lt;/code&gt; from the command line you can install &lt;code&gt;karma-cli&lt;/code&gt; globally, which will run the local version without having to specify the path to karma (&lt;code&gt;node node_modules/karma/bin/karma&lt;/code&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g karma-cli
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Karma needs a configuration file. Generate it using &lt;code&gt;karma init&lt;/code&gt; and answer the questions. For this demo all of my code is going to live in &lt;code&gt;./source-and-tests&lt;/code&gt;. If I were using a Gulp build chain this would probably need to be tweaked.&lt;/p&gt;
+
+&lt;dl&gt;
+  &lt;dt&gt;Which testing framework do you want to use ?&lt;/dt&gt;
+  &lt;dd&gt;&lt;code&gt;mocha&lt;/code&gt;&lt;/dd&gt;
+  &lt;dt&gt;Do you want to use Require.js ?&lt;/dt&gt;
+  &lt;dd&gt;&lt;code&gt;no&lt;/code&gt;&lt;/dd&gt;
+  &lt;dt&gt;Do you want to capture any browsers automatically ?&lt;/dt&gt;
+  &lt;dd&gt;&lt;code&gt;PhantomJS&lt;/code&gt;&lt;/dd&gt;
+  &lt;dt&gt;What is the location of your source and test files ?&lt;/dt&gt;
+  &lt;dd&gt;&lt;code&gt;source-and-tests/**/*.js&lt;/code&gt;&lt;/dd&gt;
+  &lt;dt&gt;Should any of the files included by the previous patterns be excluded ?&lt;/dt&gt;
+  &lt;dd&gt;&lt;em&gt;leave blank&lt;/em&gt;&lt;/dd&gt;
+  &lt;dt&gt;Do you want Karma to watch all the files and run the tests on change ?&lt;/dt&gt;
+  &lt;dd&gt;&lt;code&gt;yes&lt;/code&gt;&lt;/dd&gt;
+&lt;/dl&gt;
+
+&lt;p&gt;This generates a file called &lt;code&gt;karma-conf.js&lt;/code&gt;, which configures Karma for a test run. You can have multiple configuration files pointing to different test suites or browser configurations, which can be run by specifying the name of the configuration file (&lt;code&gt;karma start my.conf.ks&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;To get Chai included in the test pipeline, we need to edit &lt;code&gt;karma-conf.js&lt;/code&gt; and add it to the &lt;code&gt;frameworks&lt;/code&gt; setting:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;frameworks: [&#39;mocha&#39;, &#39;chai&#39;],
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; will execute the default &lt;code&gt;karma-conf.js&lt;/code&gt; (or &lt;code&gt;karma-conf.coffee&lt;/code&gt;). First we need a test to run. In &lt;code&gt;./source-and-tests/&lt;/code&gt; I created &lt;code&gt;array-tests.js&lt;/code&gt; which just contains the &lt;a href=&quot;http://mochajs.org/#synchronous-code&quot;&gt;first example&lt;/a&gt; from Mocha’s documentation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;describe(&#39;Array&#39;, function(){
+  describe(&#39;#indexOf()&#39;, function(){
+    it(&#39;should return -1 when the value is not present&#39;, function(){
+      assert.equal(-1, [1,2,3].indexOf(5));
+      assert.equal(-1, [1,2,3].indexOf(0));
+    })
+  })
+})
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; should find and run this test, then watch for changes to the watched files and repeating.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/cwTVVjT.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;adding-angularjs-to-the-mix&quot;&gt;Adding AngularJS to the mix&lt;/h2&gt;
+
+&lt;p&gt;I’ll use Bower to install AngularJS.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install --save-dev bower 
+npm install -g bower
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This installs Bower to &lt;code&gt;./node_modules/bower&lt;/code&gt;, then installs it globally. Now we need to create a configuration file for Bower:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;bower init
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can just &lt;kbd&gt;enter&lt;/kbd&gt; through the configuration, accepting all the defaults. This creates a &lt;code&gt;bower.json&lt;/code&gt; file, which will save the dependencies added by Bower. Now use Bower to install AngularJS and angular-mocks:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;bower install --save angular
+bower install --save angular-mocks
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This installs AngularJS to &lt;code&gt;./bower_components/angular&lt;/code&gt; and angular-mocks to &lt;code&gt;./bower_components/angular-mocks&lt;/code&gt;. The angular-mocks package gives us methods to resolve our application’s components and create mocks of AngularJS services.&lt;/p&gt;
+
+&lt;p&gt;I’m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I’ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.&lt;/p&gt;
+
+&lt;p&gt;To include AngularJS and angular-mocks in Karma’s test run, edit the &lt;code&gt;files&lt;/code&gt; config setting in &lt;code&gt;karma.conf.js&lt;/code&gt;. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;files: [
+	&#39;bower_components/angular/angular.js&#39;,
+	&#39;bower_components/angular-mocks/angular-mocks.js&#39;,
+	&#39;source-and-tests/**/*.js&#39;
+],
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The controller to test is very simple at this stage (&lt;code&gt;MyController.js&lt;/code&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(function(){
+	angular.module(&#39;my-module&#39;, []);
+
+	angular
+		.module(&#39;my-module&#39;)
+		.controller(&#39;MyController&#39;, [
+			function(){
+				var self = this;
+
+				self.firstName = &#39;&#39;;
+				self.lastName = &#39;&#39;;
+
+				self.getFullName = function(){
+					return self.firstName + &#39; &#39; + self.lastName;
+				};
+
+				return self;
+			}
+	]);
+})();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This creates a module called &lt;code&gt;my-module&lt;/code&gt; and creates a controller called &lt;code&gt;MyController&lt;/code&gt; that exposes &lt;code&gt;firstName&lt;/code&gt;, &lt;code&gt;lastName&lt;/code&gt; and &lt;code&gt;getFullName()&lt;/code&gt;. I want to test the result of &lt;code&gt;getFullName()&lt;/code&gt; (&lt;code&gt;MyControllerTests.js&lt;/code&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;describe(&#39;MyController&#39;, function(){
+	beforeEach(module(&#39;my-module&#39;));
+
+	describe(&#39;getFullName()&#39;, function(){
+		it(&#39;should handle names correctly&#39;, inject(function($controller){
+			var myController = $controller(&#39;MyController&#39;);
+
+			myController.firstName = &#39;George&#39;;
+			myController.lastName = &#39;Harrison&#39;;
+
+			myController.getFullName().should.equal(&#39;George Harrison&#39;);
+		}));
+	});
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This does some interesting things.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;beforeEach(module(&#39;my-module&#39;));
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This loads the &lt;code&gt;my-module&lt;/code&gt; module before each test in the &lt;code&gt;MyController&lt;/code&gt; suite.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;it(&#39;should handle names correctly&#39;, inject(function($controller){
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This injects &lt;code&gt;$controller&lt;/code&gt; into the test. &lt;code&gt;$controller&lt;/code&gt; allows resolving registered controllers.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var myController = $controller(&#39;MyController&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This resolves an instance of the &lt;code&gt;MyController&lt;/code&gt; controller. The instance is then used as the test subject.&lt;/p&gt;
+
+&lt;h2 id=&quot;scope-injection&quot;&gt;$scope injection&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code&gt;$scope&lt;/code&gt; that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to &lt;code&gt;$scope&lt;/code&gt; for another test. The controller declaration changes to this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;angular
+	.module(&#39;my-module&#39;)
+	.controller(&#39;MyController&#39;, [
+		&#39;$scope&#39;,
+		function($scope){
+			var self = this;
+
+			// ...
+
+			$scope.songs = [
+				&#39;Here Comes The Sun&#39;
+			];
+
+			$scope.addSong = function(song) {
+				$scope.songs.push(song);
+			};
+
+			return self;
+		}
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The existing test can just pass in an empty object to the controller resolution:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var myController = $controller(&#39;MyController&#39;, {
+	$scope: {}
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now the new test can inject, use and inspect a mock scope:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;describe(&#39;addSong()&#39;, function(){
+	it(&#39;should add songs&#39;, inject(function($controller) {
+		var scope = {};
+		var myController = $controller(&#39;MyController&#39;, {
+			$scope: scope
+		});
+
+		scope.addSong(&#39;While My Guitar Gently Weeps&#39;);
+
+		scope.songs.should.contain(&#39;While My Guitar Gently Weeps&#39;);
+	}));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;injecting-and-mocking-http&quot;&gt;Injecting and mocking $http&lt;/h2&gt;
+
+&lt;p&gt;So now I’ve got a web service that I call to populate something on &lt;code&gt;$scope&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;angular
+	.module(&#39;my-module&#39;)
+	.controller(&#39;MyController&#39;, [
+		&#39;$scope&#39;, &#39;$http&#39;,
+		function($scope, $http){
+			var self = this;
+
+			// ...
+
+			$scope.instruments = [&#39;foo&#39;];
+
+			$http.get(&#39;api/get-instruments&#39;)
+				.success(function(data) {
+					$scope.instruments = data;
+				});
+
+			return self;
+		}
+]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://docs.angularjs.org/api/ngMock/service/$httpBackend&quot;&gt;&lt;code&gt;$httpBackend&lt;/code&gt;&lt;/a&gt; is an &lt;code&gt;angular-mocks&lt;/code&gt; service that fakes the &lt;code&gt;$http&lt;/code&gt; service:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;describe(&#39;get-instruments result&#39;, function(){
+	it(&#39;should be added to scope&#39;, inject(function($controller, $httpBackend){
+		var scope = {};
+		$httpBackend
+			.when(&#39;GET&#39;, &#39;api/get-instruments&#39;)
+			.respond([
+				&#39;vocals&#39;, &#39;guitar&#39;, &#39;sitar&#39;
+			]);
+		var myController = $controller(&#39;MyController&#39;, {
+			$scope: scope
+		});
+
+		$httpBackend.flush();
+
+		scope.instruments.should.contain(&#39;guitar&#39;);
+	}));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;$httpBackend.flush()&lt;/code&gt; simulates the async calls completing, so they can be tested synchronously.&lt;/p&gt;
+
+&lt;h2 id=&quot;simulating-http-errors&quot;&gt;Simulating $http errors&lt;/h2&gt;
+
+&lt;p&gt;If the call to &lt;code&gt;api/get-instruments&lt;/code&gt; fails, I want to set a status to ‘ERROR’:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$scope.instruments = [&#39;foo&#39;];
+$scope.status = &#39;&#39;;
+
+$http.get(&#39;api/get-instruments&#39;)
+	.success(function(data) {
+		$scope.instruments = data;
+	})
+	.error(function(e) {
+		$scope.status = &#39;ERROR&#39;;
+	});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To simulate the error, you can just tell the &lt;code&gt;$httpBackend&lt;/code&gt; to respond with an error code (500):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;describe(&#39;get-instruments with error&#39;, function(){
+	it(&#39;should have a status with error&#39;, inject(function($controller, $httpBackend){
+		var scope = {};
+		$httpBackend
+			.when(&#39;GET&#39;, &#39;api/get-instruments&#39;)
+			.respond(500, &#39;&#39;);
+		var myController = $controller(&#39;MyController&#39;, {
+			$scope: scope
+		});
+
+		$httpBackend.flush();
+
+		scope.status.should.equal(&#39;ERROR&#39;);
+	}));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;here-is-a-cat-doing-some-tdd&quot;&gt;Here is a cat doing some TDD&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;images/tdd-cat.jpg&quot; alt=&quot;Source: http://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg&quot; /&gt;&lt;/p&gt;
+
+</description>
+				<pubDate>Sat, 21 Feb 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/karma-and-mocha-for-angular-testing.html</link>
+				<guid isPermaLink="true">http://bendetat.com/karma-and-mocha-for-angular-testing.html</guid>
+			</item>
+		
+			<item>
 				<title>Cleaning and simplifying the Gulp pipeline</title>
 				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It’s Gulp!&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;Part 3: Cleaning and simplifying the Gulp pipeline&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -107,7 +413,16 @@
 &amp;lt;/body&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The output path is specified in the &lt;code&gt;build:css&lt;/code&gt; / &lt;code&gt;build.js&lt;/code&gt; placeholder.&lt;/p&gt;
+&lt;p&gt;The output path is specified in the &lt;code&gt;build:css&lt;/code&gt; / &lt;code&gt;build.js&lt;/code&gt; placeholder. Another benefit of this approach is that the development &lt;code&gt;index.html&lt;/code&gt; is actually usable as is - those &lt;code&gt;&amp;lt;script&amp;gt;&lt;/code&gt; and &lt;code&gt;&amp;lt;link&amp;gt;&lt;/code&gt; will resolve to the un-mangled originals.&lt;/p&gt;
+
+&lt;h2 id=&quot;file-watching&quot;&gt;File watching&lt;/h2&gt;
+
+&lt;p&gt;In the &lt;code&gt;serve&lt;/code&gt; task (which sets up a static web server hosting the built site) I used &lt;code&gt;gulp.watch&lt;/code&gt; to listen for changes in the source folder and trigger a build:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;return gulp.watch(config.paths.client + &#39;/**&#39;, [&#39;build&#39;]);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now if a file changes, the files get rebuilt in the same process as the server. Because that server is just serving the entire source path any changes are available instantly.&lt;/p&gt;
 
 &lt;p&gt;Here is the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as at this post&lt;/a&gt;. Next I’ll get some AngularJS happening.&lt;/p&gt;
 
@@ -152,9 +467,9 @@
 
 &lt;p&gt;Bower is a JavaScript package manager. So is NPM, in fact we’ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM &lt;a href=&quot;http://browserify.org&quot;&gt;can be used for client-side package management&lt;/a&gt; but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.&lt;/p&gt;
 
-&lt;p&gt;Install Bower to the project using NPM:&lt;/p&gt;
+&lt;p&gt;Install Bower to the project (and globally) using NPM:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;npm install --save-dev bower
+&lt;pre&gt;&lt;code&gt;npm install --save-dev -g bower
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now create &lt;code&gt;bower.json&lt;/code&gt; by running &lt;code&gt;bower init&lt;/code&gt; and following the instructions. Bower should not be ready to install Bootstrap:&lt;/p&gt;
@@ -1501,35 +1816,6 @@ git config --global mergetool.keepBackup false
 				<pubDate>Sat, 29 Nov 2014 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</link>
 				<guid isPermaLink="true">http://bendetat.com/get-running-fast-on-github-and-bitbucket.html</guid>
-			</item>
-		
-			<item>
-				<title>Compare branches in TortoiseGit</title>
-				<description>&lt;p&gt;Using a PR / peer review model when developing in a team is a great way keep quality high with a large number of changes. This model relies on being able to review diffs easily, something which Bitbucket is usually pretty good at.&lt;/p&gt;
-
-&lt;p&gt;Unfortunately Bitbucket falls down once PRs reach a certain size:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/JRllPwb.png&quot; alt=&quot;This merge is too large to display&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;i haz a sadz&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Ideally, PRs should be small enough that this doesn’t crop up, but when you’re performing large refactors or working on significant feature branches the ideal isn’t always possible.&lt;/p&gt;
-
-&lt;p&gt;TortoiseGit to the rescue: &lt;a href=&quot;http://wikgren.fi/compare-diff-branches-in-tortoise-git-or-how-to-preview-changes-before-doing-a-merge/&quot;&gt;Compare (Diff) branches in Tortoise Git, or how to preview changes before doing a merge&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Basically:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;em&gt;shift&lt;/em&gt;-right click the folder&lt;/li&gt;
-  &lt;li&gt;Select &lt;code&gt;TortoiseGit -&amp;gt; Browse Reference&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Select the two branches to compare using control (usually the current branch and &lt;code&gt;master&lt;/code&gt;)&lt;/li&gt;
-  &lt;li&gt;Right-click and select &lt;code&gt;Compare selected refs&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Thu, 07 Aug 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/compare-branches-in-tortoise-git.html</link>
-				<guid isPermaLink="true">http://bendetat.com/compare-branches-in-tortoise-git.html</guid>
 			</item>
 		
 	</channel>

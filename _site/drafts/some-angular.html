@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>Cleaning and simplifying the Gulp pipeline</title>
+		<title>Some angular...</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
 		<meta name="author" content="Ben Scott"/>
@@ -24,21 +24,28 @@
 		
 		<div class="container">		
 			<div class="row content">
-				<h1><a href="/">~/</a>Cleaning and simplifying the Gulp pipeline <br/></h1>
+				<h1><a href="/">~/</a>Some angular... <br/></h1>
 <p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>30 Jan 2015</em></small></h2>
 
 
 
-<p><strong>DISCLAIMER:</strong> I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!</p>
+<p><strong>DISCLAIMER:</strong> I’m learning in the open here. I am not an AngularJS thought leader and I’m sure I’m missing a heap of really important stuff. Enjoy!</p>
 
 <ul>
   <li>Part 1: <a href="http://bendetat.com/hello-world-its-gulp.html">Hello World! It’s Gulp!</a></li>
   <li>Part 2: <a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">A useful build pipeline using Gulp and Bower</a></li>
-  <li>Part 3: Cleaning and simplifying the Gulp pipeline</li>
+  <li>Part 3: <a href="http://bendetat.com">Cleaning and simplifying the Gulp pipeline</a></li>
+  <li>Part 4: some angularsz</li>
 </ul>
 
-<p>I wasn’t entirely happy with how the <a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js">previous build script</a> wrote out the minified JS and CSS files next to <code>index.html</code>, or how the vendor files had to be specified in the configuration, so I did some playing with the <code>gulp-useref</code> plugin and cleaned things up significantly.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+
+<p>I’m going to use Bower to install Toastr and AngularJS:</p>
+
+<pre><code>bower install --save toastr
+bower install --save angularjs
+</code></pre>
 
 <p>I installed two new dependencies.</p>
 
@@ -129,7 +136,7 @@
 &lt;/body&gt;
 </code></pre>
 
-<p>The output path is specified in the <code>build:css</code> / <code>build.js</code> placeholder. Another benefit of this approach is that the development <code>index.html</code> is actually usable as is - those <code>&lt;script&gt;</code> and <code>&lt;link&gt;</code> will resolve to the un-mangled originals.</p>
+<p>The output path is specified in the <code>build:css</code> / <code>build.js</code> placeholder.</p>
 
 <h2 id="file-watching">File watching</h2>
 
