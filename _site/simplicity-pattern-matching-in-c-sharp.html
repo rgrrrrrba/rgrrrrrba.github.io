@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Simplicity - pattern matching in C#</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Simplicity - pattern matching in C# <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>15 May 2015</em></small></h2>
+
+
+
+<p><em>TL;DR;</em> Check out my awesome new library for <a href="https://www.nuget.org/packages/Simplicity">pattern matching in C# - Simplicity</a> (<a href="https://github.com/bendetat/Simplicity">GitHub</a>) or just copy the contents of the <a href="https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs">single file</a> into your project for near-instant gratification.</p>
+
+<p>Pattern matching is a method of transforming data in some way, similar to <code>map</code> (<code>.Select()</code> in LINQ) but closer to a <code>switch</code> statement in structure. It is a first class language construct in many functional languages including F#:</p>
+
+<pre><code>let name = "Ben"
+
+let result =
+	match name with 
+	| "Fiona" -&gt; "It's Fiona!"
+	| "Ben" -&gt; "Hey it's me!"
+	| "Steve" -&gt; "Steve you rascal!"
+	| _ -&gt; "I don't know this person"
+	
+// result = "Hey it's me!"
+</code></pre>
+
+<p>That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this <code>switch</code> construct in C#:</p>
+
+<pre><code>var name = "Ben";
+string result;
+
+switch (name) {
+	case "Fiona":
+		result =  "It's Fiona!";
+		break;
+	case "Ben":
+		result = "Hey it's me!";
+		break;
+	case "Steve":
+		result = "Steve you rascal!";
+		break;
+	default:
+		result = "I don't know this person";
+		break;
+}
+</code></pre>
+
+<p>This is of course pretty average to read, relies on <code>break</code> for execution control, and isn’t ‘pure’ since <code>result</code> is mutated during execution.</p>
+
+<aside class="pull-right well">
+	<p>I also found a couple of extant libraries that provide similar (and possibly more) functionality:</p>
+	<ul>
+		<li><a href="https://github.com/johansson/PatternMatching">johansson/PatternMatching</a></li>
+		<li><a href="https://github.com/Patrickkk/FunctionalSharp">Patrickkk/FunctionalSharp</a></li>
+	</ul>
+</aside>
+
+<p>When I found out about pattern matching I wanted to write code the same way in C#. I found a great <a href="http://codebetter.com/matthewpodwysocki/2008/09/16/functional-c-pattern-matching/">article by Matt Podwysocki</a> and adapted and extended the code into a single-file library called <a href="https://github.com/bendetat/Simplicity">Simplicity</a>. Install it <a href="https://www.nuget.org/packages/Simplicity">using NuGet</a> (<code>install-package PatternMatching</code>) or just <a href="https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs">copy the single file</a> into your project.</p>
+
+<p>Now for the fun part. Here’s the above example using my library. It adds an generic extension method called <code>Match()</code> which is the usual entry point. The match statement is built up using a fluent interface.</p>
+
+<pre><code>var name = "Ben";
+var result = name.Match()
+	.With(x =&gt; x == "Fiona", "It's Fiona!")
+	.With(x =&gt; x == "Ben", "Hey it's me!")
+	.With(x =&gt; x == "Steve", "Steve you rascal!")
+	.Else("I don't know this person")
+	.Do();
+</code></pre>
+
+<p>The result can be an action, taking the value as a parameter:</p>
+
+<pre><code>var name = "George";
+var result = name.Match()
+	.With(x =&gt; x == "Fiona", "It's Fiona!")
+	.With(x =&gt; x == "Ben", x =&gt; string.Format("Hey it's {0}!", x))
+	.With(x =&gt; x == "Steve", "Steve you rascal!")
+	.Else(x =&gt; string.Format("I don't know {0}", x))
+	.Do();
+
+// result = "I don't know George"
+</code></pre>
+
+<p>The <code>Else</code> value is optional but if it falls through without matching and there’s no <code>Else</code> value it throws an <code>IncompletePatternMatchException</code>:</p>
+
+<pre><code>var name = "Elton";
+var result = name.Match()
+	.With(x =&gt; x == "John", "matched")
+	.With(x =&gt; x == "Paul", "matched")
+	.Do();
+</code></pre>
+
+<p>F# has a wicked type system that C# can’t match, but I can set the output type to dynamic:</p>
+
+<pre><code>var question = "meaning of life";
+var result = question.Match().WithOutputType&lt;dynamic&gt;()
+    .With(x =&gt; x.Contains("roads"), "Blowing in the wind")
+    .With(x =&gt; x.Contains("life"), 42)
+    .Else("Ask again later")
+    .Do();
+
+// result = (int)42
+</code></pre>
+
+<p>The <code>Do()</code> call evaluates the patterns against the value being matched on, but there’s also an implicit cast operator to the output type that removes the need much of the time. When <code>total</code> is calculated, the <code>gstRate</code> match is implicitly cast to <code>decimal</code> from the pattern match type, which is <code>PatternMatchOnValue&lt;string, decimal&gt;</code>.</p>
+
+<pre><code>var country = "NZ";
+var gstRate = country.Match()
+	.With("AU", 0.1m)
+	.With("NZ", 0.15m)
+	.Else(0.0m);
+
+var total = 2300.0m * (1.0m + gstRate);
+
+// total = 2645.0m
+</code></pre>
+
+<p>All of the examples up until now have used the <code>Match()</code> generic extension method to apply the match statement to the value that gets called with <code>Match()</code>. I’ve also implemented matching without an input value using the static <code>PatternMatch.Match()</code> method. This lets you write a match statement that can do things like match on different values or methods, or close over a local value as below:</p>
+
+<pre><code>var eggs = 2;
+var basket = PatternMatch.Match()
+	.With(() =&gt; eggs == 0, "No eggs")
+	.With(() =&gt; eggs == 1, "One egg")
+	.With(() =&gt; eggs &gt; 1, string.Format("{0} eggs", eggs))
+	.Else("Invalid number of eggs");
+
+var twoEggs = basket.Do();
+eggs = 0;
+var zeroEggs = basket.Do();
+eggs = int.MinValue;
+var invalidEggs = basket.Do();
+
+// twoEggs = "2 eggs"
+// zeroEggs = "No eggs"
+// invalidEggs = "Invalid number of eggs"
+</code></pre>
+
+<p>There’s also a <code>.ToFunc()</code> method that gets rid of the <code>.Do()</code> call by transforming the match statement into a <code>Func&lt;TOut&gt;</code>:</p>
+
+<pre><code>var footwear = "boots";
+var intention = PatternMatch.Match()
+	.With(() =&gt; footwear == "red slippers", "following the Yellow Brick Road")
+	.With(() =&gt; footwear == "boots", "walking")
+	.With(() =&gt; footwear == "these shoes", "I don't think so")
+	.ToFunc();
+
+var walking = intention();
+footwear = "these shoes";
+var noWayJose = intention();
+
+// walking = "walking"
+// noWayJose = "I don't think so"
+</code></pre>
+
+<p>This is getting quite DRY but closing over a local mutable value will have the purists climbing the walls, myself included. So the final form goes back to processing an input, deferred until the match statement is executed. The syntax is a little verbose because C# can’t infer the types of the lambdas without help, but I’m pretty happy with the result - a reusable <code>Func&lt;TIn, TOut&gt;</code> value that is defined declaratively with no flow control or mutated state:</p>
+
+<pre><code>var processName = PatternMatch.Match&lt;string, string&gt;()
+	.With(x =&gt; x.StartsWith("A"), "Starts with A")
+	.With(x =&gt; x.StartsWith("B"), "Starts with B")
+	.With(x =&gt; x.StartsWith("C"), "Starts with C")
+	.With(x =&gt; x.StartsWith("D"), "Starts with D")
+	.With(x =&gt; x.StartsWith("E"), "Starts with E")
+	.With(x =&gt; x.StartsWith("F"), x =&gt; string.Format("{0} starts with F", x))
+	.Else("Unknown")
+	.ToFunc();
+	
+var alfred = processName("Alfred");
+var fiona = processName("Fiona");
+var ben = processName("Ben");
+var xerces = processName("Xerces");
+
+// alfred = "Starts with A"
+// fiona = "Fiona starts with F"
+// ben = "Starts with B"
+// xerces = "Unknown"
+</code></pre>
+
+<p>Note that this isn’t especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. <a href="https://github.com/bendetat/Simplicity">Submit a pull request!</a></p>
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2014 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
