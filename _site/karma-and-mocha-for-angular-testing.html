@@ -32,9 +32,9 @@
 
 <h2 id="setting-up-karma-with-mocha-phantomjs-and-chai">Setting up Karma with Mocha, PhantomJS and Chai</h2>
 
-<p>I’m following the <a href="http://karma-runner.github.io/0.12/intro/installation.html">installation guide</a> at <a href="http://karma-runner.github.io">karma-runner.github.io</a>.</p>
+<p>I&rsquo;m following the <a href="http://karma-runner.github.io/0.12/intro/installation.html">installation guide</a> at <a href="http://karma-runner.github.io">karma-runner.github.io</a>.</p>
 
-<p>I already have Node.js and NPM installed so I won’t go through the process for that, but I’ve found the easiest way to get running is via <a href="https://chocolatey.org/packages/nodejs.install">Chocolatey NuGet</a> using <code>choco install nodejs.install</code>.</p>
+<p>I already have Node.js and NPM installed so I won&rsquo;t go through the process for that, but I&rsquo;ve found the easiest way to get running is via <a href="https://chocolatey.org/packages/nodejs.install">Chocolatey NuGet</a> using <code>choco install nodejs.install</code>.</p>
 
 <p>First up, install Karma:</p>
 
@@ -47,7 +47,7 @@
   <p><em>Huh? I thought Karma was the test environment</em></p>
 </blockquote>
 
-<p>Karma is a test <em>runner</em>. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I’m setting up tests for client-side JavaScript - in particular, I’m going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.</p>
+<p>Karma is a test <em>runner</em>. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I&rsquo;m setting up tests for client-side JavaScript - in particular, I&rsquo;m going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.</p>
 
 <p>So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use <a href="http://chaijs.com/">Chai</a> as the assertion library.</p>
 
@@ -85,7 +85,7 @@ npm install --save-dev karma-chai
 <pre><code>frameworks: ['mocha', 'chai'],
 </code></pre>
 
-<p>Running <code>karma start</code> will execute the default <code>karma-conf.js</code> (or <code>karma-conf.coffee</code>). First we need a test to run. In <code>./source-and-tests/</code> I created <code>array-tests.js</code> which just contains the <a href="http://mochajs.org/#synchronous-code">first example</a> from Mocha’s documentation.</p>
+<p>Running <code>karma start</code> will execute the default <code>karma-conf.js</code> (or <code>karma-conf.coffee</code>). First we need a test to run. In <code>./source-and-tests/</code> I created <code>array-tests.js</code> which just contains the <a href="http://mochajs.org/#synchronous-code">first example</a> from Mocha&rsquo;s documentation.</p>
 
 <pre><code>describe('Array', function(){
   describe('#indexOf()', function(){
@@ -103,7 +103,7 @@ npm install --save-dev karma-chai
 
 <h2 id="adding-angularjs-to-the-mix">Adding AngularJS to the mix</h2>
 
-<p>I’ll use Bower to install AngularJS.</p>
+<p>I&rsquo;ll use Bower to install AngularJS.</p>
 
 <pre><code>npm install --save-dev bower 
 npm install -g bower
@@ -120,11 +120,11 @@ npm install -g bower
 bower install --save angular-mocks
 </code></pre>
 
-<p>This installs AngularJS to <code>./bower_components/angular</code> and angular-mocks to <code>./bower_components/angular-mocks</code>. The angular-mocks package gives us methods to resolve our application’s components and create mocks of AngularJS services.</p>
+<p>This installs AngularJS to <code>./bower_components/angular</code> and angular-mocks to <code>./bower_components/angular-mocks</code>. The angular-mocks package gives us methods to resolve our application&rsquo;s components and create mocks of AngularJS services.</p>
 
-<p>I’m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I’ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.</p>
+<p>I&rsquo;m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I&rsquo;ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.</p>
 
-<p>To include AngularJS and angular-mocks in Karma’s test run, edit the <code>files</code> config setting in <code>karma.conf.js</code>. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.</p>
+<p>To include AngularJS and angular-mocks in Karma&rsquo;s test run, edit the <code>files</code> config setting in <code>karma.conf.js</code>. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.</p>
 
 <pre><code>files: [
 	'bower_components/angular/angular.js',
@@ -194,7 +194,7 @@ bower install --save angular-mocks
 
 <h2 id="scope-injection">$scope injection</h2>
 
-<p>The <code>$scope</code> that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to <code>$scope</code> for another test. The controller declaration changes to this:</p>
+<p>The <code>$scope</code> that gets injected in to an Angular controller is just a JS object. I&rsquo;ll assign a value and a method to <code>$scope</code> for another test. The controller declaration changes to this:</p>
 
 <pre><code>angular
 	.module('my-module')
@@ -243,7 +243,7 @@ bower install --save angular-mocks
 
 <h2 id="injecting-and-mocking-http">Injecting and mocking $http</h2>
 
-<p>So now I’ve got a web service that I call to populate something on <code>$scope</code>:</p>
+<p>So now I&rsquo;ve got a web service that I call to populate something on <code>$scope</code>:</p>
 
 <pre><code>angular
 	.module('my-module')
@@ -291,7 +291,7 @@ bower install --save angular-mocks
 
 <h2 id="simulating-http-errors">Simulating $http errors</h2>
 
-<p>If the call to <code>api/get-instruments</code> fails, I want to set a status to ‘ERROR’:</p>
+<p>If the call to <code>api/get-instruments</code> fails, I want to set a status to &lsquo;ERROR&rsquo;:</p>
 
 <pre><code>$scope.instruments = ['foo'];
 $scope.status = '';

@@ -1,10 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ben d&#39;état - Ben Scott&#39;s blog</title>
+		<title>Ben d'état - Ben Scott's blog</title>
 		<description></description>		
 		<link>http://bendetat.com</link>
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>A short, executable rant on why I dislike object initialization syntax</title>
+				<description>&lt;pre&gt;&lt;code&gt;void Main()
+{
+	// Why I ~~Hate~ Dislike Object Initialization Syntax
+	// (executable in LinqPad)
+	
+	// There are three reasons why I despise initialization syntax for all but the most trivial
+	// applications. The first two are fairly common and obvious:
+
+	// 1. By design, a class built for object initialization syntax has to have public setters,
+	// meaning that the resulting object is mutable.
+
+	// 2. Because a constructor isn't used, there is no way for business rules or domain
+	// invariants to be enforced. It is trivial to miss a value or set a value to something
+	// that breaks a business rule, which can be difficult and annoying to debug and prevent.
+
+	// The third reason is a bit less common and seems to defy expectations. It involves using
+	// array initialization syntax inside of an object initializer.
+	
+	// This throws a null reference exception:
+	
+	//var brokens = new Brokens { Ints = { 1, 2, 3 } };
+	
+	// This is because Ints isn't initialised, and array initialization syntax is just 
+	// syntactic sugar for foo.Add(1). You can see this if you try to declare your collection
+	// as a straight-up array:
+	
+	//var brokensWithArray = new BrokensWithArray { Ints = { 1,2,3 } };
+	// Build error: Cannot initialize object of type 'int[]' with a collection initializer
+	
+	// To get the same syntax to work, the class must initialize Ints in the
+	// default constructor (a non-default constructor won't work):
+	
+	var works = new Works { Ints = { 1, 2, 3 } };
+	
+	// But as far as the consumer is concerned, Brokens and Works are equivalent (they have
+	// matching public interfaces). This means hours of fun debugging!
+	
+	// This syntax also works, by initializing the list before adding the values:
+	
+	var worksUsingBrokens = new Brokens { Ints = new List&amp;lt;int&amp;gt;() { 1, 2, 3 } };
+	
+	// This also works with a struct:
+	
+	var brokensStruct = new BrokensStruct { Ints = new List&amp;lt;int&amp;gt;() { 1, 2, 3 } };
+	
+	// But since structs can't have parameterless public constructors, they can never use
+	// the simpler object initialization syntax:
+	
+	//struct WorksStruct {
+	//	public List&amp;lt;int&amp;gt; Ints { get; set; }
+	//	public WorksStruct() {
+	//		Ints = new List&amp;lt;int&amp;gt;();
+	//	}
+	//}
+	// Build error: Structs cannot contain explicit parameterless constructors
+
+	// The moral of the story: In C#, prefer using an explicit, parameterised constructor
+	// over object initialization syntax. If you need a default constructor (eg. for
+	// serialization), mark it with [Obsolete] to indicate your deep dissatifaction with
+	// the code you have been forced to write.
+}
+
+// Define other methods and classes here
+class Brokens {
+	public List&amp;lt;int&amp;gt; Ints { get; set; }
+}
+
+class Works {
+	public List&amp;lt;int&amp;gt; Ints { get; set; }
+	
+	public Works() {
+		Ints = new List&amp;lt;int&amp;gt;();
+	}
+}
+
+class BrokensWithArray {
+	public int[] Ints { get; set; }
+}
+
+struct BrokensStruct {
+	public List&amp;lt;int&amp;gt; Ints { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+				<pubDate>Fri, 22 May 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html</link>
+				<guid isPermaLink="true">http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html</guid>
+			</item>
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
@@ -17,36 +109,36 @@
 
 let result =
 	match name with 
-	| &quot;Fiona&quot; -&amp;gt; &quot;It&#39;s Fiona!&quot;
-	| &quot;Ben&quot; -&amp;gt; &quot;Hey it&#39;s me!&quot;
+	| &quot;Fiona&quot; -&amp;gt; &quot;It's Fiona!&quot;
+	| &quot;Ben&quot; -&amp;gt; &quot;Hey it's me!&quot;
 	| &quot;Steve&quot; -&amp;gt; &quot;Steve you rascal!&quot;
-	| _ -&amp;gt; &quot;I don&#39;t know this person&quot;
+	| _ -&amp;gt; &quot;I don't know this person&quot;
 	
-// result = &quot;Hey it&#39;s me!&quot;
+// result = &quot;Hey it's me!&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this &lt;code&gt;switch&lt;/code&gt; construct in C#:&lt;/p&gt;
+&lt;p&gt;That&amp;rsquo;s as deep an explanation of pattern matching in F# you&amp;rsquo;re going to get from me at this point, but this is conceptually similar to this &lt;code&gt;switch&lt;/code&gt; construct in C#:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;Ben&quot;;
 string result;
 
 switch (name) {
 	case &quot;Fiona&quot;:
-		result =  &quot;It&#39;s Fiona!&quot;;
+		result =  &quot;It's Fiona!&quot;;
 		break;
 	case &quot;Ben&quot;:
-		result = &quot;Hey it&#39;s me!&quot;;
+		result = &quot;Hey it's me!&quot;;
 		break;
 	case &quot;Steve&quot;:
 		result = &quot;Steve you rascal!&quot;;
 		break;
 	default:
-		result = &quot;I don&#39;t know this person&quot;;
+		result = &quot;I don't know this person&quot;;
 		break;
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This is of course pretty average to read, relies on &lt;code&gt;break&lt;/code&gt; for execution control, and isn’t ‘pure’ since &lt;code&gt;result&lt;/code&gt; is mutated during execution.&lt;/p&gt;
+&lt;p&gt;This is of course pretty average to read, relies on &lt;code&gt;break&lt;/code&gt; for execution control, and isn&amp;rsquo;t &amp;lsquo;pure&amp;rsquo; since &lt;code&gt;result&lt;/code&gt; is mutated during execution.&lt;/p&gt;
 
 &lt;aside class=&quot;pull-right well&quot;&gt;
 	&lt;p&gt;I also found a couple of extant libraries that provide similar (and possibly more) functionality:&lt;/p&gt;
@@ -58,14 +150,14 @@ switch (name) {
 
 &lt;p&gt;When I found out about pattern matching I wanted to write code the same way in C#. I found a great &lt;a href=&quot;http://codebetter.com/matthewpodwysocki/2008/09/16/functional-c-pattern-matching/&quot;&gt;article by Matt Podwysocki&lt;/a&gt; and adapted and extended the code into a single-file library called &lt;a href=&quot;https://github.com/bendetat/Simplicity&quot;&gt;Simplicity&lt;/a&gt;. Install it &lt;a href=&quot;https://www.nuget.org/packages/Simplicity&quot;&gt;using NuGet&lt;/a&gt; (&lt;code&gt;install-package PatternMatching&lt;/code&gt;) or just &lt;a href=&quot;https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs&quot;&gt;copy the single file&lt;/a&gt; into your project.&lt;/p&gt;
 
-&lt;p&gt;Now for the fun part. Here’s the above example using my library. It adds an generic extension method called &lt;code&gt;Match()&lt;/code&gt; which is the usual entry point. The match statement is built up using a fluent interface.&lt;/p&gt;
+&lt;p&gt;Now for the fun part. Here&amp;rsquo;s the above example using my library. It adds an generic extension method called &lt;code&gt;Match()&lt;/code&gt; which is the usual entry point. The match statement is built up using a fluent interface.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;Ben&quot;;
 var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it&#39;s me!&quot;)
+	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It's Fiona!&quot;)
+	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it's me!&quot;)
 	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(&quot;I don&#39;t know this person&quot;)
+	.Else(&quot;I don't know this person&quot;)
 	.Do();
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -73,16 +165,16 @@ var result = name.Match()
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;George&quot;;
 var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it&#39;s {0}!&quot;, x))
+	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It's Fiona!&quot;)
+	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it's {0}!&quot;, x))
 	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(x =&amp;gt; string.Format(&quot;I don&#39;t know {0}&quot;, x))
+	.Else(x =&amp;gt; string.Format(&quot;I don't know {0}&quot;, x))
 	.Do();
 
-// result = &quot;I don&#39;t know George&quot;
+// result = &quot;I don't know George&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;Else&lt;/code&gt; value is optional but if it falls through without matching and there’s no &lt;code&gt;Else&lt;/code&gt; value it throws an &lt;code&gt;IncompletePatternMatchException&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;Else&lt;/code&gt; value is optional but if it falls through without matching and there&amp;rsquo;s no &lt;code&gt;Else&lt;/code&gt; value it throws an &lt;code&gt;IncompletePatternMatchException&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;Elton&quot;;
 var result = name.Match()
@@ -91,7 +183,7 @@ var result = name.Match()
 	.Do();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;F# has a wicked type system that C# can’t match, but I can set the output type to dynamic:&lt;/p&gt;
+&lt;p&gt;F# has a wicked type system that C# can&amp;rsquo;t match, but I can set the output type to dynamic:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var question = &quot;meaning of life&quot;;
 var result = question.Match().WithOutputType&amp;lt;dynamic&amp;gt;()
@@ -103,7 +195,7 @@ var result = question.Match().WithOutputType&amp;lt;dynamic&amp;gt;()
 // result = (int)42
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;Do()&lt;/code&gt; call evaluates the patterns against the value being matched on, but there’s also an implicit cast operator to the output type that removes the need much of the time. When &lt;code&gt;total&lt;/code&gt; is calculated, the &lt;code&gt;gstRate&lt;/code&gt; match is implicitly cast to &lt;code&gt;decimal&lt;/code&gt; from the pattern match type, which is &lt;code&gt;PatternMatchOnValue&amp;lt;string, decimal&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;Do()&lt;/code&gt; call evaluates the patterns against the value being matched on, but there&amp;rsquo;s also an implicit cast operator to the output type that removes the need much of the time. When &lt;code&gt;total&lt;/code&gt; is calculated, the &lt;code&gt;gstRate&lt;/code&gt; match is implicitly cast to &lt;code&gt;decimal&lt;/code&gt; from the pattern match type, which is &lt;code&gt;PatternMatchOnValue&amp;lt;string, decimal&amp;gt;&lt;/code&gt;.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var country = &quot;NZ&quot;;
 var gstRate = country.Match()
@@ -116,7 +208,7 @@ var total = 2300.0m * (1.0m + gstRate);
 // total = 2645.0m
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;All of the examples up until now have used the &lt;code&gt;Match()&lt;/code&gt; generic extension method to apply the match statement to the value that gets called with &lt;code&gt;Match()&lt;/code&gt;. I’ve also implemented matching without an input value using the static &lt;code&gt;PatternMatch.Match()&lt;/code&gt; method. This lets you write a match statement that can do things like match on different values or methods, or close over a local value as below:&lt;/p&gt;
+&lt;p&gt;All of the examples up until now have used the &lt;code&gt;Match()&lt;/code&gt; generic extension method to apply the match statement to the value that gets called with &lt;code&gt;Match()&lt;/code&gt;. I&amp;rsquo;ve also implemented matching without an input value using the static &lt;code&gt;PatternMatch.Match()&lt;/code&gt; method. This lets you write a match statement that can do things like match on different values or methods, or close over a local value as below:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var eggs = 2;
 var basket = PatternMatch.Match()
@@ -136,13 +228,13 @@ var invalidEggs = basket.Do();
 // invalidEggs = &quot;Invalid number of eggs&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;There’s also a &lt;code&gt;.ToFunc()&lt;/code&gt; method that gets rid of the &lt;code&gt;.Do()&lt;/code&gt; call by transforming the match statement into a &lt;code&gt;Func&amp;lt;TOut&amp;gt;&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;There&amp;rsquo;s also a &lt;code&gt;.ToFunc()&lt;/code&gt; method that gets rid of the &lt;code&gt;.Do()&lt;/code&gt; call by transforming the match statement into a &lt;code&gt;Func&amp;lt;TOut&amp;gt;&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var footwear = &quot;boots&quot;;
 var intention = PatternMatch.Match()
 	.With(() =&amp;gt; footwear == &quot;red slippers&quot;, &quot;following the Yellow Brick Road&quot;)
 	.With(() =&amp;gt; footwear == &quot;boots&quot;, &quot;walking&quot;)
-	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don&#39;t think so&quot;)
+	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don't think so&quot;)
 	.ToFunc();
 
 var walking = intention();
@@ -150,10 +242,10 @@ footwear = &quot;these shoes&quot;;
 var noWayJose = intention();
 
 // walking = &quot;walking&quot;
-// noWayJose = &quot;I don&#39;t think so&quot;
+// noWayJose = &quot;I don't think so&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This is getting quite DRY but closing over a local mutable value will have the purists climbing the walls, myself included. So the final form goes back to processing an input, deferred until the match statement is executed. The syntax is a little verbose because C# can’t infer the types of the lambdas without help, but I’m pretty happy with the result - a reusable &lt;code&gt;Func&amp;lt;TIn, TOut&amp;gt;&lt;/code&gt; value that is defined declaratively with no flow control or mutated state:&lt;/p&gt;
+&lt;p&gt;This is getting quite DRY but closing over a local mutable value will have the purists climbing the walls, myself included. So the final form goes back to processing an input, deferred until the match statement is executed. The syntax is a little verbose because C# can&amp;rsquo;t infer the types of the lambdas without help, but I&amp;rsquo;m pretty happy with the result - a reusable &lt;code&gt;Func&amp;lt;TIn, TOut&amp;gt;&lt;/code&gt; value that is defined declaratively with no flow control or mutated state:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var processName = PatternMatch.Match&amp;lt;string, string&amp;gt;()
 	.With(x =&amp;gt; x.StartsWith(&quot;A&quot;), &quot;Starts with A&quot;)
@@ -176,7 +268,7 @@ var xerces = processName(&quot;Xerces&quot;);
 // xerces = &quot;Unknown&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Note that this isn’t especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. &lt;a href=&quot;https://github.com/bendetat/Simplicity&quot;&gt;Submit a pull request!&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Note that this isn&amp;rsquo;t especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. &lt;a href=&quot;https://github.com/bendetat/Simplicity&quot;&gt;Submit a pull request!&lt;/a&gt;&lt;/p&gt;
 </description>
 				<pubDate>Fri, 15 May 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/simplicity-pattern-matching-in-c-sharp.html</link>
@@ -216,7 +308,7 @@ var xerces = processName(&quot;Xerces&quot;);
 
 &lt;p&gt;The private &lt;code&gt;_age&lt;/code&gt; is just to demonstrate a private field.&lt;/p&gt;
 
-&lt;p&gt;First add some validation on the constructor. I’m using my &lt;a href=&quot;https://github.com/bendetat/check&quot;&gt;Check&lt;/a&gt; library but this could be implemented in any way that throws an exception if the rule isn’t set.&lt;/p&gt;
+&lt;p&gt;First add some validation on the constructor. I&amp;rsquo;m using my &lt;a href=&quot;https://github.com/bendetat/check&quot;&gt;Check&lt;/a&gt; library but this could be implemented in any way that throws an exception if the rule isn&amp;rsquo;t set.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public Person(string name, int age)
 {
@@ -229,7 +321,7 @@ var xerces = processName(&quot;Xerces&quot;);
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This is what I’m calling a &lt;em&gt;method invariant&lt;/em&gt; - a set of rules that validate the input to a method.&lt;/p&gt;
+&lt;p&gt;This is what I&amp;rsquo;m calling a &lt;em&gt;method invariant&lt;/em&gt; - a set of rules that validate the input to a method.&lt;/p&gt;
 
 &lt;p&gt;We also want to validate the state of a person at the end of the method.&lt;/p&gt;
 
@@ -293,9 +385,9 @@ var xerces = processName(&quot;Xerces&quot;);
 				<title>Karma and Mocha for AngularJS testing</title>
 				<description>&lt;h2 id=&quot;setting-up-karma-with-mocha-phantomjs-and-chai&quot;&gt;Setting up Karma with Mocha, PhantomJS and Chai&lt;/h2&gt;
 
-&lt;p&gt;I’m following the &lt;a href=&quot;http://karma-runner.github.io/0.12/intro/installation.html&quot;&gt;installation guide&lt;/a&gt; at &lt;a href=&quot;http://karma-runner.github.io&quot;&gt;karma-runner.github.io&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m following the &lt;a href=&quot;http://karma-runner.github.io/0.12/intro/installation.html&quot;&gt;installation guide&lt;/a&gt; at &lt;a href=&quot;http://karma-runner.github.io&quot;&gt;karma-runner.github.io&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;I already have Node.js and NPM installed so I won’t go through the process for that, but I’ve found the easiest way to get running is via &lt;a href=&quot;https://chocolatey.org/packages/nodejs.install&quot;&gt;Chocolatey NuGet&lt;/a&gt; using &lt;code&gt;choco install nodejs.install&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I already have Node.js and NPM installed so I won&amp;rsquo;t go through the process for that, but I&amp;rsquo;ve found the easiest way to get running is via &lt;a href=&quot;https://chocolatey.org/packages/nodejs.install&quot;&gt;Chocolatey NuGet&lt;/a&gt; using &lt;code&gt;choco install nodejs.install&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;First up, install Karma:&lt;/p&gt;
 
@@ -308,7 +400,7 @@ var xerces = processName(&quot;Xerces&quot;);
   &lt;p&gt;&lt;em&gt;Huh? I thought Karma was the test environment&lt;/em&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;Karma is a test &lt;em&gt;runner&lt;/em&gt;. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I’m setting up tests for client-side JavaScript - in particular, I’m going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.&lt;/p&gt;
+&lt;p&gt;Karma is a test &lt;em&gt;runner&lt;/em&gt;. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I&amp;rsquo;m setting up tests for client-side JavaScript - in particular, I&amp;rsquo;m going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.&lt;/p&gt;
 
 &lt;p&gt;So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use &lt;a href=&quot;http://chaijs.com/&quot;&gt;Chai&lt;/a&gt; as the assertion library.&lt;/p&gt;
 
@@ -343,14 +435,14 @@ npm install --save-dev karma-chai
 
 &lt;p&gt;To get Chai included in the test pipeline, we need to edit &lt;code&gt;karma-conf.js&lt;/code&gt; and add it to the &lt;code&gt;frameworks&lt;/code&gt; setting:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;frameworks: [&#39;mocha&#39;, &#39;chai&#39;],
+&lt;pre&gt;&lt;code&gt;frameworks: ['mocha', 'chai'],
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; will execute the default &lt;code&gt;karma-conf.js&lt;/code&gt; (or &lt;code&gt;karma-conf.coffee&lt;/code&gt;). First we need a test to run. In &lt;code&gt;./source-and-tests/&lt;/code&gt; I created &lt;code&gt;array-tests.js&lt;/code&gt; which just contains the &lt;a href=&quot;http://mochajs.org/#synchronous-code&quot;&gt;first example&lt;/a&gt; from Mocha’s documentation.&lt;/p&gt;
+&lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; will execute the default &lt;code&gt;karma-conf.js&lt;/code&gt; (or &lt;code&gt;karma-conf.coffee&lt;/code&gt;). First we need a test to run. In &lt;code&gt;./source-and-tests/&lt;/code&gt; I created &lt;code&gt;array-tests.js&lt;/code&gt; which just contains the &lt;a href=&quot;http://mochajs.org/#synchronous-code&quot;&gt;first example&lt;/a&gt; from Mocha&amp;rsquo;s documentation.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;Array&#39;, function(){
-  describe(&#39;#indexOf()&#39;, function(){
-    it(&#39;should return -1 when the value is not present&#39;, function(){
+&lt;pre&gt;&lt;code&gt;describe('Array', function(){
+  describe('#indexOf()', function(){
+    it('should return -1 when the value is not present', function(){
       assert.equal(-1, [1,2,3].indexOf(5));
       assert.equal(-1, [1,2,3].indexOf(0));
     })
@@ -364,7 +456,7 @@ npm install --save-dev karma-chai
 
 &lt;h2 id=&quot;adding-angularjs-to-the-mix&quot;&gt;Adding AngularJS to the mix&lt;/h2&gt;
 
-&lt;p&gt;I’ll use Bower to install AngularJS.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ll use Bower to install AngularJS.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;npm install --save-dev bower 
 npm install -g bower
@@ -381,35 +473,35 @@ npm install -g bower
 bower install --save angular-mocks
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This installs AngularJS to &lt;code&gt;./bower_components/angular&lt;/code&gt; and angular-mocks to &lt;code&gt;./bower_components/angular-mocks&lt;/code&gt;. The angular-mocks package gives us methods to resolve our application’s components and create mocks of AngularJS services.&lt;/p&gt;
+&lt;p&gt;This installs AngularJS to &lt;code&gt;./bower_components/angular&lt;/code&gt; and angular-mocks to &lt;code&gt;./bower_components/angular-mocks&lt;/code&gt;. The angular-mocks package gives us methods to resolve our application&amp;rsquo;s components and create mocks of AngularJS services.&lt;/p&gt;
 
-&lt;p&gt;I’m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I’ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I&amp;rsquo;ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.&lt;/p&gt;
 
-&lt;p&gt;To include AngularJS and angular-mocks in Karma’s test run, edit the &lt;code&gt;files&lt;/code&gt; config setting in &lt;code&gt;karma.conf.js&lt;/code&gt;. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.&lt;/p&gt;
+&lt;p&gt;To include AngularJS and angular-mocks in Karma&amp;rsquo;s test run, edit the &lt;code&gt;files&lt;/code&gt; config setting in &lt;code&gt;karma.conf.js&lt;/code&gt;. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;files: [
-	&#39;bower_components/angular/angular.js&#39;,
-	&#39;bower_components/angular-mocks/angular-mocks.js&#39;,
-	&#39;source-and-tests/**/*.js&#39;
+	'bower_components/angular/angular.js',
+	'bower_components/angular-mocks/angular-mocks.js',
+	'source-and-tests/**/*.js'
 ],
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The controller to test is very simple at this stage (&lt;code&gt;MyController.js&lt;/code&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;(function(){
-	angular.module(&#39;my-module&#39;, []);
+	angular.module('my-module', []);
 
 	angular
-		.module(&#39;my-module&#39;)
-		.controller(&#39;MyController&#39;, [
+		.module('my-module')
+		.controller('MyController', [
 			function(){
 				var self = this;
 
-				self.firstName = &#39;&#39;;
-				self.lastName = &#39;&#39;;
+				self.firstName = '';
+				self.lastName = '';
 
 				self.getFullName = function(){
-					return self.firstName + &#39; &#39; + self.lastName;
+					return self.firstName + ' ' + self.lastName;
 				};
 
 				return self;
@@ -420,17 +512,17 @@ bower install --save angular-mocks
 
 &lt;p&gt;This creates a module called &lt;code&gt;my-module&lt;/code&gt; and creates a controller called &lt;code&gt;MyController&lt;/code&gt; that exposes &lt;code&gt;firstName&lt;/code&gt;, &lt;code&gt;lastName&lt;/code&gt; and &lt;code&gt;getFullName()&lt;/code&gt;. I want to test the result of &lt;code&gt;getFullName()&lt;/code&gt; (&lt;code&gt;MyControllerTests.js&lt;/code&gt;):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;MyController&#39;, function(){
-	beforeEach(module(&#39;my-module&#39;));
+&lt;pre&gt;&lt;code&gt;describe('MyController', function(){
+	beforeEach(module('my-module'));
 
-	describe(&#39;getFullName()&#39;, function(){
-		it(&#39;should handle names correctly&#39;, inject(function($controller){
-			var myController = $controller(&#39;MyController&#39;);
+	describe('getFullName()', function(){
+		it('should handle names correctly', inject(function($controller){
+			var myController = $controller('MyController');
 
-			myController.firstName = &#39;George&#39;;
-			myController.lastName = &#39;Harrison&#39;;
+			myController.firstName = 'George';
+			myController.lastName = 'Harrison';
 
-			myController.getFullName().should.equal(&#39;George Harrison&#39;);
+			myController.getFullName().should.equal('George Harrison');
 		}));
 	});
 });
@@ -438,36 +530,36 @@ bower install --save angular-mocks
 
 &lt;p&gt;This does some interesting things.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;beforeEach(module(&#39;my-module&#39;));
+&lt;pre&gt;&lt;code&gt;beforeEach(module('my-module'));
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This loads the &lt;code&gt;my-module&lt;/code&gt; module before each test in the &lt;code&gt;MyController&lt;/code&gt; suite.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;it(&#39;should handle names correctly&#39;, inject(function($controller){
+&lt;pre&gt;&lt;code&gt;it('should handle names correctly', inject(function($controller){
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This injects &lt;code&gt;$controller&lt;/code&gt; into the test. &lt;code&gt;$controller&lt;/code&gt; allows resolving registered controllers.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var myController = $controller(&#39;MyController&#39;);
+&lt;pre&gt;&lt;code&gt;var myController = $controller('MyController');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This resolves an instance of the &lt;code&gt;MyController&lt;/code&gt; controller. The instance is then used as the test subject.&lt;/p&gt;
 
 &lt;h2 id=&quot;scope-injection&quot;&gt;$scope injection&lt;/h2&gt;
 
-&lt;p&gt;The &lt;code&gt;$scope&lt;/code&gt; that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to &lt;code&gt;$scope&lt;/code&gt; for another test. The controller declaration changes to this:&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;$scope&lt;/code&gt; that gets injected in to an Angular controller is just a JS object. I&amp;rsquo;ll assign a value and a method to &lt;code&gt;$scope&lt;/code&gt; for another test. The controller declaration changes to this:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-	.module(&#39;my-module&#39;)
-	.controller(&#39;MyController&#39;, [
-		&#39;$scope&#39;,
+	.module('my-module')
+	.controller('MyController', [
+		'$scope',
 		function($scope){
 			var self = this;
 
 			// ...
 
 			$scope.songs = [
-				&#39;Here Comes The Sun&#39;
+				'Here Comes The Sun'
 			];
 
 			$scope.addSong = function(song) {
@@ -481,43 +573,43 @@ bower install --save angular-mocks
 
 &lt;p&gt;The existing test can just pass in an empty object to the controller resolution:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var myController = $controller(&#39;MyController&#39;, {
+&lt;pre&gt;&lt;code&gt;var myController = $controller('MyController', {
 	$scope: {}
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now the new test can inject, use and inspect a mock scope:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;addSong()&#39;, function(){
-	it(&#39;should add songs&#39;, inject(function($controller) {
+&lt;pre&gt;&lt;code&gt;describe('addSong()', function(){
+	it('should add songs', inject(function($controller) {
 		var scope = {};
-		var myController = $controller(&#39;MyController&#39;, {
+		var myController = $controller('MyController', {
 			$scope: scope
 		});
 
-		scope.addSong(&#39;While My Guitar Gently Weeps&#39;);
+		scope.addSong('While My Guitar Gently Weeps');
 
-		scope.songs.should.contain(&#39;While My Guitar Gently Weeps&#39;);
+		scope.songs.should.contain('While My Guitar Gently Weeps');
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&quot;injecting-and-mocking-http&quot;&gt;Injecting and mocking $http&lt;/h2&gt;
 
-&lt;p&gt;So now I’ve got a web service that I call to populate something on &lt;code&gt;$scope&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;So now I&amp;rsquo;ve got a web service that I call to populate something on &lt;code&gt;$scope&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-	.module(&#39;my-module&#39;)
-	.controller(&#39;MyController&#39;, [
-		&#39;$scope&#39;, &#39;$http&#39;,
+	.module('my-module')
+	.controller('MyController', [
+		'$scope', '$http',
 		function($scope, $http){
 			var self = this;
 
 			// ...
 
-			$scope.instruments = [&#39;foo&#39;];
+			$scope.instruments = ['foo'];
 
-			$http.get(&#39;api/get-instruments&#39;)
+			$http.get('api/get-instruments')
 				.success(function(data) {
 					$scope.instruments = data;
 				});
@@ -529,21 +621,21 @@ bower install --save angular-mocks
 
 &lt;p&gt;The &lt;a href=&quot;https://docs.angularjs.org/api/ngMock/service/$httpBackend&quot;&gt;&lt;code&gt;$httpBackend&lt;/code&gt;&lt;/a&gt; is an &lt;code&gt;angular-mocks&lt;/code&gt; service that fakes the &lt;code&gt;$http&lt;/code&gt; service:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;get-instruments result&#39;, function(){
-	it(&#39;should be added to scope&#39;, inject(function($controller, $httpBackend){
+&lt;pre&gt;&lt;code&gt;describe('get-instruments result', function(){
+	it('should be added to scope', inject(function($controller, $httpBackend){
 		var scope = {};
 		$httpBackend
-			.when(&#39;GET&#39;, &#39;api/get-instruments&#39;)
+			.when('GET', 'api/get-instruments')
 			.respond([
-				&#39;vocals&#39;, &#39;guitar&#39;, &#39;sitar&#39;
+				'vocals', 'guitar', 'sitar'
 			]);
-		var myController = $controller(&#39;MyController&#39;, {
+		var myController = $controller('MyController', {
 			$scope: scope
 		});
 
 		$httpBackend.flush();
 
-		scope.instruments.should.contain(&#39;guitar&#39;);
+		scope.instruments.should.contain('guitar');
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
@@ -552,35 +644,35 @@ bower install --save angular-mocks
 
 &lt;h2 id=&quot;simulating-http-errors&quot;&gt;Simulating $http errors&lt;/h2&gt;
 
-&lt;p&gt;If the call to &lt;code&gt;api/get-instruments&lt;/code&gt; fails, I want to set a status to ‘ERROR’:&lt;/p&gt;
+&lt;p&gt;If the call to &lt;code&gt;api/get-instruments&lt;/code&gt; fails, I want to set a status to &amp;lsquo;ERROR&amp;rsquo;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;$scope.instruments = [&#39;foo&#39;];
-$scope.status = &#39;&#39;;
+&lt;pre&gt;&lt;code&gt;$scope.instruments = ['foo'];
+$scope.status = '';
 
-$http.get(&#39;api/get-instruments&#39;)
+$http.get('api/get-instruments')
 	.success(function(data) {
 		$scope.instruments = data;
 	})
 	.error(function(e) {
-		$scope.status = &#39;ERROR&#39;;
+		$scope.status = 'ERROR';
 	});
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;To simulate the error, you can just tell the &lt;code&gt;$httpBackend&lt;/code&gt; to respond with an error code (500):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;get-instruments with error&#39;, function(){
-	it(&#39;should have a status with error&#39;, inject(function($controller, $httpBackend){
+&lt;pre&gt;&lt;code&gt;describe('get-instruments with error', function(){
+	it('should have a status with error', inject(function($controller, $httpBackend){
 		var scope = {};
 		$httpBackend
-			.when(&#39;GET&#39;, &#39;api/get-instruments&#39;)
-			.respond(500, &#39;&#39;);
-		var myController = $controller(&#39;MyController&#39;, {
+			.when('GET', 'api/get-instruments')
+			.respond(500, '');
+		var myController = $controller('MyController', {
 			$scope: scope
 		});
 
 		$httpBackend.flush();
 
-		scope.status.should.equal(&#39;ERROR&#39;);
+		scope.status.should.equal('ERROR');
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
@@ -600,15 +692,15 @@ $http.get(&#39;api/get-instruments&#39;)
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Cleaning and simplifying the Gulp pipeline</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
+				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I&amp;rsquo;m learning in the open here. This is the first time I&amp;rsquo;ve used Gulp and Bower and I&amp;rsquo;m sure I&amp;rsquo;m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It’s Gulp!&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It&amp;rsquo;s Gulp!&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;Part 3: Cleaning and simplifying the Gulp pipeline&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;I wasn’t entirely happy with how the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js&quot;&gt;previous build script&lt;/a&gt; wrote out the minified JS and CSS files next to &lt;code&gt;index.html&lt;/code&gt;, or how the vendor files had to be specified in the configuration, so I did some playing with the &lt;code&gt;gulp-useref&lt;/code&gt; plugin and cleaned things up significantly.&lt;/p&gt;
+&lt;p&gt;I wasn&amp;rsquo;t entirely happy with how the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js&quot;&gt;previous build script&lt;/a&gt; wrote out the minified JS and CSS files next to &lt;code&gt;index.html&lt;/code&gt;, or how the vendor files had to be specified in the configuration, so I did some playing with the &lt;code&gt;gulp-useref&lt;/code&gt; plugin and cleaned things up significantly.&lt;/p&gt;
 
 &lt;p&gt;I installed two new dependencies.&lt;/p&gt;
 
@@ -630,39 +722,39 @@ $http.get(&#39;api/get-instruments&#39;)
   &lt;p&gt;Conditionally run a task&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;I moved all the dependencies into &lt;code&gt;$&lt;/code&gt;, deleted the dependencies I wouldn’t need any more and added &lt;code&gt;useref&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;I moved all the dependencies into &lt;code&gt;$&lt;/code&gt;, deleted the dependencies I wouldn&amp;rsquo;t need any more and added &lt;code&gt;useref&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var $ = {
-	if: require(&#39;gulp-if&#39;),
-	notify: require(&#39;gulp-notify&#39;),
-	rev: require(&#39;gulp-rev&#39;),
-	revReplace: require(&#39;gulp-rev-replace&#39;),
-	useref: require(&#39;gulp-useref&#39;),
-	filter: require(&#39;gulp-filter&#39;),
-	uglify: require(&#39;gulp-uglify&#39;),
-	minifyCss: require(&#39;gulp-minify-css&#39;),
-	del: require(&#39;del&#39;),
-	path: require(&#39;path&#39;),
-	connect: require(&#39;connect&#39;),
-	serveStatic: require(&#39;serve-static&#39;),
-	log: require(&#39;gulp-load-plugins&#39;)()
-		.loadUtils([&#39;log&#39;])
+	if: require('gulp-if'),
+	notify: require('gulp-notify'),
+	rev: require('gulp-rev'),
+	revReplace: require('gulp-rev-replace'),
+	useref: require('gulp-useref'),
+	filter: require('gulp-filter'),
+	uglify: require('gulp-uglify'),
+	minifyCss: require('gulp-minify-css'),
+	del: require('del'),
+	path: require('path'),
+	connect: require('connect'),
+	serveStatic: require('serve-static'),
+	log: require('gulp-load-plugins')()
+		.loadUtils(['log'])
 		.log
 };
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Then I deleted the &lt;code&gt;rev-and-inject&lt;/code&gt; task plus all of the CSS and JS tasks, and replaced the &lt;code&gt;build&lt;/code&gt; task with this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;fonts&#39;, &#39;images&#39;], function() {
-	var cssFilter = $.filter(&#39;**/*.css&#39;);
-	var jsFilter = $.filter(&#39;**/*.js&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('build', ['fonts', 'images'], function() {
+	var cssFilter = $.filter('**/*.css');
+	var jsFilter = $.filter('**/*.js');
 	var assets = $.useref.assets();
 
 	return gulp
-		.src($.path.join(config.paths.client, &#39;*.html&#39;))
+		.src($.path.join(config.paths.client, '*.html'))
 		.pipe(assets)
-		.pipe($.if(&#39;*.js&#39;, $.uglify()))
-		.pipe($.if(&#39;*.css&#39;, $.minifyCss()))
+		.pipe($.if('*.js', $.uglify()))
+		.pipe($.if('*.css', $.minifyCss()))
 		.pipe($.rev())
 		.pipe(assets.restore())
 		.pipe($.useref())
@@ -671,7 +763,7 @@ $http.get(&#39;api/get-instruments&#39;)
 
 		.pipe($.notify({
 			onLast: true,
-			message: &#39;Build complete&#39;
+			message: 'Build complete'
 		}))
 		;
 });
@@ -705,12 +797,12 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;p&gt;In the &lt;code&gt;serve&lt;/code&gt; task (which sets up a static web server hosting the built site) I used &lt;code&gt;gulp.watch&lt;/code&gt; to listen for changes in the source folder and trigger a build:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;return gulp.watch(config.paths.client + &#39;/**&#39;, [&#39;build&#39;]);
+&lt;pre&gt;&lt;code&gt;return gulp.watch(config.paths.client + '/**', ['build']);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now if a file changes, the files get rebuilt in the same process as the server. Because that server is just serving the entire source path any changes are available instantly.&lt;/p&gt;
 
-&lt;p&gt;Here is the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as at this post&lt;/a&gt;. Next I’ll get some AngularJS happening.&lt;/p&gt;
+&lt;p&gt;Here is the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as at this post&lt;/a&gt;. Next I&amp;rsquo;ll get some AngularJS happening.&lt;/p&gt;
 
 &lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
 
@@ -731,10 +823,10 @@ $http.get(&#39;api/get-instruments&#39;)
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>A useful build pipeline using Gulp and Bower</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
+				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I&amp;rsquo;m learning in the open here. This is the first time I&amp;rsquo;ve used Gulp and Bower and I&amp;rsquo;m sure I&amp;rsquo;m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It’s Gulp!&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It&amp;rsquo;s Gulp!&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;Part 2: A useful build pipeline using Gulp and Bower&lt;/li&gt;
   &lt;li&gt;Part 3: &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;Cleaning and simplifying the Gulp pipeline&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -748,11 +840,11 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;h2 id=&quot;have-you-any-bootstrap&quot;&gt;Have you any Bootstrap?&lt;/h2&gt;
 
-&lt;p&gt;I want to use Bootstrap, but…&lt;/p&gt;
+&lt;p&gt;I want to use Bootstrap, but&amp;hellip;&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://cdn.meme.am/instances/500x/58510881.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Bower is a JavaScript package manager. So is NPM, in fact we’ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM &lt;a href=&quot;http://browserify.org&quot;&gt;can be used for client-side package management&lt;/a&gt; but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.&lt;/p&gt;
+&lt;p&gt;Bower is a JavaScript package manager. So is NPM, in fact we&amp;rsquo;ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM &lt;a href=&quot;http://browserify.org&quot;&gt;can be used for client-side package management&lt;/a&gt; but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.&lt;/p&gt;
 
 &lt;p&gt;Install Bower to the project (and globally) using NPM:&lt;/p&gt;
 
@@ -764,17 +856,17 @@ $http.get(&#39;api/get-instruments&#39;)
 &lt;pre&gt;&lt;code&gt;bower install bootstrap --save
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This installs all of Bootstrap (including the separate jQuery dependency) into &lt;code&gt;/bower_components&lt;/code&gt;. It also adds a reference to the dependency in &lt;code&gt;bower.json&lt;/code&gt; - if it doesn’t you may have forgotten the &lt;code&gt;--save&lt;/code&gt; argument.&lt;/p&gt;
+&lt;p&gt;This installs all of Bootstrap (including the separate jQuery dependency) into &lt;code&gt;/bower_components&lt;/code&gt;. It also adds a reference to the dependency in &lt;code&gt;bower.json&lt;/code&gt; - if it doesn&amp;rsquo;t you may have forgotten the &lt;code&gt;--save&lt;/code&gt; argument.&lt;/p&gt;
 
-&lt;p&gt;I then copied the &lt;a href=&quot;http://getbootstrap.com/getting-started/#template&quot;&gt;minimal Bootstrap HTML&lt;/a&gt; into &lt;code&gt;src/client/index.html&lt;/code&gt;. This won’t work because we’re not copying or linking in the CSS correctly.&lt;/p&gt;
+&lt;p&gt;I then copied the &lt;a href=&quot;http://getbootstrap.com/getting-started/#template&quot;&gt;minimal Bootstrap HTML&lt;/a&gt; into &lt;code&gt;src/client/index.html&lt;/code&gt;. This won&amp;rsquo;t work because we&amp;rsquo;re not copying or linking in the CSS correctly.&lt;/p&gt;
 
 &lt;h2 id=&quot;vendor-css&quot;&gt;Vendor CSS&lt;/h2&gt;
 
 &lt;p&gt;There are two types of CSS - vendor and site-specific - and each will be handled slightly differently. Vendor CSS is anything that comes from a Bower package, and site-specific CSS will be anything in &lt;code&gt;/src/client/css&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;I’ll start by adding a dependency task to the &lt;code&gt;rev-and-inject&lt;/code&gt; task:&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ll start by adding a dependency task to the &lt;code&gt;rev-and-inject&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;], function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss'], function() {
 	// existing rev-and-inject task
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -795,7 +887,7 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;p&gt;The &lt;code&gt;config&lt;/code&gt; object is now initialised using &lt;code&gt;require()&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var config = require(&#39;./gulp-config.json&#39;);
+&lt;pre&gt;&lt;code&gt;var config = require('./gulp-config.json');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now we get to install some more dependencies!&lt;/p&gt;
@@ -811,23 +903,23 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;p&gt;Pull in the &lt;code&gt;concat&lt;/code&gt; dependency at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var concat = require(&#39;gulp-concat&#39;);
+&lt;pre&gt;&lt;code&gt;var concat = require('gulp-concat');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now add the &lt;code&gt;vendorcss&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;vendorcss&#39;, function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('vendorcss', function(){
 return gulp
 	// set source
 	.src(config.paths.vendorcss)
 	// write to vendor.min.css
-	.pipe(concat(&#39;vendor.min.css&#39;))
+	.pipe(concat('vendor.min.css'))
 	// write to dest
 	.pipe(gulp.dest(config.paths.destination));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This takes all of the vendor CSS files specified in &lt;code&gt;gulp-config.json&lt;/code&gt; and bundles them into &lt;code&gt;/src/site-dist/vendor.min.css&lt;/code&gt;. Very exciting but it hasn’t minified the CSS yet. Time for some more plugins:&lt;/p&gt;
+&lt;p&gt;This takes all of the vendor CSS files specified in &lt;code&gt;gulp-config.json&lt;/code&gt; and bundles them into &lt;code&gt;/src/site-dist/vendor.min.css&lt;/code&gt;. Very exciting but it hasn&amp;rsquo;t minified the CSS yet. Time for some more plugins:&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-bytediff&quot;&gt;&lt;code&gt;gulp-bytediff&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
 
@@ -851,17 +943,17 @@ return gulp
 
 &lt;p&gt;Add the &lt;code&gt;bytediff&lt;/code&gt; and &lt;code&gt;minify-css&lt;/code&gt; dependencies at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var bytediff = require(&#39;gulp-bytediff&#39;);
-var minifyCss = require(&#39;gulp-minify-css&#39;);
+&lt;pre&gt;&lt;code&gt;var bytediff = require('gulp-bytediff');
+var minifyCss = require('gulp-minify-css');
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Then add the minify and bytediff steps to the pipeline (in &lt;code&gt;gulp.task(&#39;vendorcss&#39;..&lt;/code&gt;):&lt;/p&gt;
+&lt;p&gt;Then add the minify and bytediff steps to the pipeline (in &lt;code&gt;gulp.task('vendorcss'..&lt;/code&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;return gulp
 	// set source
 	.src(config.paths.vendorcss)
 	// write to vendor.min.css
-	.pipe(concat(&#39;vendor.min.css&#39;))
+	.pipe(concat('vendor.min.css'))
 
 	// start tracking size
 	.pipe(bytediff.start())
@@ -880,25 +972,25 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 	var formatPercent = function(num, precision) {
 		return (num * 100).toFixed(precision);
 	};
-    var difference = (data.savings &amp;gt; 0) ? &#39; smaller.&#39; : &#39; larger.&#39;;
+    var difference = (data.savings &amp;gt; 0) ? ' smaller.' : ' larger.';
     
-    return data.fileName + &#39; went from &#39; +
-        (data.startSize / 1000).toFixed(2) + &#39; kB to &#39; + (data.endSize / 1000).toFixed(2) + &#39; kB&#39; +
-        &#39; and is &#39; + formatPercent(1 - data.percent, 2) + &#39;%&#39; + difference;
+    return data.fileName + ' went from ' +
+        (data.startSize / 1000).toFixed(2) + ' kB to ' + (data.endSize / 1000).toFixed(2) + ' kB' +
+        ' and is ' + formatPercent(1 - data.percent, 2) + '%' + difference;
 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now when I run &lt;code&gt;gulp build&lt;/code&gt; the CSS is minified:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[09:10:18] Starting &#39;vendorcss&#39;...
+&lt;pre&gt;&lt;code&gt;[09:10:18] Starting 'vendorcss'...
 [gulp] [09:10:18] Compressing, bundling and copying vendor CSS
 [09:10:18] vendor.min.css went from 164.02 kB to 135.50 kB and is 17.39% smaller.
-[09:10:18] Finished &#39;vendorcss&#39; after 298 ms
-[09:10:18] Starting &#39;rev-and-inject&#39;...
-[09:10:18] Finished &#39;rev-and-inject&#39; after 5.79 ms
-[09:10:18] Starting &#39;build&#39;...
+[09:10:18] Finished 'vendorcss' after 298 ms
+[09:10:18] Starting 'rev-and-inject'...
+[09:10:18] Finished 'rev-and-inject' after 5.79 ms
+[09:10:18] Starting 'build'...
 [09:10:18] gulp-notify: [Gulp notification] Build complete
-[09:10:18] Finished &#39;build&#39; after 48 ms
+[09:10:18] Finished 'build' after 48 ms
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;code&gt;index.html&lt;/code&gt; now needs a reference to the minified CSS file. It could be hard-coded to &lt;code&gt;vendor.min.css&lt;/code&gt; but that is subject to change if the build script changes. So we need to &lt;em&gt;inject&lt;/em&gt; the path to the &lt;code&gt;vendor.min.css&lt;/code&gt; artifact directly into &lt;code&gt;index.html&lt;/code&gt; as it is being written.&lt;/p&gt;
@@ -916,16 +1008,16 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 
 &lt;p&gt;Add the new &lt;code&gt;inject&lt;/code&gt; dependency to the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var inject = require(&#39;gulp-inject&#39;);
+&lt;pre&gt;&lt;code&gt;var inject = require('gulp-inject');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task add a local method that wraps &lt;code&gt;inject()&lt;/code&gt; with some common options:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var localInject = function(pathGlob, name) {
 	var options = {
-		// Strip out the &#39;src/client-dist-app&#39; part from the path to vendor.min.css
+		// Strip out the 'src/client-dist-app' part from the path to vendor.min.css
 		ignorePaths = config.paths.destination,
-		// Don&#39;t read file being injected, just get the path
+		// Don't read file being injected, just get the path
 		read: false,
 		// add a prefix to the injected path
 		addPrefix: config.paths.buildPrefix
@@ -944,12 +1036,12 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 		// ...
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This is needed because when the site will get hosted by Nancy, it will be available at &lt;code&gt;{yoursite}/app&lt;/code&gt;. So the injected path will be &lt;code&gt;/app/content/vendor.min.css&lt;/code&gt;. In a minute I’ll set up a static server using Node.js for testing the output.&lt;/p&gt;
+&lt;p&gt;This is needed because when the site will get hosted by Nancy, it will be available at &lt;code&gt;{yoursite}/app&lt;/code&gt;. So the injected path will be &lt;code&gt;/app/content/vendor.min.css&lt;/code&gt;. In a minute I&amp;rsquo;ll set up a static server using Node.js for testing the output.&lt;/p&gt;
 
 &lt;p&gt;The inject step now needs to be added to the &lt;code&gt;rev-and-inject&lt;/code&gt; task pipeline:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;], function() {
-	var indexPath = path.join(config.paths.source, &#39;index.html&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss'], function() {
+	var indexPath = path.join(config.paths.source, 'index.html');
 
 	var localInject = //...
 
@@ -958,8 +1050,8 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 
 		// inject into inject-vendor:css
 		.pipe(localInject(
-			path.join(config.paths.destination, &#39;vendor.min.css&#39;),
-			&#39;inject-vendor&#39;))
+			path.join(config.paths.destination, 'vendor.min.css'),
+			'inject-vendor'))
 
 		.pipe(gulp.dest(config.paths.distribution))
 });
@@ -982,7 +1074,7 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 
 &lt;h3 id=&quot;use-nodejs-to-serve-the-static-website&quot;&gt;Use Node.js to serve the static website&lt;/h3&gt;
 
-&lt;p&gt;At the moment the output is going to &lt;code&gt;/src/client-dist&lt;/code&gt;. When the site is eventually hosted on Nancy it will be served from &lt;code&gt;/app&lt;/code&gt;, so the injected paths currently all start with &lt;code&gt;/app&lt;/code&gt;, which means that the build output can’t be viewed properly yet. I’m going to set up a quick, static server to publish the site. More dependencies!&lt;/p&gt;
+&lt;p&gt;At the moment the output is going to &lt;code&gt;/src/client-dist&lt;/code&gt;. When the site is eventually hosted on Nancy it will be served from &lt;code&gt;/app&lt;/code&gt;, so the injected paths currently all start with &lt;code&gt;/app&lt;/code&gt;, which means that the build output can&amp;rsquo;t be viewed properly yet. I&amp;rsquo;m going to set up a quick, static server to publish the site. More dependencies!&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/connect&quot;&gt;&lt;code&gt;connect&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
 
@@ -1004,18 +1096,18 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 
 &lt;p&gt;Add the new dependencies at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var connect = require(&#39;connect&#39;);
-var serveStatic = require(&#39;serve-static&#39;);
+&lt;pre&gt;&lt;code&gt;var connect = require('connect');
+var serveStatic = require('serve-static');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now add a new task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;serve&#39;, function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('serve', function(){
 	var sourcePath = path.join(__dirname, config.paths.destination);
 	var port = 12857;
-	var serveFromPath = &#39;/&#39; + config.paths.buildPrefix;
+	var serveFromPath = '/' + config.paths.buildPrefix;
 
-	log(&#39;Hosting &#39; + sourcePath + &#39; at http://localhost:&#39; + port + serveFromPath);
+	log('Hosting ' + sourcePath + ' at http://localhost:' + port + serveFromPath);
 
 	connect()
 		.use(serveFromPath, serveStatic(sourcePath))
@@ -1031,12 +1123,12 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;In &lt;code&gt;gulpfile.js&lt;/code&gt; add a new &lt;code&gt;css&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;css&#39;, function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('css', function() {
 	return gulp
 		// set source (src/**/*.css)
-		.src([path.join(config.paths.client, &#39;**/*.css&#39;)])
+		.src([path.join(config.paths.client, '**/*.css')])
 		// write to site.min.css
-		.pipe(concat(&#39;site.min.css&#39;))
+		.pipe(concat('site.min.css'))
 		// start tracking size
 		.pipe(bytediff.start())
 		// minify the css
@@ -1048,9 +1140,9 @@ var serveStatic = require(&#39;serve-static&#39;);
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This is getting a bit familiar. Instead of using a set of explicit tasks from &lt;code&gt;gulp-config.json&lt;/code&gt; I’ve just assumed that anything named &lt;code&gt;*.css&lt;/code&gt; anywhere in the client should be injected into the static site distribution. The concatenated, minified output gets written to &lt;code&gt;/src/client-dist/content/site.min.css&lt;/code&gt;. Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task the &lt;code&gt;css&lt;/code&gt; task needs to be added to the prerequisites:&lt;/p&gt;
+&lt;p&gt;This is getting a bit familiar. Instead of using a set of explicit tasks from &lt;code&gt;gulp-config.json&lt;/code&gt; I&amp;rsquo;ve just assumed that anything named &lt;code&gt;*.css&lt;/code&gt; anywhere in the client should be injected into the static site distribution. The concatenated, minified output gets written to &lt;code&gt;/src/client-dist/content/site.min.css&lt;/code&gt;. Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task the &lt;code&gt;css&lt;/code&gt; task needs to be added to the prerequisites:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;], function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css'], function(){
 	// ...
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1094,17 +1186,17 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;&lt;code&gt;uglify&lt;/code&gt; is used instead of &lt;code&gt;minifyCss&lt;/code&gt;. Add the dependency at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var uglify = require(&#39;gulp-uglify&#39;);
+&lt;pre&gt;&lt;code&gt;var uglify = require('gulp-uglify');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now create the &lt;code&gt;vendorjs&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;vendorjs&#39;, function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('vendorjs', function(){
 	return gulp
 		// set source
 		.src(config.paths.vendorjs)
 		// write to vendor.min.js
-		.pipe(concat(&#39;vendor.min.js&#39;))
+		.pipe(concat('vendor.min.js'))
 		// start tracking size
 		.pipe(bytediff.start())
 		// uglify js
@@ -1119,7 +1211,7 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;In &lt;code&gt;rev-and-inject&lt;/code&gt;, the &lt;code&gt;vendorcss&lt;/code&gt; prerequisite task needs to be added:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;, &#39;vendorjs&#39;], function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css', 'vendorjs'], function(){
 	// ...	
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1127,8 +1219,8 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;pre&gt;&lt;code&gt;// inject into inject-vendor:js
 .pipe(localInject(
-	path.join(config.paths.destination, &#39;vendor.min.js&#39;),
-	&#39;inject-vendor&#39;))
+	path.join(config.paths.destination, 'vendor.min.js'),
+	'inject-vendor'))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now the &lt;code&gt;inject-vendor:css&lt;/code&gt; placeholder needs to be added to &lt;code&gt;index.html&lt;/code&gt; at the end of the &lt;code&gt;&amp;lt;body&amp;gt;&lt;/code&gt; element:&lt;/p&gt;
@@ -1139,14 +1231,14 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;h2 id=&quot;site-specific-javascript&quot;&gt;Site-specific JavaScript&lt;/h2&gt;
 
-&lt;p&gt;To support AngularJS, the site-specific JS task will need a couple of extra steps, but I’ll leave that for the next post. Meanwhile, it will be similar to the site-specific CSS task, bundling and minifying all &lt;code&gt;*.js&lt;/code&gt; files in &lt;code&gt;/src/client&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;To support AngularJS, the site-specific JS task will need a couple of extra steps, but I&amp;rsquo;ll leave that for the next post. Meanwhile, it will be similar to the site-specific CSS task, bundling and minifying all &lt;code&gt;*.js&lt;/code&gt; files in &lt;code&gt;/src/client&lt;/code&gt;.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;js&#39;, function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('js', function() {
 	return gulp
 		// set source (src/**/*.js)
-		.src([path.join(config.paths.client, &#39;**/*.js&#39;)])
+		.src([path.join(config.paths.client, '**/*.js')])
 		// write to site.min.js
-		.pipe(concat(&#39;site.min.js&#39;))
+		.pipe(concat('site.min.js'))
 		// start tracking size
 		.pipe(bytediff.start())
 		// uglify js
@@ -1161,7 +1253,7 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;In &lt;code&gt;rev-and-inject&lt;/code&gt;, the &lt;code&gt;js&lt;/code&gt; prerequisite task needs to be added:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;, &#39;vendorjs&#39;], function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css', 'vendorjs'], function(){
 	// ...	
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1169,25 +1261,25 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;pre&gt;&lt;code&gt;// inject into inject:js
 .pipe(localInject(
-	path.join(config.paths.destination, &#39;site.min.js&#39;)))
+	path.join(config.paths.destination, 'site.min.js')))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&quot;fonts-and-images&quot;&gt;Fonts and images&lt;/h2&gt;
 
-&lt;p&gt;Site assets that aren’t CSS or JS need to be processed as well. Fonts are pretty straightforward, I’ll just copy everything in &lt;code&gt;content/fonts&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;Site assets that aren&amp;rsquo;t CSS or JS need to be processed as well. Fonts are pretty straightforward, I&amp;rsquo;ll just copy everything in &lt;code&gt;content/fonts&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;fonts&#39;, function(){
-	log(&#39;Copy fonts&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('fonts', function(){
+	log('Copy fonts');
 
 	return gulp
-		.src([path.join(config.paths.client, &#39;content/fonts/*&#39;)])
-		.pipe(gulp.dest(path.join(config.paths.destination, &#39;content/fonts&#39;)));
+		.src([path.join(config.paths.client, 'content/fonts/*')])
+		.pipe(gulp.dest(path.join(config.paths.destination, 'content/fonts')));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Since this can be done outside of the &lt;code&gt;rev-and-inject&lt;/code&gt; process, it gets added to the &lt;code&gt;build&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;rev-and-inject&#39;, &#39;fonts&#39;], function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('build', ['rev-and-inject', 'fonts'], function() {
 	// ...
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1213,27 +1305,27 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;&lt;code&gt;imagemin&lt;/code&gt; is an image minifier. This performs some compression on PNG images:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;images&#39;, function(){
-	log(&#39;Compress, cache and copy images&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('images', function(){
+	log('Compress, cache and copy images');
 
 	return gulp
-		.src([path.join(config.paths.client, &#39;content/images/*&#39;)])
+		.src([path.join(config.paths.client, 'content/images/*')])
 		.pipe(cache(imagemin({
 			optimizationLevel: 3
 		})))
-		.pipe(gulp.dest(path.join(config.paths.destination, &#39;content/images&#39;)));
+		.pipe(gulp.dest(path.join(config.paths.destination, 'content/images')));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This task also gets added as a prerequisite to the &lt;code&gt;build&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;rev-and-inject&#39;, &#39;fonts&#39;, &#39;images&#39;], function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('build', ['rev-and-inject', 'fonts', 'images'], function() {
 	// ...
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&quot;revisioning-and-cache-busting&quot;&gt;Revisioning and cache-busting&lt;/h2&gt;
 
-&lt;p&gt;Revisioning is a way of cache-busting (forcing the browser to reload assets) by appending a hash to the filename. Since this hash is unique for a particular revision of the file (as it is a hash of the file’s contents) as long as the source file doesn’t change, the revisioned file name will stay the same and will reload from the browser’s cache. This uses the &lt;code&gt;gulp-rev&lt;/code&gt; and &lt;code&gt;gulp-rev-replace&lt;/code&gt; plugins:&lt;/p&gt;
+&lt;p&gt;Revisioning is a way of cache-busting (forcing the browser to reload assets) by appending a hash to the filename. Since this hash is unique for a particular revision of the file (as it is a hash of the file&amp;rsquo;s contents) as long as the source file doesn&amp;rsquo;t change, the revisioned file name will stay the same and will reload from the browser&amp;rsquo;s cache. This uses the &lt;code&gt;gulp-rev&lt;/code&gt; and &lt;code&gt;gulp-rev-replace&lt;/code&gt; plugins:&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-rev&quot;&gt;&lt;code&gt;gulp-rev&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
 
@@ -1255,23 +1347,23 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;Add the new dependencies to the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var rev = require(&#39;gulp-rev&#39;);
-var revReplace = require(&#39;gulp-rev-replace&#39;);
+&lt;pre&gt;&lt;code&gt;var rev = require('gulp-rev');
+var revReplace = require('gulp-rev-replace');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now the &lt;code&gt;build&lt;/code&gt; task gets a bit of a rewrite:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var indexFilter = filter(&#39;index.html&#39;);
+&lt;pre&gt;&lt;code&gt;var indexFilter = filter('index.html');
 var cssFilter = filter(&quot;**/*.min.css&quot;);
 var jsFilter = filter(&quot;**/*.min.js&quot;);
-var manifestFilter = filter(&#39;rev-manifest.json&#39;);
+var manifestFilter = filter('rev-manifest.json');
 
 return gulp
 	// 1. set source (/src/client/)
 	.src([].concat(
-		path.join(config.paths.client, &#39;index.html&#39;), 
-		path.join(config.paths.destination, &#39;*.min.css&#39;),
-		path.join(config.paths.destination, &#39;*.min.js&#39;)))
+		path.join(config.paths.client, 'index.html'), 
+		path.join(config.paths.destination, '*.min.css'),
+		path.join(config.paths.destination, '*.min.js')))
 
 	// 2. add the revision to the css files
 	.pipe(cssFilter)
@@ -1287,10 +1379,10 @@ return gulp
 
 	// 4. inject css and js
 	.pipe(indexFilter)
-	.pipe(localInject(path.join(config.paths.destination, &#39;vendor.min.css&#39;), &#39;inject-vendor&#39;))
-	.pipe(localInject(path.join(config.paths.destination, &#39;site.min.css&#39;)))
-	.pipe(localInject(path.join(config.paths.destination, &#39;vendor.min.js&#39;), &#39;inject-vendor&#39;))
-	.pipe(localInject(path.join(config.paths.destination, &#39;site.min.js&#39;)))
+	.pipe(localInject(path.join(config.paths.destination, 'vendor.min.css'), 'inject-vendor'))
+	.pipe(localInject(path.join(config.paths.destination, 'site.min.css')))
+	.pipe(localInject(path.join(config.paths.destination, 'vendor.min.js'), 'inject-vendor'))
+	.pipe(localInject(path.join(config.paths.destination, 'site.min.js')))
 	.pipe(gulp.dest(config.paths.destination))
 	.pipe(indexFilter.restore())
 
@@ -1299,7 +1391,7 @@ return gulp
 	.pipe(gulp.dest(config.paths.destination));
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;I’ve numbered the stages of this pipeline. &lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ve numbered the stages of this pipeline. &lt;/p&gt;
 
 &lt;p&gt;In step 1 we select &lt;code&gt;index.html&lt;/code&gt; and the &lt;code&gt;*.min.css&lt;/code&gt; and &lt;code&gt;*.min.js&lt;/code&gt; files.&lt;/p&gt;
 
@@ -1321,7 +1413,7 @@ return gulp
 
 &lt;p&gt;In step 5 we substitute the newly revisioned filenames into &lt;code&gt;index.html&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h2 id=&quot;and-finally&quot;&gt;And finally…&lt;/h2&gt;
+&lt;h2 id=&quot;and-finally&quot;&gt;And finally&amp;hellip;&lt;/h2&gt;
 
 &lt;p&gt;The end result looks like this:&lt;/p&gt;
 
@@ -1354,7 +1446,7 @@ return gulp
 &amp;lt;/html&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;I’m not entirely happy with this so &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;next I’ll try to simplify things&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m not entirely happy with this so &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;next I&amp;rsquo;ll try to simplify things&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
 
@@ -1375,11 +1467,11 @@ return gulp
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Hello World! It&#39;s Gulp!</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
+				<title>Hello World! It's Gulp!</title>
+				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I&amp;rsquo;m learning in the open here. This is the first time I&amp;rsquo;ve used Gulp and I&amp;rsquo;m sure I&amp;rsquo;m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;Part 1: Hello World! It’s Gulp!&lt;/li&gt;
+  &lt;li&gt;Part 1: Hello World! It&amp;rsquo;s Gulp!&lt;/li&gt;
   &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;Part 3: &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;Cleaning and simplifying the Gulp pipeline&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -1388,7 +1480,7 @@ return gulp
 
 &lt;p&gt;This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as &lt;a href=&quot;http://bower.io&quot;&gt;Bower&lt;/a&gt; can be used to manage these complex client-side sites.&lt;/p&gt;
 
-&lt;p&gt;The static site that I’ll hopefully end up generating in the next post will be used with a &lt;a href=&quot;http://nancyfx.org&quot;&gt;Nancy&lt;/a&gt; website. The end result of this post is a Gulp build script that simply copies an &lt;code&gt;index.html&lt;/code&gt; file from &lt;code&gt;/src/client&lt;/code&gt; to &lt;code&gt;/src/client-dist&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The static site that I&amp;rsquo;ll hopefully end up generating in the next post will be used with a &lt;a href=&quot;http://nancyfx.org&quot;&gt;Nancy&lt;/a&gt; website. The end result of this post is a Gulp build script that simply copies an &lt;code&gt;index.html&lt;/code&gt; file from &lt;code&gt;/src/client&lt;/code&gt; to &lt;code&gt;/src/client-dist&lt;/code&gt;.&lt;/p&gt;
 
 &lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
 
@@ -1404,7 +1496,7 @@ return gulp
 &lt;pre&gt;&lt;code&gt;npm install --save-dev gulp
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;--save-dev&lt;/code&gt; flag adds the dependencies to &lt;code&gt;package.json&lt;/code&gt;. This means that when you open the repository in a new environment you can just do &lt;code&gt;npm install&lt;/code&gt; to automatically install the project’s NPM dependencies. &lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;--save-dev&lt;/code&gt; flag adds the dependencies to &lt;code&gt;package.json&lt;/code&gt;. This means that when you open the repository in a new environment you can just do &lt;code&gt;npm install&lt;/code&gt; to automatically install the project&amp;rsquo;s NPM dependencies. &lt;/p&gt;
 
 &lt;p&gt;Note that Gulp itself should also be installed globally so you can use &lt;code&gt;gulp&lt;/code&gt; on the command line:&lt;/p&gt;
 
@@ -1415,13 +1507,13 @@ return gulp
 
 &lt;p&gt;Create a file &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root. Start out by importing the Gulp module:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gulp = require(&#39;gulp&#39;);
+&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;code&gt;gulp.task()&lt;/code&gt; defines a task that’s available from the command line.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;gulp.task()&lt;/code&gt; defines a task that&amp;rsquo;s available from the command line.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;hello&#39;, function() {
-	console.log(&#39;Hello world!&#39;)
+&lt;pre&gt;&lt;code&gt;gulp.task('hello', function() {
+	console.log('Hello world!')
 });
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1429,44 +1521,44 @@ return gulp
 
 &lt;pre&gt;&lt;code&gt;λ gulp hello
 [10:22:08] Using gulpfile c:\source\angular-learnings\gulpfile.js
-[10:22:08] Starting &#39;hello&#39;...
+[10:22:08] Starting 'hello'...
 Hello world!
-[10:22:08] Finished &#39;hello&#39; after 316 μs
+[10:22:08] Finished 'hello' after 316 μs
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;code&gt;gulp.task&lt;/code&gt; also lets you run prerequisite tasks:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;hello&#39;, [&#39;one&#39;, &#39;two&#39;, &#39;three&#39;], function() {
-	console.log(&#39;Hello world!&#39;)
+&lt;pre&gt;&lt;code&gt;gulp.task('hello', ['one', 'two', 'three'], function() {
+	console.log('Hello world!')
 });
 
-gulp.task(&#39;one&#39;, function(){
-	console.log(&#39;one&#39;);
+gulp.task('one', function(){
+	console.log('one');
 });
 
-gulp.task(&#39;two&#39;, function(){
-	console.log(&#39;two&#39;);
+gulp.task('two', function(){
+	console.log('two');
 });
 
-gulp.task(&#39;three&#39;, function(){
-	console.log(&#39;three&#39;);
+gulp.task('three', function(){
+	console.log('three');
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now &lt;code&gt;gulp hello&lt;/code&gt; does this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[10:24:49] Starting &#39;one&#39;...
+&lt;pre&gt;&lt;code&gt;[10:24:49] Starting 'one'...
 one
-[10:24:49] Finished &#39;one&#39; after 200 μs
-[10:24:49] Starting &#39;two&#39;...
+[10:24:49] Finished 'one' after 200 μs
+[10:24:49] Starting 'two'...
 two
-[10:24:49] Finished &#39;two&#39; after 151 μs
-[10:24:49] Starting &#39;three&#39;...
+[10:24:49] Finished 'two' after 151 μs
+[10:24:49] Starting 'three'...
 three
-[10:24:49] Finished &#39;three&#39; after 154 μs
-[10:24:49] Starting &#39;hello&#39;...
+[10:24:49] Finished 'three' after 154 μs
+[10:24:49] Starting 'hello'...
 Hello world!
-[10:24:49] Finished &#39;hello&#39; after 135 μs
+[10:24:49] Finished 'hello' after 135 μs
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now make you a build pipeline. Empty out &lt;code&gt;gulpfile.js&lt;/code&gt; and start again, partner.&lt;/p&gt;
@@ -1475,7 +1567,7 @@ Hello world!
 
 &lt;h2 id=&quot;lots-of-scripting-just-to-copy-a-file&quot;&gt;Lots of scripting just to copy a file!&lt;/h2&gt;
 
-&lt;p&gt;I’m just going to start out with a simple build pipeline that basically copies &lt;code&gt;index.html&lt;/code&gt; to the server.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m just going to start out with a simple build pipeline that basically copies &lt;code&gt;index.html&lt;/code&gt; to the server.&lt;/p&gt;
 
 &lt;p&gt;Install some more NPM packages. &lt;/p&gt;
 
@@ -1490,8 +1582,8 @@ Hello world!
 
 &lt;p&gt;Eg.:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gutil = require(&#39;gulp-load-plugins&#39;)([
-	&#39;colors&#39;, &#39;env&#39;, &#39;log&#39;, &#39;pipeline&#39;
+&lt;pre&gt;&lt;code&gt;var gutil = require('gulp-load-plugins')([
+	'colors', 'env', 'log', 'pipeline'
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1524,7 +1616,7 @@ Hello world!
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;A node.js package for Steven Levithan’s excellent dateFormat() function.&lt;/p&gt;
+  &lt;p&gt;A node.js package for Steven Levithan&amp;rsquo;s excellent dateFormat() function.&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/del&quot;&gt;&lt;code&gt;del&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
@@ -1536,17 +1628,17 @@ Hello world!
   &lt;p&gt;Delete files/folders using globs&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;Whew, that’s a bunch of dependencies. At the top of &lt;code&gt;gulpfile.js&lt;/code&gt;, pull them in using &lt;code&gt;require()&lt;/code&gt; and get some utility dependencies into scope:&lt;/p&gt;
+&lt;p&gt;Whew, that&amp;rsquo;s a bunch of dependencies. At the top of &lt;code&gt;gulpfile.js&lt;/code&gt;, pull them in using &lt;code&gt;require()&lt;/code&gt; and get some utility dependencies into scope:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gulp = require(&#39;gulp&#39;);
-var notify = require(&#39;gulp-notify&#39;);
-var filter = require(&#39;gulp-filter&#39;);
-var plugins = require(&#39;gulp-load-plugins&#39;)();
-var del = require(&#39;del&#39;);
-var path = require(&#39;path&#39;);
+&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
+var notify = require('gulp-notify');
+var filter = require('gulp-filter');
+var plugins = require('gulp-load-plugins')();
+var del = require('del');
+var path = require('path');
 
 var gutil = plugins.loadUtils([
-	&#39;colors&#39;, &#39;log&#39;
+	'colors', 'log'
 ]);
 
 var log = gutil.log;
@@ -1565,10 +1657,10 @@ var colors = gutil.colors;
 
 &lt;p&gt;This could be put into another file like &lt;code&gt;gulp-config.json&lt;/code&gt; and pulled in with a &lt;code&gt;require()&lt;/code&gt; but for now this will do.&lt;/p&gt;
 
-&lt;p&gt;I’ll split out the actual copy process into a gulp task called &lt;code&gt;rev-and-inject&lt;/code&gt;. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;ll split out the actual copy process into a gulp task called &lt;code&gt;rev-and-inject&lt;/code&gt;. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, function() {
-	var indexPath = path.join(config.paths.source, &#39;index.html&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', function() {
+	var indexPath = path.join(config.paths.source, 'index.html');
 
 	return gulp
 		// set source
@@ -1580,35 +1672,35 @@ var colors = gutil.colors;
 
 &lt;p&gt;The &lt;code&gt;build&lt;/code&gt; task calls &lt;code&gt;rev--and-inject&lt;/code&gt; before displaying a notification (using a toast!):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('build', function(){
 	return gulp
-		.src(&#39;&#39;)
+		.src('')
 		.pipe(notify({
 			onLast: true,
-			message: &#39;Build complete&#39;
+			message: 'Build complete'
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;In &lt;code&gt;src/client&lt;/code&gt; I’ve added an &lt;code&gt;index.html&lt;/code&gt; just for testing. Run &lt;code&gt;gulp build&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;In &lt;code&gt;src/client&lt;/code&gt; I&amp;rsquo;ve added an &lt;code&gt;index.html&lt;/code&gt; just for testing. Run &lt;code&gt;gulp build&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[15:05:05] Starting &#39;rev-and-inject&#39;...
-[15:05:05] Finished &#39;rev-and-inject&#39; after 24 ms
-[15:05:05] Starting &#39;build&#39;...
+&lt;pre&gt;&lt;code&gt;[15:05:05] Starting 'rev-and-inject'...
+[15:05:05] Finished 'rev-and-inject' after 24 ms
+[15:05:05] Starting 'build'...
 [15:05:05] gulp-notify: [Gulp notification] Build complete
-[15:05:05] Finished &#39;build&#39; after 35 ms
+[15:05:05] Finished 'build' after 35 ms
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;You can add a quick &lt;code&gt;clean&lt;/code&gt; task too, which will delete the &lt;code&gt;src/client-dist&lt;/code&gt; folder:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;clean&#39;, function(){
-	log(&#39;Cleaning: &#39; + config.paths.distribution);
+&lt;pre&gt;&lt;code&gt;gulp.task('clean', function(){
+	log('Cleaning: ' + config.paths.distribution);
 
 	del([].concat(config.paths.distribution));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;Next I’ll add some value to the build pipeline&lt;/a&gt; by minifying and bundling JS and CSS, and injecting the results into &lt;code&gt;index.html&lt;/code&gt;. The result will be a static website set up for some AngularJS work.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;Next I&amp;rsquo;ll add some value to the build pipeline&lt;/a&gt; by minifying and bundling JS and CSS, and injecting the results into &lt;code&gt;index.html&lt;/code&gt;. The result will be a static website set up for some AngularJS work.&lt;/p&gt;
 
 &lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
 
@@ -1637,24 +1729,24 @@ var colors = gutil.colors;
 &lt;ol&gt;
   &lt;li&gt;Delete the reference from the project&lt;/li&gt;
   &lt;li&gt;Right-click the solution&lt;/li&gt;
-  &lt;li&gt;Select ‘Manage NuGet Packages for Solution’&lt;/li&gt;
-  &lt;li&gt;‘Manage’ the package&lt;/li&gt;
+  &lt;li&gt;Select &amp;lsquo;Manage NuGet Packages for Solution&amp;rsquo;&lt;/li&gt;
+  &lt;li&gt;&amp;lsquo;Manage&amp;rsquo; the package&lt;/li&gt;
   &lt;li&gt;Add the project to the package:&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Zr5S9VX.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;What I really want to do is add a convention test to make sure this doesn’t happen again. Why? Because this happens fairly infrequently, but when it does it can be hard to diagnose because it could potentially be caused by a number of things. In my experience, most of the time it is caused by a bad reference. Nevertheless I always seem to burn too much time figuring it out. In my opinion, the ROI of this convention test will probably make it worthwhile.&lt;/p&gt;
+&lt;p&gt;What I really want to do is add a convention test to make sure this doesn&amp;rsquo;t happen again. Why? Because this happens fairly infrequently, but when it does it can be hard to diagnose because it could potentially be caused by a number of things. In my experience, most of the time it is caused by a bad reference. Nevertheless I always seem to burn too much time figuring it out. In my opinion, the ROI of this convention test will probably make it worthwhile.&lt;/p&gt;
 
 &lt;h2 id=&quot;turns-out&quot;&gt;Turns out&lt;/h2&gt;
 
-&lt;p&gt;It’s a bit tricky to get to the projects in a solution file. I didn’t want to waste too much time in the internals of the build system so I found an &lt;a href=&quot;http://stackoverflow.com/a/4634505/149259&quot;&gt;answer on Stack Overflow&lt;/a&gt; that includes two wrapper classes for getting the solution, then iterating on the projects. The wrapper classes can be copied from &lt;a href=&quot;https://gist.github.com/bendetat/9a5a336d82b51ac0b564&quot;&gt;this gist&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s a bit tricky to get to the projects in a solution file. I didn&amp;rsquo;t want to waste too much time in the internals of the build system so I found an &lt;a href=&quot;http://stackoverflow.com/a/4634505/149259&quot;&gt;answer on Stack Overflow&lt;/a&gt; that includes two wrapper classes for getting the solution, then iterating on the projects. The wrapper classes can be copied from &lt;a href=&quot;https://gist.github.com/bendetat/9a5a336d82b51ac0b564&quot;&gt;this gist&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;You’ll need to add a reference to &lt;code&gt;Microsoft.Build&lt;/code&gt;. Some of the classes that are used are actually deprecated, but this should work for long enough to get a good return on this test. The &lt;code&gt;Solution&lt;/code&gt; wrapper class reads a &lt;code&gt;.sln&lt;/code&gt; file and exposes a list of &lt;code&gt;SolutionProject&lt;/code&gt; instance. Each &lt;code&gt;SolutionProject&lt;/code&gt; exposes some of the properties of the project within the solution including the relative path, which I use to build a set of &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instances for the convention test.&lt;/p&gt;
+&lt;p&gt;You&amp;rsquo;ll need to add a reference to &lt;code&gt;Microsoft.Build&lt;/code&gt;. Some of the classes that are used are actually deprecated, but this should work for long enough to get a good return on this test. The &lt;code&gt;Solution&lt;/code&gt; wrapper class reads a &lt;code&gt;.sln&lt;/code&gt; file and exposes a list of &lt;code&gt;SolutionProject&lt;/code&gt; instance. Each &lt;code&gt;SolutionProject&lt;/code&gt; exposes some of the properties of the project within the solution including the relative path, which I use to build a set of &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instances for the convention test.&lt;/p&gt;
 
 &lt;h2 id=&quot;test-cases&quot;&gt;Test cases&lt;/h2&gt;
 
-&lt;p&gt;I’m using NUnit, so my &lt;a href=&quot;http://www.nunit.org/index.php?p=testCaseSource&amp;amp;r=2.5&quot;&gt;test cases&lt;/a&gt; come from a public method that returns an enumeration of &lt;code&gt;TestCastData&lt;/code&gt; instances:&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m using NUnit, so my &lt;a href=&quot;http://www.nunit.org/index.php?p=testCaseSource&amp;amp;r=2.5&quot;&gt;test cases&lt;/a&gt; come from a public method that returns an enumeration of &lt;code&gt;TestCastData&lt;/code&gt; instances:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public IEnumerable&amp;lt;TestCaseData&amp;gt; AllProjects
 {
@@ -1682,12 +1774,12 @@ var colors = gutil.colors;
 &lt;p&gt;This:&lt;/p&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;Opens the solution file (as an instance of the above &lt;code&gt;Solution&lt;/code&gt; wrapper). I’ve hard-coded the relative path to the solution because there’s no need to get fancy - the tests are running in &lt;code&gt;src/MyProject/bin/[debug|release]/&lt;/code&gt; relative to the solution file. If you don’t keep the projects in a &lt;code&gt;/src&lt;/code&gt; subdirectory then take out one of the &lt;code&gt;../&lt;/code&gt; bits.&lt;/li&gt;
+  &lt;li&gt;Opens the solution file (as an instance of the above &lt;code&gt;Solution&lt;/code&gt; wrapper). I&amp;rsquo;ve hard-coded the relative path to the solution because there&amp;rsquo;s no need to get fancy - the tests are running in &lt;code&gt;src/MyProject/bin/[debug|release]/&lt;/code&gt; relative to the solution file. If you don&amp;rsquo;t keep the projects in a &lt;code&gt;/src&lt;/code&gt; subdirectory then take out one of the &lt;code&gt;../&lt;/code&gt; bits.&lt;/li&gt;
   &lt;li&gt;Get all of the projects (as an instance of the above &lt;code&gt;SolutionProject&lt;/code&gt; wrapper), except for &lt;code&gt;.nuget&lt;/code&gt; and &lt;code&gt;Microsoft.Build.Evaluation.Project&lt;/code&gt;, which are included in the solution as project references.&lt;/li&gt;
   &lt;li&gt;Select out all the names of the projects. This is passed into each &lt;code&gt;TestCaseData&lt;/code&gt; for comparison in the actual test.&lt;/li&gt;
   &lt;li&gt;Build up and return the &lt;code&gt;TestCaseData&lt;/code&gt; enumeration:
     &lt;ol&gt;
-      &lt;li&gt;Construct a new &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instance using the relative path. Note that this hasn’t been tested with solution folder (it would &lt;em&gt;probably&lt;/em&gt; work because I would hope that the relative path includes the solution folder).&lt;/li&gt;
+      &lt;li&gt;Construct a new &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instance using the relative path. Note that this hasn&amp;rsquo;t been tested with solution folder (it would &lt;em&gt;probably&lt;/em&gt; work because I would hope that the relative path includes the solution folder).&lt;/li&gt;
       &lt;li&gt;Build a new &lt;code&gt;TestCaseData&lt;/code&gt; instance with the project and the list of project names build up above.&lt;/li&gt;
       &lt;li&gt;Set the name of the test case to the name of the project.&lt;/li&gt;
     &lt;/ol&gt;
@@ -1696,9 +1788,9 @@ var colors = gutil.colors;
 
 &lt;h2 id=&quot;bangarang&quot;&gt;Bangarang&lt;/h2&gt;
 
-&lt;p&gt;That’s a &lt;a href=&quot;http://www.imdb.com/title/tt0102057/&quot;&gt;Hook&lt;/a&gt; reference, not some ‘popular’ EDM song.&lt;/p&gt;
+&lt;p&gt;That&amp;rsquo;s a &lt;a href=&quot;http://www.imdb.com/title/tt0102057/&quot;&gt;Hook&lt;/a&gt; reference, not some &amp;lsquo;popular&amp;rsquo; EDM song.&lt;/p&gt;
 
-&lt;p&gt;I’m using Shouldly for the assertion.&lt;/p&gt;
+&lt;p&gt;I&amp;rsquo;m using Shouldly for the assertion.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;[Test, TestCaseSource(&quot;AllProjects&quot;)]
 public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, string[] allProjectNames)
@@ -1716,7 +1808,7 @@ public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, 
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This was jammed together in LinqPad, but it’s pretty straightforward. The first two lines set up some helpers to simplify the query. Then the bad references are determined by finding the references in the project, then checking if the reference is in another project using a fairly naive path check.&lt;/p&gt;
+&lt;p&gt;This was jammed together in LinqPad, but it&amp;rsquo;s pretty straightforward. The first two lines set up some helpers to simplify the query. Then the bad references are determined by finding the references in the project, then checking if the reference is in another project using a fairly naive path check.&lt;/p&gt;
 
 &lt;p&gt;Failures look like this, showing the bad reference in the &lt;code&gt;Tests&lt;/code&gt; assembly:&lt;/p&gt;
 
@@ -1737,13 +1829,13 @@ public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, 
 				<title>Xamarin Studio borking on a Unified API project</title>
 				<description>&lt;p&gt;I created a Unified API iOS Binding Project in Xamarin Studio (but this may happen for all unified API projects). This is in Xamarin Studio 5.5.4. When I went to build the project I got an error, something like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;Error: could not import &#39;blah&#39;
+&lt;pre&gt;&lt;code&gt;Error: could not import 'blah'
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://forums.xamarin.com/discussion/27217&quot;&gt;Turns out&lt;/a&gt; the generated project file &lt;a href=&quot;http://forums.xamarin.com/discussion/comment/87535/#Comment_87535&quot;&gt;has some errors&lt;/a&gt;:&lt;/p&gt;
 
 &lt;blockquote&gt;
-  &lt;p&gt;Hi, i did succeed in the end. Here was the solution for me: For some reason, the binding project with Unified API has some errors in it’s project file. After creating the project, i saved it. and opened it with a text editor.
+  &lt;p&gt;Hi, i did succeed in the end. Here was the solution for me: For some reason, the binding project with Unified API has some errors in it&amp;rsquo;s project file. After creating the project, i saved it. and opened it with a text editor.
 Look for the Importproject element that claims to import the ObjCruntime, this line has a faulty path. It should be:&lt;/p&gt;
 &lt;/blockquote&gt;
 
@@ -1768,19 +1860,19 @@ Look for the Importproject element that claims to import the ObjCruntime, this l
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Access IIS Express from another machine</title>
-				<description>&lt;p&gt;By default, IIS Express (via Visual Studio) will only allow connections from the local machine. This is a Good Thing but sometimes you need to test sites and services from another machine. I’ve found several guide that explain how to do this but they always seem to miss some steps. This will show how to share an IIS Express site via the host’s IP address. Using the machine name is also possible as is using the HOSTS file to fake a domain (like &lt;code&gt;api.mysite.example.com&lt;/code&gt;) but both of these scenarios are outside the scope of these instructions. This has only been tested on computers on the same subnet which should be sufficient for most test scenarios.&lt;/p&gt;
+				<description>&lt;p&gt;By default, IIS Express (via Visual Studio) will only allow connections from the local machine. This is a Good Thing but sometimes you need to test sites and services from another machine. I&amp;rsquo;ve found several guide that explain how to do this but they always seem to miss some steps. This will show how to share an IIS Express site via the host&amp;rsquo;s IP address. Using the machine name is also possible as is using the HOSTS file to fake a domain (like &lt;code&gt;api.mysite.example.com&lt;/code&gt;) but both of these scenarios are outside the scope of these instructions. This has only been tested on computers on the same subnet which should be sufficient for most test scenarios.&lt;/p&gt;
 
 &lt;h2 id=&quot;site-works-locally&quot;&gt;1. Site works locally&lt;/h2&gt;
 
-&lt;p&gt;First, your project’s Web properties should look something like this:&lt;/p&gt;
+&lt;p&gt;First, your project&amp;rsquo;s Web properties should look something like this:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/yDI4IZs.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;This is the default for a new website. The port may be different and ‘Apply server settings to all users (store in project file)’ doesn’t have to be checked. The site should also run locally without issues. Make a note of the port.&lt;/p&gt;
+&lt;p&gt;This is the default for a new website. The port may be different and &amp;lsquo;Apply server settings to all users (store in project file)&amp;rsquo; doesn&amp;rsquo;t have to be checked. The site should also run locally without issues. Make a note of the port.&lt;/p&gt;
 
 &lt;h2 id=&quot;set-up-httpsys&quot;&gt;2. Set up HTTP.sys&lt;/h2&gt;
 
-&lt;p&gt;HTTP.sys is a component of Windows (Vista and above) that handles HTTP requests. The url that is going to be shared needs to be reserved in HTTP.sys’s access control list (ACL). Open an &lt;em&gt;administrative&lt;/em&gt; console. If the console doesn’t have admin rights, this won’t work. Find out your IP address and run this code to reserve the url in the ACL.&lt;/p&gt;
+&lt;p&gt;HTTP.sys is a component of Windows (Vista and above) that handles HTTP requests. The url that is going to be shared needs to be reserved in HTTP.sys&amp;rsquo;s access control list (ACL). Open an &lt;em&gt;administrative&lt;/em&gt; console. If the console doesn&amp;rsquo;t have admin rights, this won&amp;rsquo;t work. Find out your IP address and run this code to reserve the url in the ACL.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;netsh http add urlacl url=http://192.168.0.6:60985/ user=everyone
 &lt;/code&gt;&lt;/pre&gt;
@@ -1790,164 +1882,44 @@ Look for the Importproject element that claims to import the ObjCruntime, this l
 &lt;pre&gt;&lt;code&gt;URL reservation successfully added
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;If not, check that the console has admin rights and that the url hasn’t already been reserved in the ACL. If you need to, the reservation can be deleted:&lt;/p&gt;
+&lt;p&gt;If not, check that the console has admin rights and that the url hasn&amp;rsquo;t already been reserved in the ACL. If you need to, the reservation can be deleted:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;netsh http delete urlacl url=http://192.168.0.6:60985/
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&quot;open-up-the-firewall&quot;&gt;3. Open up the firewall&lt;/h2&gt;
 
-&lt;p&gt;Open the Windows Firewall (or whatever firewall you may have) and create an inbound rule allowing the above port (eg. 60985). Make sure it’s &lt;strong&gt;incoming&lt;/strong&gt;! Yes I burned time when I accidently made it outgoing. Uncheck ‘Public’ if you don’t want the port to be open at cafes and airports.&lt;/p&gt;
+&lt;p&gt;Open the Windows Firewall (or whatever firewall you may have) and create an inbound rule allowing the above port (eg. 60985). Make sure it&amp;rsquo;s &lt;strong&gt;incoming&lt;/strong&gt;! Yes I burned time when I accidently made it outgoing. Uncheck &amp;lsquo;Public&amp;rsquo; if you don&amp;rsquo;t want the port to be open at cafes and airports.&lt;/p&gt;
 
-&lt;h2 id=&quot;add-the-new-site-to-iss-expresss-configuration&quot;&gt;4. Add the new site to ISS Express’s configuration&lt;/h2&gt;
+&lt;h2 id=&quot;add-the-new-site-to-iss-expresss-configuration&quot;&gt;4. Add the new site to ISS Express&amp;rsquo;s configuration&lt;/h2&gt;
 
 &lt;p&gt;At this point, the port should actually be available from another computer, but IIS Express will only respond to requests for &lt;code&gt;localhost&lt;/code&gt;. Edit &lt;code&gt;%USERPROFILE%\Documents\iisexpress\config\applicationhost.config&lt;/code&gt; and find the site definition for your project. The easiest way might be to search for the port as it should be unique across the IIS Express instance.  Add a new binding to the site for the external facing address:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/vz9OSBl.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Make sure the application isn’t running and kill IIS Express:&lt;/p&gt;
+&lt;p&gt;Make sure the application isn&amp;rsquo;t running and kill IIS Express:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/sfSkFrQ.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;strikeprofitstrike-troubleshooting&quot;&gt;5. &lt;strike&gt;Profit!&lt;/strike&gt; Troubleshooting!&lt;/h2&gt;
 
-&lt;p&gt;Restart Visual Studio as administrator and relaunch the application. It should now work on an external machine. If it doesn’t work:&lt;/p&gt;
+&lt;p&gt;Restart Visual Studio as administrator and relaunch the application. It should now work on an external machine. If it doesn&amp;rsquo;t work:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;See if you can access the site locally using the IP address. If you cannot, make sure the IIS Express configuration is correct and that it did in fact restart.&lt;/li&gt;
   &lt;li&gt;Make sure the firewall is configured correctly - it should be an &lt;em&gt;inbound&lt;/em&gt; rule allowing traffic on the required port from your subnet.&lt;/li&gt;
   &lt;li&gt;Check the error on the remote machine.
     &lt;ul&gt;
-      &lt;li&gt;If it is a timeout (&lt;code&gt;x.x.x.x took too long to respond&lt;/code&gt;) it’s probably the host’s firewall or ACL, or an unrelated network issue.&lt;/li&gt;
-      &lt;li&gt;if it is a 503 Service Unavailable (which should return immediately) it’s probably the IIS Express configuration.&lt;/li&gt;
+      &lt;li&gt;If it is a timeout (&lt;code&gt;x.x.x.x took too long to respond&lt;/code&gt;) it&amp;rsquo;s probably the host&amp;rsquo;s firewall or ACL, or an unrelated network issue.&lt;/li&gt;
+      &lt;li&gt;if it is a 503 Service Unavailable (which should return immediately) it&amp;rsquo;s probably the IIS Express configuration.&lt;/li&gt;
     &lt;/ul&gt;
   &lt;/li&gt;
-  &lt;li&gt;If Visual Studio can’t run the project locally saying something like ‘The site http://x.x.x.x:41234 could not be created’, make sure the ACL reservation was created.&lt;/li&gt;
+  &lt;li&gt;If Visual Studio can&amp;rsquo;t run the project locally saying something like &amp;lsquo;The site http://x.x.x.x:41234 could not be created&amp;rsquo;, make sure the ACL reservation was created.&lt;/li&gt;
 &lt;/ul&gt;
 </description>
 				<pubDate>Wed, 07 Jan 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/access-iis-express-from-another-machine.html</link>
 				<guid isPermaLink="true">http://bendetat.com/access-iis-express-from-another-machine.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Set up TeamCity on an Azure virtual machine - Redux</title>
-				<description>&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This is a repost of an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance.html&quot;&gt;earlier post&lt;/a&gt; with some refinements based on feedback and tips from my friend and collegue &lt;a href=&quot;http://robdmoore.id.au/&quot;&gt;Rob Moore&lt;/a&gt;. &lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. I have barely used Azure and have only ever used already established TeamCity instances, so I’m really just messing around with two new things at the same time here. I’m sure I’m missing a heap of very important points.&lt;/p&gt;
-
-&lt;h2 id=&quot;set-up-the-vm&quot;&gt;Set up the VM&lt;/h2&gt;
-
-&lt;h3 id=&quot;get-started-on-azure&quot;&gt;Get started on Azure&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/AsSmaMo.png&quot; style=&quot;float:right&quot; /&gt; Setting up a new Azure account is pretty much as easy as hitting &lt;a href=&quot;http://windowsazure.com&quot;&gt;http://windowsazure.com&lt;/a&gt; and starting a free trial. You land in a sweet management console that is a lot easier to use than I expected, based on my experiences with Office 365 (early versions), OWA and SharePoint. &lt;a href=&quot;http://www.troyhunt.com/&quot;&gt;Troy Hunt&lt;/a&gt; recently released an awesome Azure demo video - &lt;a href=&quot;http://worldsgreatestazuredemo.com/&quot;&gt;http://worldsgreatestazuredemo.com/&lt;/a&gt; - which is a good introduction to Azure.&lt;/p&gt;
-
-&lt;h3 id=&quot;create-a-new-virtual-machine&quot;&gt;Create a new virtual machine&lt;/h3&gt;
-
-&lt;p&gt;Select the VIRTUAL MACHINES tab and click NEW from the bottom menu. Select FROM GALLERY and pick ‘Windows Server 2012 R2 Datacenter’ (or whatever is most current). Hit next and give it a cool name. I left the size on the standard tier at A1 for now and selected SE Asia as the location of the VM. According to the &lt;a href=&quot;http://azure.microsoft.com/en-us/pricing/details/virtual-machines/&quot;&gt;Azure pricing calculator&lt;/a&gt; this costs around AU$68 per month. Enter a username and password, which you will need to remote into the VM. Next through the rest of the pages and the VM will soon be provisioned:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/SzdGki7.png&quot; alt=&quot;http://i.imgur.com/SzdGki7.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Click that arrow to start managing the VM. &lt;/p&gt;
-
-&lt;h3 id=&quot;open-up-the-firewall&quot;&gt;Open up the firewall&lt;/h3&gt;
-
-&lt;p&gt;We’ll want to open up port 80 for TeamCity. It will actually run on port 8080 but I’ll use IIS to reverse proxy it to port 80. This should make it easier to move to SSL in the future. Select the ENDPOINTS tab and ADD a new one. &lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/nelGyMd.png&quot; alt=&quot;http://i.imgur.com/nelGyMd.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Note that you’re ADDing an endpoint. The NEW button will start creating a new VM. It’s like Microsoft wants you to keep adding more and more VMs.&lt;/p&gt;
-
-&lt;p&gt;Accept the first screen to add a stand-alone endpoint. Pick HTTP from the NAME drop-down, which will automatically fill in the port number. Complete the screen.&lt;/p&gt;
-
-&lt;p&gt;This opens port 80 on the &lt;em&gt;external&lt;/em&gt; firewall. The server’s internal firewall will still need to be configured (below).&lt;/p&gt;
-
-&lt;h3 id=&quot;attach-a-new-disk&quot;&gt;Attach a new disk&lt;/h3&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/4Znf3hr.png&quot; style=&quot;float: left; padding-right: 1em;&quot; /&gt; The VM has two drives configured by default - C:, which contains the Windows installation, and D:, which is ‘temporary storage’. I’m going to attach a third disk that will contain the TeamCity host (and later Octopus Deploy). The TeamCity agent will use D: as it is local to the VM, so it should be faster for building the residents. Attach a new disk by selecting the ATTACH option from the bottom menu. Select Empty Disk.  Accept the defaults, I gave it a size of 20 GB. Apparently resizing the disk later on involves downloading the VHD, using a tool to resize it, and uploading it again. Seems a bit awkward. 20 GB should do for now. Select ‘READ/WRITE’ under the ‘HOST CACHE PREFERENCE’, which should speed up access. The disk will be attached and the status should return to running.&lt;/p&gt;
-
-&lt;h3 id=&quot;remote-in-and-start-configuring-the-vm&quot;&gt;Remote in and start configuring the VM&lt;/h3&gt;
-
-&lt;p&gt;Go to the DASHBOARD tab and select CONNECT from the bottom menu. This will download an .RDP file which will should open in Remote Desktop. Enter the username and password and you should get connected to the server’s desktop.&lt;/p&gt;
-
-&lt;h4 id=&quot;ie-enhanced-security&quot;&gt;IE Enhanced Security&lt;/h4&gt;
-&lt;p&gt;Turn off IE Enhanced Security from the Server Manager, in the Local Server Tab. This will let you use Internet Explorer to download TeamCity (or to install Chrome to download TeamCity and lolcats).&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/N5ouyt1.png&quot; alt=&quot;IE Enhanced Security&quot; /&gt;&lt;/p&gt;
-
-&lt;h4 id=&quot;open-port-80-in-the-firewall&quot;&gt;Open port 80 in the firewall&lt;/h4&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/376xLMi.png&quot; style=&quot;float:right&quot; /&gt; Open the Windows Firewall with Advanved Security MMC snap-in. Easiest way to find it is to search for &lt;code&gt;firewall&lt;/code&gt; from the start screen. Create a new inbound rule.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/MlQbntP.png&quot; alt=&quot;http://i.imgur.com/MlQbntP.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Select Port, specify local TCP port 80, Allow the connection, apply the rule to all profiles, and call the rule &lt;code&gt;TeamCity&lt;/code&gt; (so you can find it again ;-) ).&lt;/p&gt;
-
-&lt;h4 id=&quot;format-and-assign-the-empty-disk&quot;&gt;Format and assign the empty disk&lt;/h4&gt;
-
-&lt;p&gt;The empty disk that we attached needs to be formatted and assigned to a drive letter in the server as well. You can think of attaching an empty disk as plugging in a new disk to any normal machine - the disk still needs be configured in the OS.&lt;/p&gt;
-
-&lt;p&gt;In the Server Manager, select File and Storage Services, then Disks (under Volumes). The new disk should be online with a partition type of ‘Unknown’. Right-click the disk and select New Volume…&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/vgarRGg.png&quot; alt=&quot;File and Storage Services - New Volume&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Next through everything and accept the defaults. It should be assigned to drive E:.&lt;/p&gt;
-
-&lt;h2 id=&quot;whew&quot;&gt;Whew…&lt;/h2&gt;
-
-&lt;p&gt;Just sit back for a moment and look at what we’ve achieved. We’ve got a new VM running the latest Windows Server OS, firewalls configured and remote desktop enabled. I haven’t even taken out my credit card yet. Compare with the amount of work needed to boot up a new physical server in a network, or even provisioning a new VM in Hyper-V. Squeeeee? Indeed.&lt;/p&gt;
-
-&lt;h2 id=&quot;install-teamcity&quot;&gt;Install TeamCity&lt;/h2&gt;
-
-&lt;p&gt;Download the ‘default free professional edition’ of TeamCity from &lt;a href=&quot;http://www.jetbrains.com/teamcity/download/&quot;&gt;here&lt;/a&gt;. The version at the time of writing was 9.0.&lt;/p&gt;
-
-&lt;p&gt;Start up the installer. Select &lt;code&gt;e:\TeamCity&lt;/code&gt; as the destination folder (or wherever the new disk was assigned). Leave the components as default, which installs a build agent and the server with Windows services. Change the TeamCity data directory to somewhere on the new disk - I used &lt;code&gt;e:\TeamCity-data&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;After installation the Build Agent properties configuration appears. Change the systemDir, workDir and tempDir to point to &lt;code&gt;D:\TeamCity\buildAgent\___&lt;/code&gt; (the temporary drive). You have to select each of the paths and edit them in turn. Save this then select the SYSTEM account. It would probably be more secure to set up a restricted user account but the system account should do for now. Do the same for the TeamCity Agent service account. ‘Next’ through and the services will start. After you finish the installation, ‘TeamCity First Start’ should open in IE / your browser of choice.&lt;/p&gt;
-
-&lt;p&gt;Start working through this wizard. I used the ‘Internal (HSQLDB)’ database type. Initializing the server components can take a few minutes so be patient! It’s a good idea to configure the admin credentials in TeamCity before setting up the reverse proxy (below) so that your new server isn’t exposed on the ‘first start’ wizard.&lt;/p&gt;
-
-&lt;h2 id=&quot;set-up-the-reverse-proxy-in-iis&quot;&gt;Set up the reverse proxy in IIS&lt;/h2&gt;
-
-&lt;p&gt;First you need to install IIS. Open the Server Manager and select ‘Add roles and features’. Select ‘Role-based or feature-based installation’. Then ‘Select a server from the server pool’ and make sure the correct VM is selected. In the list of roles, check ‘Web Server (IIS)’. If it prompts you to add the ‘IIS Management Console’, click ‘Add Features’. Click ‘Next’. Leae the other features at the default values and continue. Leave the role services for Web Server (IIS) at the default. Next then Install.&lt;/p&gt;
-
-&lt;p&gt;I used &lt;a href=&quot;http://serverfault.com/a/152411&quot;&gt;this ServerFault answer&lt;/a&gt; to set up the reverse proxy. It requires the &lt;a href=&quot;http://www.iis.net/download/URLRewrite&quot;&gt;URL Rewrite&lt;/a&gt; and &lt;a href=&quot;http://www.iis.net/download/ApplicationRequestRouting&quot;&gt;Application Request Routing&lt;/a&gt; IIS modules. Either follow those links or use &lt;a href=&quot;http://www.microsoft.com/web/downloads/platform.aspx&quot;&gt;Web Platform Installer&lt;/a&gt; to install them. Start up IIS Manger and select &lt;code&gt;&amp;lt;your server&amp;gt;/Sites/Default Web Site&lt;/code&gt;. There should be a URL Rewrite modul. Open it, right-click on the inbound rules list and select ‘Add Rules’. Select ‘Reverse Proxy’ then OK. Allow enabling proxy functionality. Enter &lt;code&gt;localhost:8080&lt;/code&gt; in the inbound rule server name, then OK. This creates a &lt;code&gt;web.config&lt;/code&gt; file in &lt;code&gt;c:\inetpub\wwwroot&lt;/code&gt; that looks like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&amp;gt;
-&amp;lt;configuration&amp;gt;
-    &amp;lt;system.webServer&amp;gt;
-        &amp;lt;rewrite&amp;gt;
-            &amp;lt;rules&amp;gt;
-                &amp;lt;rule name=&quot;ReverseProxyInboundRule1&quot; stopProcessing=&quot;true&quot;&amp;gt;
-                    &amp;lt;match url=&quot;(.*)&quot; /&amp;gt;
-                    &amp;lt;action type=&quot;Rewrite&quot; url=&quot;http://localhost:8080/{R:1}&quot; /&amp;gt;
-                &amp;lt;/rule&amp;gt;
-            &amp;lt;/rules&amp;gt;
-        &amp;lt;/rewrite&amp;gt;
-    &amp;lt;/system.webServer&amp;gt;
-&amp;lt;/configuration&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;At this point, &lt;a href=&quot;http://your-server-name.cloudapp.net&quot;&gt;http://your-server-name.cloudapp.net&lt;/a&gt; should publicly resolve to the new TeamCity instance.&lt;/p&gt;
-
-&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://blog.virtew.com/2012/08/18/setup-teamcity-on-an-azure-virtual-machine-for-windows-8-metro-style-apps/&quot;&gt;virtew - Setup TeamCity on an Azure Virtual Machine for Windows 8 Metro Style Apps&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://worldsgreatestazuredemo.com/&quot;&gt;World’s Greatest Azure Demo&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;see-also&quot;&gt;See also&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://jake.ginnivan.net/teamcity-ui-test-agent/&quot;&gt;Jake Ginnivan’s blog - TeamCity UI Test Agent&lt;/a&gt; - Jake uses Sysinternals Autologon and TightVNC to get a VM with an open desktop session so that automated UI tests will work&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Sat, 13 Dec 2014 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html</link>
-				<guid isPermaLink="true">http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html</guid>
 			</item>
 		
 	</channel>

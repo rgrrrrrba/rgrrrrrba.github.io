@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>A short, executable rant on why I dislike object initialization syntax</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>A short, executable rant on why I dislike object initialization syntax <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>22 May 2015</em></small></h2>
+
+
+
+<pre><code>void Main()
+{
+	// Why I ~~Hate~ Dislike Object Initialization Syntax
+	// (executable in LinqPad)
+	
+	// There are three reasons why I despise initialization syntax for all but the most trivial
+	// applications. The first two are fairly common and obvious:
+
+	// 1. By design, a class built for object initialization syntax has to have public setters,
+	// meaning that the resulting object is mutable.
+
+	// 2. Because a constructor isn't used, there is no way for business rules or domain
+	// invariants to be enforced. It is trivial to miss a value or set a value to something
+	// that breaks a business rule, which can be difficult and annoying to debug and prevent.
+
+	// The third reason is a bit less common and seems to defy expectations. It involves using
+	// array initialization syntax inside of an object initializer.
+	
+	// This throws a null reference exception:
+	
+	//var brokens = new Brokens { Ints = { 1, 2, 3 } };
+	
+	// This is because Ints isn't initialised, and array initialization syntax is just 
+	// syntactic sugar for foo.Add(1). You can see this if you try to declare your collection
+	// as a straight-up array:
+	
+	//var brokensWithArray = new BrokensWithArray { Ints = { 1,2,3 } };
+	// Build error: Cannot initialize object of type 'int[]' with a collection initializer
+	
+	// To get the same syntax to work, the class must initialize Ints in the
+	// default constructor (a non-default constructor won't work):
+	
+	var works = new Works { Ints = { 1, 2, 3 } };
+	
+	// But as far as the consumer is concerned, Brokens and Works are equivalent (they have
+	// matching public interfaces). This means hours of fun debugging!
+	
+	// This syntax also works, by initializing the list before adding the values:
+	
+	var worksUsingBrokens = new Brokens { Ints = new List&lt;int&gt;() { 1, 2, 3 } };
+	
+	// This also works with a struct:
+	
+	var brokensStruct = new BrokensStruct { Ints = new List&lt;int&gt;() { 1, 2, 3 } };
+	
+	// But since structs can't have parameterless public constructors, they can never use
+	// the simpler object initialization syntax:
+	
+	//struct WorksStruct {
+	//	public List&lt;int&gt; Ints { get; set; }
+	//	public WorksStruct() {
+	//		Ints = new List&lt;int&gt;();
+	//	}
+	//}
+	// Build error: Structs cannot contain explicit parameterless constructors
+
+	// The moral of the story: In C#, prefer using an explicit, parameterised constructor
+	// over object initialization syntax. If you need a default constructor (eg. for
+	// serialization), mark it with [Obsolete] to indicate your deep dissatifaction with
+	// the code you have been forced to write.
+}
+
+// Define other methods and classes here
+class Brokens {
+	public List&lt;int&gt; Ints { get; set; }
+}
+
+class Works {
+	public List&lt;int&gt; Ints { get; set; }
+	
+	public Works() {
+		Ints = new List&lt;int&gt;();
+	}
+}
+
+class BrokensWithArray {
+	public int[] Ints { get; set; }
+}
+
+struct BrokensStruct {
+	public List&lt;int&gt; Ints { get; set; }
+}
+</code></pre>
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2014 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>

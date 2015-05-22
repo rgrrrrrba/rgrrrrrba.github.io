@@ -43,7 +43,7 @@
 
 <h3 id="rebase-from-master">2. Rebase from master</h3>
 
-<p>You do this to prepare to a pull request. Usually I’ve just <code>git pull origin master</code> and do a merge commit, but this leaves the history a bit cleaner. It basically reverts to the branch point, pulls from master, then reapplies the changesets in the branch.</p>
+<p>You do this to prepare to a pull request. Usually I&rsquo;ve just <code>git pull origin master</code> and do a merge commit, but this leaves the history a bit cleaner. It basically reverts to the branch point, pulls from master, then reapplies the changesets in the branch.</p>
 
 <p>So instead of:
 	a
@@ -73,7 +73,7 @@
 
 <h3 id="push-the-rebased-branch">3. Push the rebased branch</h3>
 
-<p>The push needs to be ‘forced’ to overwrite the exising branch (since it has been updated - rebased). So you NEVER do to the <code>master</code> branch as it rewrites history.</p>
+<p>The push needs to be &lsquo;forced&rsquo; to overwrite the exising branch (since it has been updated - rebased). So you NEVER do to the <code>master</code> branch as it rewrites history.</p>
 
 <p>`git push -f origin name_of_branch</p>
 

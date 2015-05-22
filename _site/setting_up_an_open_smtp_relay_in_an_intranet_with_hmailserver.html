@@ -32,10 +32,10 @@
 
 <p><strong>You need to do this because you have line of business software or printer/scanner/faxes that need to send emails within a corporate intranet and your email server is hosted offsite.</strong></p>
 
-<p>This doesn’t work with Office 365 acting as the external SMTP server. It should work but there’s something about Office 365’s use of TLS that stops the SMTP relay from authenticating properly in hMailServer. The same problem seems to happen with IIS’s built-in SMTP relay so I think I may have been doing something wrong. In any case, although the main <code>.com.au</code>’s MX is Office 365, I also have a <code>.net.au</code> domain hosted on a shared server with a more straightforward (ie less secure) configuration, which I used as the relay.</p>
+<p>This doesn&rsquo;t work with Office 365 acting as the external SMTP server. It should work but there&rsquo;s something about Office 365&rsquo;s use of TLS that stops the SMTP relay from authenticating properly in hMailServer. The same problem seems to happen with IIS&rsquo;s built-in SMTP relay so I think I may have been doing something wrong. In any case, although the main <code>.com.au</code>&rsquo;s MX is Office 365, I also have a <code>.net.au</code> domain hosted on a shared server with a more straightforward (ie less secure) configuration, which I used as the relay.</p>
 
 <ol>
-  <li>Install <a href="http://www.hmailserver.com/">hMailServer</a> on a Windows machine within the intranet. Make sure port 25 isn’t blocked by a firewall on the machine. The default self-hosted SQL Server Compact database option in hMailServer should be fine.</li>
+  <li>Install <a href="http://www.hmailserver.com/">hMailServer</a> on a Windows machine within the intranet. Make sure port 25 isn&rsquo;t blocked by a firewall on the machine. The default self-hosted SQL Server Compact database option in hMailServer should be fine.</li>
   <li>Create an email address on the external mail server. Something like <code>relay@example.com</code>.</li>
   <li>Create a wildcard route on hMailServer.
     <ul>

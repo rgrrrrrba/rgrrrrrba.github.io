@@ -30,11 +30,11 @@
 
 
 
-<h3 id="you-wont-believe-your-eyes">YOU WON’T BELIEVE YOUR EYES</h3>
+<h3 id="you-wont-believe-your-eyes">YOU WON&rsquo;T BELIEVE YOUR EYES</h3>
 
 <p>How search engine. Such marketing. Wow.</p>
 
-<p>A trap I fall into when writing tests is big ‘arrange’ or ‘act’ sections to test a single ‘thing’. Here’s a trivial example:</p>
+<p>A trap I fall into when writing tests is big &lsquo;arrange&rsquo; or &lsquo;act&rsquo; sections to test a single &lsquo;thing&rsquo;. Here&rsquo;s a trivial example:</p>
 
 <pre><code>[Test]
 public void Member_first_name_is_updated_correctly()
@@ -88,9 +88,9 @@ static void ModifyMember(Member member, string first = "first", string last = "l
 }
 </code></pre>
 
-<p>Of course this assumes that <code>member.Modify()</code> doesn’t accept a nullable date of birth.</p>
+<p>Of course this assumes that <code>member.Modify()</code> doesn&rsquo;t accept a nullable date of birth.</p>
 
-<p>These proxy methods would quickly need to be used in multiple test fixtures, so could be appropriate to move them to the member’s object mother. They <em>could</em> be made into extension methods, but that may make things more confusing as the tests would appear to operate on the member in a way that isn’t supported in the application itself. If indeed your tests are intended to be documentation for the application. Which they should be. Y’all.</p>
+<p>These proxy methods would quickly need to be used in multiple test fixtures, so could be appropriate to move them to the member&rsquo;s object mother. They <em>could</em> be made into extension methods, but that may make things more confusing as the tests would appear to operate on the member in a way that isn&rsquo;t supported in the application itself. If indeed your tests are intended to be documentation for the application. Which they should be. Y&rsquo;all.</p>
 
 <p>HT to my home boy <a href="http://robdmoore.id.au/">Rob Moore</a> (<a href="https://twitter.com/robdmoore">@robdmoore</a>) for showing me this ONE SIMPLE TRICK.</p>
 

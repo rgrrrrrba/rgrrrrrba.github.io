@@ -37,7 +37,7 @@
 bottom content (nav, actions,etc) vv
 </code></pre>
 
-<p><code>DockPanel</code> is your friend but just setting <code>DockPanel.Dock</code> on the top and bottom controls won’t work. By default the last child control in the <code>DockPanel</code> fills the panel:</p>
+<p><code>DockPanel</code> is your friend but just setting <code>DockPanel.Dock</code> on the top and bottom controls won&rsquo;t work. By default the last child control in the <code>DockPanel</code> fills the panel:</p>
 
 <pre><code>&lt;DockPanel&gt;
     &lt;Control DockPanel.Dock="Top" x:Name="TopContentControl" /&gt;
@@ -46,7 +46,7 @@ bottom content (nav, actions,etc) vv
 &lt;/DockPanel&gt;
 </code></pre>
 
-<p>If you’ve just got content at the top and nav docked to the bottom, the top control can become the fill control. Just remember that is has to be the last control in the <code>DockPanel</code>.</p>
+<p>If you&rsquo;ve just got content at the top and nav docked to the bottom, the top control can become the fill control. Just remember that is has to be the last control in the <code>DockPanel</code>.</p>
 
 <pre><code>&lt;DockPanel&gt;
     &lt;Control DockPanel.Dock="Bottom" x:Name="BottomNavControl" /&gt;
@@ -54,7 +54,7 @@ bottom content (nav, actions,etc) vv
 &lt;/DockPanel&gt;
 </code></pre>
 
-<p>Or if you want to keep the same control ordering and explicitly dock the top control to the top, the “last child control in the <code>DockPanel</code> filling the panel” default can be turned off.</p>
+<p>Or if you want to keep the same control ordering and explicitly dock the top control to the top, the &ldquo;last child control in the <code>DockPanel</code> filling the panel&rdquo; default can be turned off.</p>
 
 <pre><code>&lt;DockPanel LastChildFill="False"&gt;
     &lt;Control DockPanel.Dock="Top" x:Name="TopContentControl" /&gt;

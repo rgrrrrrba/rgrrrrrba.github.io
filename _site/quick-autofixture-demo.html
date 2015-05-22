@@ -34,7 +34,7 @@
 
 <p><a href="https://github.com/AutoFixture/AutoFixture">AutoFixture</a> is a tool for automating the creation of test objects. It is written by <a href="http://blog.ploeh.dk/">Mark Seemann</a> (<a href="https://twitter.com/ploeh">@ploeh</a>).</p>
 
-<p>I’m just working through a couple of LINQPad tests here. <code>Fixture</code> and the <code>Create()</code> method are AutoFixture. <code>Dump()</code> belongs to LINQPad.</p>
+<p>I&rsquo;m just working through a couple of LINQPad tests here. <code>Fixture</code> and the <code>Create()</code> method are AutoFixture. <code>Dump()</code> belongs to LINQPad.</p>
 
 <pre><code>class Foo 
 {
@@ -56,7 +56,7 @@ void Main()
   </thead>
   <tbody>
     <tr>
-      <td> </td>
+      <td>&nbsp;</td>
     </tr>
   </tbody>
 </table>
@@ -82,7 +82,7 @@ void Main()
   <thead>
     <tr>
       <th>UserQuery+Foo</th>
-      <th> </th>
+      <th>&nbsp;</th>
     </tr>
   </thead>
   <tbody>
@@ -93,7 +93,7 @@ void Main()
   </tbody>
 </table>
 
-<p>AutoFixture provides a random dummy value to all publicly available properties. Make <code>Number</code> have a private setter and AutoFixture can’t see it. It will however fill the constructor with values.</p>
+<p>AutoFixture provides a random dummy value to all publicly available properties. Make <code>Number</code> have a private setter and AutoFixture can&rsquo;t see it. It will however fill the constructor with values.</p>
 
 <pre><code>class Foo 
 {
@@ -117,7 +117,7 @@ void Main()
   <thead>
     <tr>
       <th>UserQuery+Foo</th>
-      <th> </th>
+      <th>&nbsp;</th>
     </tr>
   </thead>
   <tbody>
@@ -159,7 +159,7 @@ void Main()
   <thead>
     <tr>
       <th>UserQuery+Foo</th>
-      <th> </th>
+      <th>&nbsp;</th>
     </tr>
   </thead>
   <tbody>
@@ -172,13 +172,13 @@ void Main()
       <td>UserQuery+Bar</td>
     </tr>
     <tr>
-      <td> </td>
+      <td>&nbsp;</td>
       <td>-&gt; BarNumber == 198</td>
     </tr>
   </tbody>
 </table>
 
-<p>You can see here that <code>Foo</code> and <code>Bar</code> both received different numbers - 4 and 198 respectively. The fixture’s behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value <code>999</code>.</p>
+<p>You can see here that <code>Foo</code> and <code>Bar</code> both received different numbers - 4 and 198 respectively. The fixture&rsquo;s behavior can be defined by adding a registration, such that every time it resolves a certain type it will return the same value. This example registers the integer value <code>999</code>.</p>
 
 <pre><code>void Main()
 {
@@ -195,7 +195,7 @@ void Main()
   <thead>
     <tr>
       <th>UserQuery+Foo</th>
-      <th> </th>
+      <th>&nbsp;</th>
     </tr>
   </thead>
   <tbody>
@@ -208,7 +208,7 @@ void Main()
       <td>UserQuery+Bar</td>
     </tr>
     <tr>
-      <td> </td>
+      <td>&nbsp;</td>
       <td>-&gt; BarNumber == 999</td>
     </tr>
   </tbody>
@@ -232,7 +232,7 @@ void Main()
   <thead>
     <tr>
       <th>UserQuery+Foo</th>
-      <th> </th>
+      <th>&nbsp;</th>
     </tr>
   </thead>
   <tbody>
@@ -245,7 +245,7 @@ void Main()
       <td>UserQuery+Bar</td>
     </tr>
     <tr>
-      <td> </td>
+      <td>&nbsp;</td>
       <td>-&gt; BarNumber == 1234</td>
     </tr>
   </tbody>
@@ -253,7 +253,7 @@ void Main()
 
 <h2 id="more-information">More information</h2>
 
-<p>Mark Seeman’s blog articles under the <a href="http://blog.ploeh.dk/tags.html#AutoFixture-ref">AutoFixture tag</a> are the most comprehensive source of information about AutoFixture. </p>
+<p>Mark Seeman&rsquo;s blog articles under the <a href="http://blog.ploeh.dk/tags.html#AutoFixture-ref">AutoFixture tag</a> are the most comprehensive source of information about AutoFixture. </p>
 
 
 

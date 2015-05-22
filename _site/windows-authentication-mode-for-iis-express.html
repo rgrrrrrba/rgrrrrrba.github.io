@@ -30,13 +30,13 @@
 
 
 
-<p>So I’m changing a site developed using Forms authentication to use Windows authentication, testing in IIS Express.</p>
+<p>So I&rsquo;m changing a site developed using Forms authentication to use Windows authentication, testing in IIS Express.</p>
 
 <h3 id="threadcurrentprincipalidentityname">Thread.CurrentPrincipal.Identity.Name</h3>
-<p>The first thing to be aware of is that in Forms authentication you set the thread principal yourself when logging in. With Windows authentication <code>Thread.CurrentPrincipal.Identity.Name</code> is set automatically (as long as the rest of these instructions are correct). So nothing should have to be changed in the application code as long as you’re already using <code>Thread.CurrentPrincipal.Identity.Name</code> with the Forms authentication.</p>
+<p>The first thing to be aware of is that in Forms authentication you set the thread principal yourself when logging in. With Windows authentication <code>Thread.CurrentPrincipal.Identity.Name</code> is set automatically (as long as the rest of these instructions are correct). So nothing should have to be changed in the application code as long as you&rsquo;re already using <code>Thread.CurrentPrincipal.Identity.Name</code> with the Forms authentication.</p>
 
 <h3 id="webconfig">Web.config</h3>
-<p>The first step is to get rid of the Forms authentication section in the application’s <code>Web.config</code>. Mine looked like this:</p>
+<p>The first step is to get rid of the Forms authentication section in the application&rsquo;s <code>Web.config</code>. Mine looked like this:</p>
 
 <pre><code>&lt;system.web&gt;
 	...
@@ -69,7 +69,7 @@
 &lt;/site&gt;
 </code></pre>
 
-<p>This site’s name is <code>YourSite</code>. You need to add (or alter) the site’s <code>system.webServer</code> overrides. Search for <code>location path="YourSite"</code> but chances are you need to create a new one. Add this right at the bottom of the file, just before the closing <code>&lt;/configuration&gt;</code> tag:</p>
+<p>This site&rsquo;s name is <code>YourSite</code>. You need to add (or alter) the site&rsquo;s <code>system.webServer</code> overrides. Search for <code>location path="YourSite"</code> but chances are you need to create a new one. Add this right at the bottom of the file, just before the closing <code>&lt;/configuration&gt;</code> tag:</p>
 
 <pre><code>&lt;location path="YourSite"&gt;
     &lt;system.webServer&gt;
@@ -86,7 +86,7 @@
 <p>That should be all that is required to enable Windows authentication in an IIS Express ASP.NET application.</p>
 
 <h3 id="check-the-authentication-mode">Check the authentication mode</h3>
-<p>One thing you can change in the application code is a check for the authentication mode being used. This can be used to hide a “Log out” link for example. You can get the authentication mode using this method:</p>
+<p>One thing you can change in the application code is a check for the authentication mode being used. This can be used to hide a &ldquo;Log out&rdquo; link for example. You can get the authentication mode using this method:</p>
 
 <pre><code>public AuthenticationMode GetAuthenticationMode()
 {

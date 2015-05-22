@@ -32,7 +32,7 @@
 
 <p><strong>NOTE:</strong> This is a repost of an <a href="http://bendetat.com/set-up-teamcity-on-an-azure-instance.html">earlier post</a> with some refinements based on feedback and tips from my friend and collegue <a href="http://robdmoore.id.au/">Rob Moore</a>. </p>
 
-<p><strong>DISCLAIMER:</strong> I’m learning in the open here. I have barely used Azure and have only ever used already established TeamCity instances, so I’m really just messing around with two new things at the same time here. I’m sure I’m missing a heap of very important points.</p>
+<p><strong>DISCLAIMER:</strong> I&rsquo;m learning in the open here. I have barely used Azure and have only ever used already established TeamCity instances, so I&rsquo;m really just messing around with two new things at the same time here. I&rsquo;m sure I&rsquo;m missing a heap of very important points.</p>
 
 <h2 id="set-up-the-vm">Set up the VM</h2>
 
@@ -42,7 +42,7 @@
 
 <h3 id="create-a-new-virtual-machine">Create a new virtual machine</h3>
 
-<p>Select the VIRTUAL MACHINES tab and click NEW from the bottom menu. Select FROM GALLERY and pick ‘Windows Server 2012 R2 Datacenter’ (or whatever is most current). Hit next and give it a cool name. I left the size on the standard tier at A1 for now and selected SE Asia as the location of the VM. According to the <a href="http://azure.microsoft.com/en-us/pricing/details/virtual-machines/">Azure pricing calculator</a> this costs around AU$68 per month. Enter a username and password, which you will need to remote into the VM. Next through the rest of the pages and the VM will soon be provisioned:</p>
+<p>Select the VIRTUAL MACHINES tab and click NEW from the bottom menu. Select FROM GALLERY and pick &lsquo;Windows Server 2012 R2 Datacenter&rsquo; (or whatever is most current). Hit next and give it a cool name. I left the size on the standard tier at A1 for now and selected SE Asia as the location of the VM. According to the <a href="http://azure.microsoft.com/en-us/pricing/details/virtual-machines/">Azure pricing calculator</a> this costs around AU$68 per month. Enter a username and password, which you will need to remote into the VM. Next through the rest of the pages and the VM will soon be provisioned:</p>
 
 <p><img src="http://i.imgur.com/SzdGki7.png" alt="http://i.imgur.com/SzdGki7.png" /></p>
 
@@ -50,23 +50,23 @@
 
 <h3 id="open-up-the-firewall">Open up the firewall</h3>
 
-<p>We’ll want to open up port 80 for TeamCity. It will actually run on port 8080 but I’ll use IIS to reverse proxy it to port 80. This should make it easier to move to SSL in the future. Select the ENDPOINTS tab and ADD a new one. </p>
+<p>We&rsquo;ll want to open up port 80 for TeamCity. It will actually run on port 8080 but I&rsquo;ll use IIS to reverse proxy it to port 80. This should make it easier to move to SSL in the future. Select the ENDPOINTS tab and ADD a new one. </p>
 
 <p><img src="http://i.imgur.com/nelGyMd.png" alt="http://i.imgur.com/nelGyMd.png" /></p>
 
-<p>Note that you’re ADDing an endpoint. The NEW button will start creating a new VM. It’s like Microsoft wants you to keep adding more and more VMs.</p>
+<p>Note that you&rsquo;re ADDing an endpoint. The NEW button will start creating a new VM. It&rsquo;s like Microsoft wants you to keep adding more and more VMs.</p>
 
 <p>Accept the first screen to add a stand-alone endpoint. Pick HTTP from the NAME drop-down, which will automatically fill in the port number. Complete the screen.</p>
 
-<p>This opens port 80 on the <em>external</em> firewall. The server’s internal firewall will still need to be configured (below).</p>
+<p>This opens port 80 on the <em>external</em> firewall. The server&rsquo;s internal firewall will still need to be configured (below).</p>
 
 <h3 id="attach-a-new-disk">Attach a new disk</h3>
 
-<p><img src="http://i.imgur.com/4Znf3hr.png" style="float: left; padding-right: 1em;" /> The VM has two drives configured by default - C:, which contains the Windows installation, and D:, which is ‘temporary storage’. I’m going to attach a third disk that will contain the TeamCity host (and later Octopus Deploy). The TeamCity agent will use D: as it is local to the VM, so it should be faster for building the residents. Attach a new disk by selecting the ATTACH option from the bottom menu. Select Empty Disk.  Accept the defaults, I gave it a size of 20 GB. Apparently resizing the disk later on involves downloading the VHD, using a tool to resize it, and uploading it again. Seems a bit awkward. 20 GB should do for now. Select ‘READ/WRITE’ under the ‘HOST CACHE PREFERENCE’, which should speed up access. The disk will be attached and the status should return to running.</p>
+<p><img src="http://i.imgur.com/4Znf3hr.png" style="float: left; padding-right: 1em;" /> The VM has two drives configured by default - C:, which contains the Windows installation, and D:, which is &lsquo;temporary storage&rsquo;. I&rsquo;m going to attach a third disk that will contain the TeamCity host (and later Octopus Deploy). The TeamCity agent will use D: as it is local to the VM, so it should be faster for building the residents. Attach a new disk by selecting the ATTACH option from the bottom menu. Select Empty Disk.  Accept the defaults, I gave it a size of 20 GB. Apparently resizing the disk later on involves downloading the VHD, using a tool to resize it, and uploading it again. Seems a bit awkward. 20 GB should do for now. Select &lsquo;READ/WRITE&rsquo; under the &lsquo;HOST CACHE PREFERENCE&rsquo;, which should speed up access. The disk will be attached and the status should return to running.</p>
 
 <h3 id="remote-in-and-start-configuring-the-vm">Remote in and start configuring the VM</h3>
 
-<p>Go to the DASHBOARD tab and select CONNECT from the bottom menu. This will download an .RDP file which will should open in Remote Desktop. Enter the username and password and you should get connected to the server’s desktop.</p>
+<p>Go to the DASHBOARD tab and select CONNECT from the bottom menu. This will download an .RDP file which will should open in Remote Desktop. Enter the username and password and you should get connected to the server&rsquo;s desktop.</p>
 
 <h4 id="ie-enhanced-security">IE Enhanced Security</h4>
 <p>Turn off IE Enhanced Security from the Server Manager, in the Local Server Tab. This will let you use Internet Explorer to download TeamCity (or to install Chrome to download TeamCity and lolcats).</p>
@@ -85,31 +85,31 @@
 
 <p>The empty disk that we attached needs to be formatted and assigned to a drive letter in the server as well. You can think of attaching an empty disk as plugging in a new disk to any normal machine - the disk still needs be configured in the OS.</p>
 
-<p>In the Server Manager, select File and Storage Services, then Disks (under Volumes). The new disk should be online with a partition type of ‘Unknown’. Right-click the disk and select New Volume…</p>
+<p>In the Server Manager, select File and Storage Services, then Disks (under Volumes). The new disk should be online with a partition type of &lsquo;Unknown&rsquo;. Right-click the disk and select New Volume&hellip;</p>
 
 <p><img src="http://i.imgur.com/vgarRGg.png" alt="File and Storage Services - New Volume" /></p>
 
 <p>Next through everything and accept the defaults. It should be assigned to drive E:.</p>
 
-<h2 id="whew">Whew…</h2>
+<h2 id="whew">Whew&hellip;</h2>
 
-<p>Just sit back for a moment and look at what we’ve achieved. We’ve got a new VM running the latest Windows Server OS, firewalls configured and remote desktop enabled. I haven’t even taken out my credit card yet. Compare with the amount of work needed to boot up a new physical server in a network, or even provisioning a new VM in Hyper-V. Squeeeee? Indeed.</p>
+<p>Just sit back for a moment and look at what we&rsquo;ve achieved. We&rsquo;ve got a new VM running the latest Windows Server OS, firewalls configured and remote desktop enabled. I haven&rsquo;t even taken out my credit card yet. Compare with the amount of work needed to boot up a new physical server in a network, or even provisioning a new VM in Hyper-V. Squeeeee? Indeed.</p>
 
 <h2 id="install-teamcity">Install TeamCity</h2>
 
-<p>Download the ‘default free professional edition’ of TeamCity from <a href="http://www.jetbrains.com/teamcity/download/">here</a>. The version at the time of writing was 9.0.</p>
+<p>Download the &lsquo;default free professional edition&rsquo; of TeamCity from <a href="http://www.jetbrains.com/teamcity/download/">here</a>. The version at the time of writing was 9.0.</p>
 
 <p>Start up the installer. Select <code>e:\TeamCity</code> as the destination folder (or wherever the new disk was assigned). Leave the components as default, which installs a build agent and the server with Windows services. Change the TeamCity data directory to somewhere on the new disk - I used <code>e:\TeamCity-data</code>.</p>
 
-<p>After installation the Build Agent properties configuration appears. Change the systemDir, workDir and tempDir to point to <code>D:\TeamCity\buildAgent\___</code> (the temporary drive). You have to select each of the paths and edit them in turn. Save this then select the SYSTEM account. It would probably be more secure to set up a restricted user account but the system account should do for now. Do the same for the TeamCity Agent service account. ‘Next’ through and the services will start. After you finish the installation, ‘TeamCity First Start’ should open in IE / your browser of choice.</p>
+<p>After installation the Build Agent properties configuration appears. Change the systemDir, workDir and tempDir to point to <code>D:\TeamCity\buildAgent\___</code> (the temporary drive). You have to select each of the paths and edit them in turn. Save this then select the SYSTEM account. It would probably be more secure to set up a restricted user account but the system account should do for now. Do the same for the TeamCity Agent service account. &lsquo;Next&rsquo; through and the services will start. After you finish the installation, &lsquo;TeamCity First Start&rsquo; should open in IE / your browser of choice.</p>
 
-<p>Start working through this wizard. I used the ‘Internal (HSQLDB)’ database type. Initializing the server components can take a few minutes so be patient! It’s a good idea to configure the admin credentials in TeamCity before setting up the reverse proxy (below) so that your new server isn’t exposed on the ‘first start’ wizard.</p>
+<p>Start working through this wizard. I used the &lsquo;Internal (HSQLDB)&rsquo; database type. Initializing the server components can take a few minutes so be patient! It&rsquo;s a good idea to configure the admin credentials in TeamCity before setting up the reverse proxy (below) so that your new server isn&rsquo;t exposed on the &lsquo;first start&rsquo; wizard.</p>
 
 <h2 id="set-up-the-reverse-proxy-in-iis">Set up the reverse proxy in IIS</h2>
 
-<p>First you need to install IIS. Open the Server Manager and select ‘Add roles and features’. Select ‘Role-based or feature-based installation’. Then ‘Select a server from the server pool’ and make sure the correct VM is selected. In the list of roles, check ‘Web Server (IIS)’. If it prompts you to add the ‘IIS Management Console’, click ‘Add Features’. Click ‘Next’. Leae the other features at the default values and continue. Leave the role services for Web Server (IIS) at the default. Next then Install.</p>
+<p>First you need to install IIS. Open the Server Manager and select &lsquo;Add roles and features&rsquo;. Select &lsquo;Role-based or feature-based installation&rsquo;. Then &lsquo;Select a server from the server pool&rsquo; and make sure the correct VM is selected. In the list of roles, check &lsquo;Web Server (IIS)&rsquo;. If it prompts you to add the &lsquo;IIS Management Console&rsquo;, click &lsquo;Add Features&rsquo;. Click &lsquo;Next&rsquo;. Leae the other features at the default values and continue. Leave the role services for Web Server (IIS) at the default. Next then Install.</p>
 
-<p>I used <a href="http://serverfault.com/a/152411">this ServerFault answer</a> to set up the reverse proxy. It requires the <a href="http://www.iis.net/download/URLRewrite">URL Rewrite</a> and <a href="http://www.iis.net/download/ApplicationRequestRouting">Application Request Routing</a> IIS modules. Either follow those links or use <a href="http://www.microsoft.com/web/downloads/platform.aspx">Web Platform Installer</a> to install them. Start up IIS Manger and select <code>&lt;your server&gt;/Sites/Default Web Site</code>. There should be a URL Rewrite modul. Open it, right-click on the inbound rules list and select ‘Add Rules’. Select ‘Reverse Proxy’ then OK. Allow enabling proxy functionality. Enter <code>localhost:8080</code> in the inbound rule server name, then OK. This creates a <code>web.config</code> file in <code>c:\inetpub\wwwroot</code> that looks like this:</p>
+<p>I used <a href="http://serverfault.com/a/152411">this ServerFault answer</a> to set up the reverse proxy. It requires the <a href="http://www.iis.net/download/URLRewrite">URL Rewrite</a> and <a href="http://www.iis.net/download/ApplicationRequestRouting">Application Request Routing</a> IIS modules. Either follow those links or use <a href="http://www.microsoft.com/web/downloads/platform.aspx">Web Platform Installer</a> to install them. Start up IIS Manger and select <code>&lt;your server&gt;/Sites/Default Web Site</code>. There should be a URL Rewrite modul. Open it, right-click on the inbound rules list and select &lsquo;Add Rules&rsquo;. Select &lsquo;Reverse Proxy&rsquo; then OK. Allow enabling proxy functionality. Enter <code>localhost:8080</code> in the inbound rule server name, then OK. This creates a <code>web.config</code> file in <code>c:\inetpub\wwwroot</code> that looks like this:</p>
 
 <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;configuration&gt;
@@ -132,7 +132,7 @@
 
 <ul>
   <li><a href="http://blog.virtew.com/2012/08/18/setup-teamcity-on-an-azure-virtual-machine-for-windows-8-metro-style-apps/">virtew - Setup TeamCity on an Azure Virtual Machine for Windows 8 Metro Style Apps</a></li>
-  <li><a href="http://worldsgreatestazuredemo.com/">World’s Greatest Azure Demo</a></li>
+  <li><a href="http://worldsgreatestazuredemo.com/">World&rsquo;s Greatest Azure Demo</a></li>
 </ul>
 
 <h2 id="see-also">See also</h2>

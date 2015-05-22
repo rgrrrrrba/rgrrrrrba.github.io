@@ -30,15 +30,15 @@
 
 
 
-<p><strong>DISCLAIMER:</strong> I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!</p>
+<p><strong>DISCLAIMER:</strong> I&rsquo;m learning in the open here. This is the first time I&rsquo;ve used Gulp and Bower and I&rsquo;m sure I&rsquo;m missing a heap of really important stuff. Enjoy!</p>
 
 <ul>
-  <li>Part 1: <a href="http://bendetat.com/hello-world-its-gulp.html">Hello World! It’s Gulp!</a></li>
+  <li>Part 1: <a href="http://bendetat.com/hello-world-its-gulp.html">Hello World! It&rsquo;s Gulp!</a></li>
   <li>Part 2: <a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">A useful build pipeline using Gulp and Bower</a></li>
   <li>Part 3: Cleaning and simplifying the Gulp pipeline</li>
 </ul>
 
-<p>I wasn’t entirely happy with how the <a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js">previous build script</a> wrote out the minified JS and CSS files next to <code>index.html</code>, or how the vendor files had to be specified in the configuration, so I did some playing with the <code>gulp-useref</code> plugin and cleaned things up significantly.</p>
+<p>I wasn&rsquo;t entirely happy with how the <a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js">previous build script</a> wrote out the minified JS and CSS files next to <code>index.html</code>, or how the vendor files had to be specified in the configuration, so I did some playing with the <code>gulp-useref</code> plugin and cleaned things up significantly.</p>
 
 <p>I installed two new dependencies.</p>
 
@@ -60,7 +60,7 @@
   <p>Conditionally run a task</p>
 </blockquote>
 
-<p>I moved all the dependencies into <code>$</code>, deleted the dependencies I wouldn’t need any more and added <code>useref</code>:</p>
+<p>I moved all the dependencies into <code>$</code>, deleted the dependencies I wouldn&rsquo;t need any more and added <code>useref</code>:</p>
 
 <pre><code>var $ = {
 	if: require('gulp-if'),
@@ -140,7 +140,7 @@
 
 <p>Now if a file changes, the files get rebuilt in the same process as the server. Because that server is just serving the entire source path any changes are available instantly.</p>
 
-<p>Here is the <a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js"><code>gulpfile.js</code> as at this post</a>. Next I’ll get some AngularJS happening.</p>
+<p>Here is the <a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js"><code>gulpfile.js</code> as at this post</a>. Next I&rsquo;ll get some AngularJS happening.</p>
 
 <h2 id="further-reading-and-resources">Further reading and resources</h2>
 

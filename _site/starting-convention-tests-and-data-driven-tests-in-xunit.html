@@ -30,7 +30,7 @@
 
 
 
-<p>I’m really interested in convention tests, and as I want to get into xUnit I thought I would try taking some patterns that I’ve used in NUnit and applying them in xUnit.</p>
+<p>I&rsquo;m really interested in convention tests, and as I want to get into xUnit I thought I would try taking some patterns that I&rsquo;ve used in NUnit and applying them in xUnit.</p>
 
 <p>The test project I created while writing this post is <a href="https://github.com/bendetat/convention-tests-in-xunit">available on GitHub</a>.</p>
 
@@ -60,17 +60,17 @@
 }
 </code></pre>
 
-<p>So xUnit has <code>[Fact]</code>s while NUnit has <code>[Test]</code>s. Cool so far. Note that the class has to be public. In NUnit I would usually mark test fixtures with <code>[TestFixture]</code> and the class usually ends up <code>internal</code>, which Resharper’s test runner will pick up. NUnit has been able to pick up public classes without the <code>[TestFixture]</code> decoration for the past couple of years IIRC but I’ve had mixed success with Resharper’s test runner. Sometimes I would spend valuable seconds wondering why tests weren’t running and looking dumb, so I would automatically add the attribute. xUnit doesn’t have a <code>[TestFixture]</code> equivalent. It will just find all public classes that contain tests.</p>
+<p>So xUnit has <code>[Fact]</code>s while NUnit has <code>[Test]</code>s. Cool so far. Note that the class has to be public. In NUnit I would usually mark test fixtures with <code>[TestFixture]</code> and the class usually ends up <code>internal</code>, which Resharper&rsquo;s test runner will pick up. NUnit has been able to pick up public classes without the <code>[TestFixture]</code> decoration for the past couple of years IIRC but I&rsquo;ve had mixed success with Resharper&rsquo;s test runner. Sometimes I would spend valuable seconds wondering why tests weren&rsquo;t running and looking dumb, so I would automatically add the attribute. xUnit doesn&rsquo;t have a <code>[TestFixture]</code> equivalent. It will just find all public classes that contain tests.</p>
 
 <h2 id="comparisons-with-nunit">Comparisons with NUnit</h2>
 
 <p>The xUnit Wiki has a nice <a href="http://xunit.codeplex.com/wikipage?title=Comparisons">comparison page</a> showing differences between NUnit, MSTest and itself. </p>
 
-<p>Apart from the obvious <code>[Fact]</code> vs <code>[Test]</code> and not needing <code>[TestFixture]</code>, the big differences seem to be with how the two test frameworks handle fixture setup and teardown. NUnit uses <code>[SetUp]</code> and <code>[TearDown]</code> attributes to mark methods, while xUnit adds awesome to the mix by using the public constructor as the setup method. It just creates a new instance of the fixture class for each test. This completely obviates issues that have cropped up for me in NUnit around fixture state being shared between tests. Teardown is done by implementing <code>IDisposable</code>, in the <code>Dispose</code> method. I don’t remember the last time I wrote a teardown method anyway, but using <code>IDisposable</code> is a really nice and obvious convention. Shared fixture state can be implemented with the <code>IUseFixture&lt;T&gt;</code> interface but I won’t explore that here.</p>
+<p>Apart from the obvious <code>[Fact]</code> vs <code>[Test]</code> and not needing <code>[TestFixture]</code>, the big differences seem to be with how the two test frameworks handle fixture setup and teardown. NUnit uses <code>[SetUp]</code> and <code>[TearDown]</code> attributes to mark methods, while xUnit adds awesome to the mix by using the public constructor as the setup method. It just creates a new instance of the fixture class for each test. This completely obviates issues that have cropped up for me in NUnit around fixture state being shared between tests. Teardown is done by implementing <code>IDisposable</code>, in the <code>Dispose</code> method. I don&rsquo;t remember the last time I wrote a teardown method anyway, but using <code>IDisposable</code> is a really nice and obvious convention. Shared fixture state can be implemented with the <code>IUseFixture&lt;T&gt;</code> interface but I won&rsquo;t explore that here.</p>
 
 <h2 id="a-data-driven-test">A data-driven test</h2>
 
-<p>I used NUnit’s data-driven tests to TDD a simple Fibonacci number generator (my favourite integer sequence). The implementation of the generator is <a href="https://github.com/bendetat/convention-tests-in-xunit/blob/master/src/MyApp.Shared/FibonacciGenerator.cs">in the repo</a>.</p>
+<p>I used NUnit&rsquo;s data-driven tests to TDD a simple Fibonacci number generator (my favourite integer sequence). The implementation of the generator is <a href="https://github.com/bendetat/convention-tests-in-xunit/blob/master/src/MyApp.Shared/FibonacciGenerator.cs">in the repo</a>.</p>
 
 <pre><code>[Test]
 [TestCase(0, 0)]
@@ -89,7 +89,7 @@ public void TestNumber(int sequence, int result)
 }
 </code></pre>
 
-<p>xUnit uses Theories for data driven tests, which sounds so cool. Interestingly, theories aren’t part of xUnit out of the box. You need to install the <code>xunit.extensions</code> package. Apart from the naming differences everything is pretty much the same.</p>
+<p>xUnit uses Theories for data driven tests, which sounds so cool. Interestingly, theories aren&rsquo;t part of xUnit out of the box. You need to install the <code>xunit.extensions</code> package. Apart from the naming differences everything is pretty much the same.</p>
 
 <pre><code>[Theory]
 [InlineData(0, 0)]
@@ -112,11 +112,11 @@ public void TestNumber(int sequence, int result)
 
 <h2 id="theory-data-sources">Theory data sources</h2>
 
-<p><code>InlineData</code> is only one of the data sources that xUnit provides. There doesn’t seem to be much documentation around the source types, so I’m working from the <a href="https://github.com/xunit/xunit/tree/master/test/test.xunit1/xunit.extensions/DataTheories/AcceptanceTests">acceptance tests in the xUnit source</a>.</p>
+<p><code>InlineData</code> is only one of the data sources that xUnit provides. There doesn&rsquo;t seem to be much documentation around the source types, so I&rsquo;m working from the <a href="https://github.com/xunit/xunit/tree/master/test/test.xunit1/xunit.extensions/DataTheories/AcceptanceTests">acceptance tests in the xUnit source</a>.</p>
 
 <h3 id="inlinedata">InlineData</h3>
 
-<p>As shown above, this is obviously on par with NUnit’s <code>TestCase</code>. It takes a <code>params</code> array of objects and passes them into the test method.</p>
+<p>As shown above, this is obviously on par with NUnit&rsquo;s <code>TestCase</code>. It takes a <code>params</code> array of objects and passes them into the test method.</p>
 
 <h3 id="classdata">ClassData</h3>
 
@@ -148,13 +148,13 @@ class FibonacciTestSource : IEnumerable&lt;object[]&gt;
 }
 </code></pre>
 
-<p>The test data still has to be an array of <code>object</code>, so I couldn’t strongly type my test data. This is something I never liked about NUnit’s data-driven tests, so it is disappointing that xUnit has the same limitation. However class data sources are obviously a great way of sharing test cases between fixtures.</p>
+<p>The test data still has to be an array of <code>object</code>, so I couldn&rsquo;t strongly type my test data. This is something I never liked about NUnit&rsquo;s data-driven tests, so it is disappointing that xUnit has the same limitation. However class data sources are obviously a great way of sharing test cases between fixtures.</p>
 
 <h3 id="exceldata">ExcelData</h3>
 
-<p>This is pretty cool. The data source can be an Excel spreadsheet. This looks like a great way to manage lots of test cases outside of code. I coded up an example, but the JET engine isn’t on 64-bit Windows so it didn’t work. This dependence on JET is a problem IMO, one which has been around since Windows Vista made 64-bit relatively mainstream back in 2007.</p>
+<p>This is pretty cool. The data source can be an Excel spreadsheet. This looks like a great way to manage lots of test cases outside of code. I coded up an example, but the JET engine isn&rsquo;t on 64-bit Windows so it didn&rsquo;t work. This dependence on JET is a problem IMO, one which has been around since Windows Vista made 64-bit relatively mainstream back in 2007.</p>
 
-<p>So I couldn’t get to work, but I think this is how Excel driven tests would look:</p>
+<p>So I couldn&rsquo;t get to work, but I think this is how Excel driven tests would look:</p>
 
 <pre><code>[Theory]
 [ExcelData(@"MyApp.Tests\FibonacchiTestData.xlsx", "select * from Data")]
@@ -166,7 +166,7 @@ public void TestNumber(int sequence, int result)
 
 <h3 id="propertydata">PropertyData</h3>
 
-<p><code>PropertyData</code> is very similar to <code>ClassData</code> but obviously on a property of the test class rather than a class of its own. This also looks closest to NUnit’s <code>TestCaseSource</code>, which references a method that returns <code>IEnumerable&lt;TestCaseData&gt;</code>. xUnit doesn’t have as much ceremony around the test data, although the enumerable still has return arrays of <code>object</code>s.</p>
+<p><code>PropertyData</code> is very similar to <code>ClassData</code> but obviously on a property of the test class rather than a class of its own. This also looks closest to NUnit&rsquo;s <code>TestCaseSource</code>, which references a method that returns <code>IEnumerable&lt;TestCaseData&gt;</code>. xUnit doesn&rsquo;t have as much ceremony around the test data, although the enumerable still has return arrays of <code>object</code>s.</p>
 
 <pre><code>public static IEnumerable&lt;object[]&gt; TestData
 {
@@ -188,9 +188,9 @@ public void TestNumber(int sequence, int result)
 
 <h2 id="a-simple-convention-test">A simple convention test</h2>
 
-<p>So it looks like <code>PropertyData</code> is the most appropriate for the simple convention test I’m going to put together.</p>
+<p>So it looks like <code>PropertyData</code> is the most appropriate for the simple convention test I&rsquo;m going to put together.</p>
 
-<p>This is going to be really basic. The convention I’m testing is:</p>
+<p>This is going to be really basic. The convention I&rsquo;m testing is:</p>
 
 <blockquote>
   <p>All classes that implement <code>IDomainObject</code> must have an empty constructor</p>
@@ -209,12 +209,12 @@ public void TestNumber(int sequence, int result)
 }
 </code></pre>
 
-<p>I like to think of this in terms of “get all types that inherit from <code>IDomainObject</code>”. The <code>Type</code> class has an <code>IsAssignableFrom(Type)</code> method but for that to work I would have to invert the query, so something like:</p>
+<p>I like to think of this in terms of &ldquo;get all types that inherit from <code>IDomainObject</code>&rdquo;. The <code>Type</code> class has an <code>IsAssignableFrom(Type)</code> method but for that to work I would have to invert the query, so something like:</p>
 
 <pre><code>from t in [types] where typeof(IDomainObject).IsAssignableFrom(t)
 </code></pre>
 
-<p>That doesn’t read very naturally so I like to invert the method with an extension method, and add some generic love to the mix:</p>
+<p>That doesn&rsquo;t read very naturally so I like to invert the method with an extension method, and add some generic love to the mix:</p>
 
 <pre><code>public static bool IsAssignableTo&lt;T&gt;(this Type fromType)
 {
@@ -251,7 +251,7 @@ public void DomainObjectHasDefaultConstructor(Type type)
 }
 </code></pre>
 
-<h2 id="er">Er…</h2>
+<h2 id="er">Er&hellip;</h2>
 
 <p>Fin.</p>
 

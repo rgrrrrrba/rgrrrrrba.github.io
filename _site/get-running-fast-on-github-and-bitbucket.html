@@ -33,7 +33,7 @@
 <p>These are the steps I use to set up a new PC with Git. I mainly use Git on the command line, with TortoiseGit for staging commits and visualising logs and Beyond Compare for diffs and merges.</p>
 
 <h3 id="gh4w">GH4W</h3>
-<p>I use <a href="http://windows.github.com/">GitHub for Windows</a> to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the <code>github_rsa.pub</code> file in <code>C:\Users\**username**\.ssh</code> can be added to BitBucket and other services to get everything running with the same credentials. Generally I won’t use GH4W after this as I’m mostly a command line junky, with gaps filled by TortoiseGit.</p>
+<p>I use <a href="http://windows.github.com/">GitHub for Windows</a> to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the <code>github_rsa.pub</code> file in <code>C:\Users\**username**\.ssh</code> can be added to BitBucket and other services to get everything running with the same credentials. Generally I won&rsquo;t use GH4W after this as I&rsquo;m mostly a command line junky, with gaps filled by TortoiseGit.</p>
 
 <h3 id="put-cbin-on-the-path">Put <code>c:\bin</code> on the path</h3>
 <p>Create a folder called <code>bin</code> somewhere fairly central. I use <code>c:\bin</code>. Then put it on the path. Now you can drop scripts and executables into the <code>bin</code> folder and they will work in any console anywhere. To mess with the path:</p>
@@ -42,8 +42,8 @@
   <li>Open the System control panel item (<code>Win</code>-<code>pause/break</code>)</li>
   <li>Select Advanced system settings (opens the System Properties dialog)</li>
   <li>Select Environment Variables</li>
-  <li>Update both of the Path variables (in User variables and System variables), add <code>;c:\bin</code> to the end of the values (don’t delete the existing value)</li>
-  <li>‘OK’ out of the dialogs. You will need to restart any open command prompts to get the path change to work, rebooting is usually the fastest way to make sure the change has gone through (logging out and in may work too).</li>
+  <li>Update both of the Path variables (in User variables and System variables), add <code>;c:\bin</code> to the end of the values (don&rsquo;t delete the existing value)</li>
+  <li>&lsquo;OK&rsquo; out of the dialogs. You will need to restart any open command prompts to get the path change to work, rebooting is usually the fastest way to make sure the change has gone through (logging out and in may work too).</li>
 </ol>
 
 <p><img src="http://i.imgur.com/hWvTzkl.png" alt="" /></p>
@@ -57,7 +57,7 @@
 <p>TortoiseGit has a number of commands available from the command line. Use <code>tgit commit</code> to preview, stage and execute a commit, and <code>tgit log</code> to see the log.</p>
 
 <h3 id="switch-to-cmder">Switch to Cmder</h3>
-<p>I use <a href="http://bliker.github.io/cmder/">Cmder</a> as a console replacement but the msysgit instance included in the full download doesn’t work with the public key named <code>github_rsa.pub</code>. I just copied <code>github_rsa.pub</code> to <code>id_rsa.pub</code> and <code>github_rsa</code> to <code>id_rsa</code>. Cmder has support for aliases using the <code>alias</code> command but I usually use the <code>c:\bin</code> path with batch files to keep everything relatively portable. Install Cmder to <code>c:\bin\cmder</code> and drag <code>C:\bin\cmder\cmder.exe</code> onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (<code>c:\source</code> is mine):</p>
+<p>I use <a href="http://bliker.github.io/cmder/">Cmder</a> as a console replacement but the msysgit instance included in the full download doesn&rsquo;t work with the public key named <code>github_rsa.pub</code>. I just copied <code>github_rsa.pub</code> to <code>id_rsa.pub</code> and <code>github_rsa</code> to <code>id_rsa</code>. Cmder has support for aliases using the <code>alias</code> command but I usually use the <code>c:\bin</code> path with batch files to keep everything relatively portable. Install Cmder to <code>c:\bin\cmder</code> and drag <code>C:\bin\cmder\cmder.exe</code> onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (<code>c:\source</code> is mine):</p>
 
 <p><img src="http://i.imgur.com/22KOl45.png" alt="" /></p>
 
@@ -67,7 +67,7 @@
 <pre><code>git config --global alias.ec "config --global -e"
 </code></pre>
 
-<p>Now that’s in you can hand edit the config to add some or all of <a href="http://haacked.com/archive/2014/07/28/github-flow-aliases/">Phil Haack’s GitHub Flow aliases</a>. I usually just use ‘wipe’, ‘save’ and ‘undo’:</p>
+<p>Now that&rsquo;s in you can hand edit the config to add some or all of <a href="http://haacked.com/archive/2014/07/28/github-flow-aliases/">Phil Haack&rsquo;s GitHub Flow aliases</a>. I usually just use &lsquo;wipe&rsquo;, &lsquo;save&rsquo; and &lsquo;undo&rsquo;:</p>
 
 <pre><code>wipe = !git add -A &amp;&amp; git commit -qm 'WIPE SAVEPOINT' &amp;&amp; git reset HEAD~1 --hard
 save = !git add -A &amp;&amp; git commit -m 'SAVEPOINT'
@@ -81,7 +81,7 @@ undo = reset HEAD~1 --mixed
 
 <p>Also check this out: <a href="https://help.github.com/articles/set-up-git">https://help.github.com/articles/set-up-git</a></p>
 
-<p>Looks like password caching is an issue with Cmder’s msysgit, but only with non-SSH remote urls. If <code>.git/config</code> looks like this it shoud use the above keys:</p>
+<p>Looks like password caching is an issue with Cmder&rsquo;s msysgit, but only with non-SSH remote urls. If <code>.git/config</code> looks like this it shoud use the above keys:</p>
 
 <pre><code>[remote "origin"]
 	url = git@github.com:rgrrrrrba/rgrrrrrba.github.io.git
@@ -115,7 +115,7 @@ git config --global mergetool.prompt false
 git config --global mergetool.keepBackup false
 </code></pre>
 
-<p>TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit’s Settings screen (right-click in Explorer, TortoiseGit, Settings, or just use <code>tgit settings</code> if you added the alias):</p>
+<p>TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit&rsquo;s Settings screen (right-click in Explorer, TortoiseGit, Settings, or just use <code>tgit settings</code> if you added the alias):</p>
 
 <p><img src="http://i.imgur.com/fhkbebQ.png" alt="" /></p>
 

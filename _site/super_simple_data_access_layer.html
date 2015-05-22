@@ -30,14 +30,14 @@
 
 
 
-<p>I’ve released a simple data access component that makes working with MS SQL databases in C# much more fun. It is a <a href="https://github.com/swxben/Shu-Er/blob/master/dotnet/DataAccess/src/Swxben.DataAccess/DataAccess.cs">single file</a> that can be dropped into a project, passed a connection string, and used with very little interference. It is similar to the excellent <a href="https://github.com/robconery/massive">Massive</a> but without as much magic.</p>
+<p>I&rsquo;ve released a simple data access component that makes working with MS SQL databases in C# much more fun. It is a <a href="https://github.com/swxben/Shu-Er/blob/master/dotnet/DataAccess/src/Swxben.DataAccess/DataAccess.cs">single file</a> that can be dropped into a project, passed a connection string, and used with very little interference. It is similar to the excellent <a href="https://github.com/robconery/massive">Massive</a> but without as much magic.</p>
 
 <p>Queries and commands can be executed using SQL, passing in an anonymous or strongly-typed model:</p>
 
 <pre><code>dataAccess.ExecuteCommand( "INSERT INTO Customers(CustomerId, CustomerName) VALUES(@CustomerId, @CustomerName)", new { CustomerId = 1, CustomerName = "SWXBEN" } ); 
 </code></pre>
 
-<p><code>INSERT</code> and <code>UPDATE</code> commands can also be created using some simple assumptions about the table (just adding ‘s’ to the model name) and with no need for attributes or naming conventions:</p>
+<p><code>INSERT</code> and <code>UPDATE</code> commands can also be created using some simple assumptions about the table (just adding &lsquo;s&rsquo; to the model name) and with no need for attributes or naming conventions:</p>
 
 <pre><code>class Customer { public int CustomerId; public string CustomerName }  var customer = new Customer { CustomerId = 1, CustomerName = "SWXBEN" }; dataAccess.Insert(customer);  customer.CustomerName = "Software by Ben"; dataAccess.Update(customer, "CustomerId"); 
 </code></pre>

@@ -30,12 +30,12 @@
 
 
 
-<p>Ok so I’m working on a WPF launcher that loads a shell that loads a client. Three different appdomains. The launcher could load the shell. The shell could load the client. But when I tried to get the launcher to load the shell then the shell to load the client, I would get this lovely exception when the client instance was created:</p>
+<p>Ok so I&rsquo;m working on a WPF launcher that loads a shell that loads a client. Three different appdomains. The launcher could load the shell. The shell could load the client. But when I tried to get the launcher to load the shell then the shell to load the client, I would get this lovely exception when the client instance was created:</p>
 
 <pre><code>Set property 'System.Windows.ResourceDictionary.DeferrableContent' threw an exception
 </code></pre>
 
-<p><a href="https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;aqs=chrome..69i57.519j0j4&amp;sourceid=chrome&amp;espv=210&amp;es_sm=122&amp;ie=UTF-8">Googling the exception</a> gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread (<code>InvalidOperationException</code>, “The calling thread must be STA, because many UI components require this.”).</p>
+<p><a href="https://www.google.com.au/search?q=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;oq=Set+property+'System.Windows.ResourceDictionary.DeferrableContent'+threw+an+exception.&amp;aqs=chrome..69i57.519j0j4&amp;sourceid=chrome&amp;espv=210&amp;es_sm=122&amp;ie=UTF-8">Googling the exception</a> gave a lot of talk about duplicate values in the resource dictionaries, which I burned a pile of time on. Then I noticed that the exception had an inner exception which had an inner exception and so on, and the final exception was about a UI component being created in a non-UI thread (<code>InvalidOperationException</code>, &ldquo;The calling thread must be STA, because many UI components require this.&rdquo;).</p>
 
 <p>Turned out I was doing this in the shell, to keep its UI responsive:</p>
 
@@ -52,7 +52,7 @@ worker.RunWorkerAsync();
 launchCompletedResetEvent.WaitOne();
 </code></pre>
 
-<p>The <code>launchCompletedResetEvent</code> mutex is so the shell didn’t terminate before launching the client.</p>
+<p>The <code>launchCompletedResetEvent</code> mutex is so the shell didn&rsquo;t terminate before launching the client.</p>
 
 <p>This was launching the client in a non-UI thread. For some reason this seems to have worked when running the shell directly but not when running the shell through the launcher. Maybe when I ran the shell directly I was bypassing the download step and launching the client on the main thread. Actually that makes sense.</p>
 
