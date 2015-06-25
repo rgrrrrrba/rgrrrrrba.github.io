@@ -37,11 +37,11 @@
 
 <p>This is the first post of hopefully many as I learn MonoGame by extending on a <a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">tutorial series by Tara Walker</a>. The source code is available, both <a href="https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007">before</a> and <a href="https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d">after</a>.</p>
 
-<p>In this post I walk through adding screen edge detection to the player&rsquo;s ship, using Test-Driven Development practices where possible to keep a high quality of code.</p>
+<p>In this post I walk through adding screen edge detection to the player’s ship, using Test-Driven Development practices where possible to keep a high quality of code.</p>
 
 <h3 id="changes-since-last-post">Changes since last post</h3>
 
-<p>I have created a <code>Sprite</code> class, which is the base class for both the <code>Player</code> class and the <code>Enemy</code> class. The <code>Sprite</code> class uses a velocity and maximum speed to calculate the position in each frame. I changed the <code>ViewportWrapper</code> to expose the <code>Viewport</code> directly. Turns out the <code>Viewport</code> object is just a basic <code>struct</code> without any dependencies, so it should play nice with tests. Because it is a <code>struct</code>, which is a value type, it can&rsquo;t be directly registered with AutoFac, so I need to keep the <code>IViewport</code> abstraction. I also added an <code>IDrawMyself</code> interface. MonoGame has an <code>IDrawable</code> interface but it comes with some baggage. <code>IDrawMyself</code> is implemented by <code>IAnimation</code> and will eventually be implemented by <code>ITexture2D</code> and <code>IParallaxingBackground</code>.</p>
+<p>I have created a <code>Sprite</code> class, which is the base class for both the <code>Player</code> class and the <code>Enemy</code> class. The <code>Sprite</code> class uses a velocity and maximum speed to calculate the position in each frame. I changed the <code>ViewportWrapper</code> to expose the <code>Viewport</code> directly. Turns out the <code>Viewport</code> object is just a basic <code>struct</code> without any dependencies, so it should play nice with tests. Because it is a <code>struct</code>, which is a value type, it can’t be directly registered with AutoFac, so I need to keep the <code>IViewport</code> abstraction. I also added an <code>IDrawMyself</code> interface. MonoGame has an <code>IDrawable</code> interface but it comes with some baggage. <code>IDrawMyself</code> is implemented by <code>IAnimation</code> and will eventually be implemented by <code>ITexture2D</code> and <code>IParallaxingBackground</code>.</p>
 
 <p>Implementations of the <code>Sprite</code> class use events to hook into the <code>Update()</code> and <code>Draw()</code> methods. Here is how the <code>Enemy</code> class updates its <code>IsActive</code> state before the position is recalculated (the event is subscribed to in the <code>Enemy</code> constructor):</p>
 
@@ -61,27 +61,27 @@
 }
 </code></pre>
 
-<p>I also moved to a normal Windows (DirectX) project instead of the Windows 8 Store app that I started with. The only reason for this is so I can use a nice mocking library with little friction, as the portable class libraries that you have to use with Windows 8 Store apps don&rsquo;t support <code>Reflection.Emit</code>. I only had to change one line of code to retarget the game, so I&rsquo;m pretty sure moving to different targets further along will be straightforward.</p>
+<p>I also moved to a normal Windows (DirectX) project instead of the Windows 8 Store app that I started with. The only reason for this is so I can use a nice mocking library with little friction, as the portable class libraries that you have to use with Windows 8 Store apps don’t support <code>Reflection.Emit</code>. I only had to change one line of code to retarget the game, so I’m pretty sure moving to different targets further along will be straightforward.</p>
 
 <h3 id="boundary-technique">Boundary technique</h3>
 
 <p>This technique is borrowed from a <a href="http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">Pluralsight course</a> by <a href="https://twitter.com/jsonmez">John Sonmez</a>.</p>
 
-<p>Basically we&rsquo;ll describe four rectangles around the boundary we want to limit the player&rsquo;s ship to. In practice these will be slightly inset from the screen and a bit further in on the right hand side, to keep the player from going too far forward.</p>
+<p>Basically we’ll describe four rectangles around the boundary we want to limit the player’s ship to. In practice these will be slightly inset from the screen and a bit further in on the right hand side, to keep the player from going too far forward.</p>
 
 <p><img src="http://i.imgur.com/sMbJiiv.png" alt="" /></p>
 
-<p>To keep things simple, these rectanges will be &lsquo;owned&rsquo; by the player.</p>
+<p>To keep things simple, these rectanges will be ‘owned’ by the player.</p>
 
 <h3 id="writing-the-first-test">Writing the first test</h3>
 
 <p>To make sure that everything is working as we expect, the first test will just confirm that given a ship somewhere in the middle of the screen, with no inputs (keys all up, game pad zeroed), when updating the player, the position does not change. This seems like an obvious test but it will give us a lot of guidance on how to write the rest of the tests and possibly make some changes to help testing along.</p>
 
-<p>I&rsquo;m using <a href="https://github.com/xunit/xunit">xUnit</a> as the testing framework but the tests should be pretty much the same whether you&rsquo;re using xUnit, NUnit or some other framework. I have a post on <a href="http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html">how to set up xUnit for a Windows 8 Store app</a> if that&rsquo;s what you&rsquo;re targeting. To install xUnit, open the Package Manager Console, select the tests assembly, and enter <code>install-package xunit</code>.</p>
+<p>I’m using <a href="https://github.com/xunit/xunit">xUnit</a> as the testing framework but the tests should be pretty much the same whether you’re using xUnit, NUnit or some other framework. I have a post on <a href="http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html">how to set up xUnit for a Windows 8 Store app</a> if that’s what you’re targeting. To install xUnit, open the Package Manager Console, select the tests assembly, and enter <code>install-package xunit</code>.</p>
 
 <p><img src="http://i.imgur.com/trq8uv3.png" alt="" /></p>
 
-<p>I will need to create some mock objects to pass into the <code>Player</code> constructor. I&rsquo;m going to use <a href="http://nsubstitute.github.io/">NSubstitute</a> (<code>install-package nsubstitute</code>).</p>
+<p>I will need to create some mock objects to pass into the <code>Player</code> constructor. I’m going to use <a href="http://nsubstitute.github.io/">NSubstitute</a> (<code>install-package nsubstitute</code>).</p>
 
 <pre><code>[Fact]
 public void ThePositionStaysTheSame()
@@ -95,13 +95,13 @@ public void ThePositionStaysTheSame()
 }
 </code></pre>
 
-<p>I&rsquo;m creating some substitutes for the player&rsquo;s dependencies and constructing the player object. If I run the tests at this point everything is successful, which is good because it means the player class is happy to construct itself using the substituted dependencies.</p>
+<p>I’m creating some substitutes for the player’s dependencies and constructing the player object. If I run the tests at this point everything is successful, which is good because it means the player class is happy to construct itself using the substituted dependencies.</p>
 
-<p>Now for the &ldquo;act&rdquo; part of the test. I&rsquo;ll set an initial position, then call <code>Update()</code> with no mocked inputs.</p>
+<p>Now for the “act” part of the test. I’ll set an initial position, then call <code>Update()</code> with no mocked inputs.</p>
 
 <p><img src="http://i.imgur.com/I4C0vsi.png" alt="" /></p>
 
-<p>Creating these test input states are going to be a problem in the long term. For now I&rsquo;ll just move it into a seperate method. I&rsquo;ll revisit this in the next test.</p>
+<p>Creating these test input states are going to be a problem in the long term. For now I’ll just move it into a seperate method. I’ll revisit this in the next test.</p>
 
 <pre><code>var initialPosition = new Vector2(4, 5);
 player.Position = initialPosition;
@@ -112,18 +112,18 @@ player.Update(state);
 
 <p><code>GetInputState()</code> returns a new <code>ShooterGameInputState</code> instance with default game pad, keyboard and mouse states and a default <code>GameTime</code>.</p>
 
-<p>I run my test again to make sure everything is still happy, and I&rsquo;m pleased to see it fail. It seems that the <code>Player.Update()</code> method was using some static <code>TouchPanel</code> calls, which resulted in a null reference exception outside of the game. I simply updated the <code>ShooterGameInputState</code> class with the touch panel state, although it looks like mocking out touch panel inputs will be problematic unless they are fully abstracted.</p>
+<p>I run my test again to make sure everything is still happy, and I’m pleased to see it fail. It seems that the <code>Player.Update()</code> method was using some static <code>TouchPanel</code> calls, which resulted in a null reference exception outside of the game. I simply updated the <code>ShooterGameInputState</code> class with the touch panel state, although it looks like mocking out touch panel inputs will be problematic unless they are fully abstracted.</p>
 
-<p>Now I need to assert that the player didn&rsquo;t move. I&rsquo;m using <a href="http://shouldly.github.io/">Shouldly</a> as the assertions library (<code>install-package shouldly</code>).</p>
+<p>Now I need to assert that the player didn’t move. I’m using <a href="http://shouldly.github.io/">Shouldly</a> as the assertions library (<code>install-package shouldly</code>).</p>
 
 <pre><code>player.Position.ShouldBe(initialPosition);
 </code></pre>
 
-<p>My test passes! I make sure the comparison is working by testing the position against <code>Vector2.Zero</code> (because I can&rsquo;t trust the tests quite yet).</p>
+<p>My test passes! I make sure the comparison is working by testing the position against <code>Vector2.Zero</code> (because I can’t trust the tests quite yet).</p>
 
-<h3 id="testing-the-players-movement">Testing the player&rsquo;s movement</h3>
+<h3 id="testing-the-players-movement">Testing the player’s movement</h3>
 
-<p>If the left thumbstick is fully up and left, with the player&rsquo;s default speed of 8, the player should move up 8 and left 8 after one update (note that this isn&rsquo;t actually true, read on for an explanation). This will be the second test.</p>
+<p>If the left thumbstick is fully up and left, with the player’s default speed of 8, the player should move up 8 and left 8 after one update (note that this isn’t actually true, read on for an explanation). This will be the second test.</p>
 
 <pre><code>public class WhenLeftThumbStickFullyLeftAndUp
 {
@@ -134,7 +134,7 @@ player.Update(state);
 }
 </code></pre>
 
-<p>I don&rsquo;t want to simply copy the player initialization code, especially since I know I&rsquo;m going to write a pile of these tests. So I&rsquo;m going to extract out the creation using the <a href="http://martinfowler.com/bliki/ObjectMother.html">Object Mother</a> pattern.</p>
+<p>I don’t want to simply copy the player initialization code, especially since I know I’m going to write a pile of these tests. So I’m going to extract out the creation using the <a href="http://martinfowler.com/bliki/ObjectMother.html">Object Mother</a> pattern.</p>
 
 <pre><code>public static partial class ObjectMother
 {
@@ -164,7 +164,7 @@ player.Update(state);
 }
 </code></pre>
 
-<p>The nested classes are so we can add to the object mothers and use the same naming convention as the object&rsquo;s namespace. If managed properly, the Object Mother pattern can scale out to hundreds of builders with a consistent interface, allowing a high amount of control using the domain language but keeping a very high level of code reuse.</p>
+<p>The nested classes are so we can add to the object mothers and use the same naming convention as the object’s namespace. If managed properly, the Object Mother pattern can scale out to hundreds of builders with a consistent interface, allowing a high amount of control using the domain language but keeping a very high level of code reuse.</p>
 
 <pre><code>var player = ObjectMother.Sprites.PlayerSprite.Players.Default.Build();
 
@@ -172,7 +172,7 @@ var initialPosition = new Vector2(4, 5);
 player.Position = initialPosition;
 </code></pre>
 
-<p>I&rsquo;m also going to move the input state creation into an object mother but I&rsquo;ll add an entry point to set the left thumbstick position. I&rsquo;ll add an object mother for <code>GamePadState</code> since that&rsquo;s what will be passed into the input state. Here is the builder part:</p>
+<p>I’m also going to move the input state creation into an object mother but I’ll add an entry point to set the left thumbstick position. I’ll add an object mother for <code>GamePadState</code> since that’s what will be passed into the input state. Here is the builder part:</p>
 
 <pre><code>public class GamePadStateBuilder
     : BuilderFor&lt;GamePadState&gt;
@@ -192,7 +192,7 @@ player.Position = initialPosition;
 }
 </code></pre>
 
-<p>The <code>BuilderFor</code> class has some &lsquo;magic&rsquo; to let you record the builder configuration using a <a href="https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs">DIY fluent interface</a>. Here&rsquo;s next part of the test, creating the input state with the left gamepad stick fully up and right. Note that thumbstick vector&rsquo;s Y value is <em>positive</em> in the <em>up</em> direction and <em>negative</em> in the <em>down</em> direction, which is the opposite to the screen, which decreases to zero at you approach the top of the screen.</p>
+<p>The <code>BuilderFor</code> class has some ‘magic’ to let you record the builder configuration using a <a href="https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs">DIY fluent interface</a>. Here’s next part of the test, creating the input state with the left gamepad stick fully up and right. Note that thumbstick vector’s Y value is <em>positive</em> in the <em>up</em> direction and <em>negative</em> in the <em>down</em> direction, which is the opposite to the screen, which decreases to zero at you approach the top of the screen.</p>
 
 <pre><code>var gamePadState = ObjectMother.Input.GamePadStates.Default
     .WithLeftThumbstick(new Vector2(1, 1))
@@ -202,18 +202,18 @@ var state = ObjectMother.Core.ShooterGameInputStates.Default
     .Build();
 </code></pre>
 
-<p>With that I add the &lsquo;act&rsquo; and &lsquo;assert&rsquo; parts of the test:</p>
+<p>With that I add the ‘act’ and ‘assert’ parts of the test:</p>
 
 <pre><code>player.Update(state);
 
 player.Position.ShouldBe(initialPosition + new Vector2(player.Speed, -player.Speed));
 </code></pre>
 
-<p>When running this I found something interesting about the game pad thumbsticks. When creating the <code>GamePadThumbSticks</code> object used to represent the thumbsticks, a static value <code>GamePadThumbSticks.GateType</code> is used to normalize the input value. The default gate is <code>Round</code>, which gates the position to a circular shape. Stand back, I&rsquo;m going to do some math.</p>
+<p>When running this I found something interesting about the game pad thumbsticks. When creating the <code>GamePadThumbSticks</code> object used to represent the thumbsticks, a static value <code>GamePadThumbSticks.GateType</code> is used to normalize the input value. The default gate is <code>Round</code>, which gates the position to a circular shape. Stand back, I’m going to do some math.</p>
 
 <p><img src="http://i.imgur.com/azB0IGU.png" alt="" /></p>
 
-<p>So the thumbstick at full extension to the top right is actually <code>(0.7071, 0.7071)</code>, so the player sprite will move <code>8 * 0.7071</code> pixels per update in the X and Y axes. I&rsquo;ll update the test accordingly:</p>
+<p>So the thumbstick at full extension to the top right is actually <code>(0.7071, 0.7071)</code>, so the player sprite will move <code>8 * 0.7071</code> pixels per update in the X and Y axes. I’ll update the test accordingly:</p>
 
 <pre><code>player.Update(state);
 
@@ -225,9 +225,9 @@ var changeInPosition = new Vector2(
 player.Position.ShouldBe(initialPosition + changeInPosition);
 </code></pre>
 
-<p>This test finally passes. This revealed something about the keyboard, mouse and d-pad inputs which I hadn&rsquo;t noticed. When those inputs are triggering diagonal movement my player is moving with a velocity of <code>(1, 1)</code>, which is significantly faster than the thumbpad&rsquo;s velocity of <code>(0.7071, 0.7071)</code>. This will eventually have to be corrected.</p>
+<p>This test finally passes. This revealed something about the keyboard, mouse and d-pad inputs which I hadn’t noticed. When those inputs are triggering diagonal movement my player is moving with a velocity of <code>(1, 1)</code>, which is significantly faster than the thumbpad’s velocity of <code>(0.7071, 0.7071)</code>. This will eventually have to be corrected.</p>
 
-<h3 id="configuring-the-players-boundaries">Configuring the player&rsquo;s boundaries</h3>
+<h3 id="configuring-the-players-boundaries">Configuring the player’s boundaries</h3>
 
 <p>I want to be able to configure parts of the player. To be able to unit test the player I need to be able to set the configuration outside of the player class. I could do this by passing things into the constructor:</p>
 
@@ -246,7 +246,7 @@ player.Position.ShouldBe(initialPosition + changeInPosition);
 new Player(contentManager, viewport, ..., playerConfiguration);
 </code></pre>
 
-<p>Because I&rsquo;m creating the player using Autofac I can make this more generic and let the runtime configuration be baked in. The sprite&rsquo;s width and height should also be in the configuration, because determining width and height using the animation is going to be messy for unit tests.</p>
+<p>Because I’m creating the player using Autofac I can make this more generic and let the runtime configuration be baked in. The sprite’s width and height should also be in the configuration, because determining width and height using the animation is going to be messy for unit tests.</p>
 
 <pre><code>public interface IPlayerConfiguration
 {
@@ -271,7 +271,7 @@ public class PlayerConfiguration : IPlayerConfiguration, IRegistering
 
 <p>By the way, the boundaries are going to be like padding. The player class will calculate the actual boundaries using the viewport later on.</p>
 
-<p>I need to add the new player configuration to the player&rsquo;s object mother&rsquo;s <code>PlayerBuilder</code> class:</p>
+<p>I need to add the new player configuration to the player’s object mother’s <code>PlayerBuilder</code> class:</p>
 
 <pre><code>public class PlayerBuilder
     : BuilderFor&lt;Player&gt;
@@ -362,7 +362,7 @@ public class PlayerConfiguration : IPlayerConfiguration, IRegistering
 
 <h3 id="testing-the-left-boundary">Testing the left boundary</h3>
 
-<p>I&rsquo;m guessing that the easiest boundaries to test will be the left and top, since I don&rsquo;t have to worry about the size of the viewport yet. So my first test will be, with a left boundary of 10, with the player sitting on that boundary, with the the thumbstick to the left, the player&rsquo;s X position doesn&rsquo;t change.</p>
+<p>I’m guessing that the easiest boundaries to test will be the left and top, since I don’t have to worry about the size of the viewport yet. So my first test will be, with a left boundary of 10, with the player sitting on that boundary, with the the thumbstick to the left, the player’s X position doesn’t change.</p>
 
 <pre><code>public class WhenPlayerIsOnLeftBoundaryWithLeftThumbStickFullyLeft
 {
@@ -392,7 +392,7 @@ public class PlayerConfiguration : IPlayerConfiguration, IRegistering
 }
 </code></pre>
 
-<p>Initially this fails because the boundary isn&rsquo;t implemented:</p>
+<p>Initially this fails because the boundary isn’t implemented:</p>
 
 <pre><code>Shouldly.ChuckedAWobblyplayer.Position.X
         should be
@@ -456,7 +456,7 @@ if (CheckNewPosition(newPosition))
 }
 </code></pre>
 
-<p>When I run the game, the player now can&rsquo;t be moved at all. I need to change the <code>CheckNewPosition</code> method to use the boundaries:</p>
+<p>When I run the game, the player now can’t be moved at all. I need to change the <code>CheckNewPosition</code> method to use the boundaries:</p>
 
 <pre><code>protected override bool CheckNewPosition(Vector2 newPosition)
 {
@@ -487,7 +487,7 @@ if (CheckNewPosition(newPosition))
     ScaledHeight);
 </code></pre>
 
-<p>The destination rectangle (the rectangle the sprite is being drawn at) is shifted by half the height and width, so the origin of the sprite is the center of the animation. This actually makes sense, so I need to change my logic to suit. The player&rsquo;s <code>GetBounds()</code> method is changed to this:</p>
+<p>The destination rectangle (the rectangle the sprite is being drawn at) is shifted by half the height and width, so the origin of the sprite is the center of the animation. This actually makes sense, so I need to change my logic to suit. The player’s <code>GetBounds()</code> method is changed to this:</p>
 
 <pre><code>public override Rectangle GetBounds()
 {
@@ -574,7 +574,7 @@ protected Rectangle GetBoundsAt(Vector2 position)
 
 <h3 id="coming-up-next">Coming up next</h3>
 
-<p>In my next post I&rsquo;m going to refactor my tests to use a BDD format, which will simplify the tests and reduce some duplication. That will pave the way for implementing killing the player when it gets hit by an enemy.</p>
+<p>In my next post I’m going to refactor my tests to use a BDD format, which will simplify the tests and reduce some duplication. That will pave the way for implementing killing the player when it gets hit by an enemy.</p>
 
 <h3 id="resources">Resources</h3>
 
@@ -582,8 +582,8 @@ protected Rectangle GetBoundsAt(Vector2 position)
   <li><a href="http://bendetat.com/up-and-running-with-monogame.html">Up and Running with MonoGame</a></li>
   <li><a href="http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html">xUnit tests in a Windows 8.1 Store App</a></li>
   <li><a href="http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html">Adding dependency injection to a MonoGame application</a></li>
-  <li><a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker&rsquo;s original Shooter Game tutorial</a></li>
-  <li><a href="http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">John Sonmez&rsquo; Introduction to 2D Programming with XNA (Pluralsight video)</a> ($)</li>
+  <li><a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s original Shooter Game tutorial</a></li>
+  <li><a href="http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">John Sonmez’ Introduction to 2D Programming with XNA (Pluralsight video)</a> ($)</li>
 </ul>
 
 

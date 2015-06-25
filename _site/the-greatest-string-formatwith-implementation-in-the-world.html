@@ -30,7 +30,7 @@
 
 
 
-<p>This is in fact the Greatest <code>string.FormatWith()</code> Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, ~~probably thanks to my brother-in-code <a href="http://robdmoore.id.au/">Rob Moore</a>~~ <strong>correction</strong> turns out credit is due to <a href="http://hammerproject.com/">Matt Kocoj</a>, and I brought it back along the breadth of our mighty continent. A &lsquo;Journey to the West&rsquo;, if you will. Less awesome implementations of <code>FormatWith()</code> are just simple inversions of <code>string.Format()</code>:</p>
+<p>This is in fact the Greatest <code>string.FormatWith()</code> Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, ~~probably thanks to my brother-in-code <a href="http://robdmoore.id.au/">Rob Moore</a>~~ <strong>correction</strong> turns out credit is due to <a href="http://hammerproject.com/">Matt Kocoj</a>, and I brought it back along the breadth of our mighty continent. A ‘Journey to the West’, if you will. Less awesome implementations of <code>FormatWith()</code> are just simple inversions of <code>string.Format()</code>:</p>
 
 <pre><code>public static string FormatWith(string s, params object[] args)
 {
@@ -46,7 +46,7 @@
 
 <p><img src="http://media.giphy.com/media/B9bZxUmVr3ZNS/giphy.gif" alt="" /></p>
 
-<p>Nice, but let&rsquo;s be honest, pitiful. Feel the power of this implementation.</p>
+<p>Nice, but let’s be honest, pitiful. Feel the power of this implementation.</p>
 
 <pre><code>public static class StringExtensions
 {
@@ -111,12 +111,12 @@ public static class ObjectExtensions
 
 <p><img src="http://media.giphy.com/media/6KlLzO38CkLjG/giphy.gif" alt="" /></p>
 
-<p><strong>WARNING</strong>: Now this is probably not the most performant code. If you&rsquo;re going to run this in a tight loop you may want to go with ye olde <code>string.Format()</code>. The other 99.99% of the time, go forth and be awesome.</p>
+<p><strong>WARNING</strong>: Now this is probably not the most performant code. If you’re going to run this in a tight loop you may want to go with ye olde <code>string.Format()</code>. The other 99.99% of the time, go forth and be awesome.</p>
 
 <h3 id="updates">Updates</h3>
 
 <ul>
-  <li>2014-04-23: <code>ToDictionary()</code> is now in it&rsquo;s own extension class, the named template conversion is simpler, and the numbered template conversion just uses <code>string.Format</code>.</li>
+  <li>2014-04-23: <code>ToDictionary()</code> is now in it’s own extension class, the named template conversion is simpler, and the numbered template conversion just uses <code>string.Format</code>.</li>
 </ul>
 
 

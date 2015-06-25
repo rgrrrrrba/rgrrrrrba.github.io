@@ -30,10 +30,10 @@
 
 
 
-<p><strong>DISCLAIMER:</strong> I&rsquo;m learning in the open here. This is the first time I&rsquo;ve used Gulp and I&rsquo;m sure I&rsquo;m missing a heap of really important stuff. Enjoy!</p>
+<p><strong>DISCLAIMER:</strong> I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!</p>
 
 <ul>
-  <li>Part 1: Hello World! It&rsquo;s Gulp!</li>
+  <li>Part 1: Hello World! It’s Gulp!</li>
   <li>Part 2: <a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">A useful build pipeline using Gulp and Bower</a></li>
   <li>Part 3: <a href="http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html">Cleaning and simplifying the Gulp pipeline</a></li>
 </ul>
@@ -42,7 +42,7 @@
 
 <p>This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as <a href="http://bower.io">Bower</a> can be used to manage these complex client-side sites.</p>
 
-<p>The static site that I&rsquo;ll hopefully end up generating in the next post will be used with a <a href="http://nancyfx.org">Nancy</a> website. The end result of this post is a Gulp build script that simply copies an <code>index.html</code> file from <code>/src/client</code> to <code>/src/client-dist</code>.</p>
+<p>The static site that I’ll hopefully end up generating in the next post will be used with a <a href="http://nancyfx.org">Nancy</a> website. The end result of this post is a Gulp build script that simply copies an <code>index.html</code> file from <code>/src/client</code> to <code>/src/client-dist</code>.</p>
 
 <h2 id="prerequisites">Prerequisites</h2>
 
@@ -58,7 +58,7 @@
 <pre><code>npm install --save-dev gulp
 </code></pre>
 
-<p>The <code>--save-dev</code> flag adds the dependencies to <code>package.json</code>. This means that when you open the repository in a new environment you can just do <code>npm install</code> to automatically install the project&rsquo;s NPM dependencies. </p>
+<p>The <code>--save-dev</code> flag adds the dependencies to <code>package.json</code>. This means that when you open the repository in a new environment you can just do <code>npm install</code> to automatically install the project’s NPM dependencies. </p>
 
 <p>Note that Gulp itself should also be installed globally so you can use <code>gulp</code> on the command line:</p>
 
@@ -72,7 +72,7 @@
 <pre><code>var gulp = require('gulp');
 </code></pre>
 
-<p><code>gulp.task()</code> defines a task that&rsquo;s available from the command line.</p>
+<p><code>gulp.task()</code> defines a task that’s available from the command line.</p>
 
 <pre><code>gulp.task('hello', function() {
 	console.log('Hello world!')
@@ -129,7 +129,7 @@ Hello world!
 
 <h2 id="lots-of-scripting-just-to-copy-a-file">Lots of scripting just to copy a file!</h2>
 
-<p>I&rsquo;m just going to start out with a simple build pipeline that basically copies <code>index.html</code> to the server.</p>
+<p>I’m just going to start out with a simple build pipeline that basically copies <code>index.html</code> to the server.</p>
 
 <p>Install some more NPM packages. </p>
 
@@ -178,7 +178,7 @@ Hello world!
 </code></pre>
 
 <blockquote>
-  <p>A node.js package for Steven Levithan&rsquo;s excellent dateFormat() function.</p>
+  <p>A node.js package for Steven Levithan’s excellent dateFormat() function.</p>
 </blockquote>
 
 <p><a href="https://www.npmjs.com/package/del"><code>del</code></a></p>
@@ -190,7 +190,7 @@ Hello world!
   <p>Delete files/folders using globs</p>
 </blockquote>
 
-<p>Whew, that&rsquo;s a bunch of dependencies. At the top of <code>gulpfile.js</code>, pull them in using <code>require()</code> and get some utility dependencies into scope:</p>
+<p>Whew, that’s a bunch of dependencies. At the top of <code>gulpfile.js</code>, pull them in using <code>require()</code> and get some utility dependencies into scope:</p>
 
 <pre><code>var gulp = require('gulp');
 var notify = require('gulp-notify');
@@ -219,7 +219,7 @@ var colors = gutil.colors;
 
 <p>This could be put into another file like <code>gulp-config.json</code> and pulled in with a <code>require()</code> but for now this will do.</p>
 
-<p>I&rsquo;ll split out the actual copy process into a gulp task called <code>rev-and-inject</code>. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.</p>
+<p>I’ll split out the actual copy process into a gulp task called <code>rev-and-inject</code>. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.</p>
 
 <pre><code>gulp.task('rev-and-inject', function() {
 	var indexPath = path.join(config.paths.source, 'index.html');
@@ -244,7 +244,7 @@ var colors = gutil.colors;
 });
 </code></pre>
 
-<p>In <code>src/client</code> I&rsquo;ve added an <code>index.html</code> just for testing. Run <code>gulp build</code>:</p>
+<p>In <code>src/client</code> I’ve added an <code>index.html</code> just for testing. Run <code>gulp build</code>:</p>
 
 <pre><code>[15:05:05] Starting 'rev-and-inject'...
 [15:05:05] Finished 'rev-and-inject' after 24 ms
@@ -262,7 +262,7 @@ var colors = gutil.colors;
 });
 </code></pre>
 
-<p><a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">Next I&rsquo;ll add some value to the build pipeline</a> by minifying and bundling JS and CSS, and injecting the results into <code>index.html</code>. The result will be a static website set up for some AngularJS work.</p>
+<p><a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">Next I’ll add some value to the build pipeline</a> by minifying and bundling JS and CSS, and injecting the results into <code>index.html</code>. The result will be a static website set up for some AngularJS work.</p>
 
 <h2 id="further-reading-and-resources">Further reading and resources</h2>
 

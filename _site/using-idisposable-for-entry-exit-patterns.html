@@ -30,7 +30,7 @@
 
 
 
-<p>I don&rsquo;t know if &ldquo;entry/exit&rdquo; is the right name for this pattern, but it gets used a lot in client-side code. It relates to the use of guard sections and cross-cutting concerns. For example, using Caliburn.Micro you might have a WPF viewmodel (implementing <code>PropertyChangedBase</code>) that sets  <code>IsNotifying</code> flag to false, executes some code that would otherwise cause notifications, then sets the <code>IsNotifying</code> flag to true.</p>
+<p>I don’t know if “entry/exit” is the right name for this pattern, but it gets used a lot in client-side code. It relates to the use of guard sections and cross-cutting concerns. For example, using Caliburn.Micro you might have a WPF viewmodel (implementing <code>PropertyChangedBase</code>) that sets  <code>IsNotifying</code> flag to false, executes some code that would otherwise cause notifications, then sets the <code>IsNotifying</code> flag to true.</p>
 
 <pre><code>IsNotifying = false;
 
@@ -39,9 +39,9 @@ Name = "foo";	// won't notify
 IsNotifying = true;
 </code></pre>
 
-<p>The problem with this is having to explicitly set the flags before and after the operation. What if some statements get moved around, or the assignations get dropped? This can be a tricky issue to resolve as the usage of the class isn&rsquo;t very clear to consumers.</p>
+<p>The problem with this is having to explicitly set the flags before and after the operation. What if some statements get moved around, or the assignations get dropped? This can be a tricky issue to resolve as the usage of the class isn’t very clear to consumers.</p>
 
-<p>A pattern I&rsquo;ve seen is to wrap the code in an <code>Action</code> invoker:</p>
+<p>A pattern I’ve seen is to wrap the code in an <code>Action</code> invoker:</p>
 
 <pre><code>public void InvokeWithoutNotification(Action action) {
 	IsNotifying = false;
@@ -97,7 +97,7 @@ using (viewModel.WithoutNotification()) {
 }
 </code></pre>
 
-<p>There is more ceremony involved with the setup and there isn&rsquo;t a heap of immediate benefits. One is the seperation of this guard logic into its own class, which may or may not be appropriate but is at least an interesting possibility. You could also combine guards quite easily:</p>
+<p>There is more ceremony involved with the setup and there isn’t a heap of immediate benefits. One is the seperation of this guard logic into its own class, which may or may not be appropriate but is at least an interesting possibility. You could also combine guards quite easily:</p>
 
 <pre><code>using (viewModel.WithoutNotification())
 using (viewModel.WithoutValidation())
@@ -129,7 +129,7 @@ public static class SpecialViewModelExtensions {
 }
 </code></pre>
 
-<p>This is getting very similar to what you can achieve in <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented programming</a> using entry and exit pointcuts, however in AOP the pointcuts can only extend down to method granularity, so the payload would have to be its own method. I think it&rsquo;s a pretty neat compromise.</p>
+<p>This is getting very similar to what you can achieve in <a href="http://en.wikipedia.org/wiki/Aspect-oriented_programming">Aspect-oriented programming</a> using entry and exit pointcuts, however in AOP the pointcuts can only extend down to method granularity, so the payload would have to be its own method. I think it’s a pretty neat compromise.</p>
 
 
 

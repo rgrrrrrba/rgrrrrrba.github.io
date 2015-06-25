@@ -30,27 +30,27 @@
 
 
 
-<p>Finally I have got around to checking out AppHarbor to quickly spin up a test project for something I&rsquo;m working on. I&rsquo;ve only got a couple of sites on <a href="https://www.heroku.com/">Heroku</a> set up some time ago for comparison with cloud hosting so this isn&rsquo;t a pros/cons post.</p>
+<p>Finally I have got around to checking out AppHarbor to quickly spin up a test project for something I’m working on. I’ve only got a couple of sites on <a href="https://www.heroku.com/">Heroku</a> set up some time ago for comparison with cloud hosting so this isn’t a pros/cons post.</p>
 
 <h3 id="initial-setup">Initial setup</h3>
-<p>Setting up is really easy. AppHarbor&rsquo;s entry level plan is free for unlimited applications hosted as subdomains of <code>apphb.com</code>. I initially wanted to try out Azure but they only have a free trail for a month.</p>
+<p>Setting up is really easy. AppHarbor’s entry level plan is free for unlimited applications hosted as subdomains of <code>apphb.com</code>. I initially wanted to try out Azure but they only have a free trail for a month.</p>
 
 <p>First you set up an account, then you can create applications within that account. The management console is pretty easy to use but you do need to do some exploration.</p>
 
 <h3 id="dvcs-integration">DVCS integration</h3>
-<p>I&rsquo;ve only tried Github integration but they also offer Bitbucket and CodePlex integration. When creating a new application the integration links are right there so you can set everything up via AppHarbor, but I picked the wrong Github repo, the links disappeared, and I ended up setting it up manually. I did that through Github:</p>
+<p>I’ve only tried Github integration but they also offer Bitbucket and CodePlex integration. When creating a new application the integration links are right there so you can set everything up via AppHarbor, but I picked the wrong Github repo, the links disappeared, and I ended up setting it up manually. I did that through Github:</p>
 
 <ul>
   <li>open the repo settings</li>
   <li>select Service Hooks</li>
-  <li>select &lsquo;AppHarbor&rsquo; from the list of available service hooks</li>
-  <li>&lsquo;Application Slug&rsquo; is the name of the apphb application</li>
-  <li>&lsquo;Token&rsquo; you get from AppHarbor by selecting &lsquo;BUILD URL&rsquo; from the application menu, which copies the build URL to the clipboard. The build URL looks like <code>https://appharbor.com:443/applications/APPLICATION_NAME/builds?authorization=TOKEN</code>.</li>
+  <li>select ‘AppHarbor’ from the list of available service hooks</li>
+  <li>‘Application Slug’ is the name of the apphb application</li>
+  <li>‘Token’ you get from AppHarbor by selecting ‘BUILD URL’ from the application menu, which copies the build URL to the clipboard. The build URL looks like <code>https://appharbor.com:443/applications/APPLICATION_NAME/builds?authorization=TOKEN</code>.</li>
 </ul>
 
 <p>When this is set up you just need to push to Github and AppHarbor will magically build a new application.</p>
 
-<p>After I had set all this up I found the links to do the integration via AppHarbour again. They are in the application settings under &lsquo;Deploy from external repositories&rsquo; near the bottom.</p>
+<p>After I had set all this up I found the links to do the integration via AppHarbour again. They are in the application settings under ‘Deploy from external repositories’ near the bottom.</p>
 
 <h3 id="how-it-works---basics">How it works - basics</h3>
 <p>So the repo that is linked to the repository has to either have one VS solution or if it has multiple solutions AppHarbor will only look for a solution named <code>AppHarbor.sln</code>. That solution should have a web project in it, which is what is built and deployed.</p>
@@ -65,9 +65,9 @@
 </ul>
 
 <h3 id="databases">Databases</h3>
-<p>Just to see how everything worked, the first application I deployed was the &lsquo;Single page application&rsquo; starter project, which includes a whole swag of stuff and runs off a localdb instance (SQL Server Compact). Initially this didn&rsquo;t work. I got an error page in the application. The application itself was working but it couldn&rsquo;t create the SQL Server Compact database. Turns out the best way to deploy a basic database is by enabling the SQL Server addon. This is free up to 20 MB. It is called &lsquo;Sequelizer&rsquo; in a lot of AppHarbor&rsquo;s documentation.</p>
+<p>Just to see how everything worked, the first application I deployed was the ‘Single page application’ starter project, which includes a whole swag of stuff and runs off a localdb instance (SQL Server Compact). Initially this didn’t work. I got an error page in the application. The application itself was working but it couldn’t create the SQL Server Compact database. Turns out the best way to deploy a basic database is by enabling the SQL Server addon. This is free up to 20 MB. It is called ‘Sequelizer’ in a lot of AppHarbor’s documentation.</p>
 
-<p>After installing it the configuration needs to be updated. The <code>Connectionstring alias</code> just needs to be set to whatever is in the application&rsquo;s <code>web.config</code> file - <code>DefaultConnection</code> by default. AppHarbor will inject the connection string into the app&rsquo;s config, or the connection string shown could just be used directly (although this would be publicly available in a public Github repo - so don&rsquo;t do this).</p>
+<p>After installing it the configuration needs to be updated. The <code>Connectionstring alias</code> just needs to be set to whatever is in the application’s <code>web.config</code> file - <code>DefaultConnection</code> by default. AppHarbor will inject the connection string into the app’s config, or the connection string shown could just be used directly (although this would be publicly available in a public Github repo - so don’t do this).</p>
 
 <h4 id="more-information-1">More information</h4>
 <ul>
@@ -75,12 +75,12 @@
 </ul>
 
 <h3 id="builds">Builds</h3>
-<p>When you push a new version you have to refresh the application page to see the updated build status. A big gotcha is that the build status doesn&rsquo;t update when the build completes. A bigger gotcha is that the build has to be deployed manually by pressing a Deploy button. I guess this is a good thing as long as you know about it and the build doesn&rsquo;t take an hour. Older builds cn also be redeployed. Again, when deploying the status page has to be manually refreshed to see the status.</p>
+<p>When you push a new version you have to refresh the application page to see the updated build status. A big gotcha is that the build status doesn’t update when the build completes. A bigger gotcha is that the build has to be deployed manually by pressing a Deploy button. I guess this is a good thing as long as you know about it and the build doesn’t take an hour. Older builds cn also be redeployed. Again, when deploying the status page has to be manually refreshed to see the status.</p>
 
 <p><strong>UPDATE</strong> Actually it looks like it does automatically deploy most of the time. Something to keep an eye on.</p>
 
 <h3 id="glimpse">Glimpse</h3>
-<p>For a lark I installed <a href="http://getglimpse.com/">Glimpse</a>, an awesome server side diagnostics tool. This is installed purely through NuGet and hooks in to the ASP.NET pipeline. Glimpse has to be configured to allow access to the Glimpse console from a remote session (ignore LocalPolicy) but once that is done everything works like a dream, including SQL queries via Glimpse&rsquo;s EF 4 plugin.</p>
+<p>For a lark I installed <a href="http://getglimpse.com/">Glimpse</a>, an awesome server side diagnostics tool. This is installed purely through NuGet and hooks in to the ASP.NET pipeline. Glimpse has to be configured to allow access to the Glimpse console from a remote session (ignore LocalPolicy) but once that is done everything works like a dream, including SQL queries via Glimpse’s EF 4 plugin.</p>
 
 <h4 id="more-information-2">More information</h4>
 <ul>

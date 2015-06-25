@@ -30,9 +30,9 @@
 
 
 
-<p>This was written while figuring out the best way to compose a view with a nested view model. <a href="https://github.com/bendetat/test-nested-view-model">Here is a Git repo</a>. I haven&rsquo;t spent much time in ASP.NET MVC so be fair.</p>
+<p>This was written while figuring out the best way to compose a view with a nested view model. <a href="https://github.com/bendetat/test-nested-view-model">Here is a Git repo</a>. I haven’t spent much time in ASP.NET MVC so be fair.</p>
 
-<p>I&rsquo;m trying to illustrate composing a view. I suspect a better method would be <code>Html.EditorFor</code> but that approach doesn&rsquo;t seem as rich as using partials (how would I use different editors for the same view model in a different context?).</p>
+<p>I’m trying to illustrate composing a view. I suspect a better method would be <code>Html.EditorFor</code> but that approach doesn’t seem as rich as using partials (how would I use different editors for the same view model in a different context?).</p>
 
 <p>TL;DR: it turns out that <code>Html.EditorFor</code> is <em>exactly</em> the correct solution, and as you can specify the template it is as flexible as you would expect.</p>
 
@@ -75,11 +75,11 @@
 &lt;/p&gt;
 </code></pre>
 
-<p>Note that <code>NestedViewModelField</code>&rsquo;s name won&rsquo;t bind back to the view model. For model binding to work the name should be <code>Nested.NestedViewModelField</code>.</p>
+<p>Note that <code>NestedViewModelField</code>’s name won’t bind back to the view model. For model binding to work the name should be <code>Nested.NestedViewModelField</code>.</p>
 
 <h3 id="using-htmleditorfor">Using <code>Html.EditorFor</code></h3>
 
-<p>If I make a view with the same name as the nested view model&rsquo;s type, in <code>Views/Home/EditorTemplates</code>, then <code>Html.EditorFor</code> will find it and use it. <a href="http://www.hanselman.com/blog/ASPNETMVCDisplayTemplateAndEditorTemplatesForEntityFrameworkDbGeographySpatialTypes.aspx">More on this from @shanselman</a>.</p>
+<p>If I make a view with the same name as the nested view model’s type, in <code>Views/Home/EditorTemplates</code>, then <code>Html.EditorFor</code> will find it and use it. <a href="http://www.hanselman.com/blog/ASPNETMVCDisplayTemplateAndEditorTemplatesForEntityFrameworkDbGeographySpatialTypes.aspx">More on this from @shanselman</a>.</p>
 
 <p><code>Views/Home/EditorTemplates/MyNestedViewModel.cshtml</code> is the same as <code>_Nested.cshtml</code> above. The index view swaps out the <code>Html.Partial</code> for <code>Html.EditorFor</code>:</p>
 
@@ -93,7 +93,7 @@
 @Html.EditorFor(x =&gt; x.Nested)
 </code></pre>
 
-<p>The result is cooler than I expected. The nested view model&rsquo;s field names are correct :win: :</p>
+<p>The result is cooler than I expected. The nested view model’s field names are correct :win: :</p>
 
 <pre><code>&lt;p&gt;
     &lt;label for="HomeViewModelField"&gt;HomeViewModelField&lt;/label&gt;
@@ -108,9 +108,9 @@
 
 <h3 id="composing-views-and-dry">Composing views and DRY</h3>
 
-<p>The reason I wanted to explore nested view models was to be able to reuse parts of a form across different views and controllers, so that I am composing the views in a manner that is DRY. Partials are ok because they can be shared across the application, but they don&rsquo;t respect the view model. <code>EditorTemplates</code> (and <code>DisplayTemplates</code>) work better than I expected and look to be the correct solution. So how can I share an editor template across different controllers?</p>
+<p>The reason I wanted to explore nested view models was to be able to reuse parts of a form across different views and controllers, so that I am composing the views in a manner that is DRY. Partials are ok because they can be shared across the application, but they don’t respect the view model. <code>EditorTemplates</code> (and <code>DisplayTemplates</code>) work better than I expected and look to be the correct solution. So how can I share an editor template across different controllers?</p>
 
-<p><code>Html.EditorFor</code> takes a <code>templateName</code> argument. I didn&rsquo;t expect that. As a special bonus, the engine searches for editor templates in <code>Views/Shared</code> by default (<a href="http://stackoverflow.com/a/7841835/149259">SO</a>). So I dropped two editors for my nested view model into <code>/Shared/EditorTemplates/MyNestedViewModel/</code> and specified which templates to use:</p>
+<p><code>Html.EditorFor</code> takes a <code>templateName</code> argument. I didn’t expect that. As a special bonus, the engine searches for editor templates in <code>Views/Shared</code> by default (<a href="http://stackoverflow.com/a/7841835/149259">SO</a>). So I dropped two editors for my nested view model into <code>/Shared/EditorTemplates/MyNestedViewModel/</code> and specified which templates to use:</p>
 
 <pre><code>@Html.EditorFor(x =&gt; x.Nested, "MyNestedViewModel/EditorOne")
 @Html.EditorFor(x =&gt; x.Nested, "MyNestedViewModel/EditorTwo")

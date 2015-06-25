@@ -30,10 +30,10 @@
 
 
 
-<p><strong>DISCLAIMER:</strong> I&rsquo;m learning in the open here. This is the first time I&rsquo;ve used Gulp and Bower and I&rsquo;m sure I&rsquo;m missing a heap of really important stuff. Enjoy!</p>
+<p><strong>DISCLAIMER:</strong> I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!</p>
 
 <ul>
-  <li>Part 1: <a href="http://bendetat.com/hello-world-its-gulp.html">Hello World! It&rsquo;s Gulp!</a></li>
+  <li>Part 1: <a href="http://bendetat.com/hello-world-its-gulp.html">Hello World! It’s Gulp!</a></li>
   <li>Part 2: A useful build pipeline using Gulp and Bower</li>
   <li>Part 3: <a href="http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html">Cleaning and simplifying the Gulp pipeline</a></li>
 </ul>
@@ -47,11 +47,11 @@
 
 <h2 id="have-you-any-bootstrap">Have you any Bootstrap?</h2>
 
-<p>I want to use Bootstrap, but&hellip;</p>
+<p>I want to use Bootstrap, but…</p>
 
 <p><img src="http://cdn.meme.am/instances/500x/58510881.jpg" alt="" /></p>
 
-<p>Bower is a JavaScript package manager. So is NPM, in fact we&rsquo;ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM <a href="http://browserify.org">can be used for client-side package management</a> but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.</p>
+<p>Bower is a JavaScript package manager. So is NPM, in fact we’ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM <a href="http://browserify.org">can be used for client-side package management</a> but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.</p>
 
 <p>Install Bower to the project (and globally) using NPM:</p>
 
@@ -63,15 +63,15 @@
 <pre><code>bower install bootstrap --save
 </code></pre>
 
-<p>This installs all of Bootstrap (including the separate jQuery dependency) into <code>/bower_components</code>. It also adds a reference to the dependency in <code>bower.json</code> - if it doesn&rsquo;t you may have forgotten the <code>--save</code> argument.</p>
+<p>This installs all of Bootstrap (including the separate jQuery dependency) into <code>/bower_components</code>. It also adds a reference to the dependency in <code>bower.json</code> - if it doesn’t you may have forgotten the <code>--save</code> argument.</p>
 
-<p>I then copied the <a href="http://getbootstrap.com/getting-started/#template">minimal Bootstrap HTML</a> into <code>src/client/index.html</code>. This won&rsquo;t work because we&rsquo;re not copying or linking in the CSS correctly.</p>
+<p>I then copied the <a href="http://getbootstrap.com/getting-started/#template">minimal Bootstrap HTML</a> into <code>src/client/index.html</code>. This won’t work because we’re not copying or linking in the CSS correctly.</p>
 
 <h2 id="vendor-css">Vendor CSS</h2>
 
 <p>There are two types of CSS - vendor and site-specific - and each will be handled slightly differently. Vendor CSS is anything that comes from a Bower package, and site-specific CSS will be anything in <code>/src/client/css</code>.</p>
 
-<p>I&rsquo;ll start by adding a dependency task to the <code>rev-and-inject</code> task:</p>
+<p>I’ll start by adding a dependency task to the <code>rev-and-inject</code> task:</p>
 
 <pre><code>gulp.task('rev-and-inject', ['vendorcss'], function() {
 	// existing rev-and-inject task
@@ -126,7 +126,7 @@ return gulp
 });
 </code></pre>
 
-<p>This takes all of the vendor CSS files specified in <code>gulp-config.json</code> and bundles them into <code>/src/site-dist/vendor.min.css</code>. Very exciting but it hasn&rsquo;t minified the CSS yet. Time for some more plugins:</p>
+<p>This takes all of the vendor CSS files specified in <code>gulp-config.json</code> and bundles them into <code>/src/site-dist/vendor.min.css</code>. Very exciting but it hasn’t minified the CSS yet. Time for some more plugins:</p>
 
 <p><a href="https://www.npmjs.com/package/gulp-bytediff"><code>gulp-bytediff</code></a></p>
 
@@ -243,7 +243,7 @@ var minifyCss = require('gulp-minify-css');
 		// ...
 </code></pre>
 
-<p>This is needed because when the site will get hosted by Nancy, it will be available at <code>{yoursite}/app</code>. So the injected path will be <code>/app/content/vendor.min.css</code>. In a minute I&rsquo;ll set up a static server using Node.js for testing the output.</p>
+<p>This is needed because when the site will get hosted by Nancy, it will be available at <code>{yoursite}/app</code>. So the injected path will be <code>/app/content/vendor.min.css</code>. In a minute I’ll set up a static server using Node.js for testing the output.</p>
 
 <p>The inject step now needs to be added to the <code>rev-and-inject</code> task pipeline:</p>
 
@@ -281,7 +281,7 @@ var minifyCss = require('gulp-minify-css');
 
 <h3 id="use-nodejs-to-serve-the-static-website">Use Node.js to serve the static website</h3>
 
-<p>At the moment the output is going to <code>/src/client-dist</code>. When the site is eventually hosted on Nancy it will be served from <code>/app</code>, so the injected paths currently all start with <code>/app</code>, which means that the build output can&rsquo;t be viewed properly yet. I&rsquo;m going to set up a quick, static server to publish the site. More dependencies!</p>
+<p>At the moment the output is going to <code>/src/client-dist</code>. When the site is eventually hosted on Nancy it will be served from <code>/app</code>, so the injected paths currently all start with <code>/app</code>, which means that the build output can’t be viewed properly yet. I’m going to set up a quick, static server to publish the site. More dependencies!</p>
 
 <p><a href="https://www.npmjs.com/package/connect"><code>connect</code></a></p>
 
@@ -347,7 +347,7 @@ var serveStatic = require('serve-static');
 });
 </code></pre>
 
-<p>This is getting a bit familiar. Instead of using a set of explicit tasks from <code>gulp-config.json</code> I&rsquo;ve just assumed that anything named <code>*.css</code> anywhere in the client should be injected into the static site distribution. The concatenated, minified output gets written to <code>/src/client-dist/content/site.min.css</code>. Now in the <code>rev-and-inject</code> task the <code>css</code> task needs to be added to the prerequisites:</p>
+<p>This is getting a bit familiar. Instead of using a set of explicit tasks from <code>gulp-config.json</code> I’ve just assumed that anything named <code>*.css</code> anywhere in the client should be injected into the static site distribution. The concatenated, minified output gets written to <code>/src/client-dist/content/site.min.css</code>. Now in the <code>rev-and-inject</code> task the <code>css</code> task needs to be added to the prerequisites:</p>
 
 <pre><code>gulp.task('rev-and-inject', ['vendorcss', 'css'], function(){
 	// ...
@@ -438,7 +438,7 @@ var serveStatic = require('serve-static');
 
 <h2 id="site-specific-javascript">Site-specific JavaScript</h2>
 
-<p>To support AngularJS, the site-specific JS task will need a couple of extra steps, but I&rsquo;ll leave that for the next post. Meanwhile, it will be similar to the site-specific CSS task, bundling and minifying all <code>*.js</code> files in <code>/src/client</code>.</p>
+<p>To support AngularJS, the site-specific JS task will need a couple of extra steps, but I’ll leave that for the next post. Meanwhile, it will be similar to the site-specific CSS task, bundling and minifying all <code>*.js</code> files in <code>/src/client</code>.</p>
 
 <pre><code>gulp.task('js', function() {
 	return gulp
@@ -473,7 +473,7 @@ var serveStatic = require('serve-static');
 
 <h2 id="fonts-and-images">Fonts and images</h2>
 
-<p>Site assets that aren&rsquo;t CSS or JS need to be processed as well. Fonts are pretty straightforward, I&rsquo;ll just copy everything in <code>content/fonts</code>:</p>
+<p>Site assets that aren’t CSS or JS need to be processed as well. Fonts are pretty straightforward, I’ll just copy everything in <code>content/fonts</code>:</p>
 
 <pre><code>gulp.task('fonts', function(){
 	log('Copy fonts');
@@ -532,7 +532,7 @@ var serveStatic = require('serve-static');
 
 <h2 id="revisioning-and-cache-busting">Revisioning and cache-busting</h2>
 
-<p>Revisioning is a way of cache-busting (forcing the browser to reload assets) by appending a hash to the filename. Since this hash is unique for a particular revision of the file (as it is a hash of the file&rsquo;s contents) as long as the source file doesn&rsquo;t change, the revisioned file name will stay the same and will reload from the browser&rsquo;s cache. This uses the <code>gulp-rev</code> and <code>gulp-rev-replace</code> plugins:</p>
+<p>Revisioning is a way of cache-busting (forcing the browser to reload assets) by appending a hash to the filename. Since this hash is unique for a particular revision of the file (as it is a hash of the file’s contents) as long as the source file doesn’t change, the revisioned file name will stay the same and will reload from the browser’s cache. This uses the <code>gulp-rev</code> and <code>gulp-rev-replace</code> plugins:</p>
 
 <p><a href="https://www.npmjs.com/package/gulp-rev"><code>gulp-rev</code></a></p>
 
@@ -598,7 +598,7 @@ return gulp
 	.pipe(gulp.dest(config.paths.destination));
 </code></pre>
 
-<p>I&rsquo;ve numbered the stages of this pipeline. </p>
+<p>I’ve numbered the stages of this pipeline. </p>
 
 <p>In step 1 we select <code>index.html</code> and the <code>*.min.css</code> and <code>*.min.js</code> files.</p>
 
@@ -620,7 +620,7 @@ return gulp
 
 <p>In step 5 we substitute the newly revisioned filenames into <code>index.html</code>.</p>
 
-<h2 id="and-finally">And finally&hellip;</h2>
+<h2 id="and-finally">And finally…</h2>
 
 <p>The end result looks like this:</p>
 
@@ -653,7 +653,7 @@ return gulp
 &lt;/html&gt;
 </code></pre>
 
-<p>I&rsquo;m not entirely happy with this so <a href="http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html">next I&rsquo;ll try to simplify things</a>.</p>
+<p>I’m not entirely happy with this so <a href="http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html">next I’ll try to simplify things</a>.</p>
 
 <h2 id="further-reading-and-resources">Further reading and resources</h2>
 

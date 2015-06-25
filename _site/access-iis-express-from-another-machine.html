@@ -30,19 +30,19 @@
 
 
 
-<p>By default, IIS Express (via Visual Studio) will only allow connections from the local machine. This is a Good Thing but sometimes you need to test sites and services from another machine. I&rsquo;ve found several guide that explain how to do this but they always seem to miss some steps. This will show how to share an IIS Express site via the host&rsquo;s IP address. Using the machine name is also possible as is using the HOSTS file to fake a domain (like <code>api.mysite.example.com</code>) but both of these scenarios are outside the scope of these instructions. This has only been tested on computers on the same subnet which should be sufficient for most test scenarios.</p>
+<p>By default, IIS Express (via Visual Studio) will only allow connections from the local machine. This is a Good Thing but sometimes you need to test sites and services from another machine. I’ve found several guide that explain how to do this but they always seem to miss some steps. This will show how to share an IIS Express site via the host’s IP address. Using the machine name is also possible as is using the HOSTS file to fake a domain (like <code>api.mysite.example.com</code>) but both of these scenarios are outside the scope of these instructions. This has only been tested on computers on the same subnet which should be sufficient for most test scenarios.</p>
 
 <h2 id="site-works-locally">1. Site works locally</h2>
 
-<p>First, your project&rsquo;s Web properties should look something like this:</p>
+<p>First, your project’s Web properties should look something like this:</p>
 
 <p><img src="http://i.imgur.com/yDI4IZs.png" alt="" /></p>
 
-<p>This is the default for a new website. The port may be different and &lsquo;Apply server settings to all users (store in project file)&rsquo; doesn&rsquo;t have to be checked. The site should also run locally without issues. Make a note of the port.</p>
+<p>This is the default for a new website. The port may be different and ‘Apply server settings to all users (store in project file)’ doesn’t have to be checked. The site should also run locally without issues. Make a note of the port.</p>
 
 <h2 id="set-up-httpsys">2. Set up HTTP.sys</h2>
 
-<p>HTTP.sys is a component of Windows (Vista and above) that handles HTTP requests. The url that is going to be shared needs to be reserved in HTTP.sys&rsquo;s access control list (ACL). Open an <em>administrative</em> console. If the console doesn&rsquo;t have admin rights, this won&rsquo;t work. Find out your IP address and run this code to reserve the url in the ACL.</p>
+<p>HTTP.sys is a component of Windows (Vista and above) that handles HTTP requests. The url that is going to be shared needs to be reserved in HTTP.sys’s access control list (ACL). Open an <em>administrative</em> console. If the console doesn’t have admin rights, this won’t work. Find out your IP address and run this code to reserve the url in the ACL.</p>
 
 <pre><code>netsh http add urlacl url=http://192.168.0.6:60985/ user=everyone
 </code></pre>
@@ -52,39 +52,39 @@
 <pre><code>URL reservation successfully added
 </code></pre>
 
-<p>If not, check that the console has admin rights and that the url hasn&rsquo;t already been reserved in the ACL. If you need to, the reservation can be deleted:</p>
+<p>If not, check that the console has admin rights and that the url hasn’t already been reserved in the ACL. If you need to, the reservation can be deleted:</p>
 
 <pre><code>netsh http delete urlacl url=http://192.168.0.6:60985/
 </code></pre>
 
 <h2 id="open-up-the-firewall">3. Open up the firewall</h2>
 
-<p>Open the Windows Firewall (or whatever firewall you may have) and create an inbound rule allowing the above port (eg. 60985). Make sure it&rsquo;s <strong>incoming</strong>! Yes I burned time when I accidently made it outgoing. Uncheck &lsquo;Public&rsquo; if you don&rsquo;t want the port to be open at cafes and airports.</p>
+<p>Open the Windows Firewall (or whatever firewall you may have) and create an inbound rule allowing the above port (eg. 60985). Make sure it’s <strong>incoming</strong>! Yes I burned time when I accidently made it outgoing. Uncheck ‘Public’ if you don’t want the port to be open at cafes and airports.</p>
 
-<h2 id="add-the-new-site-to-iss-expresss-configuration">4. Add the new site to ISS Express&rsquo;s configuration</h2>
+<h2 id="add-the-new-site-to-iss-expresss-configuration">4. Add the new site to ISS Express’s configuration</h2>
 
 <p>At this point, the port should actually be available from another computer, but IIS Express will only respond to requests for <code>localhost</code>. Edit <code>%USERPROFILE%\Documents\iisexpress\config\applicationhost.config</code> and find the site definition for your project. The easiest way might be to search for the port as it should be unique across the IIS Express instance.  Add a new binding to the site for the external facing address:</p>
 
 <p><img src="http://i.imgur.com/vz9OSBl.png" alt="" /></p>
 
-<p>Make sure the application isn&rsquo;t running and kill IIS Express:</p>
+<p>Make sure the application isn’t running and kill IIS Express:</p>
 
 <p><img src="http://i.imgur.com/sfSkFrQ.png" alt="" /></p>
 
 <h2 id="strikeprofitstrike-troubleshooting">5. <strike>Profit!</strike> Troubleshooting!</h2>
 
-<p>Restart Visual Studio as administrator and relaunch the application. It should now work on an external machine. If it doesn&rsquo;t work:</p>
+<p>Restart Visual Studio as administrator and relaunch the application. It should now work on an external machine. If it doesn’t work:</p>
 
 <ul>
   <li>See if you can access the site locally using the IP address. If you cannot, make sure the IIS Express configuration is correct and that it did in fact restart.</li>
   <li>Make sure the firewall is configured correctly - it should be an <em>inbound</em> rule allowing traffic on the required port from your subnet.</li>
   <li>Check the error on the remote machine.
     <ul>
-      <li>If it is a timeout (<code>x.x.x.x took too long to respond</code>) it&rsquo;s probably the host&rsquo;s firewall or ACL, or an unrelated network issue.</li>
-      <li>if it is a 503 Service Unavailable (which should return immediately) it&rsquo;s probably the IIS Express configuration.</li>
+      <li>If it is a timeout (<code>x.x.x.x took too long to respond</code>) it’s probably the host’s firewall or ACL, or an unrelated network issue.</li>
+      <li>if it is a 503 Service Unavailable (which should return immediately) it’s probably the IIS Express configuration.</li>
     </ul>
   </li>
-  <li>If Visual Studio can&rsquo;t run the project locally saying something like &lsquo;The site http://x.x.x.x:41234 could not be created&rsquo;, make sure the ACL reservation was created.</li>
+  <li>If Visual Studio can’t run the project locally saying something like ‘The site http://x.x.x.x:41234 could not be created’, make sure the ACL reservation was created.</li>
 </ul>
 
 

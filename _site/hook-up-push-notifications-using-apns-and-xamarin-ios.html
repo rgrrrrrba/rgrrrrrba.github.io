@@ -30,7 +30,7 @@
 
 
 
-<p>I&rsquo;m adding push notifications to an iOS app, sent from an ASP.NET MVC application. I&rsquo;m developing the iOS application on a Mac using Xamarin Studio and the ASP.NET application on Windows using Visual Studio. I haven&rsquo;t taken this past a sandbox environment. The server component uses <a href="https://github.com/Redth/PushSharp">PushSharp</a>, a library that handles the interface to Apple&rsquo;s APNS as well as Google and Microsoft&rsquo;s equivalent services for Android and Windows phones.</p>
+<p>I’m adding push notifications to an iOS app, sent from an ASP.NET MVC application. I’m developing the iOS application on a Mac using Xamarin Studio and the ASP.NET application on Windows using Visual Studio. I haven’t taken this past a sandbox environment. The server component uses <a href="https://github.com/Redth/PushSharp">PushSharp</a>, a library that handles the interface to Apple’s APNS as well as Google and Microsoft’s equivalent services for Android and Windows phones.</p>
 
 <p>This post skims over some important frameworks:</p>
 
@@ -42,7 +42,7 @@
 
 <h3 id="create-certificates-and-profiles">1. Create certificates and profiles</h3>
 
-<p>Create an app ID for the application. This is then used to create a provisioning profile and certificate. A wildcard id/profile won&rsquo;t do as the APN service needs an explicit App ID.</p>
+<p>Create an app ID for the application. This is then used to create a provisioning profile and certificate. A wildcard id/profile won’t do as the APN service needs an explicit App ID.</p>
 
 <blockquote>
   <p>If you plan to incorporate app services such as Game Center, In-App Purchase, Data Protection, and iCloud, or want a provisioning profile unique to a single app, you must register an explicit App ID for your app.</p>
@@ -54,17 +54,17 @@
 
 <p>Generate, install and download a certificate and provisioning profile for the app ID.</p>
 
-<p>You need to use the new provisioning profile for the application and set the bundle ID of the application to the app ID you created. You <em>don&rsquo;t</em> need to include the App Id Prefix.</p>
+<p>You need to use the new provisioning profile for the application and set the bundle ID of the application to the app ID you created. You <em>don’t</em> need to include the App Id Prefix.</p>
 
 <h3 id="export-the-certificate-as-a-p12-file">2. Export the certificate as a <code>.p12</code> file</h3>
 
-<p>You need a copy of the development certificate for the server (ASP.NET MVC) part of the application to talk to the APN service. This is done using Keychain Access. Pick the <strong>Certificates</strong> category on the left. This is crazy but you can&rsquo;t export a certificate as a <code>.p12</code> if you select the certificate with <strong>All Items</strong> selected. You <em>have</em> to pick <strong>Certificates</strong>. Right-click or control-click the new certificate, it should be named something like <code>Apple Development IOS Push Services: com.your.application</code>. Select Export and make sure <code>Personal Information Exchange (.p12)</code> is selected. Export the certificate somewhere and copy it to the server project (the ASP.NET application). You will be prompted for a password. Make a note of the password.</p>
+<p>You need a copy of the development certificate for the server (ASP.NET MVC) part of the application to talk to the APN service. This is done using Keychain Access. Pick the <strong>Certificates</strong> category on the left. This is crazy but you can’t export a certificate as a <code>.p12</code> if you select the certificate with <strong>All Items</strong> selected. You <em>have</em> to pick <strong>Certificates</strong>. Right-click or control-click the new certificate, it should be named something like <code>Apple Development IOS Push Services: com.your.application</code>. Select Export and make sure <code>Personal Information Exchange (.p12)</code> is selected. Export the certificate somewhere and copy it to the server project (the ASP.NET application). You will be prompted for a password. Make a note of the password.</p>
 
 <h3 id="hook-up-pushsharp">3. Hook up PushSharp</h3>
 
-<p>Install PushSharp into the ASP.NET MVC application via <a href="https://www.nuget.org/packages/PushSharp">NuGet</a>. Add the <code>.p12</code> certificate somewhere so it is available to the project, for example as an embedded resource. If you open the project&rsquo;s properties, select &lsquo;Resources&rsquo; then &lsquo;Add Resource&rsquo;, you can refer to the certificate directly in code as below.</p>
+<p>Install PushSharp into the ASP.NET MVC application via <a href="https://www.nuget.org/packages/PushSharp">NuGet</a>. Add the <code>.p12</code> certificate somewhere so it is available to the project, for example as an embedded resource. If you open the project’s properties, select ‘Resources’ then ‘Add Resource’, you can refer to the certificate directly in code as below.</p>
 
-<p>In the application&rsquo;s startup code set up a <code>PushBroker</code>:</p>
+<p>In the application’s startup code set up a <code>PushBroker</code>:</p>
 
 <pre><code>var production = false;
 var password = "see step 2";
@@ -120,7 +120,7 @@ Sound
 
 <p>You can register for a notification type even if the server never needs to send that type of notification, so registering <code>UIRemoteNotificationType.Alert | UIRemoteNotificationType.Badge | UIRemoteNotificationType.Sound</code> is a pretty safe bet.</p>
 
-<p>Calling this registration the first time causes iOS to open a confirmation dialog for the user. Once the notifications are confirmed a method in the <code>AppDelegate</code> is called. Override the method to get the device token and send it to the server. This method may be called many times if the notification settings are changed or the app is restarted. You only need to send the token if it has changed from the last time it was sent. I&rsquo;m using a <code>_settingsProvider</code> which uses a SQLite database to persist the last device ID sent - the <code>_settingsProvider</code> also has the base URL of my server&rsquo;s API. There is also a method that can be overriden if the registration failed. The endpoint is called using RestSharp in the <code>SendDeviceToken</code> method.</p>
+<p>Calling this registration the first time causes iOS to open a confirmation dialog for the user. Once the notifications are confirmed a method in the <code>AppDelegate</code> is called. Override the method to get the device token and send it to the server. This method may be called many times if the notification settings are changed or the app is restarted. You only need to send the token if it has changed from the last time it was sent. I’m using a <code>_settingsProvider</code> which uses a SQLite database to persist the last device ID sent - the <code>_settingsProvider</code> also has the base URL of my server’s API. There is also a method that can be overriden if the registration failed. The endpoint is called using RestSharp in the <code>SendDeviceToken</code> method.</p>
 
 <pre><code>public override void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken) {
 {

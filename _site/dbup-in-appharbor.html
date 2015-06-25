@@ -30,11 +30,11 @@
 
 
 
-<p><a href="https://twitter.com/PawelPabich">Pawel Pabich</a> has a good way to <a href="http://www.pabich.eu/2011/03/automated-database-deployments-to.html">run DbUp as part of AppHarbor&rsquo;s build process</a> which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up <a href="http://dbup.github.io/">DbUp</a> with a web hook.</p>
+<p><a href="https://twitter.com/PawelPabich">Pawel Pabich</a> has a good way to <a href="http://www.pabich.eu/2011/03/automated-database-deployments-to.html">run DbUp as part of AppHarbor’s build process</a> which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up <a href="http://dbup.github.io/">DbUp</a> with a web hook.</p>
 
 <p>Something important to note is that there is no security around this. It relies on an obfuscated controller path, so it is only really useful for bootstrapping an early project. The controller should be moved behind security as soon as possible.</p>
 
-<p>I&rsquo;m assuming that DbUp has been set up as per my post on <a href="/reset-the-world.html">resetting the world</a>. Specifically, the DbUp DLL should have an upgrader that looks like this:</p>
+<p>I’m assuming that DbUp has been set up as per my post on <a href="/reset-the-world.html">resetting the world</a>. Specifically, the DbUp DLL should have an upgrader that looks like this:</p>
 
 <pre><code>namespace ResetTheWorld
 {
@@ -71,7 +71,7 @@
 }
 </code></pre>
 
-<p>I&rsquo;ve just created a controller with a long random name:</p>
+<p>I’ve just created a controller with a long random name:</p>
 
 <pre><code>public class njvfdklnvfjdkslndsieController : Controller
 {
@@ -88,7 +88,7 @@
 }
 </code></pre>
 
-<p>The <code>HtmlLog</code> is a basic replacement for DbUp&rsquo;s console log that just builds up a HTML string:</p>
+<p>The <code>HtmlLog</code> is a basic replacement for DbUp’s console log that just builds up a HTML string:</p>
 
 <pre><code>class HtmlLog : IUpgradeLog
 {

@@ -30,13 +30,13 @@
 
 
 
-<p>So all I&rsquo;m doing here is creating a button that has a different images depending on the enum value that is bound to the control.</p>
+<p>So all I’m doing here is creating a button that has a different images depending on the enum value that is bound to the control.</p>
 
 <p>The images used are linked as resources in a resource project - the build action is <code>Resource</code>:</p>
 
 <p><img src="http://snag.gy/o9v6X.jpg" alt="Images are linked using a build action of Resource" /></p>
 
-<p>The button&rsquo;s view model (<code>ToggleMyEnumViewModel.cs</code>):</p>
+<p>The button’s view model (<code>ToggleMyEnumViewModel.cs</code>):</p>
 
 <pre><code>public class ToggleMyEnumViewModel : Screen
 {
@@ -65,7 +65,7 @@ public enum MyEnum {
 }
 </code></pre>
 
-<p>The button&rsquo;s XAML (<code>ToggleMyEnumView.xaml</code>):</p>
+<p>The button’s XAML (<code>ToggleMyEnumView.xaml</code>):</p>
 
 <pre><code>&lt;Button x:Class="MyNamespace.ToggleMyEnumButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -103,10 +103,10 @@ public enum MyEnum {
 
 <p>The <code>&lt;cal:ActionMessage MethodName="ToggleMyThing"/&gt;</code> part is what binds the button click to the <code>ToggleMyThing</code> method in the view model.</p>
 
-<p>Things to note in the view&rsquo;s XAML:</p>
+<p>Things to note in the view’s XAML:</p>
 
 <ul>
-  <li>The style sits in the image&rsquo;s resources</li>
+  <li>The style sits in the image’s resources</li>
   <li>The target type of the style is set to the <code>Image</code> type</li>
   <li>The trigger has to be a data trigger</li>
   <li>The trigger just sets the <code>Source</code> property of the image based on the value of the <code>MyEnum</code> property</li>
@@ -128,7 +128,7 @@ public ConsumingViewModel()
 }
 </code></pre>
 
-<p>This isn&rsquo;t exactly what I want, I would prefer to bind directly to a property on the consuming view model rather than indirectly with the <code>ToggleMyEnumViewModel</code>.</p>
+<p>This isn’t exactly what I want, I would prefer to bind directly to a property on the consuming view model rather than indirectly with the <code>ToggleMyEnumViewModel</code>.</p>
 
 
 

@@ -30,7 +30,7 @@
 
 
 
-<p>The project I&rsquo;m working on at the moment is using <a href="http://knockoutjs.com/">Knockout</a> with some view models that are three deep. Since all the projects scripts are being bundled together that&rsquo;s a lot of JS, so I&rsquo;m using namespaces to keep things tidy.</p>
+<p>The project I’m working on at the moment is using <a href="http://knockoutjs.com/">Knockout</a> with some view models that are three deep. Since all the projects scripts are being bundled together that’s a lot of JS, so I’m using namespaces to keep things tidy.</p>
 
 <p>The namespaces are being declared like this:</p>
 
@@ -62,7 +62,7 @@ Foo.Bar.Derp = Foo.Bar.Derp || {};
 };
 </code></pre>
 
-<p>Each file&rsquo;s namespace declaration then becomes:</p>
+<p>Each file’s namespace declaration then becomes:</p>
 
 <pre><code>namespace('Foo.Bar.Derp.Chicken.Derp.Bork.Bork.Bork');
 
@@ -73,7 +73,7 @@ Foo.Bar.Derp.Chicken.Derp.Bork.Bork.Bork.Bwuhahaha = function() {
 Foo.Bar.Derp.Chicken.Derp.Bork.Bork.Bork.Bwuhahaha();
 </code></pre>
 
-<p>Because of the way the declarations are written, the generated namespace declarations won&rsquo;t collide:</p>
+<p>Because of the way the declarations are written, the generated namespace declarations won’t collide:</p>
 
 <pre><code>namespace('Foo.Bar.Derp.Chicken.Derp.Bork.Bork.Bork.Oh.No');
 
@@ -84,7 +84,7 @@ Foo.Bar.Derp.Chicken.Derp.Bork.Bork.Bork.Oh.No.Wai = function() {
 Foo.Bar.Derp.Chicken.Derp.Bork.Bork.Bork.Oh.No.Wai();
 </code></pre>
 
-<p>The generated HTML litters the place with the extra scripts, but that&rsquo;s the browser&rsquo;s problem amiright?</p>
+<p>The generated HTML litters the place with the extra scripts, but that’s the browser’s problem amiright?</p>
 
 
 
