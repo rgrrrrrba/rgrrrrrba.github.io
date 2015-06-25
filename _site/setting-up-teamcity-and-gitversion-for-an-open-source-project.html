@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Setting up TeamCity and GitVersion for an open source project</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Setting up TeamCity and GitVersion for an open source project <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>25 Jun 2015</em></small></h2>
+
+
+
+<p>Note that I’m using TeamCity 9.0 (build 32060). These steps may be different in future versions.</p>
+
+<h2 id="practice-makes-perfect">Practice makes perfect</h2>
+
+<p>I’m setting up TeamCity using GitVersion for a new open source project that I want to deploy via NuGet. I’ve used TeamCity a few times to set up basic builds but I’ve never got <a href="http://semver.org/">SemVer</a> working in a nice way before, so I thought this would be a nice opportunity to try <a href="https://github.com/ParticularLabs/GitVersion">GitVersion</a>.</p>
+
+<p>The Release configuration is triggered manually to deploy the last built version to NuGet. It would probably be nicer to do this from Octopus but for now I’ll just use TeamCity.</p>
+
+<h2 id="preparing-the-build-agent">Preparing the build agent</h2>
+
+<p>I’ve started out with an <a href="http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html">Azure VM configured with TeamCity 9</a>. I first installed GitVersion on my build agent using <a href="https://chocolatey.org/">Chocolatey</a>. Install Chocolatey using an elevated Powershell console:</p>
+
+<pre><code>iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
+</code></pre>
+
+<p>Then install GitVersion:</p>
+
+<pre><code>cinst gitversion.portable
+</code></pre>
+
+<p>You may also have to install <a href="https://msysgit.github.io/">msysgit</a>. TeamCity has its own Git client built into the server but GitVersion needs to be able to access the Git history on the agent, which means the VCS checkout has to happen on the agent (configured below). Reboot the machine once this is done to make sure everything is on the path.</p>
+
+<h2 id="teamcity-setup">TeamCity setup</h2>
+
+<p>Now start setting up the project in TeamCity.</p>
+
+<ol>
+  <li>Under <em>Administration</em>, create a new project</li>
+  <li>Create a build configuration called <code>CI</code></li>
+  <li>In the VCS roots, just paste the HTTPS clone URL from Github into the <em>Repository URL</em>. Change the <em>Authentication method</em> to <em>Password</em> and enter your Github username and password. <em>Note:</em> I’m using HTTPS because GitVersion uses LitGit2Sharp, which doesn’t support SSH at the time of writing :’-( (at least GitVersion doesn’t support it AFAIK)</li>
+  <li>Click <em>Create</em></li>
+</ol>
+
+<p>Now create the first build step for GitVersion. I used <a href="http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/">Jake Ginnivan’s post on his typical TeamCity build setup</a> as a guide.</p>
+
+<ol>
+  <li>Click <em>Add build step</em></li>
+  <li>Select <em>Command Line</em> as the <em>Runner type</em></li>
+  <li>Change the <em>Run</em> value to <em>Executable with parameters</em></li>
+  <li><em>Command executable</em> is <code>GitVersion</code></li>
+  <li><em>Command parameters</em> is <code>. /updateAssemblyInfo /output buildserver</code></li>
+</ol>
+
+<p>Note that there is a space between the <code>.</code> and the <code>/updateAssemblyInfo</code>:</p>
+
+<p><img src="http://i.imgur.com/GCImykG.png" alt="" /></p>
+
+<p>Now create another build step to build the solution.</p>
+
+<ol>
+  <li>Under <em>Build Steps</em> click <em>Auto-detect build steps</em>, which scans the repository and finds things to build. In this case it identified a <em>Visual Studio (sln)</em> build step which just builds <code>PROJECT_NAME.sln</code>. Select the step then clicked <em>Use selected</em>.</li>
+  <li>Under <em>Version Control Settings</em>, change the <em>VCS checkout mode</em> from <em>Automatically on server</em> to <em>Automatically on agent</em>. This will check out the repository on the agent, which means the <code>.git</code> folder will exist and GitVersion should work properly.</li>
+  <li>Also check the <em>Clean build</em> option.</li>
+</ol>
+
+<p>To run GitVersion before building the solution:</p>
+
+<ol>
+  <li>Reorder build steps</li>
+  <li>Drag <em>GitVersion</em> above <em>Visual Studio (sln)</em></li>
+  <li><em>Apply</em></li>
+</ol>
+
+<p>Now select <em>Triggers</em> and <em>Add a new trigger</em>. Select <em>VCS Trigger</em> then <em>Save</em>.</p>
+
+<h2 id="i-wonder-what-happens-if-i-press-this">I wonder what happens if I press this…</h2>
+
+<p>Running the configuration worked for me at this point, resulting in a build versioned <code>0.1.0+21</code> (there were 22 commits, so that’s 21 commits since version <code>0.0.0</code>). If you get an error about not being able to find <code>GitVersion</code> or <code>git.exe</code> make sure the build agent has rebooted and that GitVersion and Git are on the path.</p>
+
+<p>Next you can add a step to run tests. I’m using xUnit. This is just a <em>Command Line</em> runner with the following custom script:</p>
+
+<pre><code>packages\xunit.runner.console.2.0.0\tools\xunit.console.exe src\YOUR_PROJECT.Tests\bin\Release\YOUR_PROJECT.Tests.dll
+</code></pre>
+
+<h2 id="releasing-to-nuget">Releasing to NuGet</h2>
+
+<p>First you need to add a <code>nuspec</code> file alongside the library being released (add it to the project in Visual Studio) and push it up so TeamCity can see it. For example, <code>.\src\frankenwiki\Frankenwiki.nuspec</code>:</p>
+
+<pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt; 
+&lt;package&gt; 
+	&lt;metadata&gt; 
+		&lt;id&gt;frankenwiki&lt;/id&gt; 
+		&lt;title&gt;Frankenwiki&lt;/title&gt;
+		&lt;version&gt;0.0.0&lt;/version&gt; 
+		&lt;authors&gt;Ben Scott&lt;/authors&gt;
+		&lt;description&gt;Markdown based statically generated wiki engine&lt;/description&gt; 
+		&lt;language&gt;en-US&lt;/language&gt;
+		&lt;licenseUrl&gt;https://github.com/frankenwiki/frankenwiki/blob/master/LICENSE.md&lt;/licenseUrl&gt;
+		&lt;releaseNotes&gt;https://github.com/frankenwiki/frankenwiki/releases&lt;/releaseNotes&gt;
+		&lt;projectUrl&gt;http://frankenwiki.com&lt;/projectUrl&gt;
+	&lt;/metadata&gt;
+&lt;/package&gt;
+</code></pre>
+
+<p>The easiest way to generate the NuGet package (<code>.nupkg</code>) seems to be <a href="http://docs.octopusdeploy.com/display/OD/Using+OctoPack">Octopack</a>. Install Octopack to the library being released and push the changes up to the repository. Now edit the CI configuration and in the <em>Visual Studio (sln)</em> step  (the actual build step) show the advanced options and add this to the <em>Command line parameters</em>:</p>
+
+<pre><code>/p:RunOctoPack=true
+</code></pre>
+
+<p>Now when a build happens, OctoPack will create the <code>.nupkg</code> file named something like <code>Frankenwiki.0.1.0.nupkg</code>. This package gets consumed in the next step. Trigger a build now to make sure everything works and the package is created as an artifact.</p>
+
+<p>Create a new build configuration called <em>Release</em> or <em>Promote</em> or <em>Fly, my pretties, ah hahahaha!</em>:</p>
+
+<ol>
+  <li>Attach it to the existing VCS root created above</li>
+  <li>Don’t use any of the detected build steps, just <em>configure build steps manually</em></li>
+  <li>Pick <em>NuGet Publish</em> as the runner type</li>
+  <li>In <em>Packages</em>, use a wildcard to specify the <code>.nupkg</code> file (so it is independent of the version). Eg. <code>Frankenwiki.*.nupkg</code>.</li>
+  <li>Paste in your <a href="http://docs.nuget.org/Create/creating-and-publishing-a-package#publishing-using-nuget-command-line">NuGet API key</a></li>
+  <li>Save</li>
+</ol>
+
+<p>The last few steps are directly based on <a href="http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/">Jake’s post</a>. Go to <em>Build Features</em> to set up labelling:</p>
+
+<ol>
+  <li><em>Add build feature</em></li>
+  <li>Select <em>VCS Labelling</em></li>
+  <li>Select the existing VCS root</li>
+  <li>The default labelling pattern is <code>build-%system.build.number%</code>. Take out the <code>build-</code> part so it is just <code>%system.build.number%</code></li>
+  <li>Save</li>
+</ol>
+
+<p>Now go to <em>Dependencies</em> to set up the build chain:</p>
+
+<ol>
+  <li>Add a new snapshot dependency</li>
+  <li>Pick the CI build configuration and any other configurations that run before the Release configuration</li>
+  <li><em>Do not run new build if there is a suitable one</em> and <em>Only use successful builds from suitable ones</em> should both be ticked, if they aren’t then tick them</li>
+  <li>Save</li>
+  <li>Add a new artifact dependency</li>
+  <li>Change <em>Get artifacts from</em> to <em>Build from the same chain</em></li>
+  <li>In <em>Artifacts rules</em> use the same wildcard specification as above to select the <code>.nupkg</code> file</li>
+  <li>Check <em>Clean destination paths before downloading artifacts</em></li>
+  <li>Save</li>
+</ol>
+
+<p>Go to <em>General Settings</em> and show advanced options. Change the <em>Build number format</em> to the following:</p>
+
+<pre><code>%dep.MyProject_Ci.build.number%
+</code></pre>
+
+<p>where <code>MyProject_Ci</code> is the build configuration ID of the CI step. Once you type in <code>%dep</code> it will suggest the available configurations.</p>
+
+<p>Now you should be able to trigger a Release, which should successfully publish the package to NuGet! If everything works.</p>
+
+<h2 id="tell-teamcity-to-build-feature-branches-and-tags">Tell TeamCity to build feature branches and tags</h2>
+
+<p>TeamCity can build feature branches and tags. This lets GitVersion version feature branches to reduce surprises.</p>
+
+<ol>
+  <li>In <em>Project Settings</em> select <em>VCS Roots</em></li>
+  <li>Select the single VCS root created above</li>
+  <li>In <em>Branch specification</em>, enter <code>+:refs/heads/*</code> (<a href="https://confluence.jetbrains.com/display/TCD8/Working+with+Feature+Branches">Working with Feature Branches</a>)</li>
+  <li>Check <em>Enable to use tags in the branch specification</em></li>
+  <li>Save</li>
+</ol>
+
+<h2 id="using-gitversion">Using GitVersion</h2>
+
+<p>Jake’s post about <a href="http://jake.ginnivan.net/blog/2014/05/25/simple-versioning-and-release-notes/">Simple Versioning and Release Notes</a> has some great info about changing the version but a good one seems to be using a feature branching strategy.</p>
+
+<p>Push a branch with the new version number in the name. For example:</p>
+
+<pre><code>git checkout -b version-0.3.0
+git commit ...
+git push
+</code></pre>
+
+<p>Note that just pushing the branch won’t trigger the branch build, there needs to be a non-empty commit.</p>
+
+<p><img src="http://i.imgur.com/SGxLhKx.png" alt="Feature branches building in TeamCity" /></p>
+
+<p>You can see that TeamCity has built a new release from the feature branch and GitVersion has versioned it at <code>0.3.0-beta.1+4</code>. Subsequent commits to this feature branch will increment the build number (eg. <code>0.3.0-beta.1+5</code>). When the feature branch is merged into master, the master version will become <code>0.3.0</code> and you can just manually run the Release configuration to deploy to NuGet.</p>
+
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2014 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>

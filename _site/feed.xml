@@ -100,6 +100,189 @@ struct BrokensStruct {
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Setting up TeamCity and GitVersion for an open source project</title>
+				<description>&lt;p&gt;Note that I’m using TeamCity 9.0 (build 32060). These steps may be different in future versions.&lt;/p&gt;
+
+&lt;h2 id=&quot;practice-makes-perfect&quot;&gt;Practice makes perfect&lt;/h2&gt;
+
+&lt;p&gt;I’m setting up TeamCity using GitVersion for a new open source project that I want to deploy via NuGet. I’ve used TeamCity a few times to set up basic builds but I’ve never got &lt;a href=&quot;http://semver.org/&quot;&gt;SemVer&lt;/a&gt; working in a nice way before, so I thought this would be a nice opportunity to try &lt;a href=&quot;https://github.com/ParticularLabs/GitVersion&quot;&gt;GitVersion&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The Release configuration is triggered manually to deploy the last built version to NuGet. It would probably be nicer to do this from Octopus but for now I’ll just use TeamCity.&lt;/p&gt;
+
+&lt;h2 id=&quot;preparing-the-build-agent&quot;&gt;Preparing the build agent&lt;/h2&gt;
+
+&lt;p&gt;I’ve started out with an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html&quot;&gt;Azure VM configured with TeamCity 9&lt;/a&gt;. I first installed GitVersion on my build agent using &lt;a href=&quot;https://chocolatey.org/&quot;&gt;Chocolatey&lt;/a&gt;. Install Chocolatey using an elevated Powershell console:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;iex ((new-object net.webclient).DownloadString(&#39;https://chocolatey.org/install.ps1&#39;))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then install GitVersion:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cinst gitversion.portable
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You may also have to install &lt;a href=&quot;https://msysgit.github.io/&quot;&gt;msysgit&lt;/a&gt;. TeamCity has its own Git client built into the server but GitVersion needs to be able to access the Git history on the agent, which means the VCS checkout has to happen on the agent (configured below). Reboot the machine once this is done to make sure everything is on the path.&lt;/p&gt;
+
+&lt;h2 id=&quot;teamcity-setup&quot;&gt;TeamCity setup&lt;/h2&gt;
+
+&lt;p&gt;Now start setting up the project in TeamCity.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Under &lt;em&gt;Administration&lt;/em&gt;, create a new project&lt;/li&gt;
+  &lt;li&gt;Create a build configuration called &lt;code&gt;CI&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;In the VCS roots, just paste the HTTPS clone URL from Github into the &lt;em&gt;Repository URL&lt;/em&gt;. Change the &lt;em&gt;Authentication method&lt;/em&gt; to &lt;em&gt;Password&lt;/em&gt; and enter your Github username and password. &lt;em&gt;Note:&lt;/em&gt; I’m using HTTPS because GitVersion uses LitGit2Sharp, which doesn’t support SSH at the time of writing :’-( (at least GitVersion doesn’t support it AFAIK)&lt;/li&gt;
+  &lt;li&gt;Click &lt;em&gt;Create&lt;/em&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now create the first build step for GitVersion. I used &lt;a href=&quot;http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/&quot;&gt;Jake Ginnivan’s post on his typical TeamCity build setup&lt;/a&gt; as a guide.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Click &lt;em&gt;Add build step&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Select &lt;em&gt;Command Line&lt;/em&gt; as the &lt;em&gt;Runner type&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Change the &lt;em&gt;Run&lt;/em&gt; value to &lt;em&gt;Executable with parameters&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Command executable&lt;/em&gt; is &lt;code&gt;GitVersion&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Command parameters&lt;/em&gt; is &lt;code&gt;. /updateAssemblyInfo /output buildserver&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Note that there is a space between the &lt;code&gt;.&lt;/code&gt; and the &lt;code&gt;/updateAssemblyInfo&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/GCImykG.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now create another build step to build the solution.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Under &lt;em&gt;Build Steps&lt;/em&gt; click &lt;em&gt;Auto-detect build steps&lt;/em&gt;, which scans the repository and finds things to build. In this case it identified a &lt;em&gt;Visual Studio (sln)&lt;/em&gt; build step which just builds &lt;code&gt;PROJECT_NAME.sln&lt;/code&gt;. Select the step then clicked &lt;em&gt;Use selected&lt;/em&gt;.&lt;/li&gt;
+  &lt;li&gt;Under &lt;em&gt;Version Control Settings&lt;/em&gt;, change the &lt;em&gt;VCS checkout mode&lt;/em&gt; from &lt;em&gt;Automatically on server&lt;/em&gt; to &lt;em&gt;Automatically on agent&lt;/em&gt;. This will check out the repository on the agent, which means the &lt;code&gt;.git&lt;/code&gt; folder will exist and GitVersion should work properly.&lt;/li&gt;
+  &lt;li&gt;Also check the &lt;em&gt;Clean build&lt;/em&gt; option.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;To run GitVersion before building the solution:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Reorder build steps&lt;/li&gt;
+  &lt;li&gt;Drag &lt;em&gt;GitVersion&lt;/em&gt; above &lt;em&gt;Visual Studio (sln)&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Apply&lt;/em&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now select &lt;em&gt;Triggers&lt;/em&gt; and &lt;em&gt;Add a new trigger&lt;/em&gt;. Select &lt;em&gt;VCS Trigger&lt;/em&gt; then &lt;em&gt;Save&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;i-wonder-what-happens-if-i-press-this&quot;&gt;I wonder what happens if I press this…&lt;/h2&gt;
+
+&lt;p&gt;Running the configuration worked for me at this point, resulting in a build versioned &lt;code&gt;0.1.0+21&lt;/code&gt; (there were 22 commits, so that’s 21 commits since version &lt;code&gt;0.0.0&lt;/code&gt;). If you get an error about not being able to find &lt;code&gt;GitVersion&lt;/code&gt; or &lt;code&gt;git.exe&lt;/code&gt; make sure the build agent has rebooted and that GitVersion and Git are on the path.&lt;/p&gt;
+
+&lt;p&gt;Next you can add a step to run tests. I’m using xUnit. This is just a &lt;em&gt;Command Line&lt;/em&gt; runner with the following custom script:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;packages\xunit.runner.console.2.0.0\tools\xunit.console.exe src\YOUR_PROJECT.Tests\bin\Release\YOUR_PROJECT.Tests.dll
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;releasing-to-nuget&quot;&gt;Releasing to NuGet&lt;/h2&gt;
+
+&lt;p&gt;First you need to add a &lt;code&gt;nuspec&lt;/code&gt; file alongside the library being released (add it to the project in Visual Studio) and push it up so TeamCity can see it. For example, &lt;code&gt;.\src\frankenwiki\Frankenwiki.nuspec&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt; 
+&amp;lt;package&amp;gt; 
+	&amp;lt;metadata&amp;gt; 
+		&amp;lt;id&amp;gt;frankenwiki&amp;lt;/id&amp;gt; 
+		&amp;lt;title&amp;gt;Frankenwiki&amp;lt;/title&amp;gt;
+		&amp;lt;version&amp;gt;0.0.0&amp;lt;/version&amp;gt; 
+		&amp;lt;authors&amp;gt;Ben Scott&amp;lt;/authors&amp;gt;
+		&amp;lt;description&amp;gt;Markdown based statically generated wiki engine&amp;lt;/description&amp;gt; 
+		&amp;lt;language&amp;gt;en-US&amp;lt;/language&amp;gt;
+		&amp;lt;licenseUrl&amp;gt;https://github.com/frankenwiki/frankenwiki/blob/master/LICENSE.md&amp;lt;/licenseUrl&amp;gt;
+		&amp;lt;releaseNotes&amp;gt;https://github.com/frankenwiki/frankenwiki/releases&amp;lt;/releaseNotes&amp;gt;
+		&amp;lt;projectUrl&amp;gt;http://frankenwiki.com&amp;lt;/projectUrl&amp;gt;
+	&amp;lt;/metadata&amp;gt;
+&amp;lt;/package&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The easiest way to generate the NuGet package (&lt;code&gt;.nupkg&lt;/code&gt;) seems to be &lt;a href=&quot;http://docs.octopusdeploy.com/display/OD/Using+OctoPack&quot;&gt;Octopack&lt;/a&gt;. Install Octopack to the library being released and push the changes up to the repository. Now edit the CI configuration and in the &lt;em&gt;Visual Studio (sln)&lt;/em&gt; step  (the actual build step) show the advanced options and add this to the &lt;em&gt;Command line parameters&lt;/em&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/p:RunOctoPack=true
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now when a build happens, OctoPack will create the &lt;code&gt;.nupkg&lt;/code&gt; file named something like &lt;code&gt;Frankenwiki.0.1.0.nupkg&lt;/code&gt;. This package gets consumed in the next step. Trigger a build now to make sure everything works and the package is created as an artifact.&lt;/p&gt;
+
+&lt;p&gt;Create a new build configuration called &lt;em&gt;Release&lt;/em&gt; or &lt;em&gt;Promote&lt;/em&gt; or &lt;em&gt;Fly, my pretties, ah hahahaha!&lt;/em&gt;:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Attach it to the existing VCS root created above&lt;/li&gt;
+  &lt;li&gt;Don’t use any of the detected build steps, just &lt;em&gt;configure build steps manually&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Pick &lt;em&gt;NuGet Publish&lt;/em&gt; as the runner type&lt;/li&gt;
+  &lt;li&gt;In &lt;em&gt;Packages&lt;/em&gt;, use a wildcard to specify the &lt;code&gt;.nupkg&lt;/code&gt; file (so it is independent of the version). Eg. &lt;code&gt;Frankenwiki.*.nupkg&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Paste in your &lt;a href=&quot;http://docs.nuget.org/Create/creating-and-publishing-a-package#publishing-using-nuget-command-line&quot;&gt;NuGet API key&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Save&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The last few steps are directly based on &lt;a href=&quot;http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/&quot;&gt;Jake’s post&lt;/a&gt;. Go to &lt;em&gt;Build Features&lt;/em&gt; to set up labelling:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;em&gt;Add build feature&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Select &lt;em&gt;VCS Labelling&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Select the existing VCS root&lt;/li&gt;
+  &lt;li&gt;The default labelling pattern is &lt;code&gt;build-%system.build.number%&lt;/code&gt;. Take out the &lt;code&gt;build-&lt;/code&gt; part so it is just &lt;code&gt;%system.build.number%&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Save&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now go to &lt;em&gt;Dependencies&lt;/em&gt; to set up the build chain:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Add a new snapshot dependency&lt;/li&gt;
+  &lt;li&gt;Pick the CI build configuration and any other configurations that run before the Release configuration&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Do not run new build if there is a suitable one&lt;/em&gt; and &lt;em&gt;Only use successful builds from suitable ones&lt;/em&gt; should both be ticked, if they aren’t then tick them&lt;/li&gt;
+  &lt;li&gt;Save&lt;/li&gt;
+  &lt;li&gt;Add a new artifact dependency&lt;/li&gt;
+  &lt;li&gt;Change &lt;em&gt;Get artifacts from&lt;/em&gt; to &lt;em&gt;Build from the same chain&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;In &lt;em&gt;Artifacts rules&lt;/em&gt; use the same wildcard specification as above to select the &lt;code&gt;.nupkg&lt;/code&gt; file&lt;/li&gt;
+  &lt;li&gt;Check &lt;em&gt;Clean destination paths before downloading artifacts&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Save&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Go to &lt;em&gt;General Settings&lt;/em&gt; and show advanced options. Change the &lt;em&gt;Build number format&lt;/em&gt; to the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;%dep.MyProject_Ci.build.number%
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where &lt;code&gt;MyProject_Ci&lt;/code&gt; is the build configuration ID of the CI step. Once you type in &lt;code&gt;%dep&lt;/code&gt; it will suggest the available configurations.&lt;/p&gt;
+
+&lt;p&gt;Now you should be able to trigger a Release, which should successfully publish the package to NuGet! If everything works.&lt;/p&gt;
+
+&lt;h2 id=&quot;tell-teamcity-to-build-feature-branches-and-tags&quot;&gt;Tell TeamCity to build feature branches and tags&lt;/h2&gt;
+
+&lt;p&gt;TeamCity can build feature branches and tags. This lets GitVersion version feature branches to reduce surprises.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;In &lt;em&gt;Project Settings&lt;/em&gt; select &lt;em&gt;VCS Roots&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Select the single VCS root created above&lt;/li&gt;
+  &lt;li&gt;In &lt;em&gt;Branch specification&lt;/em&gt;, enter &lt;code&gt;+:refs/heads/*&lt;/code&gt; (&lt;a href=&quot;https://confluence.jetbrains.com/display/TCD8/Working+with+Feature+Branches&quot;&gt;Working with Feature Branches&lt;/a&gt;)&lt;/li&gt;
+  &lt;li&gt;Check &lt;em&gt;Enable to use tags in the branch specification&lt;/em&gt;&lt;/li&gt;
+  &lt;li&gt;Save&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;using-gitversion&quot;&gt;Using GitVersion&lt;/h2&gt;
+
+&lt;p&gt;Jake’s post about &lt;a href=&quot;http://jake.ginnivan.net/blog/2014/05/25/simple-versioning-and-release-notes/&quot;&gt;Simple Versioning and Release Notes&lt;/a&gt; has some great info about changing the version but a good one seems to be using a feature branching strategy.&lt;/p&gt;
+
+&lt;p&gt;Push a branch with the new version number in the name. For example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git checkout -b version-0.3.0
+git commit ...
+git push
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that just pushing the branch won’t trigger the branch build, there needs to be a non-empty commit.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/SGxLhKx.png&quot; alt=&quot;Feature branches building in TeamCity&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;You can see that TeamCity has built a new release from the feature branch and GitVersion has versioned it at &lt;code&gt;0.3.0-beta.1+4&lt;/code&gt;. Subsequent commits to this feature branch will increment the build number (eg. &lt;code&gt;0.3.0-beta.1+5&lt;/code&gt;). When the feature branch is merged into master, the master version will become &lt;code&gt;0.3.0&lt;/code&gt; and you can just manually run the Release configuration to deploy to NuGet.&lt;/p&gt;
+
+</description>
+				<pubDate>Thu, 25 Jun 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/setting-up-teamcity-and-gitversion-for-an-open-source-project.html</link>
+				<guid isPermaLink="true">http://bendetat.com/setting-up-teamcity-and-gitversion-for-an-open-source-project.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Simplicity - pattern matching in C#</title>
 				<description>&lt;p&gt;&lt;em&gt;TL;DR;&lt;/em&gt; Check out my awesome new library for &lt;a href=&quot;https://www.nuget.org/packages/Simplicity&quot;&gt;pattern matching in C# - Simplicity&lt;/a&gt; (&lt;a href=&quot;https://github.com/bendetat/Simplicity&quot;&gt;GitHub&lt;/a&gt;) or just copy the contents of the &lt;a href=&quot;https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs&quot;&gt;single file&lt;/a&gt; into your project for near-instant gratification.&lt;/p&gt;
 
