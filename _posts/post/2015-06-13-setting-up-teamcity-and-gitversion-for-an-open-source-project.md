@@ -5,7 +5,7 @@ date: 2015-06-25
 category: post
 ---
 
-Note that I'm using TeamCity 9.0 (build 32060). These steps may be different in future versions.
+Note that I'm using TeamCity 9.0 (build 32060) and GitVersion 2.0.1. These steps may be different in future versions. GitVersion seems to be slated for a 3.0 release very soon.
 
 
 ## Practice makes perfect
@@ -43,11 +43,13 @@ Now create the first build step for GitVersion. I used [Jake Ginnivan's post on 
 2. Select _Command Line_ as the _Runner type_
 3. Change the _Run_ value to _Executable with parameters_
 4. _Command executable_ is `GitVersion`
-5. _Command parameters_ is `. /updateAssemblyInfo /output buildserver`
+5. _Command parameters_ is `. /updateAssemblyInfo /assemblyVersionFormat MajorMinorPatch /output buildserver`
 
 Note that there is a space between the `.` and the `/updateAssemblyInfo`:
 
-![](http://i.imgur.com/GCImykG.png)
+![](http://i.imgur.com/stM7oSn.png)
+
+*Note* with the 3.0 release of GitVersion the command parameters may be able to be removed in favour of a `GitVersionConfig.yaml` configuration file. Stay tuned.
 
 Now create another build step to build the solution.
 
@@ -90,6 +92,9 @@ First you need to add a `nuspec` file alongside the library being released (add 
 			<releaseNotes>https://github.com/frankenwiki/frankenwiki/releases</releaseNotes>
 			<projectUrl>http://frankenwiki.com</projectUrl>
 		</metadata>
+		<files>
+			<file src="bin\release\Frankenwiki.dll" target="lib\net451"/>
+		</files>
 	</package>
 
 The easiest way to generate the NuGet package (`.nupkg`) seems to be [Octopack](http://docs.octopusdeploy.com/display/OD/Using+OctoPack). Install Octopack to the library being released and push the changes up to the repository. Now edit the CI configuration and in the _Visual Studio (sln)_ step  (the actual build step) show the advanced options and add this to the _Command line parameters_:
@@ -162,4 +167,17 @@ Note that just pushing the branch won't trigger the branch build, there needs to
 ![Feature branches building in TeamCity](http://i.imgur.com/SGxLhKx.png)
 
 You can see that TeamCity has built a new release from the feature branch and GitVersion has versioned it at `0.3.0-beta.1+4`. Subsequent commits to this feature branch will increment the build number (eg. `0.3.0-beta.1+5`). When the feature branch is merged into master, the master version will become `0.3.0` and you can just manually run the Release configuration to deploy to NuGet.
+
+
+## Extra tricks and gotchas
+
+
+### Commits with number can have unexpected results
+
+Don't add a branch or a commit with a version number in it unless you expect it to bump the version number. I merged a branch called `change-to-dotnet-4.5.1` which GitVersion helpfully interpreted as a version bump to `4.5.1`. I had to fix this by rewriting the commit comments to say `4dot5dot1`.
+
+
+### Check the versioning scheme
+
+If GitVersion report a particular version but Octopack generates nuspec files with a different version, check in the `AssemblyInfo.cs` file for a different version in the `AssemblyVersion` and `AssemblyFileVersion` attributes. This can be due to the versioning scheme, which can be set using the `/assemblyVersionFormat` parameter as above (or in `GitVersionConfig.yaml` once it is supported by GitVersion).
 
