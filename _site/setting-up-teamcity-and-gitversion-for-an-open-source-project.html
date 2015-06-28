@@ -30,7 +30,7 @@
 
 
 
-<p>Note that I’m using TeamCity 9.0 (build 32060). These steps may be different in future versions.</p>
+<p>Note that I’m using TeamCity 9.0 (build 32060) and GitVersion 2.0.1. These steps may be different in future versions. GitVersion seems to be slated for a 3.0 release very soon.</p>
 
 <h2 id="practice-makes-perfect">Practice makes perfect</h2>
 
@@ -70,12 +70,14 @@
   <li>Select <em>Command Line</em> as the <em>Runner type</em></li>
   <li>Change the <em>Run</em> value to <em>Executable with parameters</em></li>
   <li><em>Command executable</em> is <code>GitVersion</code></li>
-  <li><em>Command parameters</em> is <code>. /updateAssemblyInfo /output buildserver</code></li>
+  <li><em>Command parameters</em> is <code>. /updateAssemblyInfo /assemblyVersionFormat MajorMinorPatch /output buildserver</code></li>
 </ol>
 
 <p>Note that there is a space between the <code>.</code> and the <code>/updateAssemblyInfo</code>:</p>
 
-<p><img src="http://i.imgur.com/GCImykG.png" alt="" /></p>
+<p><img src="http://i.imgur.com/stM7oSn.png" alt="" /></p>
+
+<p><em>Note</em> with the 3.0 release of GitVersion the command parameters may be able to be removed in favour of a <code>GitVersionConfig.yaml</code> configuration file. Stay tuned.</p>
 
 <p>Now create another build step to build the solution.</p>
 
@@ -121,6 +123,9 @@
 		&lt;releaseNotes&gt;https://github.com/frankenwiki/frankenwiki/releases&lt;/releaseNotes&gt;
 		&lt;projectUrl&gt;http://frankenwiki.com&lt;/projectUrl&gt;
 	&lt;/metadata&gt;
+	&lt;files&gt;
+		&lt;file src="bin\release\Frankenwiki.dll" target="lib\net451"/&gt;
+	&lt;/files&gt;
 &lt;/package&gt;
 </code></pre>
 
@@ -203,6 +208,16 @@ git push
 <p><img src="http://i.imgur.com/SGxLhKx.png" alt="Feature branches building in TeamCity" /></p>
 
 <p>You can see that TeamCity has built a new release from the feature branch and GitVersion has versioned it at <code>0.3.0-beta.1+4</code>. Subsequent commits to this feature branch will increment the build number (eg. <code>0.3.0-beta.1+5</code>). When the feature branch is merged into master, the master version will become <code>0.3.0</code> and you can just manually run the Release configuration to deploy to NuGet.</p>
+
+<h2 id="extra-tricks-and-gotchas">Extra tricks and gotchas</h2>
+
+<h3 id="commits-with-number-can-have-unexpected-results">Commits with number can have unexpected results</h3>
+
+<p>Don’t add a branch or a commit with a version number in it unless you expect it to bump the version number. I merged a branch called <code>change-to-dotnet-4.5.1</code> which GitVersion helpfully interpreted as a version bump to <code>4.5.1</code>. I had to fix this by rewriting the commit comments to say <code>4dot5dot1</code>.</p>
+
+<h3 id="check-the-versioning-scheme">Check the versioning scheme</h3>
+
+<p>If GitVersion report a particular version but Octopack generates nuspec files with a different version, check in the <code>AssemblyInfo.cs</code> file for a different version in the <code>AssemblyVersion</code> and <code>AssemblyFileVersion</code> attributes. This can be due to the versioning scheme, which can be set using the <code>/assemblyVersionFormat</code> parameter as above (or in <code>GitVersionConfig.yaml</code> once it is supported by GitVersion).</p>
 
 
 

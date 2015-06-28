@@ -8,8 +8,123 @@
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Controller scope in Angular JS directives</title>
+				<description>&lt;p&gt;This is probably basic level Angular JS but I haven’t seen it mentioned anywhere. I’m probably missing something fundamental about directive scope.&lt;/p&gt;
+
+&lt;p&gt;Say you’ve got this directive (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/2/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;angular
+    .module(&#39;app&#39;, [])
+    .directive(&#39;thing&#39;, function() {
+        return {
+            restrict: &#39;E&#39;,
+            replace: true,
+            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
+            controller: function() {
+                this.name = &#39;&#39;;
+            },
+            controllerAs: &#39;vm&#39;
+        };
+    });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Using it once works great:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;div ng-app=&quot;app&quot;&amp;gt;
+	&amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;But if you use the directive multiple times, it becomes clear that the directive views all share the same controller:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;div ng-app=&quot;app&quot;&amp;gt;
+    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
+    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
+    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
+    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
+    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Oqbl2Yy.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Typing in the first textbox affects all of the other directive views, ie. they are all pointing to the same controller.&lt;/p&gt;
+
+&lt;p&gt;In fact, if you have different directives with the same &lt;code&gt;controllerAs&lt;/code&gt; value, you can see that the &lt;code&gt;vm&lt;/code&gt; instance for each directive is set to the last directive’s controller (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/3/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;angular
+    .module(&#39;app&#39;, [])
+    .directive(&#39;firstDirective&#39;, function() {
+        return {
+            restrict: &#39;E&#39;,
+            replace: true,
+            template: &#39;&amp;lt;div&amp;gt;first directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
+            controller: function() {
+                this.foo = &#39;Hi!&#39;;
+            },
+            controllerAs: &#39;vm&#39;
+        };
+    })
+    .directive(&#39;secondDirective&#39;, function(){
+        return {
+            restrict: &#39;E&#39;,
+            replace: true,
+            template: &#39;&amp;lt;div&amp;gt;second directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
+            controller: function() {
+                this.bar = &#39;There?&#39;;
+            },
+            controllerAs: &#39;vm&#39;
+        };
+    });
+
+&amp;lt;div ng-app=&quot;app&quot;&amp;gt;
+	&amp;lt;first-directive&amp;gt;&amp;lt;/first-directive&amp;gt;
+	&amp;lt;second-directive&amp;gt;&amp;lt;/second-directive&amp;gt;
+&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/9y6Rg6k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If you change the name of the &lt;code&gt;controllerAs&lt;/code&gt; alias - say to &lt;code&gt;firstDirectiveVm&lt;/code&gt; and &lt;code&gt;secondDirectiveVm&lt;/code&gt; - then the problem goes away, so Angular JS by default is setting &lt;code&gt;vm&lt;/code&gt; globally each time a directive uses &lt;code&gt;controllerAs: &#39;vm&#39;&lt;/code&gt;, and going down the page, meaning the last &lt;code&gt;vm&lt;/code&gt; wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s &lt;code&gt;controllerAs&lt;/code&gt; value won’t work for multiple directives of the same type.&lt;/p&gt;
+
+&lt;p&gt;The solution is to set &lt;code&gt;scope&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in the directive declaration (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/4/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;angular
+    .module(&#39;app&#39;, [])
+    .directive(&#39;thing&#39;, function() {
+        return {
+            restrict: &#39;E&#39;,
+            replace: true,
+            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
+            controller: function() {
+                this.name = &#39;&#39;;
+            },
+            controllerAs: &#39;vm&#39;,
+            scope: true
+        };
+    });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/jUlaSCJ.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A lot more can happen in that &lt;code&gt;scope&lt;/code&gt; value than setting it to true. See the Angular JS docs for &lt;a href=&quot;https://docs.angularjs.org/guide/directive#isolating-the-scope-of-a-directive&quot;&gt;isolating directive scope&lt;/a&gt; for examples. Unfortunately, ‘scope’ seems to be an overloaded term in Angular JS world. This kind of ‘scope’ is talking about the scope of the element and attributes provided by the directive, in a way distinct from &lt;code&gt;$scope&lt;/code&gt;, which is what I’m trying to avoid by using &lt;code&gt;controllerAs&lt;/code&gt; in the first place.&lt;/p&gt;
+
+&lt;p&gt;It seems strange to me that shared scope is the default, and that you need to set &lt;code&gt;scope&lt;/code&gt; to a non-falsy value to opt out of that. I’m sure I’m missing a lot of nuance around the reasons. In any case, setting &lt;code&gt;scope: true&lt;/code&gt; seems to be the happy path. &lt;/p&gt;
+
+&lt;p&gt;I just wish I hadn’t wasted a full day rewriting an entire site before figuring out what was happening.&lt;/p&gt;
+
+&lt;p&gt;:-(&lt;/p&gt;
+
+</description>
+				<pubDate>Sun, 28 Jun 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/controller-scope-in-angular-js-directives.html</link>
+				<guid isPermaLink="true">http://bendetat.com/controller-scope-in-angular-js-directives.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Setting up TeamCity and GitVersion for an open source project</title>
-				<description>&lt;p&gt;Note that I’m using TeamCity 9.0 (build 32060). These steps may be different in future versions.&lt;/p&gt;
+				<description>&lt;p&gt;Note that I’m using TeamCity 9.0 (build 32060) and GitVersion 2.0.1. These steps may be different in future versions. GitVersion seems to be slated for a 3.0 release very soon.&lt;/p&gt;
 
 &lt;h2 id=&quot;practice-makes-perfect&quot;&gt;Practice makes perfect&lt;/h2&gt;
 
@@ -49,12 +164,14 @@
   &lt;li&gt;Select &lt;em&gt;Command Line&lt;/em&gt; as the &lt;em&gt;Runner type&lt;/em&gt;&lt;/li&gt;
   &lt;li&gt;Change the &lt;em&gt;Run&lt;/em&gt; value to &lt;em&gt;Executable with parameters&lt;/em&gt;&lt;/li&gt;
   &lt;li&gt;&lt;em&gt;Command executable&lt;/em&gt; is &lt;code&gt;GitVersion&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;Command parameters&lt;/em&gt; is &lt;code&gt;. /updateAssemblyInfo /output buildserver&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Command parameters&lt;/em&gt; is &lt;code&gt;. /updateAssemblyInfo /assemblyVersionFormat MajorMinorPatch /output buildserver&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;Note that there is a space between the &lt;code&gt;.&lt;/code&gt; and the &lt;code&gt;/updateAssemblyInfo&lt;/code&gt;:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/GCImykG.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/stM7oSn.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Note&lt;/em&gt; with the 3.0 release of GitVersion the command parameters may be able to be removed in favour of a &lt;code&gt;GitVersionConfig.yaml&lt;/code&gt; configuration file. Stay tuned.&lt;/p&gt;
 
 &lt;p&gt;Now create another build step to build the solution.&lt;/p&gt;
 
@@ -100,6 +217,9 @@
 		&amp;lt;releaseNotes&amp;gt;https://github.com/frankenwiki/frankenwiki/releases&amp;lt;/releaseNotes&amp;gt;
 		&amp;lt;projectUrl&amp;gt;http://frankenwiki.com&amp;lt;/projectUrl&amp;gt;
 	&amp;lt;/metadata&amp;gt;
+	&amp;lt;files&amp;gt;
+		&amp;lt;file src=&quot;bin\release\Frankenwiki.dll&quot; target=&quot;lib\net451&quot;/&amp;gt;
+	&amp;lt;/files&amp;gt;
 &amp;lt;/package&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -182,6 +302,16 @@ git push
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/SGxLhKx.png&quot; alt=&quot;Feature branches building in TeamCity&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;You can see that TeamCity has built a new release from the feature branch and GitVersion has versioned it at &lt;code&gt;0.3.0-beta.1+4&lt;/code&gt;. Subsequent commits to this feature branch will increment the build number (eg. &lt;code&gt;0.3.0-beta.1+5&lt;/code&gt;). When the feature branch is merged into master, the master version will become &lt;code&gt;0.3.0&lt;/code&gt; and you can just manually run the Release configuration to deploy to NuGet.&lt;/p&gt;
+
+&lt;h2 id=&quot;extra-tricks-and-gotchas&quot;&gt;Extra tricks and gotchas&lt;/h2&gt;
+
+&lt;h3 id=&quot;commits-with-number-can-have-unexpected-results&quot;&gt;Commits with number can have unexpected results&lt;/h3&gt;
+
+&lt;p&gt;Don’t add a branch or a commit with a version number in it unless you expect it to bump the version number. I merged a branch called &lt;code&gt;change-to-dotnet-4.5.1&lt;/code&gt; which GitVersion helpfully interpreted as a version bump to &lt;code&gt;4.5.1&lt;/code&gt;. I had to fix this by rewriting the commit comments to say &lt;code&gt;4dot5dot1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;check-the-versioning-scheme&quot;&gt;Check the versioning scheme&lt;/h3&gt;
+
+&lt;p&gt;If GitVersion report a particular version but Octopack generates nuspec files with a different version, check in the &lt;code&gt;AssemblyInfo.cs&lt;/code&gt; file for a different version in the &lt;code&gt;AssemblyVersion&lt;/code&gt; and &lt;code&gt;AssemblyFileVersion&lt;/code&gt; attributes. This can be due to the versioning scheme, which can be set using the &lt;code&gt;/assemblyVersionFormat&lt;/code&gt; parameter as above (or in &lt;code&gt;GitVersionConfig.yaml&lt;/code&gt; once it is supported by GitVersion).&lt;/p&gt;
 
 </description>
 				<pubDate>Thu, 25 Jun 2015 00:00:00 +1000</pubDate>
@@ -2005,39 +2135,6 @@ public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, 
 				<pubDate>Sat, 17 Jan 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/convention-test-for-projects-referencing-other-project-references-instead-of-nuget-packages.html</link>
 				<guid isPermaLink="true">http://bendetat.com/convention-test-for-projects-referencing-other-project-references-instead-of-nuget-packages.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Xamarin Studio borking on a Unified API project</title>
-				<description>&lt;p&gt;I created a Unified API iOS Binding Project in Xamarin Studio (but this may happen for all unified API projects). This is in Xamarin Studio 5.5.4. When I went to build the project I got an error, something like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Error: could not import &#39;blah&#39;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://forums.xamarin.com/discussion/27217&quot;&gt;Turns out&lt;/a&gt; the generated project file &lt;a href=&quot;http://forums.xamarin.com/discussion/comment/87535/#Comment_87535&quot;&gt;has some errors&lt;/a&gt;:&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Hi, i did succeed in the end. Here was the solution for me: For some reason, the binding project with Unified API has some errors in it’s project file. After creating the project, i saved it. and opened it with a text editor.
-Look for the Importproject element that claims to import the ObjCruntime, this line has a faulty path. It should be:&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;Import Project=&quot;$(MSBuildExtensionsPath)\Xamarin\Xamarin.ObjcBinding.CSharp.targets&quot; /&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Also, i added this to the propertygroups:&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;TargetFrameworkIdentifier&amp;gt;Xamarin.iOS&amp;lt;/TargetFrameworkIdentifier&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;(Note: add the framework identifier to each of the &lt;code&gt;PropertyGroup&lt;/code&gt; elements)&lt;/p&gt;
-
-</description>
-				<pubDate>Mon, 12 Jan 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/xamarin-studio-borking-on-unified-api-project.html</link>
-				<guid isPermaLink="true">http://bendetat.com/xamarin-studio-borking-on-unified-api-project.html</guid>
 			</item>
 		
 	</channel>

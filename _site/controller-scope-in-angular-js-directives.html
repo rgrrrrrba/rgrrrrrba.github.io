@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>Controller scope in Angular JS directives</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
+		<meta name="author" content="Ben Scott"/>
+		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
+		<link href="/css/site.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row header">
+				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
+				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+			</div>
+		</div>
+
+		<hr/>
+		
+		<div class="container">		
+			<div class="row content">
+				<h1><a href="/">~/</a>Controller scope in Angular JS directives <br/></h1>
+<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
+<h2><small><em>28 Jun 2015</em></small></h2>
+
+
+
+<p>This is probably basic level Angular JS but I haven’t seen it mentioned anywhere. I’m probably missing something fundamental about directive scope.</p>
+
+<p>Say you’ve got this directive (<a href="http://jsfiddle.net/10qwqc5r/2/">JSFiddle</a>):</p>
+
+<pre><code>angular
+    .module('app', [])
+    .directive('thing', function() {
+        return {
+            restrict: 'E',
+            replace: true,
+            template: '&lt;div&gt;&lt;input ng-model="vm.name"/&gt; Name: &lt;/div&gt;',
+            controller: function() {
+                this.name = '';
+            },
+            controllerAs: 'vm'
+        };
+    });
+</code></pre>
+
+<p>Using it once works great:</p>
+
+<pre><code>&lt;div ng-app="app"&gt;
+	&lt;thing&gt;&lt;/thing&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>But if you use the directive multiple times, it becomes clear that the directive views all share the same controller:</p>
+
+<pre><code>&lt;div ng-app="app"&gt;
+    &lt;thing&gt;&lt;/thing&gt;
+    &lt;thing&gt;&lt;/thing&gt;
+    &lt;thing&gt;&lt;/thing&gt;
+    &lt;thing&gt;&lt;/thing&gt;
+    &lt;thing&gt;&lt;/thing&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p><img src="http://i.imgur.com/Oqbl2Yy.png" alt="" /></p>
+
+<p>Typing in the first textbox affects all of the other directive views, ie. they are all pointing to the same controller.</p>
+
+<p>In fact, if you have different directives with the same <code>controllerAs</code> value, you can see that the <code>vm</code> instance for each directive is set to the last directive’s controller (<a href="http://jsfiddle.net/10qwqc5r/3/">JSFiddle</a>):</p>
+
+<pre><code>angular
+    .module('app', [])
+    .directive('firstDirective', function() {
+        return {
+            restrict: 'E',
+            replace: true,
+            template: '&lt;div&gt;first directive: &lt;pre&gt;&lt;/pre&gt;&lt;/div&gt;',
+            controller: function() {
+                this.foo = 'Hi!';
+            },
+            controllerAs: 'vm'
+        };
+    })
+    .directive('secondDirective', function(){
+        return {
+            restrict: 'E',
+            replace: true,
+            template: '&lt;div&gt;second directive: &lt;pre&gt;&lt;/pre&gt;&lt;/div&gt;',
+            controller: function() {
+                this.bar = 'There?';
+            },
+            controllerAs: 'vm'
+        };
+    });
+
+&lt;div ng-app="app"&gt;
+	&lt;first-directive&gt;&lt;/first-directive&gt;
+	&lt;second-directive&gt;&lt;/second-directive&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p><img src="http://i.imgur.com/9y6Rg6k.png" alt="" /></p>
+
+<p>If you change the name of the <code>controllerAs</code> alias - say to <code>firstDirectiveVm</code> and <code>secondDirectiveVm</code> - then the problem goes away, so Angular JS by default is setting <code>vm</code> globally each time a directive uses <code>controllerAs: 'vm'</code>, and going down the page, meaning the last <code>vm</code> wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s <code>controllerAs</code> value won’t work for multiple directives of the same type.</p>
+
+<p>The solution is to set <code>scope</code> to <code>true</code> in the directive declaration (<a href="http://jsfiddle.net/10qwqc5r/4/">JSFiddle</a>):</p>
+
+<pre><code>angular
+    .module('app', [])
+    .directive('thing', function() {
+        return {
+            restrict: 'E',
+            replace: true,
+            template: '&lt;div&gt;&lt;input ng-model="vm.name"/&gt; Name: &lt;/div&gt;',
+            controller: function() {
+                this.name = '';
+            },
+            controllerAs: 'vm',
+            scope: true
+        };
+    });
+</code></pre>
+
+<p><img src="http://i.imgur.com/jUlaSCJ.png" alt="" /></p>
+
+<p>A lot more can happen in that <code>scope</code> value than setting it to true. See the Angular JS docs for <a href="https://docs.angularjs.org/guide/directive#isolating-the-scope-of-a-directive">isolating directive scope</a> for examples. Unfortunately, ‘scope’ seems to be an overloaded term in Angular JS world. This kind of ‘scope’ is talking about the scope of the element and attributes provided by the directive, in a way distinct from <code>$scope</code>, which is what I’m trying to avoid by using <code>controllerAs</code> in the first place.</p>
+
+<p>It seems strange to me that shared scope is the default, and that you need to set <code>scope</code> to a non-falsy value to opt out of that. I’m sure I’m missing a lot of nuance around the reasons. In any case, setting <code>scope: true</code> seems to be the happy path. </p>
+
+<p>I just wish I hadn’t wasted a full day rewriting an entire site before figuring out what was happening.</p>
+
+<p>:-(</p>
+
+
+
+
+
+<br/>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+			</div>
+		</div>
+
+		<hr/>
+
+		<div class="container">			
+			<div class="row footer">
+				<p><small>
+					Content &copy; 2008-2014 Ben Scott<br/>
+					<a href="https://twitter.com/bendetat">@bendetat</a> |
+					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
+					<a href="https://github.com/bendetat">github.com/bendetat</a> |
+					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+				</small></p>
+			</div>
+		</div>
+
+		<script src="/lib/jquery-2.0.2.min.js"></script>
+		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="/js/site.js"></script>
+	</body>
+</html>
