@@ -50,11 +50,12 @@ Now that's in you can hand edit the config to add some or all of [Phil Haack's G
 	save = !git add -A && git commit -m 'SAVEPOINT'
 	undo = reset HEAD~1 --mixed
 
-Run this to configure git to push the current branch by default, fix long path name issues and set `autocrlf` to true:
+Run this to configure git to push the current branch by default, fix long path name issues, set `autocrlf` to true, and use the `wincred` credentials helper to store credentials for repositories that don't support SSH:
 
 	git config --global push.default current
 	git config --system core.longpaths true
 	git config --global core.autocrlf true
+	git config --global credential.helper wincred
 
 Also check this out: <https://help.github.com/articles/set-up-git>
 
