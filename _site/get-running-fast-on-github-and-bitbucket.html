@@ -49,7 +49,7 @@
 <p><img src="http://i.imgur.com/hWvTzkl.png" alt="" /></p>
 
 <h3 id="tortoisegit">TortoiseGit</h3>
-<p>I use <a href="code.google.com/p/tortoisegit">TortoiseGit</a> to help stage commits and for visualising the log. I can bypass clicking around in Explorer by adding this batch file (named <code>tgit.bat</code>) to somewhere in my path (I usually add <code>c:\bin</code> to the path for this reason). This is based on a <a href="http://ayende.com/blog/4749/executing-tortoisegit-from-the-command-line">post by Oren Eini</a>.</p>
+<p>I use <a href="http://code.google.com/p/tortoisegit">TortoiseGit</a> to help stage commits and for visualising the log. I can bypass clicking around in Explorer by adding this batch file (named <code>tgit.bat</code>) to somewhere in my path (I usually add <code>c:\bin</code> to the path for this reason). This is based on a <a href="http://ayende.com/blog/4749/executing-tortoisegit-from-the-command-line">post by Oren Eini</a>.</p>
 
 <pre><code>@start "TortoiseGit" "C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe" /command:%1 /path:.
 </code></pre>
@@ -74,9 +74,12 @@ save = !git add -A &amp;&amp; git commit -m 'SAVEPOINT'
 undo = reset HEAD~1 --mixed
 </code></pre>
 
-<p>Run this to configure git to push the current branch by default:</p>
+<p>Run this to configure git to push the current branch by default, fix long path name issues, set <code>autocrlf</code> to true, and use the <code>wincred</code> credentials helper to store credentials for repositories that don’t support SSH:</p>
 
 <pre><code>git config --global push.default current
+git config --system core.longpaths true
+git config --global core.autocrlf true
+git config --global credential.helper wincred
 </code></pre>
 
 <p>Also check this out: <a href="https://help.github.com/articles/set-up-git">https://help.github.com/articles/set-up-git</a></p>

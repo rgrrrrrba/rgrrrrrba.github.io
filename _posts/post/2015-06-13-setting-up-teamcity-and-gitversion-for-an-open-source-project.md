@@ -147,9 +147,10 @@ TeamCity can build feature branches and tags. This lets GitVersion version featu
 
 1. In _Project Settings_ select _VCS Roots_
 2. Select the single VCS root created above
-3. In _Branch specification_, enter `+:refs/heads/*` ([Working with Feature Branches](https://confluence.jetbrains.com/display/TCD8/Working+with+Feature+Branches))
-4. Check _Enable to use tags in the branch specification_
-5. Save
+3. Make sure the advanced options are visible
+4. In _Branch specification_, enter `+:refs/heads/*` ([Working with Feature Branches](https://confluence.jetbrains.com/display/TCD8/Working+with+Feature+Branches))
+5. Check _Enable to use tags in the branch specification_
+6. Save
 
 
 ## Using GitVersion

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ben d&#39;état - Ben Scott&#39;s blog</title>
+		<title>Ben d'état - Ben Scott's blog</title>
 		<description></description>		
 		<link>http://bendetat.com</link>
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
@@ -14,16 +14,16 @@
 &lt;p&gt;Say you’ve got this directive (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/2/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;thing&#39;, function() {
+    .module('app', [])
+    .directive('thing', function() {
         return {
-            restrict: &#39;E&#39;,
+            restrict: 'E',
             replace: true,
-            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
+            template: '&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;',
             controller: function() {
-                this.name = &#39;&#39;;
+                this.name = '';
             },
-            controllerAs: &#39;vm&#39;
+            controllerAs: 'vm'
         };
     });
 &lt;/code&gt;&lt;/pre&gt;
@@ -53,27 +53,27 @@
 &lt;p&gt;In fact, if you have different directives with the same &lt;code&gt;controllerAs&lt;/code&gt; value, you can see that the &lt;code&gt;vm&lt;/code&gt; instance for each directive is set to the last directive’s controller (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/3/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;firstDirective&#39;, function() {
+    .module('app', [])
+    .directive('firstDirective', function() {
         return {
-            restrict: &#39;E&#39;,
+            restrict: 'E',
             replace: true,
-            template: &#39;&amp;lt;div&amp;gt;first directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
+            template: '&amp;lt;div&amp;gt;first directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;',
             controller: function() {
-                this.foo = &#39;Hi!&#39;;
+                this.foo = 'Hi!';
             },
-            controllerAs: &#39;vm&#39;
+            controllerAs: 'vm'
         };
     })
-    .directive(&#39;secondDirective&#39;, function(){
+    .directive('secondDirective', function(){
         return {
-            restrict: &#39;E&#39;,
+            restrict: 'E',
             replace: true,
-            template: &#39;&amp;lt;div&amp;gt;second directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
+            template: '&amp;lt;div&amp;gt;second directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;',
             controller: function() {
-                this.bar = &#39;There?&#39;;
+                this.bar = 'There?';
             },
-            controllerAs: &#39;vm&#39;
+            controllerAs: 'vm'
         };
     });
 
@@ -85,21 +85,21 @@
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/9y6Rg6k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;If you change the name of the &lt;code&gt;controllerAs&lt;/code&gt; alias - say to &lt;code&gt;firstDirectiveVm&lt;/code&gt; and &lt;code&gt;secondDirectiveVm&lt;/code&gt; - then the problem goes away, so Angular JS by default is setting &lt;code&gt;vm&lt;/code&gt; globally each time a directive uses &lt;code&gt;controllerAs: &#39;vm&#39;&lt;/code&gt;, and going down the page, meaning the last &lt;code&gt;vm&lt;/code&gt; wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s &lt;code&gt;controllerAs&lt;/code&gt; value won’t work for multiple directives of the same type.&lt;/p&gt;
+&lt;p&gt;If you change the name of the &lt;code&gt;controllerAs&lt;/code&gt; alias - say to &lt;code&gt;firstDirectiveVm&lt;/code&gt; and &lt;code&gt;secondDirectiveVm&lt;/code&gt; - then the problem goes away, so Angular JS by default is setting &lt;code&gt;vm&lt;/code&gt; globally each time a directive uses &lt;code&gt;controllerAs: 'vm'&lt;/code&gt;, and going down the page, meaning the last &lt;code&gt;vm&lt;/code&gt; wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s &lt;code&gt;controllerAs&lt;/code&gt; value won’t work for multiple directives of the same type.&lt;/p&gt;
 
 &lt;p&gt;The solution is to set &lt;code&gt;scope&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in the directive declaration (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/4/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;thing&#39;, function() {
+    .module('app', [])
+    .directive('thing', function() {
         return {
-            restrict: &#39;E&#39;,
+            restrict: 'E',
             replace: true,
-            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
+            template: '&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;',
             controller: function() {
-                this.name = &#39;&#39;;
+                this.name = '';
             },
-            controllerAs: &#39;vm&#39;,
+            controllerAs: 'vm',
             scope: true
         };
     });
@@ -136,7 +136,7 @@
 
 &lt;p&gt;I’ve started out with an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html&quot;&gt;Azure VM configured with TeamCity 9&lt;/a&gt;. I first installed GitVersion on my build agent using &lt;a href=&quot;https://chocolatey.org/&quot;&gt;Chocolatey&lt;/a&gt;. Install Chocolatey using an elevated Powershell console:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;iex ((new-object net.webclient).DownloadString(&#39;https://chocolatey.org/install.ps1&#39;))
+&lt;pre&gt;&lt;code&gt;iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Then install GitVersion:&lt;/p&gt;
@@ -281,6 +281,7 @@
 &lt;ol&gt;
   &lt;li&gt;In &lt;em&gt;Project Settings&lt;/em&gt; select &lt;em&gt;VCS Roots&lt;/em&gt;&lt;/li&gt;
   &lt;li&gt;Select the single VCS root created above&lt;/li&gt;
+  &lt;li&gt;Make sure the advanced options are visible&lt;/li&gt;
   &lt;li&gt;In &lt;em&gt;Branch specification&lt;/em&gt;, enter &lt;code&gt;+:refs/heads/*&lt;/code&gt; (&lt;a href=&quot;https://confluence.jetbrains.com/display/TCD8/Working+with+Feature+Branches&quot;&gt;Working with Feature Branches&lt;/a&gt;)&lt;/li&gt;
   &lt;li&gt;Check &lt;em&gt;Enable to use tags in the branch specification&lt;/em&gt;&lt;/li&gt;
   &lt;li&gt;Save&lt;/li&gt;
@@ -333,7 +334,7 @@ git push
 	// 1. By design, a class built for object initialization syntax has to have public setters,
 	// meaning that the resulting object is mutable.
 
-	// 2. Because a constructor isn&#39;t used, there is no way for business rules or domain
+	// 2. Because a constructor isn't used, there is no way for business rules or domain
 	// invariants to be enforced. It is trivial to miss a value or set a value to something
 	// that breaks a business rule, which can be difficult and annoying to debug and prevent.
 
@@ -344,15 +345,15 @@ git push
 	
 	//var brokens = new Brokens { Ints = { 1, 2, 3 } };
 	
-	// This is because Ints isn&#39;t initialised, and array initialization syntax is just 
+	// This is because Ints isn't initialised, and array initialization syntax is just 
 	// syntactic sugar for foo.Add(1). You can see this if you try to declare your collection
 	// as a straight-up array:
 	
 	//var brokensWithArray = new BrokensWithArray { Ints = { 1,2,3 } };
-	// Build error: Cannot initialize object of type &#39;int[]&#39; with a collection initializer
+	// Build error: Cannot initialize object of type 'int[]' with a collection initializer
 	
 	// To get the same syntax to work, the class must initialize Ints in the
-	// default constructor (a non-default constructor won&#39;t work):
+	// default constructor (a non-default constructor won't work):
 	
 	var works = new Works { Ints = { 1, 2, 3 } };
 	
@@ -367,7 +368,7 @@ git push
 	
 	var brokensStruct = new BrokensStruct { Ints = new List&amp;lt;int&amp;gt;() { 1, 2, 3 } };
 	
-	// But since structs can&#39;t have parameterless public constructors, they can never use
+	// But since structs can't have parameterless public constructors, they can never use
 	// the simpler object initialization syntax:
 	
 	//struct WorksStruct {
@@ -422,12 +423,12 @@ struct BrokensStruct {
 
 let result =
 	match name with 
-	| &quot;Fiona&quot; -&amp;gt; &quot;It&#39;s Fiona!&quot;
-	| &quot;Ben&quot; -&amp;gt; &quot;Hey it&#39;s me!&quot;
+	| &quot;Fiona&quot; -&amp;gt; &quot;It's Fiona!&quot;
+	| &quot;Ben&quot; -&amp;gt; &quot;Hey it's me!&quot;
 	| &quot;Steve&quot; -&amp;gt; &quot;Steve you rascal!&quot;
-	| _ -&amp;gt; &quot;I don&#39;t know this person&quot;
+	| _ -&amp;gt; &quot;I don't know this person&quot;
 	
-// result = &quot;Hey it&#39;s me!&quot;
+// result = &quot;Hey it's me!&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this &lt;code&gt;switch&lt;/code&gt; construct in C#:&lt;/p&gt;
@@ -437,16 +438,16 @@ string result;
 
 switch (name) {
 	case &quot;Fiona&quot;:
-		result =  &quot;It&#39;s Fiona!&quot;;
+		result =  &quot;It's Fiona!&quot;;
 		break;
 	case &quot;Ben&quot;:
-		result = &quot;Hey it&#39;s me!&quot;;
+		result = &quot;Hey it's me!&quot;;
 		break;
 	case &quot;Steve&quot;:
 		result = &quot;Steve you rascal!&quot;;
 		break;
 	default:
-		result = &quot;I don&#39;t know this person&quot;;
+		result = &quot;I don't know this person&quot;;
 		break;
 }
 &lt;/code&gt;&lt;/pre&gt;
@@ -467,10 +468,10 @@ switch (name) {
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;Ben&quot;;
 var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it&#39;s me!&quot;)
+	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It's Fiona!&quot;)
+	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it's me!&quot;)
 	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(&quot;I don&#39;t know this person&quot;)
+	.Else(&quot;I don't know this person&quot;)
 	.Do();
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -478,13 +479,13 @@ var result = name.Match()
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;George&quot;;
 var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it&#39;s {0}!&quot;, x))
+	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It's Fiona!&quot;)
+	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it's {0}!&quot;, x))
 	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(x =&amp;gt; string.Format(&quot;I don&#39;t know {0}&quot;, x))
+	.Else(x =&amp;gt; string.Format(&quot;I don't know {0}&quot;, x))
 	.Do();
 
-// result = &quot;I don&#39;t know George&quot;
+// result = &quot;I don't know George&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;code&gt;Else&lt;/code&gt; value is optional but if it falls through without matching and there’s no &lt;code&gt;Else&lt;/code&gt; value it throws an &lt;code&gt;IncompletePatternMatchException&lt;/code&gt;:&lt;/p&gt;
@@ -547,7 +548,7 @@ var invalidEggs = basket.Do();
 var intention = PatternMatch.Match()
 	.With(() =&amp;gt; footwear == &quot;red slippers&quot;, &quot;following the Yellow Brick Road&quot;)
 	.With(() =&amp;gt; footwear == &quot;boots&quot;, &quot;walking&quot;)
-	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don&#39;t think so&quot;)
+	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don't think so&quot;)
 	.ToFunc();
 
 var walking = intention();
@@ -555,7 +556,7 @@ footwear = &quot;these shoes&quot;;
 var noWayJose = intention();
 
 // walking = &quot;walking&quot;
-// noWayJose = &quot;I don&#39;t think so&quot;
+// noWayJose = &quot;I don't think so&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This is getting quite DRY but closing over a local mutable value will have the purists climbing the walls, myself included. So the final form goes back to processing an input, deferred until the match statement is executed. The syntax is a little verbose because C# can’t infer the types of the lambdas without help, but I’m pretty happy with the result - a reusable &lt;code&gt;Func&amp;lt;TIn, TOut&amp;gt;&lt;/code&gt; value that is defined declaratively with no flow control or mutated state:&lt;/p&gt;
@@ -748,14 +749,14 @@ npm install --save-dev karma-chai
 
 &lt;p&gt;To get Chai included in the test pipeline, we need to edit &lt;code&gt;karma-conf.js&lt;/code&gt; and add it to the &lt;code&gt;frameworks&lt;/code&gt; setting:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;frameworks: [&#39;mocha&#39;, &#39;chai&#39;],
+&lt;pre&gt;&lt;code&gt;frameworks: ['mocha', 'chai'],
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; will execute the default &lt;code&gt;karma-conf.js&lt;/code&gt; (or &lt;code&gt;karma-conf.coffee&lt;/code&gt;). First we need a test to run. In &lt;code&gt;./source-and-tests/&lt;/code&gt; I created &lt;code&gt;array-tests.js&lt;/code&gt; which just contains the &lt;a href=&quot;http://mochajs.org/#synchronous-code&quot;&gt;first example&lt;/a&gt; from Mocha’s documentation.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;Array&#39;, function(){
-  describe(&#39;#indexOf()&#39;, function(){
-    it(&#39;should return -1 when the value is not present&#39;, function(){
+&lt;pre&gt;&lt;code&gt;describe('Array', function(){
+  describe('#indexOf()', function(){
+    it('should return -1 when the value is not present', function(){
       assert.equal(-1, [1,2,3].indexOf(5));
       assert.equal(-1, [1,2,3].indexOf(0));
     })
@@ -793,28 +794,28 @@ bower install --save angular-mocks
 &lt;p&gt;To include AngularJS and angular-mocks in Karma’s test run, edit the &lt;code&gt;files&lt;/code&gt; config setting in &lt;code&gt;karma.conf.js&lt;/code&gt;. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;files: [
-	&#39;bower_components/angular/angular.js&#39;,
-	&#39;bower_components/angular-mocks/angular-mocks.js&#39;,
-	&#39;source-and-tests/**/*.js&#39;
+	'bower_components/angular/angular.js',
+	'bower_components/angular-mocks/angular-mocks.js',
+	'source-and-tests/**/*.js'
 ],
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The controller to test is very simple at this stage (&lt;code&gt;MyController.js&lt;/code&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;(function(){
-	angular.module(&#39;my-module&#39;, []);
+	angular.module('my-module', []);
 
 	angular
-		.module(&#39;my-module&#39;)
-		.controller(&#39;MyController&#39;, [
+		.module('my-module')
+		.controller('MyController', [
 			function(){
 				var self = this;
 
-				self.firstName = &#39;&#39;;
-				self.lastName = &#39;&#39;;
+				self.firstName = '';
+				self.lastName = '';
 
 				self.getFullName = function(){
-					return self.firstName + &#39; &#39; + self.lastName;
+					return self.firstName + ' ' + self.lastName;
 				};
 
 				return self;
@@ -825,17 +826,17 @@ bower install --save angular-mocks
 
 &lt;p&gt;This creates a module called &lt;code&gt;my-module&lt;/code&gt; and creates a controller called &lt;code&gt;MyController&lt;/code&gt; that exposes &lt;code&gt;firstName&lt;/code&gt;, &lt;code&gt;lastName&lt;/code&gt; and &lt;code&gt;getFullName()&lt;/code&gt;. I want to test the result of &lt;code&gt;getFullName()&lt;/code&gt; (&lt;code&gt;MyControllerTests.js&lt;/code&gt;):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;MyController&#39;, function(){
-	beforeEach(module(&#39;my-module&#39;));
+&lt;pre&gt;&lt;code&gt;describe('MyController', function(){
+	beforeEach(module('my-module'));
 
-	describe(&#39;getFullName()&#39;, function(){
-		it(&#39;should handle names correctly&#39;, inject(function($controller){
-			var myController = $controller(&#39;MyController&#39;);
+	describe('getFullName()', function(){
+		it('should handle names correctly', inject(function($controller){
+			var myController = $controller('MyController');
 
-			myController.firstName = &#39;George&#39;;
-			myController.lastName = &#39;Harrison&#39;;
+			myController.firstName = 'George';
+			myController.lastName = 'Harrison';
 
-			myController.getFullName().should.equal(&#39;George Harrison&#39;);
+			myController.getFullName().should.equal('George Harrison');
 		}));
 	});
 });
@@ -843,17 +844,17 @@ bower install --save angular-mocks
 
 &lt;p&gt;This does some interesting things.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;beforeEach(module(&#39;my-module&#39;));
+&lt;pre&gt;&lt;code&gt;beforeEach(module('my-module'));
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This loads the &lt;code&gt;my-module&lt;/code&gt; module before each test in the &lt;code&gt;MyController&lt;/code&gt; suite.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;it(&#39;should handle names correctly&#39;, inject(function($controller){
+&lt;pre&gt;&lt;code&gt;it('should handle names correctly', inject(function($controller){
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This injects &lt;code&gt;$controller&lt;/code&gt; into the test. &lt;code&gt;$controller&lt;/code&gt; allows resolving registered controllers.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var myController = $controller(&#39;MyController&#39;);
+&lt;pre&gt;&lt;code&gt;var myController = $controller('MyController');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This resolves an instance of the &lt;code&gt;MyController&lt;/code&gt; controller. The instance is then used as the test subject.&lt;/p&gt;
@@ -863,16 +864,16 @@ bower install --save angular-mocks
 &lt;p&gt;The &lt;code&gt;$scope&lt;/code&gt; that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to &lt;code&gt;$scope&lt;/code&gt; for another test. The controller declaration changes to this:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-	.module(&#39;my-module&#39;)
-	.controller(&#39;MyController&#39;, [
-		&#39;$scope&#39;,
+	.module('my-module')
+	.controller('MyController', [
+		'$scope',
 		function($scope){
 			var self = this;
 
 			// ...
 
 			$scope.songs = [
-				&#39;Here Comes The Sun&#39;
+				'Here Comes The Sun'
 			];
 
 			$scope.addSong = function(song) {
@@ -886,23 +887,23 @@ bower install --save angular-mocks
 
 &lt;p&gt;The existing test can just pass in an empty object to the controller resolution:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var myController = $controller(&#39;MyController&#39;, {
+&lt;pre&gt;&lt;code&gt;var myController = $controller('MyController', {
 	$scope: {}
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now the new test can inject, use and inspect a mock scope:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;addSong()&#39;, function(){
-	it(&#39;should add songs&#39;, inject(function($controller) {
+&lt;pre&gt;&lt;code&gt;describe('addSong()', function(){
+	it('should add songs', inject(function($controller) {
 		var scope = {};
-		var myController = $controller(&#39;MyController&#39;, {
+		var myController = $controller('MyController', {
 			$scope: scope
 		});
 
-		scope.addSong(&#39;While My Guitar Gently Weeps&#39;);
+		scope.addSong('While My Guitar Gently Weeps');
 
-		scope.songs.should.contain(&#39;While My Guitar Gently Weeps&#39;);
+		scope.songs.should.contain('While My Guitar Gently Weeps');
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
@@ -912,17 +913,17 @@ bower install --save angular-mocks
 &lt;p&gt;So now I’ve got a web service that I call to populate something on &lt;code&gt;$scope&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-	.module(&#39;my-module&#39;)
-	.controller(&#39;MyController&#39;, [
-		&#39;$scope&#39;, &#39;$http&#39;,
+	.module('my-module')
+	.controller('MyController', [
+		'$scope', '$http',
 		function($scope, $http){
 			var self = this;
 
 			// ...
 
-			$scope.instruments = [&#39;foo&#39;];
+			$scope.instruments = ['foo'];
 
-			$http.get(&#39;api/get-instruments&#39;)
+			$http.get('api/get-instruments')
 				.success(function(data) {
 					$scope.instruments = data;
 				});
@@ -934,21 +935,21 @@ bower install --save angular-mocks
 
 &lt;p&gt;The &lt;a href=&quot;https://docs.angularjs.org/api/ngMock/service/$httpBackend&quot;&gt;&lt;code&gt;$httpBackend&lt;/code&gt;&lt;/a&gt; is an &lt;code&gt;angular-mocks&lt;/code&gt; service that fakes the &lt;code&gt;$http&lt;/code&gt; service:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;get-instruments result&#39;, function(){
-	it(&#39;should be added to scope&#39;, inject(function($controller, $httpBackend){
+&lt;pre&gt;&lt;code&gt;describe('get-instruments result', function(){
+	it('should be added to scope', inject(function($controller, $httpBackend){
 		var scope = {};
 		$httpBackend
-			.when(&#39;GET&#39;, &#39;api/get-instruments&#39;)
+			.when('GET', 'api/get-instruments')
 			.respond([
-				&#39;vocals&#39;, &#39;guitar&#39;, &#39;sitar&#39;
+				'vocals', 'guitar', 'sitar'
 			]);
-		var myController = $controller(&#39;MyController&#39;, {
+		var myController = $controller('MyController', {
 			$scope: scope
 		});
 
 		$httpBackend.flush();
 
-		scope.instruments.should.contain(&#39;guitar&#39;);
+		scope.instruments.should.contain('guitar');
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
@@ -959,33 +960,33 @@ bower install --save angular-mocks
 
 &lt;p&gt;If the call to &lt;code&gt;api/get-instruments&lt;/code&gt; fails, I want to set a status to ‘ERROR’:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;$scope.instruments = [&#39;foo&#39;];
-$scope.status = &#39;&#39;;
+&lt;pre&gt;&lt;code&gt;$scope.instruments = ['foo'];
+$scope.status = '';
 
-$http.get(&#39;api/get-instruments&#39;)
+$http.get('api/get-instruments')
 	.success(function(data) {
 		$scope.instruments = data;
 	})
 	.error(function(e) {
-		$scope.status = &#39;ERROR&#39;;
+		$scope.status = 'ERROR';
 	});
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;To simulate the error, you can just tell the &lt;code&gt;$httpBackend&lt;/code&gt; to respond with an error code (500):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;describe(&#39;get-instruments with error&#39;, function(){
-	it(&#39;should have a status with error&#39;, inject(function($controller, $httpBackend){
+&lt;pre&gt;&lt;code&gt;describe('get-instruments with error', function(){
+	it('should have a status with error', inject(function($controller, $httpBackend){
 		var scope = {};
 		$httpBackend
-			.when(&#39;GET&#39;, &#39;api/get-instruments&#39;)
-			.respond(500, &#39;&#39;);
-		var myController = $controller(&#39;MyController&#39;, {
+			.when('GET', 'api/get-instruments')
+			.respond(500, '');
+		var myController = $controller('MyController', {
 			$scope: scope
 		});
 
 		$httpBackend.flush();
 
-		scope.status.should.equal(&#39;ERROR&#39;);
+		scope.status.should.equal('ERROR');
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
@@ -1038,36 +1039,36 @@ $http.get(&#39;api/get-instruments&#39;)
 &lt;p&gt;I moved all the dependencies into &lt;code&gt;$&lt;/code&gt;, deleted the dependencies I wouldn’t need any more and added &lt;code&gt;useref&lt;/code&gt;:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var $ = {
-	if: require(&#39;gulp-if&#39;),
-	notify: require(&#39;gulp-notify&#39;),
-	rev: require(&#39;gulp-rev&#39;),
-	revReplace: require(&#39;gulp-rev-replace&#39;),
-	useref: require(&#39;gulp-useref&#39;),
-	filter: require(&#39;gulp-filter&#39;),
-	uglify: require(&#39;gulp-uglify&#39;),
-	minifyCss: require(&#39;gulp-minify-css&#39;),
-	del: require(&#39;del&#39;),
-	path: require(&#39;path&#39;),
-	connect: require(&#39;connect&#39;),
-	serveStatic: require(&#39;serve-static&#39;),
-	log: require(&#39;gulp-load-plugins&#39;)()
-		.loadUtils([&#39;log&#39;])
+	if: require('gulp-if'),
+	notify: require('gulp-notify'),
+	rev: require('gulp-rev'),
+	revReplace: require('gulp-rev-replace'),
+	useref: require('gulp-useref'),
+	filter: require('gulp-filter'),
+	uglify: require('gulp-uglify'),
+	minifyCss: require('gulp-minify-css'),
+	del: require('del'),
+	path: require('path'),
+	connect: require('connect'),
+	serveStatic: require('serve-static'),
+	log: require('gulp-load-plugins')()
+		.loadUtils(['log'])
 		.log
 };
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Then I deleted the &lt;code&gt;rev-and-inject&lt;/code&gt; task plus all of the CSS and JS tasks, and replaced the &lt;code&gt;build&lt;/code&gt; task with this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;fonts&#39;, &#39;images&#39;], function() {
-	var cssFilter = $.filter(&#39;**/*.css&#39;);
-	var jsFilter = $.filter(&#39;**/*.js&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('build', ['fonts', 'images'], function() {
+	var cssFilter = $.filter('**/*.css');
+	var jsFilter = $.filter('**/*.js');
 	var assets = $.useref.assets();
 
 	return gulp
-		.src($.path.join(config.paths.client, &#39;*.html&#39;))
+		.src($.path.join(config.paths.client, '*.html'))
 		.pipe(assets)
-		.pipe($.if(&#39;*.js&#39;, $.uglify()))
-		.pipe($.if(&#39;*.css&#39;, $.minifyCss()))
+		.pipe($.if('*.js', $.uglify()))
+		.pipe($.if('*.css', $.minifyCss()))
 		.pipe($.rev())
 		.pipe(assets.restore())
 		.pipe($.useref())
@@ -1076,7 +1077,7 @@ $http.get(&#39;api/get-instruments&#39;)
 
 		.pipe($.notify({
 			onLast: true,
-			message: &#39;Build complete&#39;
+			message: 'Build complete'
 		}))
 		;
 });
@@ -1110,7 +1111,7 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;p&gt;In the &lt;code&gt;serve&lt;/code&gt; task (which sets up a static web server hosting the built site) I used &lt;code&gt;gulp.watch&lt;/code&gt; to listen for changes in the source folder and trigger a build:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;return gulp.watch(config.paths.client + &#39;/**&#39;, [&#39;build&#39;]);
+&lt;pre&gt;&lt;code&gt;return gulp.watch(config.paths.client + '/**', ['build']);
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now if a file changes, the files get rebuilt in the same process as the server. Because that server is just serving the entire source path any changes are available instantly.&lt;/p&gt;
@@ -1179,7 +1180,7 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;p&gt;I’ll start by adding a dependency task to the &lt;code&gt;rev-and-inject&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;], function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss'], function() {
 	// existing rev-and-inject task
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1200,7 +1201,7 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;p&gt;The &lt;code&gt;config&lt;/code&gt; object is now initialised using &lt;code&gt;require()&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var config = require(&#39;./gulp-config.json&#39;);
+&lt;pre&gt;&lt;code&gt;var config = require('./gulp-config.json');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now we get to install some more dependencies!&lt;/p&gt;
@@ -1216,17 +1217,17 @@ $http.get(&#39;api/get-instruments&#39;)
 
 &lt;p&gt;Pull in the &lt;code&gt;concat&lt;/code&gt; dependency at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var concat = require(&#39;gulp-concat&#39;);
+&lt;pre&gt;&lt;code&gt;var concat = require('gulp-concat');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now add the &lt;code&gt;vendorcss&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;vendorcss&#39;, function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('vendorcss', function(){
 return gulp
 	// set source
 	.src(config.paths.vendorcss)
 	// write to vendor.min.css
-	.pipe(concat(&#39;vendor.min.css&#39;))
+	.pipe(concat('vendor.min.css'))
 	// write to dest
 	.pipe(gulp.dest(config.paths.destination));
 });
@@ -1256,17 +1257,17 @@ return gulp
 
 &lt;p&gt;Add the &lt;code&gt;bytediff&lt;/code&gt; and &lt;code&gt;minify-css&lt;/code&gt; dependencies at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var bytediff = require(&#39;gulp-bytediff&#39;);
-var minifyCss = require(&#39;gulp-minify-css&#39;);
+&lt;pre&gt;&lt;code&gt;var bytediff = require('gulp-bytediff');
+var minifyCss = require('gulp-minify-css');
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Then add the minify and bytediff steps to the pipeline (in &lt;code&gt;gulp.task(&#39;vendorcss&#39;..&lt;/code&gt;):&lt;/p&gt;
+&lt;p&gt;Then add the minify and bytediff steps to the pipeline (in &lt;code&gt;gulp.task('vendorcss'..&lt;/code&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;return gulp
 	// set source
 	.src(config.paths.vendorcss)
 	// write to vendor.min.css
-	.pipe(concat(&#39;vendor.min.css&#39;))
+	.pipe(concat('vendor.min.css'))
 
 	// start tracking size
 	.pipe(bytediff.start())
@@ -1285,25 +1286,25 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 	var formatPercent = function(num, precision) {
 		return (num * 100).toFixed(precision);
 	};
-    var difference = (data.savings &amp;gt; 0) ? &#39; smaller.&#39; : &#39; larger.&#39;;
+    var difference = (data.savings &amp;gt; 0) ? ' smaller.' : ' larger.';
     
-    return data.fileName + &#39; went from &#39; +
-        (data.startSize / 1000).toFixed(2) + &#39; kB to &#39; + (data.endSize / 1000).toFixed(2) + &#39; kB&#39; +
-        &#39; and is &#39; + formatPercent(1 - data.percent, 2) + &#39;%&#39; + difference;
+    return data.fileName + ' went from ' +
+        (data.startSize / 1000).toFixed(2) + ' kB to ' + (data.endSize / 1000).toFixed(2) + ' kB' +
+        ' and is ' + formatPercent(1 - data.percent, 2) + '%' + difference;
 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now when I run &lt;code&gt;gulp build&lt;/code&gt; the CSS is minified:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[09:10:18] Starting &#39;vendorcss&#39;...
+&lt;pre&gt;&lt;code&gt;[09:10:18] Starting 'vendorcss'...
 [gulp] [09:10:18] Compressing, bundling and copying vendor CSS
 [09:10:18] vendor.min.css went from 164.02 kB to 135.50 kB and is 17.39% smaller.
-[09:10:18] Finished &#39;vendorcss&#39; after 298 ms
-[09:10:18] Starting &#39;rev-and-inject&#39;...
-[09:10:18] Finished &#39;rev-and-inject&#39; after 5.79 ms
-[09:10:18] Starting &#39;build&#39;...
+[09:10:18] Finished 'vendorcss' after 298 ms
+[09:10:18] Starting 'rev-and-inject'...
+[09:10:18] Finished 'rev-and-inject' after 5.79 ms
+[09:10:18] Starting 'build'...
 [09:10:18] gulp-notify: [Gulp notification] Build complete
-[09:10:18] Finished &#39;build&#39; after 48 ms
+[09:10:18] Finished 'build' after 48 ms
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;code&gt;index.html&lt;/code&gt; now needs a reference to the minified CSS file. It could be hard-coded to &lt;code&gt;vendor.min.css&lt;/code&gt; but that is subject to change if the build script changes. So we need to &lt;em&gt;inject&lt;/em&gt; the path to the &lt;code&gt;vendor.min.css&lt;/code&gt; artifact directly into &lt;code&gt;index.html&lt;/code&gt; as it is being written.&lt;/p&gt;
@@ -1321,16 +1322,16 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 
 &lt;p&gt;Add the new &lt;code&gt;inject&lt;/code&gt; dependency to the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var inject = require(&#39;gulp-inject&#39;);
+&lt;pre&gt;&lt;code&gt;var inject = require('gulp-inject');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task add a local method that wraps &lt;code&gt;inject()&lt;/code&gt; with some common options:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;var localInject = function(pathGlob, name) {
 	var options = {
-		// Strip out the &#39;src/client-dist-app&#39; part from the path to vendor.min.css
+		// Strip out the 'src/client-dist-app' part from the path to vendor.min.css
 		ignorePaths = config.paths.destination,
-		// Don&#39;t read file being injected, just get the path
+		// Don't read file being injected, just get the path
 		read: false,
 		// add a prefix to the injected path
 		addPrefix: config.paths.buildPrefix
@@ -1353,8 +1354,8 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 
 &lt;p&gt;The inject step now needs to be added to the &lt;code&gt;rev-and-inject&lt;/code&gt; task pipeline:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;], function() {
-	var indexPath = path.join(config.paths.source, &#39;index.html&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss'], function() {
+	var indexPath = path.join(config.paths.source, 'index.html');
 
 	var localInject = //...
 
@@ -1363,8 +1364,8 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 
 		// inject into inject-vendor:css
 		.pipe(localInject(
-			path.join(config.paths.destination, &#39;vendor.min.css&#39;),
-			&#39;inject-vendor&#39;))
+			path.join(config.paths.destination, 'vendor.min.css'),
+			'inject-vendor'))
 
 		.pipe(gulp.dest(config.paths.distribution))
 });
@@ -1409,18 +1410,18 @@ var minifyCss = require(&#39;gulp-minify-css&#39;);
 
 &lt;p&gt;Add the new dependencies at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var connect = require(&#39;connect&#39;);
-var serveStatic = require(&#39;serve-static&#39;);
+&lt;pre&gt;&lt;code&gt;var connect = require('connect');
+var serveStatic = require('serve-static');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now add a new task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;serve&#39;, function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('serve', function(){
 	var sourcePath = path.join(__dirname, config.paths.destination);
 	var port = 12857;
-	var serveFromPath = &#39;/&#39; + config.paths.buildPrefix;
+	var serveFromPath = '/' + config.paths.buildPrefix;
 
-	log(&#39;Hosting &#39; + sourcePath + &#39; at http://localhost:&#39; + port + serveFromPath);
+	log('Hosting ' + sourcePath + ' at http://localhost:' + port + serveFromPath);
 
 	connect()
 		.use(serveFromPath, serveStatic(sourcePath))
@@ -1436,12 +1437,12 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;In &lt;code&gt;gulpfile.js&lt;/code&gt; add a new &lt;code&gt;css&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;css&#39;, function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('css', function() {
 	return gulp
 		// set source (src/**/*.css)
-		.src([path.join(config.paths.client, &#39;**/*.css&#39;)])
+		.src([path.join(config.paths.client, '**/*.css')])
 		// write to site.min.css
-		.pipe(concat(&#39;site.min.css&#39;))
+		.pipe(concat('site.min.css'))
 		// start tracking size
 		.pipe(bytediff.start())
 		// minify the css
@@ -1455,7 +1456,7 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;This is getting a bit familiar. Instead of using a set of explicit tasks from &lt;code&gt;gulp-config.json&lt;/code&gt; I’ve just assumed that anything named &lt;code&gt;*.css&lt;/code&gt; anywhere in the client should be injected into the static site distribution. The concatenated, minified output gets written to &lt;code&gt;/src/client-dist/content/site.min.css&lt;/code&gt;. Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task the &lt;code&gt;css&lt;/code&gt; task needs to be added to the prerequisites:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;], function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css'], function(){
 	// ...
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1499,17 +1500,17 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;&lt;code&gt;uglify&lt;/code&gt; is used instead of &lt;code&gt;minifyCss&lt;/code&gt;. Add the dependency at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var uglify = require(&#39;gulp-uglify&#39;);
+&lt;pre&gt;&lt;code&gt;var uglify = require('gulp-uglify');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now create the &lt;code&gt;vendorjs&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;vendorjs&#39;, function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('vendorjs', function(){
 	return gulp
 		// set source
 		.src(config.paths.vendorjs)
 		// write to vendor.min.js
-		.pipe(concat(&#39;vendor.min.js&#39;))
+		.pipe(concat('vendor.min.js'))
 		// start tracking size
 		.pipe(bytediff.start())
 		// uglify js
@@ -1524,7 +1525,7 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;In &lt;code&gt;rev-and-inject&lt;/code&gt;, the &lt;code&gt;vendorcss&lt;/code&gt; prerequisite task needs to be added:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;, &#39;vendorjs&#39;], function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css', 'vendorjs'], function(){
 	// ...	
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1532,8 +1533,8 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;pre&gt;&lt;code&gt;// inject into inject-vendor:js
 .pipe(localInject(
-	path.join(config.paths.destination, &#39;vendor.min.js&#39;),
-	&#39;inject-vendor&#39;))
+	path.join(config.paths.destination, 'vendor.min.js'),
+	'inject-vendor'))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now the &lt;code&gt;inject-vendor:css&lt;/code&gt; placeholder needs to be added to &lt;code&gt;index.html&lt;/code&gt; at the end of the &lt;code&gt;&amp;lt;body&amp;gt;&lt;/code&gt; element:&lt;/p&gt;
@@ -1546,12 +1547,12 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;To support AngularJS, the site-specific JS task will need a couple of extra steps, but I’ll leave that for the next post. Meanwhile, it will be similar to the site-specific CSS task, bundling and minifying all &lt;code&gt;*.js&lt;/code&gt; files in &lt;code&gt;/src/client&lt;/code&gt;.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;js&#39;, function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('js', function() {
 	return gulp
 		// set source (src/**/*.js)
-		.src([path.join(config.paths.client, &#39;**/*.js&#39;)])
+		.src([path.join(config.paths.client, '**/*.js')])
 		// write to site.min.js
-		.pipe(concat(&#39;site.min.js&#39;))
+		.pipe(concat('site.min.js'))
 		// start tracking size
 		.pipe(bytediff.start())
 		// uglify js
@@ -1566,7 +1567,7 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;In &lt;code&gt;rev-and-inject&lt;/code&gt;, the &lt;code&gt;js&lt;/code&gt; prerequisite task needs to be added:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;, &#39;vendorjs&#39;], function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css', 'vendorjs'], function(){
 	// ...	
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1574,25 +1575,25 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;pre&gt;&lt;code&gt;// inject into inject:js
 .pipe(localInject(
-	path.join(config.paths.destination, &#39;site.min.js&#39;)))
+	path.join(config.paths.destination, 'site.min.js')))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&quot;fonts-and-images&quot;&gt;Fonts and images&lt;/h2&gt;
 
 &lt;p&gt;Site assets that aren’t CSS or JS need to be processed as well. Fonts are pretty straightforward, I’ll just copy everything in &lt;code&gt;content/fonts&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;fonts&#39;, function(){
-	log(&#39;Copy fonts&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('fonts', function(){
+	log('Copy fonts');
 
 	return gulp
-		.src([path.join(config.paths.client, &#39;content/fonts/*&#39;)])
-		.pipe(gulp.dest(path.join(config.paths.destination, &#39;content/fonts&#39;)));
+		.src([path.join(config.paths.client, 'content/fonts/*')])
+		.pipe(gulp.dest(path.join(config.paths.destination, 'content/fonts')));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Since this can be done outside of the &lt;code&gt;rev-and-inject&lt;/code&gt; process, it gets added to the &lt;code&gt;build&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;rev-and-inject&#39;, &#39;fonts&#39;], function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('build', ['rev-and-inject', 'fonts'], function() {
 	// ...
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1618,21 +1619,21 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;&lt;code&gt;imagemin&lt;/code&gt; is an image minifier. This performs some compression on PNG images:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;images&#39;, function(){
-	log(&#39;Compress, cache and copy images&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('images', function(){
+	log('Compress, cache and copy images');
 
 	return gulp
-		.src([path.join(config.paths.client, &#39;content/images/*&#39;)])
+		.src([path.join(config.paths.client, 'content/images/*')])
 		.pipe(cache(imagemin({
 			optimizationLevel: 3
 		})))
-		.pipe(gulp.dest(path.join(config.paths.destination, &#39;content/images&#39;)));
+		.pipe(gulp.dest(path.join(config.paths.destination, 'content/images')));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This task also gets added as a prerequisite to the &lt;code&gt;build&lt;/code&gt; task:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;rev-and-inject&#39;, &#39;fonts&#39;, &#39;images&#39;], function() {
+&lt;pre&gt;&lt;code&gt;gulp.task('build', ['rev-and-inject', 'fonts', 'images'], function() {
 	// ...
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1660,23 +1661,23 @@ var serveStatic = require(&#39;serve-static&#39;);
 
 &lt;p&gt;Add the new dependencies to the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var rev = require(&#39;gulp-rev&#39;);
-var revReplace = require(&#39;gulp-rev-replace&#39;);
+&lt;pre&gt;&lt;code&gt;var rev = require('gulp-rev');
+var revReplace = require('gulp-rev-replace');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now the &lt;code&gt;build&lt;/code&gt; task gets a bit of a rewrite:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var indexFilter = filter(&#39;index.html&#39;);
+&lt;pre&gt;&lt;code&gt;var indexFilter = filter('index.html');
 var cssFilter = filter(&quot;**/*.min.css&quot;);
 var jsFilter = filter(&quot;**/*.min.js&quot;);
-var manifestFilter = filter(&#39;rev-manifest.json&#39;);
+var manifestFilter = filter('rev-manifest.json');
 
 return gulp
 	// 1. set source (/src/client/)
 	.src([].concat(
-		path.join(config.paths.client, &#39;index.html&#39;), 
-		path.join(config.paths.destination, &#39;*.min.css&#39;),
-		path.join(config.paths.destination, &#39;*.min.js&#39;)))
+		path.join(config.paths.client, 'index.html'), 
+		path.join(config.paths.destination, '*.min.css'),
+		path.join(config.paths.destination, '*.min.js')))
 
 	// 2. add the revision to the css files
 	.pipe(cssFilter)
@@ -1692,10 +1693,10 @@ return gulp
 
 	// 4. inject css and js
 	.pipe(indexFilter)
-	.pipe(localInject(path.join(config.paths.destination, &#39;vendor.min.css&#39;), &#39;inject-vendor&#39;))
-	.pipe(localInject(path.join(config.paths.destination, &#39;site.min.css&#39;)))
-	.pipe(localInject(path.join(config.paths.destination, &#39;vendor.min.js&#39;), &#39;inject-vendor&#39;))
-	.pipe(localInject(path.join(config.paths.destination, &#39;site.min.js&#39;)))
+	.pipe(localInject(path.join(config.paths.destination, 'vendor.min.css'), 'inject-vendor'))
+	.pipe(localInject(path.join(config.paths.destination, 'site.min.css')))
+	.pipe(localInject(path.join(config.paths.destination, 'vendor.min.js'), 'inject-vendor'))
+	.pipe(localInject(path.join(config.paths.destination, 'site.min.js')))
 	.pipe(gulp.dest(config.paths.destination))
 	.pipe(indexFilter.restore())
 
@@ -1780,7 +1781,7 @@ return gulp
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Hello World! It&#39;s Gulp!</title>
+				<title>Hello World! It's Gulp!</title>
 				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
 
 &lt;ul&gt;
@@ -1820,13 +1821,13 @@ return gulp
 
 &lt;p&gt;Create a file &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root. Start out by importing the Gulp module:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gulp = require(&#39;gulp&#39;);
+&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;code&gt;gulp.task()&lt;/code&gt; defines a task that’s available from the command line.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;hello&#39;, function() {
-	console.log(&#39;Hello world!&#39;)
+&lt;pre&gt;&lt;code&gt;gulp.task('hello', function() {
+	console.log('Hello world!')
 });
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1834,44 +1835,44 @@ return gulp
 
 &lt;pre&gt;&lt;code&gt;λ gulp hello
 [10:22:08] Using gulpfile c:\source\angular-learnings\gulpfile.js
-[10:22:08] Starting &#39;hello&#39;...
+[10:22:08] Starting 'hello'...
 Hello world!
-[10:22:08] Finished &#39;hello&#39; after 316 μs
+[10:22:08] Finished 'hello' after 316 μs
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;&lt;code&gt;gulp.task&lt;/code&gt; also lets you run prerequisite tasks:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;hello&#39;, [&#39;one&#39;, &#39;two&#39;, &#39;three&#39;], function() {
-	console.log(&#39;Hello world!&#39;)
+&lt;pre&gt;&lt;code&gt;gulp.task('hello', ['one', 'two', 'three'], function() {
+	console.log('Hello world!')
 });
 
-gulp.task(&#39;one&#39;, function(){
-	console.log(&#39;one&#39;);
+gulp.task('one', function(){
+	console.log('one');
 });
 
-gulp.task(&#39;two&#39;, function(){
-	console.log(&#39;two&#39;);
+gulp.task('two', function(){
+	console.log('two');
 });
 
-gulp.task(&#39;three&#39;, function(){
-	console.log(&#39;three&#39;);
+gulp.task('three', function(){
+	console.log('three');
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now &lt;code&gt;gulp hello&lt;/code&gt; does this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[10:24:49] Starting &#39;one&#39;...
+&lt;pre&gt;&lt;code&gt;[10:24:49] Starting 'one'...
 one
-[10:24:49] Finished &#39;one&#39; after 200 μs
-[10:24:49] Starting &#39;two&#39;...
+[10:24:49] Finished 'one' after 200 μs
+[10:24:49] Starting 'two'...
 two
-[10:24:49] Finished &#39;two&#39; after 151 μs
-[10:24:49] Starting &#39;three&#39;...
+[10:24:49] Finished 'two' after 151 μs
+[10:24:49] Starting 'three'...
 three
-[10:24:49] Finished &#39;three&#39; after 154 μs
-[10:24:49] Starting &#39;hello&#39;...
+[10:24:49] Finished 'three' after 154 μs
+[10:24:49] Starting 'hello'...
 Hello world!
-[10:24:49] Finished &#39;hello&#39; after 135 μs
+[10:24:49] Finished 'hello' after 135 μs
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Now make you a build pipeline. Empty out &lt;code&gt;gulpfile.js&lt;/code&gt; and start again, partner.&lt;/p&gt;
@@ -1895,8 +1896,8 @@ Hello world!
 
 &lt;p&gt;Eg.:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gutil = require(&#39;gulp-load-plugins&#39;)([
-	&#39;colors&#39;, &#39;env&#39;, &#39;log&#39;, &#39;pipeline&#39;
+&lt;pre&gt;&lt;code&gt;var gutil = require('gulp-load-plugins')([
+	'colors', 'env', 'log', 'pipeline'
 ]);
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1943,15 +1944,15 @@ Hello world!
 
 &lt;p&gt;Whew, that’s a bunch of dependencies. At the top of &lt;code&gt;gulpfile.js&lt;/code&gt;, pull them in using &lt;code&gt;require()&lt;/code&gt; and get some utility dependencies into scope:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var gulp = require(&#39;gulp&#39;);
-var notify = require(&#39;gulp-notify&#39;);
-var filter = require(&#39;gulp-filter&#39;);
-var plugins = require(&#39;gulp-load-plugins&#39;)();
-var del = require(&#39;del&#39;);
-var path = require(&#39;path&#39;);
+&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
+var notify = require('gulp-notify');
+var filter = require('gulp-filter');
+var plugins = require('gulp-load-plugins')();
+var del = require('del');
+var path = require('path');
 
 var gutil = plugins.loadUtils([
-	&#39;colors&#39;, &#39;log&#39;
+	'colors', 'log'
 ]);
 
 var log = gutil.log;
@@ -1972,8 +1973,8 @@ var colors = gutil.colors;
 
 &lt;p&gt;I’ll split out the actual copy process into a gulp task called &lt;code&gt;rev-and-inject&lt;/code&gt;. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, function() {
-	var indexPath = path.join(config.paths.source, &#39;index.html&#39;);
+&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', function() {
+	var indexPath = path.join(config.paths.source, 'index.html');
 
 	return gulp
 		// set source
@@ -1985,29 +1986,29 @@ var colors = gutil.colors;
 
 &lt;p&gt;The &lt;code&gt;build&lt;/code&gt; task calls &lt;code&gt;rev--and-inject&lt;/code&gt; before displaying a notification (using a toast!):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, function(){
+&lt;pre&gt;&lt;code&gt;gulp.task('build', function(){
 	return gulp
-		.src(&#39;&#39;)
+		.src('')
 		.pipe(notify({
 			onLast: true,
-			message: &#39;Build complete&#39;
+			message: 'Build complete'
 	}));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;In &lt;code&gt;src/client&lt;/code&gt; I’ve added an &lt;code&gt;index.html&lt;/code&gt; just for testing. Run &lt;code&gt;gulp build&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;[15:05:05] Starting &#39;rev-and-inject&#39;...
-[15:05:05] Finished &#39;rev-and-inject&#39; after 24 ms
-[15:05:05] Starting &#39;build&#39;...
+&lt;pre&gt;&lt;code&gt;[15:05:05] Starting 'rev-and-inject'...
+[15:05:05] Finished 'rev-and-inject' after 24 ms
+[15:05:05] Starting 'build'...
 [15:05:05] gulp-notify: [Gulp notification] Build complete
-[15:05:05] Finished &#39;build&#39; after 35 ms
+[15:05:05] Finished 'build' after 35 ms
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;You can add a quick &lt;code&gt;clean&lt;/code&gt; task too, which will delete the &lt;code&gt;src/client-dist&lt;/code&gt; folder:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;clean&#39;, function(){
-	log(&#39;Cleaning: &#39; + config.paths.distribution);
+&lt;pre&gt;&lt;code&gt;gulp.task('clean', function(){
+	log('Cleaning: ' + config.paths.distribution);
 
 	del([].concat(config.paths.distribution));
 });
