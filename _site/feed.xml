@@ -8,6 +8,110 @@
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Ubuntu Desktop in AWS EC2</title>
+				<description>&lt;p&gt;This turned out to be much harder than I had hoped. Creating and connecting to a Windows Server VM is trivial in Azure but I thought I would try creating an Ubuntu VM with a desktop in AWS for the exercise (and hopefully in less time than it would take to download an Ubuntu ISO and set up a local VM - I failed). The main time sink was messing around with the SSH keys, which is admittedly a good thing because it’s got to be, excuse me, pretty damn secure. The other delay was in properly configuring X-Windows to show the Ubuntu desktop. Again this is probably a good thing because an OOTB Ubuntu instance is quite lean and most server-y things can be done via SSH rather in a GUI. That’s not what I was intending for this exercise though.&lt;/p&gt;
+
+&lt;p&gt;I won’t go into &lt;a href=&quot;http://aws.amazon.com/&quot;&gt;creating an AWS account&lt;/a&gt; but wow, that UI. I thought Azure was arcane.&lt;/p&gt;
+
+&lt;p&gt;To create a VM you find a section called ‘Create instance’, which lets you press a button called ‘Launch Instance’, which launches a virtual server, which is known as an Amazon EC2 instance. In Azure this is a big blue plus sign.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/SOJx4Np.png&quot; alt=&quot;pressss meeeee&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now select your VM image. I picked “Ubuntu Server 14.04 LTS (HVM), SSD Volume Type”. It’s free! For eligible! I selected the ‘t2.micro’ instance type, which is also free. This is exactly how much I want to spend. I left everything else as default and clicked ‘Review and Launch’, mainly because I didn’t realise there were other things to configure.&lt;/p&gt;
+
+&lt;p&gt;By default a new security group will be created when launching a new instance, named something like &lt;code&gt;launch-wizard-1&lt;/code&gt;. This is ‘open to the world’, meaning that any IP address could connect to the instance if it has the proper credentials. A security group is basically a set of firewall rules. The only port open by default is 22 for SSH, which requires a private key. Because I’m using SSH tunnelling to forward the VNC port I don’t actually have to change the security group but you could limit port 22 to your static IP if you’ve got one.&lt;/p&gt;
+
+&lt;p&gt;Now hit Launch. The next step lets you create a public &amp;amp; private key pair. Select ‘Create a new key pair’ and give it a nice name. Press Download Key Pair to download the private key then continue. If you hit ‘View instances’ you can see the new VM get provisioned. It’s not that exciting.&lt;/p&gt;
+
+&lt;p&gt;I followed &lt;a href=&quot;https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html?console_help=true&quot;&gt;these instructions&lt;/a&gt; to use PuTTY to SSH into the VM but you could just use &lt;code&gt;ssh&lt;/code&gt; directly. I ended up needing to use SSH directly later on to create an SSH tunnel anyway.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -i &amp;lt;KEYFILE&amp;gt;.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The value for &lt;code&gt;-i&lt;/code&gt; is the path to the .pem file downloaded previously.&lt;/p&gt;
+
+&lt;p&gt;I followed &lt;a href=&quot;http://xmodulo.com/how-to-set-up-ubuntu-desktop-vm-on-amazon-ec2.html&quot;&gt;these instructions&lt;/a&gt; to install the Ubuntu desktop and a TightVNC server, but I ended up with the grey screen of an empty X-Windows session. I needed some &lt;a href=&quot;http://askubuntu.com/a/475036/29199&quot;&gt;extra work&lt;/a&gt; to get it going. You should just do the following instead ;)&lt;/p&gt;
+
+&lt;p&gt;Update &lt;code&gt;apt-get&lt;/code&gt; and install lots of things:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo apt-get update
+sudo apt-get intall ubuntu-desktop
+sudo apt-get intall tightvncserver
+sudo apt-get install gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Launch VNC server to create an initial configuration file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;vncserver :1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Open the configuration file in VIM:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;vim ~/.vnc/xstartup
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Edit the configuration file to look like this, using &lt;code&gt;i&lt;/code&gt; to enter insert mode, then &lt;code&gt;&amp;lt;escape&amp;gt;&lt;/code&gt; &lt;code&gt;:wq&lt;/code&gt; to save and exit:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;#!/bin/sh
+
+export XKL_XMODMAP_DISABLE=1
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+[ -x /etc/vnc/xstartup ] &amp;amp;&amp;amp; exec /etc/vnc/xstartup
+[ -r $HOME/.Xresources ] &amp;amp;&amp;amp; xrdb $HOME/.Xresources
+xsetroot -solid grey
+
+vncconfig -iconic &amp;amp;
+gnome-panel &amp;amp;
+gnome-settings-daemon &amp;amp;
+metacity &amp;amp;
+nautilus &amp;amp;
+gnome-terminal &amp;amp;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Kill and restart the VNC server to apply the settings. This needs to happen each time the VNC / X-Windows configuration is updated.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;vncserver -kill :1
+vncserver :1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After setting up the VNC server you need to create an SSH tunnel. Open a local console that has &lt;code&gt;ssh.exe&lt;/code&gt; in the path (Cmder didn’t have it but vanilla PowerShell did). The command to run is&lt;sup id=&quot;fnref:how-to-specify-a-private-key-in-ssh&quot;&gt;&lt;a href=&quot;#fn:how-to-specify-a-private-key-in-ssh&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -L 5902/127.0.0.1/5901 -i &amp;lt;KEYFILE&amp;gt;.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;-L&lt;/code&gt; sets up the tunnel, from port &lt;code&gt;5902&lt;/code&gt; on &lt;code&gt;127.0.0.1&lt;/code&gt; (localhost) to port &lt;code&gt;5901&lt;/code&gt; on the remote server. Note that I’m setting my local endpoint to port 5902 - 5901 didn’t work for me.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/iYRRB3k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If you’re on Windows, &lt;a href=&quot;http://www.tightvnc.com/download.php&quot;&gt;download Tight-VNC&lt;/a&gt; instead of using apt-get to install VNC. Connect to &lt;code&gt;127.0.0.1::5902&lt;/code&gt; and use the password you gave above. You should now see your new shiny Ubuntu desktop:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/m7PRgMm.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If you see an empty grey window like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/crHgZFM.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;, or if parts of the Ubuntu desktop seem to be missing, you will need to work on the VNC / X-Windows configuration. Make sure you’ve edited the &lt;code&gt;xstartup&lt;/code&gt; file for the user that the tunnel is logged in as for a start.&lt;/p&gt;
+
+&lt;p&gt;Quick note: to delete an instance you just need to terminate it. It doesn’t disappear from the list immediately but apparently it will. &lt;em&gt;refresh&lt;/em&gt; nope, still there.&lt;/p&gt;
+
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:how-to-specify-a-private-key-in-ssh&quot;&gt;
+      &lt;p&gt;http://xmodulo.com/how-to-specify-private-key-file-in-ssh.html &lt;a href=&quot;#fnref:how-to-specify-a-private-key-in-ssh&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
+</description>
+				<pubDate>Thu, 30 Jul 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/ubuntu-desktop-in-ec2.html</link>
+				<guid isPermaLink="true">http://bendetat.com/ubuntu-desktop-in-ec2.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Controller scope in Angular JS directives</title>
 				<description>&lt;p&gt;This is probably basic level Angular JS but I haven’t seen it mentioned anywhere. I’m probably missing something fundamental about directive scope.&lt;/p&gt;
 
@@ -2029,113 +2133,6 @@ var colors = gutil.colors;
 				<pubDate>Tue, 27 Jan 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/hello-world-its-gulp.html</link>
 				<guid isPermaLink="true">http://bendetat.com/hello-world-its-gulp.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>A convention test for projects referencing other project references instead of NuGet packages</title>
-				<description>&lt;p&gt;Earlier this week I was running into problems when adding a solution to a CI build server. Although there were no problems running the solution locally, the build server was complaining about not being able to resolve a reference for a project.&lt;/p&gt;
-
-&lt;p&gt;The solution was using NuGet package restore, which I happen to prefer over checking in the &lt;code&gt;packages&lt;/code&gt; folder (at least for smaller projects with few developers), but I was confident that the packages were being restored correctly, including the unresolved reference.&lt;/p&gt;
-
-&lt;p&gt;The problem was that the project was referencing an assembly from the &lt;code&gt;/bin/debug&lt;/code&gt; folder of another project, rather than the project referencing the correct NuGet package. This usually happens when using something like Resharper to automatically add a reference. The fix itself is easy:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Delete the reference from the project&lt;/li&gt;
-  &lt;li&gt;Right-click the solution&lt;/li&gt;
-  &lt;li&gt;Select ‘Manage NuGet Packages for Solution’&lt;/li&gt;
-  &lt;li&gt;‘Manage’ the package&lt;/li&gt;
-  &lt;li&gt;Add the project to the package:&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Zr5S9VX.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;What I really want to do is add a convention test to make sure this doesn’t happen again. Why? Because this happens fairly infrequently, but when it does it can be hard to diagnose because it could potentially be caused by a number of things. In my experience, most of the time it is caused by a bad reference. Nevertheless I always seem to burn too much time figuring it out. In my opinion, the ROI of this convention test will probably make it worthwhile.&lt;/p&gt;
-
-&lt;h2 id=&quot;turns-out&quot;&gt;Turns out&lt;/h2&gt;
-
-&lt;p&gt;It’s a bit tricky to get to the projects in a solution file. I didn’t want to waste too much time in the internals of the build system so I found an &lt;a href=&quot;http://stackoverflow.com/a/4634505/149259&quot;&gt;answer on Stack Overflow&lt;/a&gt; that includes two wrapper classes for getting the solution, then iterating on the projects. The wrapper classes can be copied from &lt;a href=&quot;https://gist.github.com/bendetat/9a5a336d82b51ac0b564&quot;&gt;this gist&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;You’ll need to add a reference to &lt;code&gt;Microsoft.Build&lt;/code&gt;. Some of the classes that are used are actually deprecated, but this should work for long enough to get a good return on this test. The &lt;code&gt;Solution&lt;/code&gt; wrapper class reads a &lt;code&gt;.sln&lt;/code&gt; file and exposes a list of &lt;code&gt;SolutionProject&lt;/code&gt; instance. Each &lt;code&gt;SolutionProject&lt;/code&gt; exposes some of the properties of the project within the solution including the relative path, which I use to build a set of &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instances for the convention test.&lt;/p&gt;
-
-&lt;h2 id=&quot;test-cases&quot;&gt;Test cases&lt;/h2&gt;
-
-&lt;p&gt;I’m using NUnit, so my &lt;a href=&quot;http://www.nunit.org/index.php?p=testCaseSource&amp;amp;r=2.5&quot;&gt;test cases&lt;/a&gt; come from a public method that returns an enumeration of &lt;code&gt;TestCastData&lt;/code&gt; instances:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public IEnumerable&amp;lt;TestCaseData&amp;gt; AllProjects
-{
-    get
-    {
-        var solution = new Solution(&quot;../../../../MySolution.sln&quot;);
-        var allProjects = solution.Projects
-            .Where(x =&amp;gt; x.RelativePath != &quot;.nuget&quot;)
-            .Where(x =&amp;gt; x.ProjectName != &quot;Microsoft.Build.Evaluation.Project&quot;)
-            .ToArray();
-        var allProjectNames = allProjects.Select(x =&amp;gt; x.ProjectName).ToArray();
-        
-        return allProjects.Select(x =&amp;gt;
-        {
-            var project = new Project(&quot;../../../../&quot; + x.RelativePath);
-            var testCase = new TestCaseData(project, allProjectNames);
-            testCase.SetName(x.ProjectName);
-
-            return testCase;
-        });
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Opens the solution file (as an instance of the above &lt;code&gt;Solution&lt;/code&gt; wrapper). I’ve hard-coded the relative path to the solution because there’s no need to get fancy - the tests are running in &lt;code&gt;src/MyProject/bin/[debug|release]/&lt;/code&gt; relative to the solution file. If you don’t keep the projects in a &lt;code&gt;/src&lt;/code&gt; subdirectory then take out one of the &lt;code&gt;../&lt;/code&gt; bits.&lt;/li&gt;
-  &lt;li&gt;Get all of the projects (as an instance of the above &lt;code&gt;SolutionProject&lt;/code&gt; wrapper), except for &lt;code&gt;.nuget&lt;/code&gt; and &lt;code&gt;Microsoft.Build.Evaluation.Project&lt;/code&gt;, which are included in the solution as project references.&lt;/li&gt;
-  &lt;li&gt;Select out all the names of the projects. This is passed into each &lt;code&gt;TestCaseData&lt;/code&gt; for comparison in the actual test.&lt;/li&gt;
-  &lt;li&gt;Build up and return the &lt;code&gt;TestCaseData&lt;/code&gt; enumeration:
-    &lt;ol&gt;
-      &lt;li&gt;Construct a new &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instance using the relative path. Note that this hasn’t been tested with solution folder (it would &lt;em&gt;probably&lt;/em&gt; work because I would hope that the relative path includes the solution folder).&lt;/li&gt;
-      &lt;li&gt;Build a new &lt;code&gt;TestCaseData&lt;/code&gt; instance with the project and the list of project names build up above.&lt;/li&gt;
-      &lt;li&gt;Set the name of the test case to the name of the project.&lt;/li&gt;
-    &lt;/ol&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;bangarang&quot;&gt;Bangarang&lt;/h2&gt;
-
-&lt;p&gt;That’s a &lt;a href=&quot;http://www.imdb.com/title/tt0102057/&quot;&gt;Hook&lt;/a&gt; reference, not some ‘popular’ EDM song.&lt;/p&gt;
-
-&lt;p&gt;I’m using Shouldly for the assertion.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Test, TestCaseSource(&quot;AllProjects&quot;)]
-public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, string[] allProjectNames)
-{
-        var startsWithProjectName = new Func&amp;lt;string, string, bool&amp;gt;((x, projectName) =&amp;gt; x.StartsWith(&quot;..\\&quot; + projectName + &quot;\\&quot;));
-        var isReferenceInAnotherProject = new Func&amp;lt;string, bool&amp;gt;(x =&amp;gt; allProjectNames.Any(projectName =&amp;gt; startsWithProjectName(x, projectName)));
-
-        var badReferences = from projectItem in project.GetItems(&quot;Reference&quot;)
-                            from metaData in projectItem.Metadata
-                            let reference = metaData.EvaluatedValue
-                            where isReferenceInAnotherProject(reference)
-                            select reference;
-
-        badReferences.ShouldBeEmpty();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This was jammed together in LinqPad, but it’s pretty straightforward. The first two lines set up some helpers to simplify the query. Then the bad references are determined by finding the references in the project, then checking if the reference is in another project using a fairly naive path check.&lt;/p&gt;
-
-&lt;p&gt;Failures look like this, showing the bad reference in the &lt;code&gt;Tests&lt;/code&gt; assembly:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Hkc6y9a.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Viz.&lt;/p&gt;
-
-&lt;iframe width=&quot;420&quot; height=&quot;315&quot; src=&quot;//www.youtube.com/embed/E2VCwBzGdPM&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
-
-</description>
-				<pubDate>Sat, 17 Jan 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/convention-test-for-projects-referencing-other-project-references-instead-of-nuget-packages.html</link>
-				<guid isPermaLink="true">http://bendetat.com/convention-test-for-projects-referencing-other-project-references-instead-of-nuget-packages.html</guid>
 			</item>
 		
 	</channel>
