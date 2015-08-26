@@ -8,6 +8,112 @@
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Bundling and deploying Azure WebJobs in a Web App with Octopus and Nimbus</title>
+				<description>&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 20em&quot;&gt;
+	&quot;Nimbus is a .NET client library to add an easy to develop against experience against the Azure Service Bus or the Windows Service Bus.&quot;
+&lt;/aside&gt;
+
+&lt;p&gt;I’ve been working on a site hosted in Azure. Up until a few days ago it consisted of a single, monolithic web app, but I had been implementing it against &lt;a href=&quot;http://nimbusapi.github.io/&quot;&gt;Nimbus&lt;/a&gt;’s &lt;a href=&quot;https://www.nuget.org/packages/Nimbus.MessageContracts/&quot;&gt;message&lt;/a&gt; and &lt;a href=&quot;https://www.nuget.org/packages/Nimbus.InfrastructureContracts/&quot;&gt;infrastructure&lt;/a&gt; contract libraries, with a simple in-process bus implementation. This paid off because I reached a point where I needed to offload some asynchronous work to the service layer while keeping things simple in the site layer, and converting the entire application to use Service Bus took a few hours all up.&lt;/p&gt;
+
+&lt;p&gt;That left me with needing somewhere to host the service layer. Load and scalability isn’t an issue so I went with a &lt;a href=&quot;https://azure.microsoft.com/en-us/documentation/articles/web-sites-create-web-jobs/&quot;&gt;WebJob&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;WebJobs are very lightweight and easy to create. They run as part of an Azure web app, so they can be scaled up and out as far as the web app can. This could be a limiting factor in some scenarios. Fortunately a web job that wraps a Nimbus/Service Bus could easily be converted to a different, heavier-weight deployment type, such as a Windows service for use in a VM, a worker role or on-premises.&lt;/p&gt;
+
+&lt;p&gt;Getting a WebJob deployed is fairly easy, but everything has to be correct or the job just won’t run, and there isn’t any support for diagnosing why. As far as Azure is concerned it just doesn’t exist.&lt;/p&gt;
+
+&lt;p&gt;I’m creating a continuous WebJob that uses Nimbus for messaging. The Azure WebJobs API has its own methods for registering endpoints, and for creating triggered or scheduled jobs. Scott Hanselman has a great blog post explaining &lt;a href=&quot;http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx&quot;&gt;how to use the API in this way&lt;/a&gt;. The WebJob will basically be a container for a Nimbus message pump.&lt;/p&gt;
+
+&lt;h2 id=&quot;creating-the-webjob-executable&quot;&gt;Creating the WebJob executable&lt;/h2&gt;
+
+&lt;aside class=&quot;pull-left well&quot; style=&quot;width:15em&quot;&gt;
+	The .exe name is important. &lt;code&gt;MyApplicationWorker.exe&lt;/code&gt; is ok but &lt;code&gt;MyApplication.Worker.exe&lt;/code&gt; is not.
+&lt;/aside&gt;
+
+&lt;p&gt;For use in a C#/.NET application, WebJobs are created as console applications. The name of the generated executable can’t have any punctuation - &lt;code&gt;MyApplicationWorker.exe&lt;/code&gt; is ok but &lt;code&gt;MyApplication.Worker.exe&lt;/code&gt; isn’t. You can still use punctuation in the project name and default namespace, just set the “Assembly name” in the project properties to something valid.&lt;/p&gt;
+
+&lt;p&gt;The application references the &lt;code&gt;Microsoft.Azure.WebJobs&lt;/code&gt; NuGet package, and the &lt;code&gt;Main&lt;/code&gt; method is trivial:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;private static void Main(string[] args)
+{
+    var container = IoC.LetThereBeIoC();
+
+    var connectionString = ConfigurationManager.AppSettings[&quot;WebJobStorageConnectionString&quot;];
+    var configuration = new JobHostConfiguration(connectionString);
+    var host = new JobHost(configuration);
+
+    host.RunAndBlock();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first line creates the IoC container, which includes all the Nimbus setup. The Nimbus bus then just sits in the background while the app is running, handling messages as they appear on the bus.&lt;/p&gt;
+
+&lt;p&gt;The middle section sets up the WebJob host. It requires a connection string to an Azure Table Storage instance. I tried this with the local storage emulator for testing but it requires an actual instance in Azure - the WebJobs API apparently requires features that are not available in the local storage emulator.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;host.RunAndBlock()&lt;/code&gt; then effectively puts the application into an infinite loop and lets it sit around to handle messages.&lt;/p&gt;
+
+&lt;p&gt;When starting the application locally it complains that “No functions found”. This is because WebJobs have their own message handling model based on Service Bus, by decorating parameters on static methods. Since I’m using Nimbus to handle the messaging via Service Bus there are no WebJob-specific handlers needed.&lt;/p&gt;
+
+&lt;h2 id=&quot;deploying&quot;&gt;Deploying&lt;/h2&gt;
+
+&lt;p&gt;Because WebJobs are part of a web site, they don’t need their own deployment pipeline. Instead the entire job application is copied into a &lt;code&gt;jobs&lt;/code&gt; folder within the web site:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;MySite\&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code&gt;app_data\&lt;/code&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;code&gt;jobs\&lt;/code&gt;
+            &lt;ul&gt;
+              &lt;li&gt;&lt;code&gt;continuous\&lt;/code&gt;
+                &lt;ul&gt;
+                  &lt;li&gt;&lt;code&gt;MyWorkerJob\&lt;/code&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+              &lt;/li&gt;
+            &lt;/ul&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The &lt;code&gt;MyWorkerJob&lt;/code&gt; has to be &lt;em&gt;exactly the same&lt;/em&gt; as the &lt;code&gt;.exe&lt;/code&gt; name. So &lt;code&gt;MyWorkerJob.exe&lt;/code&gt; needs to be deployed to &lt;code&gt;app_data/jobs/continuous/MyWorkerJob&lt;/code&gt;. Jobs can be scheduled as &lt;code&gt;continuous&lt;/code&gt; or &lt;code&gt;triggered&lt;/code&gt;. The Nimbus work needs to run continuously so it gets deployed to &lt;code&gt;App_Data\jobs\continuous&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;For Octopack to include the jobs, the job path just needs to be added to the project’s &lt;code&gt;.nuspec&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;?xml version=&quot;1.0&quot;?&amp;gt;
+&amp;lt;package xmlns=&quot;http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd&quot;&amp;gt;
+	...
+	&amp;lt;files&amp;gt;
+		...
+		&amp;lt;file src=&quot;..\My.Worker\bin\release\**&quot; target=&quot;app_data\jobs\continuous\MyWorker&quot; /&amp;gt;
+	&amp;lt;/files&amp;gt;
+&amp;lt;/package&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The solution’s build order needs to have the job’s built before the web site (so the job’s artifacts are available when building the site). You can do that by right-clicking the project, selecting ‘Project Build Order’, and adding the WebJob as a dependency of the web site.&lt;/p&gt;
+
+&lt;p&gt;That’s pretty much all there is to it. When the solution is built and packed, the WebJob will be included in the &lt;code&gt;.nupkg&lt;/code&gt; file, and Octopus will automatically patch the WebJob’s &lt;code&gt;App.config&lt;/code&gt; when configuring the site. It’s also a good idea to logging using something like &lt;a href=&quot;http://getseq.net/&quot;&gt;Seq&lt;/a&gt; to see the WebJob start up with the site.&lt;/p&gt;
+
+&lt;h2 id=&quot;resources-amp-further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx&quot;&gt;Introducing Windows Azure WebJobs - Scott Hanselman&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.troyhunt.com/2015/01/azure-webjobs-are-awesome-and-you.html&quot;&gt;Azure WebJobs are awesome and you should start using them right now! - Troy Hunt&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://azure.microsoft.com/en-us/documentation/articles/web-sites-create-web-jobs/&quot;&gt;Run Background tasks with WebJobs - Azure&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://robdmoore.id.au/blog/2014/07/22/my-stance-on-azure-worker-roles/&quot;&gt;My stance on Azure Worker Roles - Rob Moore&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blog.amitapple.com/post/74215124623/deploy-azure-webjobs/#.VbjV2W6qpBf&quot;&gt;How to deploy Azure WebJobs - Amit Apple&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://withouttheloop.com/articles/2015-06-23-deploying-custom-services-as-azure-webjobs/&quot;&gt;Deploying custom services as Azure Webjobs - Liam McLennan&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</link>
+				<guid isPermaLink="true">http://bendetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Ubuntu Desktop in AWS EC2</title>
 				<description>&lt;p&gt;This turned out to be much harder than I had hoped. Creating and connecting to a Windows Server VM is trivial in Azure but I thought I would try creating an Ubuntu VM with a desktop in AWS for the exercise (and hopefully in less time than it would take to download an Ubuntu ISO and set up a local VM - I failed). The main time sink was messing around with the SSH keys, which is admittedly a good thing because it’s got to be, excuse me, pretty damn secure. The other delay was in properly configuring X-Windows to show the Ubuntu desktop. Again this is probably a good thing because an OOTB Ubuntu instance is quite lean and most server-y things can be done via SSH rather in a GUI. That’s not what I was intending for this exercise though.&lt;/p&gt;
 
@@ -528,11 +634,11 @@ struct BrokensStruct {
 let result =
 	match name with 
 	| &quot;Fiona&quot; -&amp;gt; &quot;It's Fiona!&quot;
-	| &quot;Ben&quot; -&amp;gt; &quot;Hey it's me!&quot;
+	| &quot;Ben&quot; -&amp;gt; &quot;it me!&quot;
 	| &quot;Steve&quot; -&amp;gt; &quot;Steve you rascal!&quot;
 	| _ -&amp;gt; &quot;I don't know this person&quot;
 	
-// result = &quot;Hey it's me!&quot;
+// result = &quot;it me!&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this &lt;code&gt;switch&lt;/code&gt; construct in C#:&lt;/p&gt;
@@ -545,7 +651,7 @@ switch (name) {
 		result =  &quot;It's Fiona!&quot;;
 		break;
 	case &quot;Ben&quot;:
-		result = &quot;Hey it's me!&quot;;
+		result = &quot;it me!&quot;;
 		break;
 	case &quot;Steve&quot;:
 		result = &quot;Steve you rascal!&quot;;
@@ -558,7 +664,7 @@ switch (name) {
 
 &lt;p&gt;This is of course pretty average to read, relies on &lt;code&gt;break&lt;/code&gt; for execution control, and isn’t ‘pure’ since &lt;code&gt;result&lt;/code&gt; is mutated during execution.&lt;/p&gt;
 
-&lt;aside class=&quot;pull-right well&quot;&gt;
+&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 42ex&quot;&gt;
 	&lt;p&gt;I also found a couple of extant libraries that provide similar (and possibly more) functionality:&lt;/p&gt;
 	&lt;ul&gt;
 		&lt;li&gt;&lt;a href=&quot;https://github.com/johansson/PatternMatching&quot;&gt;johansson/PatternMatching&lt;/a&gt;&lt;/li&gt;
@@ -1881,258 +1987,6 @@ return gulp
 				<pubDate>Fri, 30 Jan 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html</link>
 				<guid isPermaLink="true">http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Hello World! It's Gulp!</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Part 1: Hello World! It’s Gulp!&lt;/li&gt;
-  &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Part 3: &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;Cleaning and simplifying the Gulp pipeline&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://gulpjs.org&quot;&gt;Gulp&lt;/a&gt; is a Node.js based build tool. It executes &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.&lt;/p&gt;
-
-&lt;p&gt;This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as &lt;a href=&quot;http://bower.io&quot;&gt;Bower&lt;/a&gt; can be used to manage these complex client-side sites.&lt;/p&gt;
-
-&lt;p&gt;The static site that I’ll hopefully end up generating in the next post will be used with a &lt;a href=&quot;http://nancyfx.org&quot;&gt;Nancy&lt;/a&gt; website. The end result of this post is a Gulp build script that simply copies an &lt;code&gt;index.html&lt;/code&gt; file from &lt;code&gt;/src/client&lt;/code&gt; to &lt;code&gt;/src/client-dist&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
-
-&lt;p&gt;Install Node and NPM. The easiest way may be via &lt;a href=&quot;http://chocolatey.org&quot;&gt;Chocolatey&lt;/a&gt;, this does both:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;cinst nodejs.install
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;After installation, you may need to add &lt;code&gt;C:\Program Files\nodejs&lt;/code&gt; to the system path and create a new folder in &lt;code&gt;C:\Users\ben_000\AppData\Roaming&lt;/code&gt; named &lt;code&gt;npm&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Get NPM to create a &lt;code&gt;package.json&lt;/code&gt; file in the project root by running &lt;code&gt;npm install&lt;/code&gt; and working through the wizard. Now install Gulp using NPM:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;--save-dev&lt;/code&gt; flag adds the dependencies to &lt;code&gt;package.json&lt;/code&gt;. This means that when you open the repository in a new environment you can just do &lt;code&gt;npm install&lt;/code&gt; to automatically install the project’s NPM dependencies. &lt;/p&gt;
-
-&lt;p&gt;Note that Gulp itself should also be installed globally so you can use &lt;code&gt;gulp&lt;/code&gt; on the command line:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g gulp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;helloworlding-gulp&quot;&gt;helloworlding Gulp&lt;/h2&gt;
-
-&lt;p&gt;Create a file &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root. Start out by importing the Gulp module:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;gulp.task()&lt;/code&gt; defines a task that’s available from the command line.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('hello', function() {
-	console.log('Hello world!')
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you run &lt;code&gt;gulp hello&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;λ gulp hello
-[10:22:08] Using gulpfile c:\source\angular-learnings\gulpfile.js
-[10:22:08] Starting 'hello'...
-Hello world!
-[10:22:08] Finished 'hello' after 316 μs
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;gulp.task&lt;/code&gt; also lets you run prerequisite tasks:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('hello', ['one', 'two', 'three'], function() {
-	console.log('Hello world!')
-});
-
-gulp.task('one', function(){
-	console.log('one');
-});
-
-gulp.task('two', function(){
-	console.log('two');
-});
-
-gulp.task('three', function(){
-	console.log('three');
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now &lt;code&gt;gulp hello&lt;/code&gt; does this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[10:24:49] Starting 'one'...
-one
-[10:24:49] Finished 'one' after 200 μs
-[10:24:49] Starting 'two'...
-two
-[10:24:49] Finished 'two' after 151 μs
-[10:24:49] Starting 'three'...
-three
-[10:24:49] Finished 'three' after 154 μs
-[10:24:49] Starting 'hello'...
-Hello world!
-[10:24:49] Finished 'hello' after 135 μs
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now make you a build pipeline. Empty out &lt;code&gt;gulpfile.js&lt;/code&gt; and start again, partner.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/a1wyl0YQrCGm4/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;lots-of-scripting-just-to-copy-a-file&quot;&gt;Lots of scripting just to copy a file!&lt;/h2&gt;
-
-&lt;p&gt;I’m just going to start out with a simple build pipeline that basically copies &lt;code&gt;index.html&lt;/code&gt; to the server.&lt;/p&gt;
-
-&lt;p&gt;Install some more NPM packages. &lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-load-plugins&quot;&gt;&lt;code&gt;gulp-load-plugins&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-load-plugins
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Loads in any gulp plugins and attaches them to the global scope, or an object of your choice.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Eg.:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var gutil = require('gulp-load-plugins')([
-	'colors', 'env', 'log', 'pipeline'
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-notify&quot;&gt;&lt;code&gt;gulp-notify&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-notify
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;gulp plugin to send messages based on Vinyl Files or Errors to Mac OS X, Linux or Windows using the node-notifier module. Fallbacks to Growl or simply logging&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-filter&quot;&gt;&lt;code&gt;gulp-filter&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-filter
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/chalk&quot;&gt;&lt;code&gt;chalk&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev chalk
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Terminal string styling done right&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/dateformat&quot;&gt;&lt;code&gt;dateformat&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev dateformat
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A node.js package for Steven Levithan’s excellent dateFormat() function.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/del&quot;&gt;&lt;code&gt;del&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev del
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Delete files/folders using globs&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Whew, that’s a bunch of dependencies. At the top of &lt;code&gt;gulpfile.js&lt;/code&gt;, pull them in using &lt;code&gt;require()&lt;/code&gt; and get some utility dependencies into scope:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var gulp = require('gulp');
-var notify = require('gulp-notify');
-var filter = require('gulp-filter');
-var plugins = require('gulp-load-plugins')();
-var del = require('del');
-var path = require('path');
-
-var gutil = plugins.loadUtils([
-	'colors', 'log'
-]);
-
-var log = gutil.log;
-var colors = gutil.colors;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To centralise the build paths, add this next:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var config = {
-	&quot;paths&quot;: {
-		&quot;source&quot;: &quot;src/client&quot;,
-		&quot;distribution&quot;: &quot;src/client-dist&quot;
-	}
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This could be put into another file like &lt;code&gt;gulp-config.json&lt;/code&gt; and pulled in with a &lt;code&gt;require()&lt;/code&gt; but for now this will do.&lt;/p&gt;
-
-&lt;p&gt;I’ll split out the actual copy process into a gulp task called &lt;code&gt;rev-and-inject&lt;/code&gt;. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', function() {
-	var indexPath = path.join(config.paths.source, 'index.html');
-
-	return gulp
-		// set source
-		.src([].concat(indexPath))
-		// write to dest
-		.pipe(gulp.dest(config.paths.distribution))
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;build&lt;/code&gt; task calls &lt;code&gt;rev--and-inject&lt;/code&gt; before displaying a notification (using a toast!):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('build', function(){
-	return gulp
-		.src('')
-		.pipe(notify({
-			onLast: true,
-			message: 'Build complete'
-	}));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In &lt;code&gt;src/client&lt;/code&gt; I’ve added an &lt;code&gt;index.html&lt;/code&gt; just for testing. Run &lt;code&gt;gulp build&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[15:05:05] Starting 'rev-and-inject'...
-[15:05:05] Finished 'rev-and-inject' after 24 ms
-[15:05:05] Starting 'build'...
-[15:05:05] gulp-notify: [Gulp notification] Build complete
-[15:05:05] Finished 'build' after 35 ms
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can add a quick &lt;code&gt;clean&lt;/code&gt; task too, which will delete the &lt;code&gt;src/client-dist&lt;/code&gt; folder:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('clean', function(){
-	log('Cleaning: ' + config.paths.distribution);
-
-	del([].concat(config.paths.distribution));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;Next I’ll add some value to the build pipeline&lt;/a&gt; by minifying and bundling JS and CSS, and injecting the results into &lt;code&gt;index.html&lt;/code&gt;. The result will be a static website set up for some AngularJS work.&lt;/p&gt;
-
-&lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&quot;&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;https://github.com/gertjvr/ng-template&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://gulpjs.com/&quot;&gt;http://gulpjs.com/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://nodejs.org/api/&quot;&gt;http://nodejs.org/api/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Tue, 27 Jan 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/hello-world-its-gulp.html</link>
-				<guid isPermaLink="true">http://bendetat.com/hello-world-its-gulp.html</guid>
 			</item>
 		
 	</channel>

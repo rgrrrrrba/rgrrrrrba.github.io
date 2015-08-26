@@ -14,11 +14,11 @@ Pattern matching is a method of transforming data in some way, similar to `map` 
 	let result =
 		match name with 
 		| "Fiona" -> "It's Fiona!"
-		| "Ben" -> "Hey it's me!"
+		| "Ben" -> "it me!"
 		| "Steve" -> "Steve you rascal!"
 		| _ -> "I don't know this person"
 		
-	// result = "Hey it's me!"
+	// result = "it me!"
 
 That's as deep an explanation of pattern matching in F# you're going to get from me at this point, but this is conceptually similar to this `switch` construct in C#:
 
@@ -30,7 +30,7 @@ That's as deep an explanation of pattern matching in F# you're going to get from
 			result =  "It's Fiona!";
 			break;
 		case "Ben":
-			result = "Hey it's me!";
+			result = "it me!";
 			break;
 		case "Steve":
 			result = "Steve you rascal!";
@@ -42,7 +42,7 @@ That's as deep an explanation of pattern matching in F# you're going to get from
 
 This is of course pretty average to read, relies on `break` for execution control, and isn't 'pure' since `result` is mutated during execution.
 
-<aside class="pull-right well">
+<aside class="pull-right well" style="width: 42ex">
 	<p>I also found a couple of extant libraries that provide similar (and possibly more) functionality:</p>
 	<ul>
 		<li><a href="https://github.com/johansson/PatternMatching">johansson/PatternMatching</a></li>

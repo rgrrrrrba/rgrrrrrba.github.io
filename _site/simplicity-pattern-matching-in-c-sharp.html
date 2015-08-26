@@ -39,11 +39,11 @@
 let result =
 	match name with 
 	| "Fiona" -&gt; "It's Fiona!"
-	| "Ben" -&gt; "Hey it's me!"
+	| "Ben" -&gt; "it me!"
 	| "Steve" -&gt; "Steve you rascal!"
 	| _ -&gt; "I don't know this person"
 	
-// result = "Hey it's me!"
+// result = "it me!"
 </code></pre>
 
 <p>That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this <code>switch</code> construct in C#:</p>
@@ -56,7 +56,7 @@ switch (name) {
 		result =  "It's Fiona!";
 		break;
 	case "Ben":
-		result = "Hey it's me!";
+		result = "it me!";
 		break;
 	case "Steve":
 		result = "Steve you rascal!";
@@ -69,7 +69,7 @@ switch (name) {
 
 <p>This is of course pretty average to read, relies on <code>break</code> for execution control, and isn’t ‘pure’ since <code>result</code> is mutated during execution.</p>
 
-<aside class="pull-right well">
+<aside class="pull-right well" style="width: 42ex">
 	<p>I also found a couple of extant libraries that provide similar (and possibly more) functionality:</p>
 	<ul>
 		<li><a href="https://github.com/johansson/PatternMatching">johansson/PatternMatching</a></li>
