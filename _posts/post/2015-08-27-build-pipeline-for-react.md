@@ -5,7 +5,7 @@ date: 2015-08-27
 category: post
 ---
 
-I'm going to eshew Bower and just use NPM as the package manager. I've already got [Node and NPM installed][gulp-hello-world]. The example site I'm creating is `survey-thing` - a simple thing for [creating surveys][survey-thing-repo].
+I'm going to eshew Bower and just use NPM as the package manager. I've already got [Node and NPM installed][gulp-hello-world]. The example site I'm creating is `survey-thing` - a simple thing for [creating surveys][survey-thing-repo]. I also have a [stub package][react-gulp-bootstrap-stub-project] which just includes a script for setting up the environment and a simple landing page.
 
 I'm going to use all the shinies - [Browserify][browserify] for CommonJS modules and [JSX][jsx-in-depth] instead of the seperate `.js`/`.html` structure of a typical AngularJS application, using [Babel][babel] for ES6 features and [SASS][sass] for stylesheet preprocessing.
 
@@ -214,6 +214,7 @@ Check out the [survey-thing][survey-thing-repo] repo for updates and lols.
 ## Resources &amp; further reading:
 
 - [pawelpabich/random-reactjs-hacks - Pawel Pabich][pawel-random-js-hacks]
+- [Stub projects - React with Gulp and Bootstrap][react-gulp-bootstrap-stub-project]
 
 
 [pawel-random-js-hacks]: https://github.com/pawelpabich/random-reactjs-hacks
@@ -226,3 +227,6 @@ Check out the [survey-thing][survey-thing-repo] repo for updates and lols.
 [babel]: https://babeljs.io/
 [sass]: http://sass-lang.com/
 [nancy]: http://nancyfx.org/
+[react-gulp-bootstrap-stub-project]: https://github.com/bendetat/stub-projects/tree/master/react-with-gulp-and-bootstrap
+
+
