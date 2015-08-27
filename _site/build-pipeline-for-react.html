@@ -38,7 +38,19 @@
 
 <p>The site will be hosted in a simple <a href="http://nancyfx.org/">Nancy app</a> so the built React application will be output to <code>src\SurveyThing\app</code>. Host this in Nancy with a static convention - this example is for an ASP.NET site using OWIN.</p>
 
-<p>Install some NuGet packages (<code>Microsoft.Owin</code>, <code>Microsoft.Owin.Host.SystemWeb</code>, <code>Nancy</code>, <code>Nancy.Owin</code>, and <code>Owin</code>) then add <code>Startup</code> and <code>Bootstrapper</code> classes:</p>
+<p>Install some NuGet packages (<code>Microsoft.Owin</code>, <code>Microsoft.Owin.Host.SystemWeb</code>, <code>Nancy</code> and <code>Nancy.Owin</code>).</p>
+
+<p>Add these values to the <code>web.config</code> file, within the <code>configuration</code> element:</p>
+
+<pre><code>&lt;appSettings&gt;
+	&lt;add key="owin:HandleAllRequests" value="true" /&gt;
+&lt;/appSettings&gt;
+&lt;system.webServer&gt;
+	&lt;modules runAllManagedModulesForAllRequests="true"/&gt;
+&lt;/system.webServer&gt;
+</code></pre>
+
+<p>Add <code>Startup</code> and <code>Bootstrapper</code> classes:</p>
 
 <pre><code>public class Startup
 {

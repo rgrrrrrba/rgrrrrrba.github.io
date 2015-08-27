@@ -14,7 +14,18 @@ I'm going to use all the shinies - [Browserify][browserify] for CommonJS modules
 
 The site will be hosted in a simple [Nancy app][nancy] so the built React application will be output to `src\SurveyThing\app`. Host this in Nancy with a static convention - this example is for an ASP.NET site using OWIN.
 
-Install some NuGet packages (`Microsoft.Owin`, `Microsoft.Owin.Host.SystemWeb`, `Nancy`, `Nancy.Owin`, and `Owin`) then add `Startup` and `Bootstrapper` classes:
+Install some NuGet packages (`Microsoft.Owin`, `Microsoft.Owin.Host.SystemWeb`, `Nancy` and `Nancy.Owin`).
+
+Add these values to the `web.config` file, within the `configuration` element:
+
+	<appSettings>
+		<add key="owin:HandleAllRequests" value="true" />
+	</appSettings>
+	<system.webServer>
+		<modules runAllManagedModulesForAllRequests="true"/>
+	</system.webServer>
+
+Add `Startup` and `Bootstrapper` classes:
 
 	public class Startup
     {

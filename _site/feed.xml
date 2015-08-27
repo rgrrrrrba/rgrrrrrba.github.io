@@ -123,7 +123,19 @@
 
 &lt;p&gt;The site will be hosted in a simple &lt;a href=&quot;http://nancyfx.org/&quot;&gt;Nancy app&lt;/a&gt; so the built React application will be output to &lt;code&gt;src\SurveyThing\app&lt;/code&gt;. Host this in Nancy with a static convention - this example is for an ASP.NET site using OWIN.&lt;/p&gt;
 
-&lt;p&gt;Install some NuGet packages (&lt;code&gt;Microsoft.Owin&lt;/code&gt;, &lt;code&gt;Microsoft.Owin.Host.SystemWeb&lt;/code&gt;, &lt;code&gt;Nancy&lt;/code&gt;, &lt;code&gt;Nancy.Owin&lt;/code&gt;, and &lt;code&gt;Owin&lt;/code&gt;) then add &lt;code&gt;Startup&lt;/code&gt; and &lt;code&gt;Bootstrapper&lt;/code&gt; classes:&lt;/p&gt;
+&lt;p&gt;Install some NuGet packages (&lt;code&gt;Microsoft.Owin&lt;/code&gt;, &lt;code&gt;Microsoft.Owin.Host.SystemWeb&lt;/code&gt;, &lt;code&gt;Nancy&lt;/code&gt; and &lt;code&gt;Nancy.Owin&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;Add these values to the &lt;code&gt;web.config&lt;/code&gt; file, within the &lt;code&gt;configuration&lt;/code&gt; element:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;appSettings&amp;gt;
+	&amp;lt;add key=&quot;owin:HandleAllRequests&quot; value=&quot;true&quot; /&amp;gt;
+&amp;lt;/appSettings&amp;gt;
+&amp;lt;system.webServer&amp;gt;
+	&amp;lt;modules runAllManagedModulesForAllRequests=&quot;true&quot;/&amp;gt;
+&amp;lt;/system.webServer&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Add &lt;code&gt;Startup&lt;/code&gt; and &lt;code&gt;Bootstrapper&lt;/code&gt; classes:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;public class Startup
 {
