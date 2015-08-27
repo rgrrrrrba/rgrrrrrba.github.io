@@ -57,6 +57,10 @@ Run this to configure git to push the current branch by default, fix long path n
 	git config --global core.autocrlf true
 	git config --global credential.helper wincred
 
+Do this to get around long path issues:
+
+	git config --system core.longpaths true
+
 Also check this out: <https://help.github.com/articles/set-up-git>
 
 Looks like password caching is an issue with Cmder's msysgit, but only with non-SSH remote urls. If `.git/config` looks like this it shoud use the above keys:

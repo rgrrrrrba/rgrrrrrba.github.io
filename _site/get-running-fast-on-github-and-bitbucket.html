@@ -82,6 +82,11 @@ git config --global core.autocrlf true
 git config --global credential.helper wincred
 </code></pre>
 
+<p>Do this to get around long path issues:</p>
+
+<pre><code>git config --system core.longpaths true
+</code></pre>
+
 <p>Also check this out: <a href="https://help.github.com/articles/set-up-git">https://help.github.com/articles/set-up-git</a></p>
 
 <p>Looks like password caching is an issue with Cmder’s msysgit, but only with non-SSH remote urls. If <code>.git/config</code> looks like this it shoud use the above keys:</p>

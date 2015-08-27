@@ -114,6 +114,237 @@
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Build pipeline for React</title>
+				<description>&lt;p&gt;I’m going to eshew Bower and just use NPM as the package manager. I’ve already got &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Node and NPM installed&lt;/a&gt;. The example site I’m creating is &lt;code&gt;survey-thing&lt;/code&gt; - a simple thing for &lt;a href=&quot;https://github.com/bendetat/survey-thing&quot;&gt;creating surveys&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I’m going to use all the shinies - &lt;a href=&quot;http://browserify.org/&quot;&gt;Browserify&lt;/a&gt; for CommonJS modules and &lt;a href=&quot;https://facebook.github.io/react/docs/jsx-in-depth.html&quot;&gt;JSX&lt;/a&gt; instead of the seperate &lt;code&gt;.js&lt;/code&gt;/&lt;code&gt;.html&lt;/code&gt; structure of a typical AngularJS application, using &lt;a href=&quot;https://babeljs.io/&quot;&gt;Babel&lt;/a&gt; for ES6 features and &lt;a href=&quot;http://sass-lang.com/&quot;&gt;SASS&lt;/a&gt; for stylesheet preprocessing.&lt;/p&gt;
+
+&lt;h2 id=&quot;primer-nancy-as-a-static-server&quot;&gt;Primer: Nancy as a static server&lt;/h2&gt;
+
+&lt;p&gt;The site will be hosted in a simple &lt;a href=&quot;http://nancyfx.org/&quot;&gt;Nancy app&lt;/a&gt; so the built React application will be output to &lt;code&gt;src\SurveyThing\app&lt;/code&gt;. Host this in Nancy with a static convention - this example is for an ASP.NET site using OWIN.&lt;/p&gt;
+
+&lt;p&gt;Install some NuGet packages (&lt;code&gt;Microsoft.Owin&lt;/code&gt;, &lt;code&gt;Microsoft.Owin.Host.SystemWeb&lt;/code&gt;, &lt;code&gt;Nancy&lt;/code&gt;, &lt;code&gt;Nancy.Owin&lt;/code&gt;, and &lt;code&gt;Owin&lt;/code&gt;) then add &lt;code&gt;Startup&lt;/code&gt; and &lt;code&gt;Bootstrapper&lt;/code&gt; classes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class Startup
+{
+    public void Configuration(IAppBuilder app)
+    {
+        app
+            .UseNancy(new NancyOptions
+            {
+                Bootstrapper = new Bootstrapper()
+            })
+            .UseStageMarker(PipelineStage.MapHandler);
+    }
+}
+
+public class Bootstrapper : DefaultNancyBootstrapper
+{
+    protected override void ConfigureConventions(NancyConventions nancyConventions)
+    {
+        Conventions.StaticContentsConventions.Clear();
+        Conventions.StaticContentsConventions.AddDirectory(&quot;/&quot;, &quot;app&quot;);
+
+        base.ConfigureConventions(nancyConventions);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you create &lt;code&gt;\app\test.html&lt;/code&gt; inside the Nancy site’s root it should be served from &lt;code&gt;http://localhost:PORT/test.html&lt;/code&gt;. To serve &lt;code&gt;\app\index.html&lt;/code&gt; when requesting &lt;code&gt;http://localhost:PORT&lt;/code&gt; a static route needs to added:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class StaticModule : NancyModule
+{
+    public StaticModule()
+    {
+        Get[&quot;/&quot;] = _ =&amp;gt; Response.AsFile(&quot;app/index.html&quot;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;set-up-gulp&quot;&gt;Set up Gulp&lt;/h2&gt;
+
+&lt;p&gt;I want to use:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;gulp&lt;/code&gt; for the build tool&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;sass&lt;/code&gt; for CSS generation&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;gulp-pleeease&lt;/code&gt; to do &lt;a href=&quot;http://pleeease.io/&quot;&gt;nice things with CSS&lt;/a&gt; including minification&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;babelify&lt;/code&gt; for ES6 and JSX support&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;browserify&lt;/code&gt; for a CommonJs module system&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;vinyl-source-stream&lt;/code&gt; reduces the reliance on gulp plugins (so we can use &lt;code&gt;babelify&lt;/code&gt; instead of &lt;code&gt;gulp-babel&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;react&lt;/code&gt; obviously ;-)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;gulp-streamify&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;uglify&lt;/code&gt; minify JS (used later)&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code&gt;yargs&lt;/code&gt; get command line args (used later)&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt;  npm install --save gulp
+  npm install --save gulp-concat
+  npm install --save gulp-sass
+  npm install --save gulp-pleeease
+  npm install --save babelify
+  npm install --save browserify
+  npm install --save vinyl-source-stream
+  npm install --save react
+  npm install --save gulp-streamify
+  npm install --save uglify
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;There’s a fair bit happening in &lt;a href=&quot;https://github.com/bendetat/survey-thing/blob/master/gulpfile.js&quot;&gt;the &lt;code&gt;gulpfile.js&lt;/code&gt; script&lt;/a&gt; but here are some highlights.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;'code'&lt;/code&gt; step uses browserify to set up the CommonJS module system and uses &lt;code&gt;app/layout/index.jsx&lt;/code&gt; as the entry point to the application. Babel is used to take advantage of ES6 and the script is minified.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; gulp.task('code', function(){
+	browserify({
+		entries: 'app/layout/layout.jsx',
+		extensions: ['.jsx'],
+		debug: true
+	})
+		.transform(babelify)
+		.bundle()
+		.pipe(source('site.js'))
+		.pipe(gulp.dest(destinationPath));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;CSS preprocessing is done using SASS. The entry point is &lt;code&gt;app/site.scss&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('css', function(){
+	gulp
+		.src([
+			'app/site.scss',
+			'app/**/*.css'
+		])
+		.pipe(sass().on('error', sass.logError))
+		.pipe(pleeease())
+		.pipe(concat('site.css'))
+		.pipe(gulp.dest(destinationPath));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The template HTML file is copied verbatim to the destination path.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('html', function(){
+	gulp
+		.src('app/index.html')
+		.pipe(gulp.dest(destinationPath));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The default gulp task runs all the main tasks (&lt;code&gt;'vendor'&lt;/code&gt; is not shown, it just bundles up vendor CSS and JS into &lt;code&gt;vendor.css&lt;/code&gt; and &lt;code&gt;vendor.js&lt;/code&gt; respectively).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('default', ['code', 'css', 'html', 'vendor']);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;'watch'&lt;/code&gt; task splits up the workload to keep live rebuilds snappy:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('watch', ['default'], function() {
+	gulp.watch(
+		['app/**/*.jsx'], 
+		['code']);
+	gulp.watch(
+		['app/**/*.css', 'app/**/*.scss'],
+		['css']);
+	gulp.watch(
+		['app/index.html'],
+		['html']);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;react-app-structure&quot;&gt;React app structure&lt;/h2&gt;
+
+&lt;p&gt;The structure is pretty trivial at this point:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;app/
+	index.html
+	site.scss
+	/layout
+		layout.jsx
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;index.html&lt;/code&gt; references the stylesheets and scripts, and includes a &lt;code&gt;div&lt;/code&gt; with an ID that will be used by the React app:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html&amp;gt;
+	&amp;lt;head&amp;gt;
+		&amp;lt;title&amp;gt;Survey Thing&amp;lt;/title&amp;gt;
+		&amp;lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;site.css&quot;/&amp;gt;
+		&amp;lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;vendor.css&quot;/&amp;gt;
+	&amp;lt;/head&amp;gt;
+	&amp;lt;body&amp;gt;
+		&amp;lt;div id=&quot;content&quot;&amp;gt;&amp;lt;/div&amp;gt;
+
+		&amp;lt;script src=&quot;site.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+		&amp;lt;script src=&quot;vendor.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+	&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In &lt;code&gt;layout.jsx&lt;/code&gt;, ‘Hello world’ is rendered into the &lt;code&gt;div&lt;/code&gt; using inline markup:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import React from 'react';
+
+React.render(
+	&amp;lt;h1&amp;gt;Hello, world!&amp;lt;/h1&amp;gt;,
+	document.getElementById(&quot;content&quot;)
+);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running &lt;code&gt;gulp&lt;/code&gt; will run the &lt;code&gt;'default'&lt;/code&gt; task, which should build the app and write the artifacts to &lt;code&gt;\src\SurveyThing\app&lt;/code&gt;. Running &lt;code&gt;gulp watch&lt;/code&gt; will run the &lt;code&gt;'watch'&lt;/code&gt; task and rebuild whenever the monitored files change.&lt;/p&gt;
+
+&lt;p&gt;If everything works, we should have a happy ‘hello world’ page. I made mine pink &lt;strike&gt;because pink is cool&lt;/strike&gt; to test SASS:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/rMdt9t7.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;minifying-the-sitejs-file&quot;&gt;Minifying the &lt;code&gt;site.js&lt;/code&gt; file&lt;/h2&gt;
+
+&lt;p&gt;Without minification the &lt;code&gt;site.js&lt;/code&gt; file is huge (1.5M). To conditionally minify the script I check for a &lt;code&gt;--release&lt;/code&gt; argument:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var yargs = require('yargs');
+
+var buildRelease = yargs.argv.release || false;
+
+gulp.task('code', function(){
+	var pipeline = browserify({
+		entries: 'app/layout/layout.jsx',
+		extensions: ['.jsx'],
+		debug: true
+	})
+		.transform(babelify)
+		.bundle()
+		.pipe(source('site.js'));
+
+	if (buildRelease) {
+		pipeline.pipe(streamify(uglify()));
+	}
+
+	pipeline
+		.pipe(gulp.dest(destinationPath));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now running &lt;code&gt;gulp --release&lt;/code&gt; results in a much more managable 185k file.&lt;/p&gt;
+
+&lt;h2 id=&quot;fin&quot;&gt;fin&lt;/h2&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://github.com/bendetat/survey-thing&quot;&gt;survey-thing&lt;/a&gt; repo for updates and lols.&lt;/p&gt;
+
+&lt;h2 id=&quot;resources-amp-further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/pawelpabich/random-reactjs-hacks&quot;&gt;pawelpabich/random-reactjs-hacks - Pawel Pabich&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/build-pipeline-for-react.html</link>
+				<guid isPermaLink="true">http://bendetat.com/build-pipeline-for-react.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Ubuntu Desktop in AWS EC2</title>
 				<description>&lt;p&gt;This turned out to be much harder than I had hoped. Creating and connecting to a Windows Server VM is trivial in Azure but I thought I would try creating an Ubuntu VM with a desktop in AWS for the exercise (and hopefully in less time than it would take to download an Ubuntu ISO and set up a local VM - I failed). The main time sink was messing around with the SSH keys, which is admittedly a good thing because it’s got to be, excuse me, pretty damn secure. The other delay was in properly configuring X-Windows to show the Ubuntu desktop. Again this is probably a good thing because an OOTB Ubuntu instance is quite lean and most server-y things can be done via SSH rather in a GUI. That’s not what I was intending for this exercise though.&lt;/p&gt;
 
@@ -1342,651 +1573,6 @@ $http.get('api/get-instruments')
 				<pubDate>Fri, 30 Jan 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html</link>
 				<guid isPermaLink="true">http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>A useful build pipeline using Gulp and Bower</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It’s Gulp!&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Part 2: A useful build pipeline using Gulp and Bower&lt;/li&gt;
-  &lt;li&gt;Part 3: &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;Cleaning and simplifying the Gulp pipeline&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Big thanks to my colleague &lt;a href=&quot;http://blog.gertjvr.com/&quot;&gt;Gert JvR&lt;/a&gt; whose &lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;ng-template&lt;/a&gt; project I am deconstructing.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as of this post&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js&quot;&gt;cleaned &lt;code&gt;gulpfile.js&lt;/code&gt;&lt;/a&gt; which I will use from here on&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;have-you-any-bootstrap&quot;&gt;Have you any Bootstrap?&lt;/h2&gt;
-
-&lt;p&gt;I want to use Bootstrap, but…&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://cdn.meme.am/instances/500x/58510881.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Bower is a JavaScript package manager. So is NPM, in fact we’ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM &lt;a href=&quot;http://browserify.org&quot;&gt;can be used for client-side package management&lt;/a&gt; but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.&lt;/p&gt;
-
-&lt;p&gt;Install Bower to the project (and globally) using NPM:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev -g bower
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now create &lt;code&gt;bower.json&lt;/code&gt; by running &lt;code&gt;bower init&lt;/code&gt; and following the instructions. Bower should not be ready to install Bootstrap:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;bower install bootstrap --save
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This installs all of Bootstrap (including the separate jQuery dependency) into &lt;code&gt;/bower_components&lt;/code&gt;. It also adds a reference to the dependency in &lt;code&gt;bower.json&lt;/code&gt; - if it doesn’t you may have forgotten the &lt;code&gt;--save&lt;/code&gt; argument.&lt;/p&gt;
-
-&lt;p&gt;I then copied the &lt;a href=&quot;http://getbootstrap.com/getting-started/#template&quot;&gt;minimal Bootstrap HTML&lt;/a&gt; into &lt;code&gt;src/client/index.html&lt;/code&gt;. This won’t work because we’re not copying or linking in the CSS correctly.&lt;/p&gt;
-
-&lt;h2 id=&quot;vendor-css&quot;&gt;Vendor CSS&lt;/h2&gt;
-
-&lt;p&gt;There are two types of CSS - vendor and site-specific - and each will be handled slightly differently. Vendor CSS is anything that comes from a Bower package, and site-specific CSS will be anything in &lt;code&gt;/src/client/css&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;I’ll start by adding a dependency task to the &lt;code&gt;rev-and-inject&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss'], function() {
-	// existing rev-and-inject task
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In my &lt;a href=&quot;hello-world-its-gulp.html&quot;&gt;last post&lt;/a&gt; I declared the &lt;code&gt;config&lt;/code&gt; object within &lt;code&gt;gulpfile.js&lt;/code&gt;. I immediately regret this decision and move it into its own file - &lt;code&gt;gulp-config.json&lt;/code&gt;. Now I need to explicitly add the CSS files that will be included in the site:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-	&quot;paths&quot;: {
-		&quot;client&quot;: &quot;src/client/&quot;,
-		&quot;server&quot;: &quot;src/server/&quot;,
-		&quot;dist&quot;: &quot;src/client-dist&quot;,
-		&quot;vendorcss&quot;: [
-			&quot;bower_components/bootstrap/dist/css/bootstrap.css&quot;,
-			&quot;bower_components/bootstrap/dist/css/bootstrap-theme.css&quot;
-		]
-	}
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;config&lt;/code&gt; object is now initialised using &lt;code&gt;require()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var config = require('./gulp-config.json');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we get to install some more dependencies!&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-concat&quot;&gt;&lt;code&gt;gulp-concat&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-concat
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Concatenates files&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Pull in the &lt;code&gt;concat&lt;/code&gt; dependency at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var concat = require('gulp-concat');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now add the &lt;code&gt;vendorcss&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('vendorcss', function(){
-return gulp
-	// set source
-	.src(config.paths.vendorcss)
-	// write to vendor.min.css
-	.pipe(concat('vendor.min.css'))
-	// write to dest
-	.pipe(gulp.dest(config.paths.destination));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This takes all of the vendor CSS files specified in &lt;code&gt;gulp-config.json&lt;/code&gt; and bundles them into &lt;code&gt;/src/site-dist/vendor.min.css&lt;/code&gt;. Very exciting but it hasn’t minified the CSS yet. Time for some more plugins:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-bytediff&quot;&gt;&lt;code&gt;gulp-bytediff&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-bytediff
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Compare file sizes before and after your gulp build process.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code&gt;bytediff&lt;/code&gt; is just used to output the file size reduction from minification.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-minify-css&quot;&gt;&lt;code&gt;gulp-minify-css&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-minify-css
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Minify css with clean-css.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the &lt;code&gt;bytediff&lt;/code&gt; and &lt;code&gt;minify-css&lt;/code&gt; dependencies at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var bytediff = require('gulp-bytediff');
-var minifyCss = require('gulp-minify-css');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Then add the minify and bytediff steps to the pipeline (in &lt;code&gt;gulp.task('vendorcss'..&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;return gulp
-	// set source
-	.src(config.paths.vendorcss)
-	// write to vendor.min.css
-	.pipe(concat('vendor.min.css'))
-
-	// start tracking size
-	.pipe(bytediff.start())
-	// minify css
-	.pipe(minifyCss())
-	// stop tracking size and output it using bytediffFormatter
-	.pipe(bytediff.stop(bytediffFormatter))
-
-	// write to dest
-	.pipe(gulp.dest(config.paths.destination));
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;bytediff.stop(bytediffFormatter)&lt;/code&gt; uses a new function to format the file size difference. This function needs to be added:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;function bytediffFormatter(data) {
-	var formatPercent = function(num, precision) {
-		return (num * 100).toFixed(precision);
-	};
-    var difference = (data.savings &amp;gt; 0) ? ' smaller.' : ' larger.';
-    
-    return data.fileName + ' went from ' +
-        (data.startSize / 1000).toFixed(2) + ' kB to ' + (data.endSize / 1000).toFixed(2) + ' kB' +
-        ' and is ' + formatPercent(1 - data.percent, 2) + '%' + difference;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now when I run &lt;code&gt;gulp build&lt;/code&gt; the CSS is minified:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[09:10:18] Starting 'vendorcss'...
-[gulp] [09:10:18] Compressing, bundling and copying vendor CSS
-[09:10:18] vendor.min.css went from 164.02 kB to 135.50 kB and is 17.39% smaller.
-[09:10:18] Finished 'vendorcss' after 298 ms
-[09:10:18] Starting 'rev-and-inject'...
-[09:10:18] Finished 'rev-and-inject' after 5.79 ms
-[09:10:18] Starting 'build'...
-[09:10:18] gulp-notify: [Gulp notification] Build complete
-[09:10:18] Finished 'build' after 48 ms
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;index.html&lt;/code&gt; now needs a reference to the minified CSS file. It could be hard-coded to &lt;code&gt;vendor.min.css&lt;/code&gt; but that is subject to change if the build script changes. So we need to &lt;em&gt;inject&lt;/em&gt; the path to the &lt;code&gt;vendor.min.css&lt;/code&gt; artifact directly into &lt;code&gt;index.html&lt;/code&gt; as it is being written.&lt;/p&gt;
-
-&lt;p&gt;Install yet another plugin:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-inject&quot;&gt;&lt;code&gt;gulp-inject&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-inject
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A javascript, stylesheet and webcomponent injection plugin for Gulp, i.e. inject file references into your index.html&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the new &lt;code&gt;inject&lt;/code&gt; dependency to the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var inject = require('gulp-inject');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task add a local method that wraps &lt;code&gt;inject()&lt;/code&gt; with some common options:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var localInject = function(pathGlob, name) {
-	var options = {
-		// Strip out the 'src/client-dist-app' part from the path to vendor.min.css
-		ignorePaths = config.paths.destination,
-		// Don't read file being injected, just get the path
-		read: false,
-		// add a prefix to the injected path
-		addPrefix: config.paths.buildPrefix
-	};
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;aside&gt;The `read: false` option is interesting, if it is set to true you can use a transform to [inject the contents](https://www.npmjs.com/package/gulp-inject/#injecting-files-contents) of the file into the output.&lt;/aside&gt;
-
-&lt;p&gt;There is a new &lt;code&gt;buildPrefix&lt;/code&gt; value in the config that needs to be added to &lt;code&gt;gulp-config.json&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-	&quot;paths&quot;: {
-		// ...
-		&quot;buildPrefix&quot;: &quot;app&quot;,
-		// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is needed because when the site will get hosted by Nancy, it will be available at &lt;code&gt;{yoursite}/app&lt;/code&gt;. So the injected path will be &lt;code&gt;/app/content/vendor.min.css&lt;/code&gt;. In a minute I’ll set up a static server using Node.js for testing the output.&lt;/p&gt;
-
-&lt;p&gt;The inject step now needs to be added to the &lt;code&gt;rev-and-inject&lt;/code&gt; task pipeline:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss'], function() {
-	var indexPath = path.join(config.paths.source, 'index.html');
-
-	var localInject = //...
-
-	return gulp
-		.src([].concat(indexPath))
-
-		// inject into inject-vendor:css
-		.pipe(localInject(
-			path.join(config.paths.destination, 'vendor.min.css'),
-			'inject-vendor'))
-
-		.pipe(gulp.dest(config.paths.distribution))
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now in &lt;code&gt;/src/client/index.html&lt;/code&gt; we just need to replace the link to &lt;code&gt;bootstrap.min.css&lt;/code&gt; to the &lt;code&gt;inject-vendor:css&lt;/code&gt; placeholder:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;title&amp;gt;Bootstrap 101 Template&amp;lt;/title&amp;gt;
-
-&amp;lt;!-- inject-vendor:css --&amp;gt;
-&amp;lt;!-- endinject --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now, running &lt;code&gt;gulp build&lt;/code&gt; should inject the correct path into &lt;code&gt;/src/client-dist/index.html&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;!-- inject-vendor:css --&amp;gt;
-&amp;lt;link rel=&quot;stylesheet&quot; href=&quot;/app/vendor.min.css&quot;&amp;gt;
-&amp;lt;!-- endinject --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;use-nodejs-to-serve-the-static-website&quot;&gt;Use Node.js to serve the static website&lt;/h3&gt;
-
-&lt;p&gt;At the moment the output is going to &lt;code&gt;/src/client-dist&lt;/code&gt;. When the site is eventually hosted on Nancy it will be served from &lt;code&gt;/app&lt;/code&gt;, so the injected paths currently all start with &lt;code&gt;/app&lt;/code&gt;, which means that the build output can’t be viewed properly yet. I’m going to set up a quick, static server to publish the site. More dependencies!&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/connect&quot;&gt;&lt;code&gt;connect&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev connect
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;High performance middleware framework&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/serve-static&quot;&gt;&lt;code&gt;serve-static&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev serve-static
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Serve static files&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the new dependencies at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var connect = require('connect');
-var serveStatic = require('serve-static');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now add a new task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('serve', function(){
-	var sourcePath = path.join(__dirname, config.paths.destination);
-	var port = 12857;
-	var serveFromPath = '/' + config.paths.buildPrefix;
-
-	log('Hosting ' + sourcePath + ' at http://localhost:' + port + serveFromPath);
-
-	connect()
-		.use(serveFromPath, serveStatic(sourcePath))
-		.listen(port);
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now running &lt;code&gt;gulp serve&lt;/code&gt; will serve the static content from &lt;a href=&quot;http://localhost:12857/app&quot;&gt;http://localhost:12857/app&lt;/a&gt;. I can leave that running in one console while rebuilding in another.&lt;/p&gt;
-
-&lt;p&gt;Interestingly, this way of serving a static site could probably be used all the way through to production, as the interaction with the server is all done on the client side via REST calls.&lt;/p&gt;
-
-&lt;h2 id=&quot;site-specific-css&quot;&gt;Site-specific CSS&lt;/h2&gt;
-
-&lt;p&gt;In &lt;code&gt;gulpfile.js&lt;/code&gt; add a new &lt;code&gt;css&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('css', function() {
-	return gulp
-		// set source (src/**/*.css)
-		.src([path.join(config.paths.client, '**/*.css')])
-		// write to site.min.css
-		.pipe(concat('site.min.css'))
-		// start tracking size
-		.pipe(bytediff.start())
-		// minify the css
-		.pipe(minifyCss())
-		// stop tracking size and output it
-		.pipe(bytediff.stop(bytediffFormatter))
-		// write to dest/content
-		.pipe(gulp.dest(config.paths.destination));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is getting a bit familiar. Instead of using a set of explicit tasks from &lt;code&gt;gulp-config.json&lt;/code&gt; I’ve just assumed that anything named &lt;code&gt;*.css&lt;/code&gt; anywhere in the client should be injected into the static site distribution. The concatenated, minified output gets written to &lt;code&gt;/src/client-dist/content/site.min.css&lt;/code&gt;. Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task the &lt;code&gt;css&lt;/code&gt; task needs to be added to the prerequisites:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css'], function(){
-	// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And the path to the new &lt;code&gt;site.min.css&lt;/code&gt; needs to be injected (this goes after the &lt;code&gt;inject-vendor:css&lt;/code&gt; injection):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// inject into inject:css
-.pipe(localInject(config.paths.destination))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that there is no name placeholder used. This will inject into the default &lt;code&gt;inject:css&lt;/code&gt; placeholder, which needs to be added to &lt;code&gt;index.html&lt;/code&gt; after the existing &lt;code&gt;inject-vendor:css&lt;/code&gt; placeholder:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;!-- inject:css --&amp;gt;
-&amp;lt;!-- endinject --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now if you add some CSS files to &lt;code&gt;/src/client&lt;/code&gt; they will be injected into &lt;code&gt;index.html&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;vendor-javascript&quot;&gt;Vendor JavaScript&lt;/h2&gt;
-
-&lt;p&gt;One more dependency:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-uglify&quot;&gt;&lt;code&gt;gulp-uglify&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-uglify
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Minify files with UglifyJS.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Vendor JS is configured the same way vendor CSS is, in &lt;code&gt;gulp-config.json&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;	&quot;vendorcss&quot;: [
-		// ...
-	],
-	&quot;vendorjs&quot;: [
-		&quot;bower_components/jquery/dist/jquery.js&quot;,
-		&quot;bower_components/bootstrap/dist/bootstrap.js&quot;
-	]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;uglify&lt;/code&gt; is used instead of &lt;code&gt;minifyCss&lt;/code&gt;. Add the dependency at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var uglify = require('gulp-uglify');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now create the &lt;code&gt;vendorjs&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('vendorjs', function(){
-	return gulp
-		// set source
-		.src(config.paths.vendorjs)
-		// write to vendor.min.js
-		.pipe(concat('vendor.min.js'))
-		// start tracking size
-		.pipe(bytediff.start())
-		// uglify js
-		.pipe(uglify())
-		// stop tracking size and output it using bytediffFormatter
-		.pipe(bytediff.stop(bytediffFormatter))
- 
-		// write to dest
-		.pipe(gulp.dest(config.paths.destination));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In &lt;code&gt;rev-and-inject&lt;/code&gt;, the &lt;code&gt;vendorcss&lt;/code&gt; prerequisite task needs to be added:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css', 'vendorjs'], function(){
-	// ...	
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And the newly minified &lt;code&gt;content/script/vendor.min.js&lt;/code&gt; needs to be injected (after the &lt;code&gt;inject:css&lt;/code&gt; injection):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// inject into inject-vendor:js
-.pipe(localInject(
-	path.join(config.paths.destination, 'vendor.min.js'),
-	'inject-vendor'))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now the &lt;code&gt;inject-vendor:css&lt;/code&gt; placeholder needs to be added to &lt;code&gt;index.html&lt;/code&gt; at the end of the &lt;code&gt;&amp;lt;body&amp;gt;&lt;/code&gt; element:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;!-- inject-vendor:css --&amp;gt;
-&amp;lt;!-- endinject --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;site-specific-javascript&quot;&gt;Site-specific JavaScript&lt;/h2&gt;
-
-&lt;p&gt;To support AngularJS, the site-specific JS task will need a couple of extra steps, but I’ll leave that for the next post. Meanwhile, it will be similar to the site-specific CSS task, bundling and minifying all &lt;code&gt;*.js&lt;/code&gt; files in &lt;code&gt;/src/client&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('js', function() {
-	return gulp
-		// set source (src/**/*.js)
-		.src([path.join(config.paths.client, '**/*.js')])
-		// write to site.min.js
-		.pipe(concat('site.min.js'))
-		// start tracking size
-		.pipe(bytediff.start())
-		// uglify js
-		.pipe(uglify())
-		// stop tracking size and output it using bytediffFormatter
-		.pipe(bytediff.stop(bytediffFormatter))
- 
-		// write to dest
-		.pipe(gulp.dest(config.paths.destination));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In &lt;code&gt;rev-and-inject&lt;/code&gt;, the &lt;code&gt;js&lt;/code&gt; prerequisite task needs to be added:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('rev-and-inject', ['vendorcss', 'css', 'vendorjs'], function(){
-	// ...	
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And &lt;code&gt;content/script/site.min.js&lt;/code&gt; needs to be injected (after the &lt;code&gt;inject-vendor:js&lt;/code&gt; injection):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// inject into inject:js
-.pipe(localInject(
-	path.join(config.paths.destination, 'site.min.js')))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;fonts-and-images&quot;&gt;Fonts and images&lt;/h2&gt;
-
-&lt;p&gt;Site assets that aren’t CSS or JS need to be processed as well. Fonts are pretty straightforward, I’ll just copy everything in &lt;code&gt;content/fonts&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('fonts', function(){
-	log('Copy fonts');
-
-	return gulp
-		.src([path.join(config.paths.client, 'content/fonts/*')])
-		.pipe(gulp.dest(path.join(config.paths.destination, 'content/fonts')));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Since this can be done outside of the &lt;code&gt;rev-and-inject&lt;/code&gt; process, it gets added to the &lt;code&gt;build&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('build', ['rev-and-inject', 'fonts'], function() {
-	// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Images could be a straight copy as well, or you can pass them through an image optimization plugin. Install two more dependencies:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-cache&quot;&gt;&lt;code&gt;gulp-cache&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-cache
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A cache proxy task for Gulp&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-imagemin&quot;&gt;&lt;code&gt;gulp-imagemin&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-imagemin
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Minify PNG, JPEG, GIF and SVG images&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code&gt;imagemin&lt;/code&gt; is an image minifier. This performs some compression on PNG images:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('images', function(){
-	log('Compress, cache and copy images');
-
-	return gulp
-		.src([path.join(config.paths.client, 'content/images/*')])
-		.pipe(cache(imagemin({
-			optimizationLevel: 3
-		})))
-		.pipe(gulp.dest(path.join(config.paths.destination, 'content/images')));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This task also gets added as a prerequisite to the &lt;code&gt;build&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task('build', ['rev-and-inject', 'fonts', 'images'], function() {
-	// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;revisioning-and-cache-busting&quot;&gt;Revisioning and cache-busting&lt;/h2&gt;
-
-&lt;p&gt;Revisioning is a way of cache-busting (forcing the browser to reload assets) by appending a hash to the filename. Since this hash is unique for a particular revision of the file (as it is a hash of the file’s contents) as long as the source file doesn’t change, the revisioned file name will stay the same and will reload from the browser’s cache. This uses the &lt;code&gt;gulp-rev&lt;/code&gt; and &lt;code&gt;gulp-rev-replace&lt;/code&gt; plugins:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-rev&quot;&gt;&lt;code&gt;gulp-rev&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-rev
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Static asset revisioning by appending content hash to filenames: unicorn.css =&amp;gt; unicorn-098f6bcd.css&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-rev-replace&quot;&gt;&lt;code&gt;gulp-rev-replace&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-rev-replace
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Rewrite occurences of filenames which have been renamed by gulp-rev&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the new dependencies to the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var rev = require('gulp-rev');
-var revReplace = require('gulp-rev-replace');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now the &lt;code&gt;build&lt;/code&gt; task gets a bit of a rewrite:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var indexFilter = filter('index.html');
-var cssFilter = filter(&quot;**/*.min.css&quot;);
-var jsFilter = filter(&quot;**/*.min.js&quot;);
-var manifestFilter = filter('rev-manifest.json');
-
-return gulp
-	// 1. set source (/src/client/)
-	.src([].concat(
-		path.join(config.paths.client, 'index.html'), 
-		path.join(config.paths.destination, '*.min.css'),
-		path.join(config.paths.destination, '*.min.js')))
-
-	// 2. add the revision to the css files
-	.pipe(cssFilter)
-	.pipe(rev())
-	.pipe(gulp.dest(config.paths.destination))
-	.pipe(cssFilter.restore())
-
-	// 3. add the revision to the js files
-	.pipe(jsFilter)
-	.pipe(rev())
-	.pipe(gulp.dest(config.paths.destination))
-	.pipe(jsFilter.restore())
-
-	// 4. inject css and js
-	.pipe(indexFilter)
-	.pipe(localInject(path.join(config.paths.destination, 'vendor.min.css'), 'inject-vendor'))
-	.pipe(localInject(path.join(config.paths.destination, 'site.min.css')))
-	.pipe(localInject(path.join(config.paths.destination, 'vendor.min.js'), 'inject-vendor'))
-	.pipe(localInject(path.join(config.paths.destination, 'site.min.js')))
-	.pipe(gulp.dest(config.paths.destination))
-	.pipe(indexFilter.restore())
-
-	// 5. substitute in new revved filenames
-	.pipe(revReplace())
-	.pipe(gulp.dest(config.paths.destination));
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’ve numbered the stages of this pipeline. &lt;/p&gt;
-
-&lt;p&gt;In step 1 we select &lt;code&gt;index.html&lt;/code&gt; and the &lt;code&gt;*.min.css&lt;/code&gt; and &lt;code&gt;*.min.js&lt;/code&gt; files.&lt;/p&gt;
-
-&lt;p&gt;In step 2 we filter down to just the &lt;code&gt;*.min.css&lt;/code&gt; files, then apply the revisioning hash to the filenames (using &lt;code&gt;rev()&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// filter to *.min.css
-.pipe(cssFilter)
-// add the revision to the files
-.pipe(rev())
-// write the files
-.pipe(gulp.dest(config.paths.destination))
-// clear the filter
-.pipe(cssFilter.restore())
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Step 3 is the same as step 2 except for &lt;code&gt;*.min.js&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;In step 4 we filter down to just &lt;code&gt;index.html&lt;/code&gt; and do the existing CSS and JS injections.&lt;/p&gt;
-
-&lt;p&gt;In step 5 we substitute the newly revisioned filenames into &lt;code&gt;index.html&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;and-finally&quot;&gt;And finally…&lt;/h2&gt;
-
-&lt;p&gt;The end result looks like this:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/j3WY60e.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;index.html&lt;/code&gt; points to the concatenated, minified, and hashed files:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE html&amp;gt;
-&amp;lt;html lang=&quot;en&quot;&amp;gt;
-	&amp;lt;head&amp;gt;
-		&amp;lt;!-- inject-vendor:css --&amp;gt;
-		&amp;lt;link rel=&quot;stylesheet&quot; href=&quot;/app/vendor.min-a491bda8.css&quot;&amp;gt;
-		&amp;lt;!-- endinject --&amp;gt;
-
-		&amp;lt;!-- inject:css --&amp;gt;
-		&amp;lt;link rel=&quot;stylesheet&quot; href=&quot;/app/site.min-238af6ba.css&quot;&amp;gt;
-		&amp;lt;!-- endinject --&amp;gt;
-		&amp;lt;/head&amp;gt;
-	&amp;lt;body&amp;gt;
-		&amp;lt;h1&amp;gt;Hello, world!&amp;lt;/h1&amp;gt;
-
-		&amp;lt;!-- inject-vendor:js --&amp;gt;
-		&amp;lt;script src=&quot;/app/vendor.min-8e07c5e8.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-		&amp;lt;!-- endinject --&amp;gt;
-
-		&amp;lt;!-- inject:js --&amp;gt;
-		&amp;lt;script src=&quot;/app/site.min-5b54178e.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-		&amp;lt;!-- endinject --&amp;gt;
-	&amp;lt;/body&amp;gt;
-&amp;lt;/html&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’m not entirely happy with this so &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;next I’ll try to simplify things&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&quot;&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;https://github.com/gertjvr/ng-template&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://gulpjs.com/&quot;&gt;http://gulpjs.com/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://nodejs.org/api/&quot;&gt;http://nodejs.org/api/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as of this post&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js&quot;&gt;cleaned &lt;code&gt;gulpfile.js&lt;/code&gt;&lt;/a&gt; which I will use from here on&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Fri, 30 Jan 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html</link>
-				<guid isPermaLink="true">http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html</guid>
 			</item>
 		
 	</channel>
