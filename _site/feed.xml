@@ -8,6 +8,174 @@
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Notes on Kerberos and Active Directory</title>
+				<description>&lt;p&gt;These are just some notes I made while reading about Kerberos and Active Directory. They aren’t very technical or well-edited and probably have plenty of errors. Read at your peril!&lt;/p&gt;
+
+&lt;h2 id=&quot;kerberos&quot;&gt;Kerberos&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Kerberos_(protocol)&quot;&gt;https://en.wikipedia.org/wiki/Kerberos_(protocol)&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Requires a trusted third party
+    &lt;ul&gt;
+      &lt;li&gt;Authentication Server and Ticket Granting Service&lt;/li&gt;
+      &lt;li&gt;usually backed by a database - Active Directory for example&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Originally implemented by MIT&lt;/li&gt;
+  &lt;li&gt;Windows 2000 onwards uses the Kerberos protocol (&lt;em&gt;not&lt;/em&gt; MIT’s implementation) as the default auth method
+    &lt;ul&gt;
+      &lt;li&gt;Prior to Windows 2000 it used NTLM&lt;/li&gt;
+      &lt;li&gt;If the machine is not joined to a domain it falls back to NTML between client and server&lt;/li&gt;
+      &lt;li&gt;Intranet web applications can enforce Kerberos as an authentication method for domain joined clients by using APIs provided under SSPI
+        &lt;ul&gt;
+          &lt;li&gt;IIS integrated auth for example&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2015-11-02-notes-on-kerberos-and-active-directory/kerberos-data-flow.jpg&quot; alt=&quot;Kerberos Data Flow&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;authentication-and-sso-service-access&quot;&gt;Authentication and SSO service access&lt;/h3&gt;
+
+&lt;h4 id=&quot;stage-1---initial-sign-on&quot;&gt;Stage 1 - Initial sign-on&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Client sends user ID (in plain text) to authentication server (AS)&lt;/li&gt;
+  &lt;li&gt;AS finds the user in the database (Active Directory) and sends:
+    &lt;ul&gt;
+      &lt;li&gt;TGS Session Key - encrypted with user’s password (from AD)&lt;/li&gt;
+      &lt;li&gt;Ticket Granting Ticket (TGT) - encrypted with the AS’s private key&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Client decrypts Session Key using the password the user entered
+    &lt;ul&gt;
+      &lt;li&gt;If it can’t decrypt the Session Key then it can’t be used and authentication has failed&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now the client has enough information to access the Ticket Granting Server.&lt;/p&gt;
+
+&lt;h4 id=&quot;stage-2---getting-clientserver-ticket-so-the-client-can-access-a-service-server-ss&quot;&gt;Stage 2 - Getting Client/Server ticket, so the client can access a Service Server (SS)&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Client sends to Ticket Granting Server (TGS):
+    &lt;ul&gt;
+      &lt;li&gt;TGT and ID of requested service&lt;/li&gt;
+      &lt;li&gt;Authenticator, encrypted using the TGS Session Key&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;TGS decrypts the TGT using the AS’s private key, which gives it the session key.&lt;/li&gt;
+  &lt;li&gt;TGS uses the session key to decrypt the Authenticator&lt;/li&gt;
+  &lt;li&gt;TGS checks that the client has access to the requested service (using AD)&lt;/li&gt;
+  &lt;li&gt;TGS sends to client:
+    &lt;ul&gt;
+      &lt;li&gt;Client/Server Ticket, encrypted with the Service Server’s (SS) private key (the TGS has the SS’s private keys)&lt;/li&gt;
+      &lt;li&gt;Client/Server Session Key, encrypted with the TGS Session Key&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now the client has enough information to access the Service Server.&lt;/p&gt;
+
+&lt;h4 id=&quot;stage-3---accessing-the-service-server&quot;&gt;Stage 3 - Accessing the Service Server&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Client sends to SS:
+    &lt;ul&gt;
+      &lt;li&gt;Client/Server Ticket (still encrypted with service’s private key)&lt;/li&gt;
+      &lt;li&gt;A new Authenticator, encrypted using Client/Server Session Key&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;SS decrypts the Client/Server Ticket using its private key&lt;/li&gt;
+  &lt;li&gt;SS uses the Client/Server Ticket to decrypt the Authenticator&lt;/li&gt;
+  &lt;li&gt;SS sends to client a message with the timestamp encoded in the Authenticator, encrypted with the Client/Server Ticket&lt;/li&gt;
+  &lt;li&gt;This verifies to the client that the SS can be trusted and is willing to service the client&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now the client and the SS can interact.&lt;/p&gt;
+
+&lt;h2 id=&quot;active-directory&quot;&gt;Active Directory&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Active_Directory&quot;&gt;https://en.wikipedia.org/wiki/Active_Directory&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Domain controller (DC) authenticates and authorises users and computers in the domain&lt;/li&gt;
+  &lt;li&gt;AD implements LDAP (lightweight directory access protocol) (not 100%, there are exceptions)&lt;/li&gt;
+  &lt;li&gt;Stores network objects:
+    &lt;ul&gt;
+      &lt;li&gt;resources (machines, printers)&lt;/li&gt;
+      &lt;li&gt;security principles (user/computer accounts and groups)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Objects have many different attributes&lt;/li&gt;
+  &lt;li&gt;Schema can be extended and modified by administrators&lt;/li&gt;
+  &lt;li&gt;Hierarchical:
+    &lt;ul&gt;
+      &lt;li&gt;A domain is a group of network objects&lt;/li&gt;
+      &lt;li&gt;A tree is a collection of domains and domain trees, linked by a trust hierarchy&lt;/li&gt;
+      &lt;li&gt;A forest is a collection of trees with a common schema, structure and configuration - used as the security boundary&lt;/li&gt;
+      &lt;li&gt;Objects in a domain can be grouped into Organizational Units (OUs). OUs give hierarchy to a domain. OUs should be used for structure instead of domains or sites.&lt;/li&gt;
+      &lt;li&gt;Duplicate usernames are an issue. Can’t have duplicate usernames in a single domain. This is why you get names like &lt;code&gt;DOMAIN\scottbe123&lt;/code&gt;.&lt;/li&gt;
+      &lt;li&gt;OUs aren’t used for access permissions (specific to AD, other directory services support this). Shadow groups are used for this, usually via third party tooling to map a group to an OU.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Physical structure:
+    &lt;ul&gt;
+      &lt;li&gt;Sites are common across the forest - independent of the domain/OU structure&lt;/li&gt;
+      &lt;li&gt;Sites are physical groupings based on 1+ IP subnets&lt;/li&gt;
+      &lt;li&gt;Include concept of connections between sites&lt;/li&gt;
+      &lt;li&gt;Sites are used to control replication between domain controllers and refering clients to the nearest DC&lt;/li&gt;
+      &lt;li&gt;AD info is replicated across peer DCs, each DC has a copy of the AD&lt;/li&gt;
+      &lt;li&gt;AD uses DNS and TCP/IP, each connection -&amp;gt; link has a cost (speed - the type of connection). This determines the network topology and replication strategy&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Replication:
+    &lt;ul&gt;
+      &lt;li&gt;Generally networks using AD will have more than one DC for failover&lt;/li&gt;
+      &lt;li&gt;DCs should be single-purpose - other services on the machine can interfere with AD&lt;/li&gt;
+      &lt;li&gt;virtualisation can help with reducing hardware costs&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Applications can access AD features using COM interfaces - Active Directory Service Interfaces&lt;/li&gt;
+  &lt;li&gt;Trusts:
+    &lt;ul&gt;
+      &lt;li&gt;Allow users in one domain to access resources in another. Lots of different trust types.&lt;/li&gt;
+      &lt;li&gt;There are also forest-level trusts&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Interoperability with *nix systems can be done via LDAP but that doesn’t include all of the features of AD. There are third party AD integration applications including Samba which can act as a DC.&lt;/li&gt;
+  &lt;li&gt;Group policy:
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Group_Policy&quot;&gt;https://en.wikipedia.org/wiki/Group_Policy&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;centralised management of AD configuration&lt;/li&gt;
+      &lt;li&gt;Local Group Policy (LGPO) is a version that enables GPO management in non-domain environments&lt;/li&gt;
+      &lt;li&gt;Controls what users are allows to do on a system, for example password policies, RDP configuration, block access to Task Manager&lt;/li&gt;
+      &lt;li&gt;GPOs are pushed to computers using Active Directory&lt;/li&gt;
+      &lt;li&gt;GPOs are refreshed every 90 minutes + random 30m offset&lt;/li&gt;
+      &lt;li&gt;GPOs on DCs are refreshed every 5 minutes&lt;/li&gt;
+      &lt;li&gt;Windows 8 clients can have forced GPO updates (per OU) running the update within 10 minutes, with a random offset (avoid spiked load on the DC)&lt;/li&gt;
+      &lt;li&gt;Processed in order: local -&amp;gt; site -&amp;gt; domain -&amp;gt; OU&lt;/li&gt;
+      &lt;li&gt;policies use inheritance&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol&quot;&gt;LDAP&lt;/a&gt; - &lt;a href=&quot;https://tools.ietf.org/html/rfc4511&quot;&gt;https://tools.ietf.org/html/rfc4511&lt;/a&gt;:
+    &lt;ul&gt;
+      &lt;li&gt;provides an interface for querying AD - &lt;a href=&quot;https://technet.microsoft.com/en-us/library/aa996205(v=exchg.65).aspx&quot;&gt;LDAP Query Basics (TechNet)&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;can also manipulate data and perform authentication&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 02 Nov 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/notes-on-kerberos-and-active-directory.html</link>
+				<guid isPermaLink="true">http://bendetat.com/notes-on-kerberos-and-active-directory.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>React - Early thoughts</title>
 				<description>&lt;p&gt;I’ve just started playing with React, so here is a bit of a brain dump of my first impressions.&lt;/p&gt;
 
@@ -1402,315 +1570,6 @@ var xerces = processName(&quot;Xerces&quot;);
 				<pubDate>Tue, 24 Feb 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/class-and-method-invariants-and-validation.html</link>
 				<guid isPermaLink="true">http://bendetat.com/class-and-method-invariants-and-validation.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Karma and Mocha for AngularJS testing</title>
-				<description>&lt;h2 id=&quot;setting-up-karma-with-mocha-phantomjs-and-chai&quot;&gt;Setting up Karma with Mocha, PhantomJS and Chai&lt;/h2&gt;
-
-&lt;p&gt;I’m following the &lt;a href=&quot;http://karma-runner.github.io/0.12/intro/installation.html&quot;&gt;installation guide&lt;/a&gt; at &lt;a href=&quot;http://karma-runner.github.io&quot;&gt;karma-runner.github.io&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;I already have Node.js and NPM installed so I won’t go through the process for that, but I’ve found the easiest way to get running is via &lt;a href=&quot;https://chocolatey.org/packages/nodejs.install&quot;&gt;Chocolatey NuGet&lt;/a&gt; using &lt;code&gt;choco install nodejs.install&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;First up, install Karma:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev karma
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now install some plugins for Karma. The installation instructions are for Jasmine and the Chrome launcher, but I want &lt;a href=&quot;http://mochajs.org/&quot;&gt;Mocha&lt;/a&gt; as the testing framework and &lt;a href=&quot;http://phantomjs.org/&quot;&gt;PhantomJS&lt;/a&gt; for a headless (window-less) test environment.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;&lt;em&gt;Huh? I thought Karma was the test environment&lt;/em&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Karma is a test &lt;em&gt;runner&lt;/em&gt;. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I’m setting up tests for client-side JavaScript - in particular, I’m going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.&lt;/p&gt;
-
-&lt;p&gt;So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use &lt;a href=&quot;http://chaijs.com/&quot;&gt;Chai&lt;/a&gt; as the assertion library.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev karma-mocha
-npm install --save-dev karma-phantomjs-launcher
-npm install --save-dev karma-chai
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To make it easier to run &lt;code&gt;karma&lt;/code&gt; from the command line you can install &lt;code&gt;karma-cli&lt;/code&gt; globally, which will run the local version without having to specify the path to karma (&lt;code&gt;node node_modules/karma/bin/karma&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g karma-cli
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Karma needs a configuration file. Generate it using &lt;code&gt;karma init&lt;/code&gt; and answer the questions. For this demo all of my code is going to live in &lt;code&gt;./source-and-tests&lt;/code&gt;. If I were using a Gulp build chain this would probably need to be tweaked.&lt;/p&gt;
-
-&lt;dl&gt;
-  &lt;dt&gt;Which testing framework do you want to use ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;mocha&lt;/code&gt;&lt;/dd&gt;
-  &lt;dt&gt;Do you want to use Require.js ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;no&lt;/code&gt;&lt;/dd&gt;
-  &lt;dt&gt;Do you want to capture any browsers automatically ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;PhantomJS&lt;/code&gt;&lt;/dd&gt;
-  &lt;dt&gt;What is the location of your source and test files ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;source-and-tests/**/*.js&lt;/code&gt;&lt;/dd&gt;
-  &lt;dt&gt;Should any of the files included by the previous patterns be excluded ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;em&gt;leave blank&lt;/em&gt;&lt;/dd&gt;
-  &lt;dt&gt;Do you want Karma to watch all the files and run the tests on change ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;yes&lt;/code&gt;&lt;/dd&gt;
-&lt;/dl&gt;
-
-&lt;p&gt;This generates a file called &lt;code&gt;karma-conf.js&lt;/code&gt;, which configures Karma for a test run. You can have multiple configuration files pointing to different test suites or browser configurations, which can be run by specifying the name of the configuration file (&lt;code&gt;karma start my.conf.ks&lt;/code&gt;).&lt;/p&gt;
-
-&lt;p&gt;To get Chai included in the test pipeline, we need to edit &lt;code&gt;karma-conf.js&lt;/code&gt; and add it to the &lt;code&gt;frameworks&lt;/code&gt; setting:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;frameworks: ['mocha', 'chai'],
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; will execute the default &lt;code&gt;karma-conf.js&lt;/code&gt; (or &lt;code&gt;karma-conf.coffee&lt;/code&gt;). First we need a test to run. In &lt;code&gt;./source-and-tests/&lt;/code&gt; I created &lt;code&gt;array-tests.js&lt;/code&gt; which just contains the &lt;a href=&quot;http://mochajs.org/#synchronous-code&quot;&gt;first example&lt;/a&gt; from Mocha’s documentation.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe('Array', function(){
-  describe('#indexOf()', function(){
-    it('should return -1 when the value is not present', function(){
-      assert.equal(-1, [1,2,3].indexOf(5));
-      assert.equal(-1, [1,2,3].indexOf(0));
-    })
-  })
-})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; should find and run this test, then watch for changes to the watched files and repeating.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/cwTVVjT.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;adding-angularjs-to-the-mix&quot;&gt;Adding AngularJS to the mix&lt;/h2&gt;
-
-&lt;p&gt;I’ll use Bower to install AngularJS.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev bower 
-npm install -g bower
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This installs Bower to &lt;code&gt;./node_modules/bower&lt;/code&gt;, then installs it globally. Now we need to create a configuration file for Bower:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;bower init
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can just &lt;kbd&gt;enter&lt;/kbd&gt; through the configuration, accepting all the defaults. This creates a &lt;code&gt;bower.json&lt;/code&gt; file, which will save the dependencies added by Bower. Now use Bower to install AngularJS and angular-mocks:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;bower install --save angular
-bower install --save angular-mocks
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This installs AngularJS to &lt;code&gt;./bower_components/angular&lt;/code&gt; and angular-mocks to &lt;code&gt;./bower_components/angular-mocks&lt;/code&gt;. The angular-mocks package gives us methods to resolve our application’s components and create mocks of AngularJS services.&lt;/p&gt;
-
-&lt;p&gt;I’m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I’ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.&lt;/p&gt;
-
-&lt;p&gt;To include AngularJS and angular-mocks in Karma’s test run, edit the &lt;code&gt;files&lt;/code&gt; config setting in &lt;code&gt;karma.conf.js&lt;/code&gt;. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;files: [
-	'bower_components/angular/angular.js',
-	'bower_components/angular-mocks/angular-mocks.js',
-	'source-and-tests/**/*.js'
-],
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The controller to test is very simple at this stage (&lt;code&gt;MyController.js&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;(function(){
-	angular.module('my-module', []);
-
-	angular
-		.module('my-module')
-		.controller('MyController', [
-			function(){
-				var self = this;
-
-				self.firstName = '';
-				self.lastName = '';
-
-				self.getFullName = function(){
-					return self.firstName + ' ' + self.lastName;
-				};
-
-				return self;
-			}
-	]);
-})();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This creates a module called &lt;code&gt;my-module&lt;/code&gt; and creates a controller called &lt;code&gt;MyController&lt;/code&gt; that exposes &lt;code&gt;firstName&lt;/code&gt;, &lt;code&gt;lastName&lt;/code&gt; and &lt;code&gt;getFullName()&lt;/code&gt;. I want to test the result of &lt;code&gt;getFullName()&lt;/code&gt; (&lt;code&gt;MyControllerTests.js&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe('MyController', function(){
-	beforeEach(module('my-module'));
-
-	describe('getFullName()', function(){
-		it('should handle names correctly', inject(function($controller){
-			var myController = $controller('MyController');
-
-			myController.firstName = 'George';
-			myController.lastName = 'Harrison';
-
-			myController.getFullName().should.equal('George Harrison');
-		}));
-	});
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This does some interesting things.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;beforeEach(module('my-module'));
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This loads the &lt;code&gt;my-module&lt;/code&gt; module before each test in the &lt;code&gt;MyController&lt;/code&gt; suite.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;it('should handle names correctly', inject(function($controller){
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This injects &lt;code&gt;$controller&lt;/code&gt; into the test. &lt;code&gt;$controller&lt;/code&gt; allows resolving registered controllers.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var myController = $controller('MyController');
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This resolves an instance of the &lt;code&gt;MyController&lt;/code&gt; controller. The instance is then used as the test subject.&lt;/p&gt;
-
-&lt;h2 id=&quot;scope-injection&quot;&gt;$scope injection&lt;/h2&gt;
-
-&lt;p&gt;The &lt;code&gt;$scope&lt;/code&gt; that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to &lt;code&gt;$scope&lt;/code&gt; for another test. The controller declaration changes to this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;angular
-	.module('my-module')
-	.controller('MyController', [
-		'$scope',
-		function($scope){
-			var self = this;
-
-			// ...
-
-			$scope.songs = [
-				'Here Comes The Sun'
-			];
-
-			$scope.addSong = function(song) {
-				$scope.songs.push(song);
-			};
-
-			return self;
-		}
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The existing test can just pass in an empty object to the controller resolution:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var myController = $controller('MyController', {
-	$scope: {}
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now the new test can inject, use and inspect a mock scope:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe('addSong()', function(){
-	it('should add songs', inject(function($controller) {
-		var scope = {};
-		var myController = $controller('MyController', {
-			$scope: scope
-		});
-
-		scope.addSong('While My Guitar Gently Weeps');
-
-		scope.songs.should.contain('While My Guitar Gently Weeps');
-	}));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;injecting-and-mocking-http&quot;&gt;Injecting and mocking $http&lt;/h2&gt;
-
-&lt;p&gt;So now I’ve got a web service that I call to populate something on &lt;code&gt;$scope&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;angular
-	.module('my-module')
-	.controller('MyController', [
-		'$scope', '$http',
-		function($scope, $http){
-			var self = this;
-
-			// ...
-
-			$scope.instruments = ['foo'];
-
-			$http.get('api/get-instruments')
-				.success(function(data) {
-					$scope.instruments = data;
-				});
-
-			return self;
-		}
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;a href=&quot;https://docs.angularjs.org/api/ngMock/service/$httpBackend&quot;&gt;&lt;code&gt;$httpBackend&lt;/code&gt;&lt;/a&gt; is an &lt;code&gt;angular-mocks&lt;/code&gt; service that fakes the &lt;code&gt;$http&lt;/code&gt; service:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe('get-instruments result', function(){
-	it('should be added to scope', inject(function($controller, $httpBackend){
-		var scope = {};
-		$httpBackend
-			.when('GET', 'api/get-instruments')
-			.respond([
-				'vocals', 'guitar', 'sitar'
-			]);
-		var myController = $controller('MyController', {
-			$scope: scope
-		});
-
-		$httpBackend.flush();
-
-		scope.instruments.should.contain('guitar');
-	}));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;$httpBackend.flush()&lt;/code&gt; simulates the async calls completing, so they can be tested synchronously.&lt;/p&gt;
-
-&lt;h2 id=&quot;simulating-http-errors&quot;&gt;Simulating $http errors&lt;/h2&gt;
-
-&lt;p&gt;If the call to &lt;code&gt;api/get-instruments&lt;/code&gt; fails, I want to set a status to ‘ERROR’:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$scope.instruments = ['foo'];
-$scope.status = '';
-
-$http.get('api/get-instruments')
-	.success(function(data) {
-		$scope.instruments = data;
-	})
-	.error(function(e) {
-		$scope.status = 'ERROR';
-	});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To simulate the error, you can just tell the &lt;code&gt;$httpBackend&lt;/code&gt; to respond with an error code (500):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe('get-instruments with error', function(){
-	it('should have a status with error', inject(function($controller, $httpBackend){
-		var scope = {};
-		$httpBackend
-			.when('GET', 'api/get-instruments')
-			.respond(500, '');
-		var myController = $controller('MyController', {
-			$scope: scope
-		});
-
-		$httpBackend.flush();
-
-		scope.status.should.equal('ERROR');
-	}));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;here-is-a-cat-doing-some-tdd&quot;&gt;Here is a cat doing some TDD&lt;/h2&gt;
-
-&lt;p&gt;Please imagine that this cat is really stoked about now being able to test front-end JavaScript.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://bendetat.com/images/tdd-cat.jpg&quot; alt=&quot;Source: http://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg&quot; /&gt;&lt;/p&gt;
-
-</description>
-				<pubDate>Sat, 21 Feb 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/karma-and-mocha-for-angular-testing.html</link>
-				<guid isPermaLink="true">http://bendetat.com/karma-and-mocha-for-angular-testing.html</guid>
 			</item>
 		
 	</channel>
