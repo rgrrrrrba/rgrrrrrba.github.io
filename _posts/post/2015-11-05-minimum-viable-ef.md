@@ -70,7 +70,7 @@ The SQL that really gets generated is a bit more complex but the structure is ba
 	// ... entity classes as above
 
 	class Context : DbContext {
-		public IDbSet<Portfolio> Portfolios{get;set;}
+		public IDbSet<Portfolio> Portfolios { get; set; }
 	}
 
 Whenever a navigation property that wasn't included in that initial load is accessed, the database is re-queried just for that one item. This is useful if you just wanted to get to the `Security` property for a given portfolio item:
@@ -140,7 +140,7 @@ The result is a spaghetti mess of unclear dependencies and configurations,  diff
 
 An easy, early optimisation that should happen is denormalising some data. When I first started learning about database design, way back in high school, a heavy emphasis was placed on normalisation. The goal with any database design was to get it to the highest Nth Normal Form possible, and damn the consequences.
 
-A normalised design is crucial to having a performant, modular and extendable system. Agressively de-duplicating data and chasing the perfectly normalised schema imaginable can have precisely the opposite effect.
+A normalised design is crucial to having a performant, modular and extendable system. Aggressively deduplicating data and chasing the perfectly normalised schema imaginable can have precisely the opposite effect.
 
 To get the security code for an item in a portfolio in SQL requires an extra table join:
 
@@ -171,7 +171,7 @@ The problem, as described above, is when our ORM - Entity Framework - needs its 
 		.ToArray();
 
 <aside class="pull-right well" style="width: 33em">
-	The <code>// later...</code> comment is important, because I could just select out the security name in the initial query and obviate this entire example. I'm making an assumption that, as is usually the case in the systems I've worked in and created, the selected portfolios are queried in one place then being consumed elsewhere. Generally both of those places are only tangentally related through some common consumer. As I'll explain soon, this is a bad practice that I would like to challenge.
+	The <code>// later...</code> comment is important, because I could just select out the security name in the initial query and obviate this entire example. I'm making an assumption that, as is usually the case in the systems I've worked in and created, the selected portfolios are queried in one place then being consumed elsewhere. Generally both of those places are only tangentially related through some common consumer. As I'll explain soon, this is a bad practice that I would like to challenge.
 </aside>
 
 If the `Security` property isn't eagerly loaded, I get lazy loading in that final `.Select(i => i.Security.Name)` resulting in O(n) performance.
@@ -253,7 +253,7 @@ Based on the earlier example of lazily loading the security for a given portfoli
 
 ### Thinking about the query
 
-This method forces me to think more about the query I'm writing and how that will be translated into SQL. This gives me an opportunity to write queries that are focussed on the job at hand. I can't just select a heap of data and pass it somewhere else for processing without knowing how that processing will happen - the way to implement that when leveraging navigation properties is with a pile of fragments that get applied at different stages, which is an opaque and dangerous strategy.
+This method forces me to think more about the query I'm writing and how that will be translated into SQL. This gives me an opportunity to write queries that are focused on the job at hand. I can't just select a heap of data and pass it somewhere else for processing without knowing how that processing will happen - the way to implement that when leveraging navigation properties is with a pile of fragments that get applied at different stages, which is an opaque and dangerous strategy.
 
 This also means that the query itself can live closer to the calculations that get performed on it in memory. In fact, the query can often be co-located with the calculations that depend on it. This means less spaghetti code and a less 'sophisticated' (complicated) architecture.
 
@@ -293,7 +293,7 @@ This can be implemented without the navigation property by explicitly passing th
 	
 	// or, if you wanted to hide the implementation detail
 	// and not make the consumer concerned about where the
-	// curent price comes from:
+	// current price comes from:
 	
 	public decimal GetValue(Security security) => this.Units * security.CurrentPrice;
 
@@ -342,7 +342,7 @@ This is a terrible example so here's a better one. Warning - I'm about to drop s
 
 #### Updates, inserts and deletes
 
-Navigation properties also have the advantage of already being tracked by EF, so any updates to them will be persisted when the context is saved. This doesn't change when pulling those entities out explicity in queries - EF will track them as well, as long as you've used the same context. In other words, don't use `InstancePerDependency` to register the context in Autofac - use something like `InstancePerRequest` or `InstancePerLifetimeScope`.
+Navigation properties also have the advantage of already being tracked by EF, so any updates to them will be persisted when the context is saved. This doesn't change when pulling those entities out explicitly in queries - EF will track them as well, as long as you've used the same context. In other words, don't use `InstancePerDependency` to register the context in Autofac - use something like `InstancePerRequest` or `InstancePerLifetimeScope`.
 
 Of course, this means that methods in an aggregate root that create or delete child entities will need to be restructured. Take this method that adds a new item to a portfolio using navigation properties:
 
@@ -393,7 +393,7 @@ In an example this trivial I don't think a discrete service class is actually wa
 
 ## Doesn't this break the Aggregate Root concept?
 
-To a degree. As discussed above, there are strategies for changing the implementation of an aggregate root's embedded logic that allows for the removal of navigation properties from the aggregate root iself.
+To a degree. As discussed above, there are strategies for changing the implementation of an aggregate root's embedded logic that allows for the removal of navigation properties from the aggregate root itself.
 
 Aggregate roots are a useful thought technology that inform us of how to model discrete pieces of domain functionality by aggregating it into subdomains. Generally this gets expressed as pushing all the domain logic into an entity class. I argue that this is an anti-pattern.
 
