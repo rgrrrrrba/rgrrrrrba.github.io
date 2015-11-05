@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ben d'état - Ben Scott's blog</title>
+		<title>Ben d&#39;état - Ben Scott&#39;s blog</title>
 		<description></description>		
 		<link>http://bendetat.com</link>
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
@@ -94,11 +94,11 @@ var name = item.Security.Name;
 
 &lt;p&gt;I have several problems with lazy loading of navigation properties:&lt;/p&gt;
 
-&lt;ol&gt;
+&lt;ul&gt;
   &lt;li&gt;The cost (in terms of latency) isn’t clear when accessing a navigation property - without some external tracking mechanism it’s difficult to predict which properties nested in a collection will trigger the load.&lt;/li&gt;
   &lt;li&gt;Entity Framework executes the navigation properties queries synchronously, whereas the initial query could be performed asynchronously. There is no control over the query mechanism.&lt;/li&gt;
   &lt;li&gt;Complex or non-standard relationships such as composite keys have to be expressed using attributes or special configuration in the database context. Apart from the effort involved in configuring these relationships (very error prone) they are then an extra maintenance burden.&lt;/li&gt;
-&lt;/ol&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;Unfortunately the prevailing practice of encapsulating logic in the entities by way of the &lt;a href=&quot;http://martinfowler.com/bliki/DDD_Aggregate.html&quot;&gt;Aggregate pattern&lt;/a&gt; when using Entity Framework requires the use of navigation properties for it to be efficient. When writing the query to produce performant code that consumes navigation properties somewhere down the call path you have no choice but to be aware of (usually &lt;em&gt;discover&lt;/em&gt;, often through trial and error) the navigation properties that will be required when the results are processed.&lt;/p&gt;
 
@@ -128,7 +128,7 @@ var portfolios = _context.Portfolios.GetAllPortfoliosBelongingToClient(clientId)
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 26em&quot;&gt;
-	The entire reusable query fragment pattern is dreadful, but I'll leave that for another rant. I usually lump it in with 'reusable' mapper classes, misused flag enums, &lt;a href=&quot;http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html&quot;&gt;object initialisation syntax for anything not a DTO&lt;/a&gt;, tuples (although &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/347&quot;&gt;C# 7 may fix this&lt;/a&gt;) and nested ternary expressions.
+	The entire reusable query fragment pattern is dreadful, but I&#39;ll leave that for another rant. I usually lump it in with &#39;reusable&#39; mapper classes, misused flag enums, &lt;a href=&quot;http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html&quot;&gt;object initialisation syntax for anything not a DTO&lt;/a&gt;, tuples (although &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/347&quot;&gt;C# 7 may fix this&lt;/a&gt;) and nested ternary expressions.
 &lt;/aside&gt;
 
 &lt;p&gt;&lt;code&gt;Items&lt;/code&gt; are included to make the query more performant by eager loading the collection for each portfolio. Note that the item securities are not included and will be lazily loaded.&lt;/p&gt;
@@ -184,7 +184,7 @@ var securityNames = selectedPortfolios
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 33em&quot;&gt;
-	The &lt;code&gt;// later...&lt;/code&gt; comment is important, because I could just select out the security name in the initial query and obviate this entire example. I'm making an assumption that, as is usually the case in the systems I've worked in and created, the selected portfolios are queried in one place then being consumed elsewhere. Generally both of those places are only tangentially related through some common consumer. As I'll explain soon, this is a bad practice that I would like to challenge.
+	The &lt;code&gt;// later...&lt;/code&gt; comment is important, because I could just select out the security name in the initial query and obviate this entire example. I&#39;m making an assumption that, as is usually the case in the systems I&#39;ve worked in and created, the selected portfolios are queried in one place then being consumed elsewhere. Generally both of those places are only tangentially related through some common consumer. As I&#39;ll explain soon, this is a bad practice that I would like to challenge.
 &lt;/aside&gt;
 
 &lt;p&gt;If the &lt;code&gt;Security&lt;/code&gt; property isn’t eagerly loaded, I get lazy loading in that final &lt;code&gt;.Select(i =&amp;gt; i.Security.Name)&lt;/code&gt; resulting in O(n) performance.&lt;/p&gt;
@@ -240,8 +240,8 @@ var result = query.Single();
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 27em&quot;&gt;
-	&lt;p&gt;Note that I can't use &lt;code&gt;context.Securities.Single(...)&lt;/code&gt; because, according to LINQ to SQL: &quot;The methods 'Single' and 'SingleOrDefault' can only be used as a final query operation. Consider using the method 'FirstOrDefault' in this instance instead.&quot;&lt;/p&gt;	
-	&lt;p&gt;&lt;code&gt;var result = query.Single()&lt;/code&gt; is ok because it is the 'final query operation'.&lt;/p&gt;
+	&lt;p&gt;Note that I can&#39;t use &lt;code&gt;context.Securities.Single(...)&lt;/code&gt; because, according to LINQ to SQL: &quot;The methods &#39;Single&#39; and &#39;SingleOrDefault&#39; can only be used as a final query operation. Consider using the method &#39;FirstOrDefault&#39; in this instance instead.&quot;&lt;/p&gt;	
+	&lt;p&gt;&lt;code&gt;var result = query.Single()&lt;/code&gt; is ok because it is the &#39;final query operation&#39;.&lt;/p&gt;
 &lt;/aside&gt;
 
 &lt;p&gt;The query is now more complex, but I’ve moved the previously hidden complexity of navigation properties back into the query. In my opinion the query is where that complexity belongs - not off-loaded to an ORM.&lt;/p&gt;
@@ -337,7 +337,7 @@ var results =
     };
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;You may be tempted to break the query and the map stages into separate classes, possibly even calling the map step a mapper. Reconsider! There is a good chance that the query and map are only going to be used in this one place (if not, they probably should be). If you try to DRY your application too much and too soon it will probably crack™. Extracting the stages would also require a pile of intermediary classes to bridge between the stages. &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/206&quot;&gt;Record types in C# 7&lt;/a&gt; (if they happen) will reduce the amount of boilerplate code but until the overheads will outweigh any benefit. For most cases I would just keep the query and the map stage together. They can still be tested as a whole by simply mocking out the EF context.&lt;/p&gt;
+&lt;p&gt;You may be tempted to break the query and the map stages into separate classes, possibly even calling the map step a mapper. Reconsider! There is a good chance that the query and map are only going to be used in this one place (if not, they probably should be). If you try to DRY your application too much and too soon it will probably crack™. Extracting the stages would also require a pile of intermediary classes to bridge between the stages. &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/206&quot;&gt;Record types in C# 7&lt;/a&gt; (if they happen) will reduce the amount of boilerplate code but until then the overheads will likely outweigh any benefit. For most cases I would just keep the query and the map stage together. They can still be tested as a whole by simply mocking out the EF context.&lt;/p&gt;
 
 &lt;p&gt;That’s not to say that individual complex calculations shouldn’t be refactored into service classes when appropriate. Since the &lt;code&gt;Value&lt;/code&gt; calculation is now being done in memory it could easily be extracted:&lt;/p&gt;
 
@@ -390,7 +390,7 @@ var results =
 	There are more complicated scenarios such as making multiple passes over a collection of items that are alternately queried and updated. In this situation I argue that a domain object is the incorrect level of abstraction to be holding this collection. It should be the responsibility of the orchestrating function to maintain then persist its state.
 &lt;/aside&gt;
 
-&lt;p&gt;This has the smell of a dirty workaround that will be more trouble than it is worth. It raises a number of questions:&lt;/p&gt;
+&lt;p&gt;This has the smell of a dirty workaround that will be more trouble than it is worth. It raises some questions:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;During an read/write/delete operation, why do I &lt;em&gt;need&lt;/em&gt; to know the items that a portfolio contains? Surely this is an update, not a query? What is that collection of items actually giving me, if I shouldn’t be using it in this operation anyway?&lt;/li&gt;
@@ -409,9 +409,9 @@ var results =
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Note that the service doesn’t call &lt;code&gt;_context.SaveChanges()&lt;/code&gt;. That is left for the consuming code. It could be done in the service itself but because I’ve got a shared EF context I can take advantage of batching. I could also use a unit of work implementation wrapping the EF context and flushing the context automatically, but that is out of the scope of this post.&lt;/p&gt;
+&lt;p&gt;Note that the service doesn’t call &lt;code&gt;_context.SaveChanges()&lt;/code&gt;. That is left for the consuming code. It could be done in the service itself but because I’ve got a shared EF context I can take advantage of batching. I could also use a unit of work implementation that wraps the EF context and flushes the context automatically.&lt;/p&gt;
 
-&lt;p&gt;In an example this trivial I don’t think a discrete service class is actually warranted. I may as well just perform the operation in the consuming code. Generally I would defer extracting out service classes until it is clear that the logic will actually be reused and is too complex to enjoy a bit of duplication.&lt;/p&gt;
+&lt;p&gt;In an example this trivial I don’t think a discrete service class is actually warranted. I may as well just perform the operation in the consuming code. Generally I would defer extracting out service classes until it is clear that the logic will actually be reused and is too complex to be safely duplicated.&lt;/p&gt;
 
 &lt;h2 id=&quot;doesnt-this-break-the-aggregate-root-concept&quot;&gt;Doesn’t this break the Aggregate Root concept?&lt;/h2&gt;
 
@@ -476,7 +476,9 @@ var results =
 
 &lt;p&gt;You don’t have to buy in wholesale to this approach. It should be ideal for limited usage without affecting the system as a whole. I believe that treating EF as an efficient SQL generation library and data access layer is a viable alternative to attempting to deal with EF as a monolithic ORM, stopping far short of throwing it away in favour of something even more lightweight such as Massive or Dapper, or pivoting to a non-relational data store for a completely different approach.&lt;/p&gt;
 
-&lt;p&gt;I wouldn’t try to implement this across the board in an application already using navigation properties - there’s rarely any benefit to that kind of large scale adoption. It also makes refactoring relationships more difficult, because those relationships are now referenced directly in consuming code rather than as a consequence of the simple possession of a navigation property.&lt;/p&gt;
+&lt;p&gt;I wouldn’t try to implement this across the board in an application already using navigation properties - there’s rarely any benefit to that kind of large scale adoption.&lt;/p&gt;
+
+&lt;p&gt;It also makes refactoring relationships more difficult, because those relationships are now referenced directly in consuming code rather than as a consequence of the simple possession of a navigation property.&lt;/p&gt;
 
 &lt;p&gt;I would argue that refactoring relationships &lt;em&gt;should&lt;/em&gt; be non-trivial. Changing a relationship can have unconsidered and difficult to discover effects on the performance of an application that makes use of navigation properties.&lt;/p&gt;
 
@@ -675,7 +677,7 @@ var results =
 
 React.render(
 	&amp;lt;HelloWorld/&amp;gt;,
-	document.getElementById('content')
+	document.getElementById(&#39;content&#39;)
 )
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -720,7 +722,7 @@ p.sayChildName()
 &lt;p&gt;This writes &lt;code&gt;&quot;parent&quot;&lt;/code&gt; to the console, not &lt;code&gt;&quot;child&quot;&lt;/code&gt; as expected. This is because of JavaScript’s late binding - when the &lt;code&gt;sayChildName&lt;/code&gt; reference is executed, &lt;code&gt;this&lt;/code&gt; is the parent. The &lt;code&gt;this&lt;/code&gt; reference in &lt;code&gt;sayName()&lt;/code&gt; isn’t closed over in the function. To get the correct &lt;code&gt;this&lt;/code&gt; in function-based ES6, we usually assign &lt;code&gt;this&lt;/code&gt; to &lt;code&gt;self&lt;/code&gt;. The working equivalent is this:&lt;/p&gt;
 
 &lt;aside class=&quot;pull-right&quot; style=&quot;width: 15em&quot;&gt;
-	In fact, by removing the &lt;code&gt;self.name = name&lt;/code&gt; you can make &lt;code&gt;name&lt;/code&gt; truly private, something that isn't possible (yet) in ES6/TS classes.
+	In fact, by removing the &lt;code&gt;self.name = name&lt;/code&gt; you can make &lt;code&gt;name&lt;/code&gt; truly private, something that isn&#39;t possible (yet) in ES6/TS classes.
 &lt;/aside&gt;
 
 &lt;pre&gt;&lt;code&gt;function Child(name) {
@@ -760,8 +762,8 @@ p.sayChildName();
       return;
     }
     this.props.onCommentSubmit({author: author, text: text});
-    React.findDOMNode(this.refs.author).value = '';
-    React.findDOMNode(this.refs.text).value = '';
+    React.findDOMNode(this.refs.author).value = &#39;&#39;;
+    React.findDOMNode(this.refs.text).value = &#39;&#39;;
   },
   render: function() {
     return (
@@ -792,8 +794,8 @@ p.sayChildName();
 				author: author,
 				text: text
 			});
-			React.findDOMNode(this.refs.author).value = '';
-			React.findDOMNode(this.refs.text).value = '';
+			React.findDOMNode(this.refs.author).value = &#39;&#39;;
+			React.findDOMNode(this.refs.text).value = &#39;&#39;;
 		};
 
 		return (
@@ -870,7 +872,7 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 
 &lt;p&gt;Note that &lt;code&gt;this.state&lt;/code&gt; is only set directly like this &lt;em&gt;in the constructor&lt;/em&gt;. Updating the state subsequently has to happen using &lt;code&gt;this.setState&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;$.get('/comments').then(data =&amp;gt; this.setState({
+&lt;pre&gt;&lt;code&gt;$.get(&#39;/comments&#39;).then(data =&amp;gt; this.setState({
 	data: data
 }));
 &lt;/code&gt;&lt;/pre&gt;
@@ -1112,62 +1114,62 @@ public class Bootstrapper : DefaultNancyBootstrapper
 
 &lt;p&gt;There’s a fair bit happening in &lt;a href=&quot;https://github.com/bendetat/survey-thing/blob/master/gulpfile.js&quot;&gt;the &lt;code&gt;gulpfile.js&lt;/code&gt; script&lt;/a&gt; but here are some highlights.&lt;/p&gt;
 
-&lt;p&gt;The &lt;code&gt;'code'&lt;/code&gt; step uses browserify to set up the CommonJS module system and uses &lt;code&gt;app/layout/index.jsx&lt;/code&gt; as the entry point to the application. Babel is used to take advantage of ES6 and the script is minified.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;&#39;code&#39;&lt;/code&gt; step uses browserify to set up the CommonJS module system and uses &lt;code&gt;app/layout/index.jsx&lt;/code&gt; as the entry point to the application. Babel is used to take advantage of ES6 and the script is minified.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt; gulp.task('code', function(){
+&lt;pre&gt;&lt;code&gt; gulp.task(&#39;code&#39;, function(){
 	browserify({
-		entries: 'app/layout/layout.jsx',
-		extensions: ['.jsx'],
+		entries: &#39;app/layout/layout.jsx&#39;,
+		extensions: [&#39;.jsx&#39;],
 		debug: true
 	})
 		.transform(babelify)
 		.bundle()
-		.pipe(source('site.js'))
+		.pipe(source(&#39;site.js&#39;))
 		.pipe(gulp.dest(destinationPath));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;CSS preprocessing is done using SASS. The entry point is &lt;code&gt;app/site.scss&lt;/code&gt;.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('css', function(){
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;css&#39;, function(){
 	gulp
 		.src([
-			'app/site.scss',
-			'app/**/*.css'
+			&#39;app/site.scss&#39;,
+			&#39;app/**/*.css&#39;
 		])
-		.pipe(sass().on('error', sass.logError))
+		.pipe(sass().on(&#39;error&#39;, sass.logError))
 		.pipe(pleeease())
-		.pipe(concat('site.css'))
+		.pipe(concat(&#39;site.css&#39;))
 		.pipe(gulp.dest(destinationPath));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The template HTML file is copied verbatim to the destination path.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('html', function(){
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;html&#39;, function(){
 	gulp
-		.src('app/index.html')
+		.src(&#39;app/index.html&#39;)
 		.pipe(gulp.dest(destinationPath));
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The default gulp task runs all the main tasks (&lt;code&gt;'vendor'&lt;/code&gt; is not shown, it just bundles up vendor CSS and JS into &lt;code&gt;vendor.css&lt;/code&gt; and &lt;code&gt;vendor.js&lt;/code&gt; respectively).&lt;/p&gt;
+&lt;p&gt;The default gulp task runs all the main tasks (&lt;code&gt;&#39;vendor&#39;&lt;/code&gt; is not shown, it just bundles up vendor CSS and JS into &lt;code&gt;vendor.css&lt;/code&gt; and &lt;code&gt;vendor.js&lt;/code&gt; respectively).&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('default', ['code', 'css', 'html', 'vendor']);
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;default&#39;, [&#39;code&#39;, &#39;css&#39;, &#39;html&#39;, &#39;vendor&#39;]);
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;'watch'&lt;/code&gt; task splits up the workload to keep live rebuilds snappy:&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;&#39;watch&#39;&lt;/code&gt; task splits up the workload to keep live rebuilds snappy:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task('watch', ['default'], function() {
+&lt;pre&gt;&lt;code&gt;gulp.task(&#39;watch&#39;, [&#39;default&#39;], function() {
 	gulp.watch(
-		['app/**/*.jsx'], 
-		['code']);
+		[&#39;app/**/*.jsx&#39;], 
+		[&#39;code&#39;]);
 	gulp.watch(
-		['app/**/*.css', 'app/**/*.scss'],
-		['css']);
+		[&#39;app/**/*.css&#39;, &#39;app/**/*.scss&#39;],
+		[&#39;css&#39;]);
 	gulp.watch(
-		['app/index.html'],
-		['html']);
+		[&#39;app/index.html&#39;],
+		[&#39;html&#39;]);
 });
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1202,7 +1204,7 @@ public class Bootstrapper : DefaultNancyBootstrapper
 
 &lt;p&gt;In &lt;code&gt;layout.jsx&lt;/code&gt;, ‘Hello world’ is rendered into the &lt;code&gt;div&lt;/code&gt; using inline markup:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;import React from 'react';
+&lt;pre&gt;&lt;code&gt;import React from &#39;react&#39;;
 
 React.render(
 	&amp;lt;h1&amp;gt;Hello, world!&amp;lt;/h1&amp;gt;,
@@ -1210,7 +1212,7 @@ React.render(
 );
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Running &lt;code&gt;gulp&lt;/code&gt; will run the &lt;code&gt;'default'&lt;/code&gt; task, which should build the app and write the artifacts to &lt;code&gt;\src\SurveyThing\app&lt;/code&gt;. Running &lt;code&gt;gulp watch&lt;/code&gt; will run the &lt;code&gt;'watch'&lt;/code&gt; task and rebuild whenever the monitored files change.&lt;/p&gt;
+&lt;p&gt;Running &lt;code&gt;gulp&lt;/code&gt; will run the &lt;code&gt;&#39;default&#39;&lt;/code&gt; task, which should build the app and write the artifacts to &lt;code&gt;\src\SurveyThing\app&lt;/code&gt;. Running &lt;code&gt;gulp watch&lt;/code&gt; will run the &lt;code&gt;&#39;watch&#39;&lt;/code&gt; task and rebuild whenever the monitored files change.&lt;/p&gt;
 
 &lt;p&gt;If everything works, we should have a happy ‘hello world’ page. I made mine pink &lt;strike&gt;because pink is cool&lt;/strike&gt; to test SASS:&lt;/p&gt;
 
@@ -1220,19 +1222,19 @@ React.render(
 
 &lt;p&gt;Without minification the &lt;code&gt;site.js&lt;/code&gt; file is huge (1.5M). To conditionally minify the script I check for a &lt;code&gt;--release&lt;/code&gt; argument:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var yargs = require('yargs');
+&lt;pre&gt;&lt;code&gt;var yargs = require(&#39;yargs&#39;);
 
 var buildRelease = yargs.argv.release || false;
 
-gulp.task('code', function(){
+gulp.task(&#39;code&#39;, function(){
 	var pipeline = browserify({
-		entries: 'app/layout/layout.jsx',
-		extensions: ['.jsx'],
+		entries: &#39;app/layout/layout.jsx&#39;,
+		extensions: [&#39;.jsx&#39;],
 		debug: true
 	})
 		.transform(babelify)
 		.bundle()
-		.pipe(source('site.js'));
+		.pipe(source(&#39;site.js&#39;));
 
 	if (buildRelease) {
 		pipeline.pipe(streamify(uglify()));
@@ -1374,16 +1376,16 @@ vncserver :1
 &lt;p&gt;Say you’ve got this directive (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/2/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module('app', [])
-    .directive('thing', function() {
+    .module(&#39;app&#39;, [])
+    .directive(&#39;thing&#39;, function() {
         return {
-            restrict: 'E',
+            restrict: &#39;E&#39;,
             replace: true,
-            template: '&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;',
+            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
             controller: function() {
-                this.name = '';
+                this.name = &#39;&#39;;
             },
-            controllerAs: 'vm'
+            controllerAs: &#39;vm&#39;
         };
     });
 &lt;/code&gt;&lt;/pre&gt;
@@ -1413,27 +1415,27 @@ vncserver :1
 &lt;p&gt;In fact, if you have different directives with the same &lt;code&gt;controllerAs&lt;/code&gt; value, you can see that the &lt;code&gt;vm&lt;/code&gt; instance for each directive is set to the last directive’s controller (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/3/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module('app', [])
-    .directive('firstDirective', function() {
+    .module(&#39;app&#39;, [])
+    .directive(&#39;firstDirective&#39;, function() {
         return {
-            restrict: 'E',
+            restrict: &#39;E&#39;,
             replace: true,
-            template: '&amp;lt;div&amp;gt;first directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;',
+            template: &#39;&amp;lt;div&amp;gt;first directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
             controller: function() {
-                this.foo = 'Hi!';
+                this.foo = &#39;Hi!&#39;;
             },
-            controllerAs: 'vm'
+            controllerAs: &#39;vm&#39;
         };
     })
-    .directive('secondDirective', function(){
+    .directive(&#39;secondDirective&#39;, function(){
         return {
-            restrict: 'E',
+            restrict: &#39;E&#39;,
             replace: true,
-            template: '&amp;lt;div&amp;gt;second directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;',
+            template: &#39;&amp;lt;div&amp;gt;second directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
             controller: function() {
-                this.bar = 'There?';
+                this.bar = &#39;There?&#39;;
             },
-            controllerAs: 'vm'
+            controllerAs: &#39;vm&#39;
         };
     });
 
@@ -1445,21 +1447,21 @@ vncserver :1
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/9y6Rg6k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;If you change the name of the &lt;code&gt;controllerAs&lt;/code&gt; alias - say to &lt;code&gt;firstDirectiveVm&lt;/code&gt; and &lt;code&gt;secondDirectiveVm&lt;/code&gt; - then the problem goes away, so Angular JS by default is setting &lt;code&gt;vm&lt;/code&gt; globally each time a directive uses &lt;code&gt;controllerAs: 'vm'&lt;/code&gt;, and going down the page, meaning the last &lt;code&gt;vm&lt;/code&gt; wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s &lt;code&gt;controllerAs&lt;/code&gt; value won’t work for multiple directives of the same type.&lt;/p&gt;
+&lt;p&gt;If you change the name of the &lt;code&gt;controllerAs&lt;/code&gt; alias - say to &lt;code&gt;firstDirectiveVm&lt;/code&gt; and &lt;code&gt;secondDirectiveVm&lt;/code&gt; - then the problem goes away, so Angular JS by default is setting &lt;code&gt;vm&lt;/code&gt; globally each time a directive uses &lt;code&gt;controllerAs: &#39;vm&#39;&lt;/code&gt;, and going down the page, meaning the last &lt;code&gt;vm&lt;/code&gt; wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s &lt;code&gt;controllerAs&lt;/code&gt; value won’t work for multiple directives of the same type.&lt;/p&gt;
 
 &lt;p&gt;The solution is to set &lt;code&gt;scope&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in the directive declaration (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/4/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module('app', [])
-    .directive('thing', function() {
+    .module(&#39;app&#39;, [])
+    .directive(&#39;thing&#39;, function() {
         return {
-            restrict: 'E',
+            restrict: &#39;E&#39;,
             replace: true,
-            template: '&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;',
+            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
             controller: function() {
-                this.name = '';
+                this.name = &#39;&#39;;
             },
-            controllerAs: 'vm',
+            controllerAs: &#39;vm&#39;,
             scope: true
         };
     });
@@ -1496,7 +1498,7 @@ vncserver :1
 
 &lt;p&gt;I’ve started out with an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html&quot;&gt;Azure VM configured with TeamCity 9&lt;/a&gt;. I first installed GitVersion on my build agent using &lt;a href=&quot;https://chocolatey.org/&quot;&gt;Chocolatey&lt;/a&gt;. Install Chocolatey using an elevated Powershell console:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
+&lt;pre&gt;&lt;code&gt;iex ((new-object net.webclient).DownloadString(&#39;https://chocolatey.org/install.ps1&#39;))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Then install GitVersion:&lt;/p&gt;
@@ -1694,7 +1696,7 @@ git push
 	// 1. By design, a class built for object initialization syntax has to have public setters,
 	// meaning that the resulting object is mutable.
 
-	// 2. Because a constructor isn't used, there is no way for business rules or domain
+	// 2. Because a constructor isn&#39;t used, there is no way for business rules or domain
 	// invariants to be enforced. It is trivial to miss a value or set a value to something
 	// that breaks a business rule, which can be difficult and annoying to debug and prevent.
 
@@ -1705,15 +1707,15 @@ git push
 	
 	//var brokens = new Brokens { Ints = { 1, 2, 3 } };
 	
-	// This is because Ints isn't initialised, and array initialization syntax is just 
+	// This is because Ints isn&#39;t initialised, and array initialization syntax is just 
 	// syntactic sugar for foo.Add(1). You can see this if you try to declare your collection
 	// as a straight-up array:
 	
 	//var brokensWithArray = new BrokensWithArray { Ints = { 1,2,3 } };
-	// Build error: Cannot initialize object of type 'int[]' with a collection initializer
+	// Build error: Cannot initialize object of type &#39;int[]&#39; with a collection initializer
 	
 	// To get the same syntax to work, the class must initialize Ints in the
-	// default constructor (a non-default constructor won't work):
+	// default constructor (a non-default constructor won&#39;t work):
 	
 	var works = new Works { Ints = { 1, 2, 3 } };
 	
@@ -1728,7 +1730,7 @@ git push
 	
 	var brokensStruct = new BrokensStruct { Ints = new List&amp;lt;int&amp;gt;() { 1, 2, 3 } };
 	
-	// But since structs can't have parameterless public constructors, they can never use
+	// But since structs can&#39;t have parameterless public constructors, they can never use
 	// the simpler object initialization syntax:
 	
 	//struct WorksStruct {
@@ -1783,10 +1785,10 @@ struct BrokensStruct {
 
 let result =
 	match name with 
-	| &quot;Fiona&quot; -&amp;gt; &quot;It's Fiona!&quot;
+	| &quot;Fiona&quot; -&amp;gt; &quot;It&#39;s Fiona!&quot;
 	| &quot;Ben&quot; -&amp;gt; &quot;it me!&quot;
 	| &quot;Steve&quot; -&amp;gt; &quot;Steve you rascal!&quot;
-	| _ -&amp;gt; &quot;I don't know this person&quot;
+	| _ -&amp;gt; &quot;I don&#39;t know this person&quot;
 	
 // result = &quot;it me!&quot;
 &lt;/code&gt;&lt;/pre&gt;
@@ -1798,7 +1800,7 @@ string result;
 
 switch (name) {
 	case &quot;Fiona&quot;:
-		result =  &quot;It's Fiona!&quot;;
+		result =  &quot;It&#39;s Fiona!&quot;;
 		break;
 	case &quot;Ben&quot;:
 		result = &quot;it me!&quot;;
@@ -1807,7 +1809,7 @@ switch (name) {
 		result = &quot;Steve you rascal!&quot;;
 		break;
 	default:
-		result = &quot;I don't know this person&quot;;
+		result = &quot;I don&#39;t know this person&quot;;
 		break;
 }
 &lt;/code&gt;&lt;/pre&gt;
@@ -1828,10 +1830,10 @@ switch (name) {
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;Ben&quot;;
 var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It's Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it's me!&quot;)
+	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
+	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it&#39;s me!&quot;)
 	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(&quot;I don't know this person&quot;)
+	.Else(&quot;I don&#39;t know this person&quot;)
 	.Do();
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -1839,13 +1841,13 @@ var result = name.Match()
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;George&quot;;
 var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It's Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it's {0}!&quot;, x))
+	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
+	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it&#39;s {0}!&quot;, x))
 	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(x =&amp;gt; string.Format(&quot;I don't know {0}&quot;, x))
+	.Else(x =&amp;gt; string.Format(&quot;I don&#39;t know {0}&quot;, x))
 	.Do();
 
-// result = &quot;I don't know George&quot;
+// result = &quot;I don&#39;t know George&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;code&gt;Else&lt;/code&gt; value is optional but if it falls through without matching and there’s no &lt;code&gt;Else&lt;/code&gt; value it throws an &lt;code&gt;IncompletePatternMatchException&lt;/code&gt;:&lt;/p&gt;
@@ -1908,7 +1910,7 @@ var invalidEggs = basket.Do();
 var intention = PatternMatch.Match()
 	.With(() =&amp;gt; footwear == &quot;red slippers&quot;, &quot;following the Yellow Brick Road&quot;)
 	.With(() =&amp;gt; footwear == &quot;boots&quot;, &quot;walking&quot;)
-	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don't think so&quot;)
+	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don&#39;t think so&quot;)
 	.ToFunc();
 
 var walking = intention();
@@ -1916,7 +1918,7 @@ footwear = &quot;these shoes&quot;;
 var noWayJose = intention();
 
 // walking = &quot;walking&quot;
-// noWayJose = &quot;I don't think so&quot;
+// noWayJose = &quot;I don&#39;t think so&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This is getting quite DRY but closing over a local mutable value will have the purists climbing the walls, myself included. So the final form goes back to processing an input, deferred until the match statement is executed. The syntax is a little verbose because C# can’t infer the types of the lambdas without help, but I’m pretty happy with the result - a reusable &lt;code&gt;Func&amp;lt;TIn, TOut&amp;gt;&lt;/code&gt; value that is defined declaratively with no flow control or mutated state:&lt;/p&gt;

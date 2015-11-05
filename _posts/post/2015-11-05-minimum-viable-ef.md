@@ -87,9 +87,9 @@ If I try to pull out the security for every loaded portfolio item, the performan
 
 I have several problems with lazy loading of navigation properties:
 
-1. The cost (in terms of latency) isn't clear when accessing a navigation property - without some external tracking mechanism it's difficult to predict which properties nested in a collection will trigger the load.
-2. Entity Framework executes the navigation properties queries synchronously, whereas the initial query could be performed asynchronously. There is no control over the query mechanism.
-3. Complex or non-standard relationships such as composite keys have to be expressed using attributes or special configuration in the database context. Apart from the effort involved in configuring these relationships (very error prone) they are then an extra maintenance burden.
+- The cost (in terms of latency) isn't clear when accessing a navigation property - without some external tracking mechanism it's difficult to predict which properties nested in a collection will trigger the load.
+- Entity Framework executes the navigation properties queries synchronously, whereas the initial query could be performed asynchronously. There is no control over the query mechanism.
+- Complex or non-standard relationships such as composite keys have to be expressed using attributes or special configuration in the database context. Apart from the effort involved in configuring these relationships (very error prone) they are then an extra maintenance burden.
 
 Unfortunately the prevailing practice of encapsulating logic in the entities by way of the [Aggregate pattern](http://martinfowler.com/bliki/DDD_Aggregate.html) when using Entity Framework requires the use of navigation properties for it to be efficient. When writing the query to produce performant code that consumes navigation properties somewhere down the call path you have no choice but to be aware of (usually _discover_, often through trial and error) the navigation properties that will be required when the results are processed.
 
@@ -320,7 +320,7 @@ These methods can't be called directly by EF. This isn't because I removed the n
             Value = item.item.Value(item.security)
         };
 
-You may be tempted to break the query and the map stages into separate classes, possibly even calling the map step a mapper. Reconsider! There is a good chance that the query and map are only going to be used in this one place (if not, they probably should be). If you try to DRY your application too much and too soon it will probably crack&trade;. Extracting the stages would also require a pile of intermediary classes to bridge between the stages. [Record types in C# 7](https://github.com/dotnet/roslyn/issues/206) (if they happen) will reduce the amount of boilerplate code but until the overheads will outweigh any benefit. For most cases I would just keep the query and the map stage together. They can still be tested as a whole by simply mocking out the EF context.
+You may be tempted to break the query and the map stages into separate classes, possibly even calling the map step a mapper. Reconsider! There is a good chance that the query and map are only going to be used in this one place (if not, they probably should be). If you try to DRY your application too much and too soon it will probably crack&trade;. Extracting the stages would also require a pile of intermediary classes to bridge between the stages. [Record types in C# 7](https://github.com/dotnet/roslyn/issues/206) (if they happen) will reduce the amount of boilerplate code but until then the overheads will likely outweigh any benefit. For most cases I would just keep the query and the map stage together. They can still be tested as a whole by simply mocking out the EF context.
 
 That's not to say that individual complex calculations shouldn't be refactored into service classes when appropriate. Since the `Value` calculation is now being done in memory it could easily be extracted:
 
@@ -370,7 +370,7 @@ Another consequence of removing the navigation properties is that the portfolio 
 	There are more complicated scenarios such as making multiple passes over a collection of items that are alternately queried and updated. In this situation I argue that a domain object is the incorrect level of abstraction to be holding this collection. It should be the responsibility of the orchestrating function to maintain then persist its state.
 </aside>
 
-This has the smell of a dirty workaround that will be more trouble than it is worth. It raises a number of questions:
+This has the smell of a dirty workaround that will be more trouble than it is worth. It raises some questions:
 
 - During an read/write/delete operation, why do I _need_ to know the items that a portfolio contains? Surely this is an update, not a query? What is that collection of items actually giving me, if I shouldn't be using it in this operation anyway?
 - Why does the portfolio even _have_ a concept of adding an item? An investment portfolio is a collection of assets and other related information. It isn't the thing that does the purchasing. In reality, the owner or manager of the portfolio instructs a stockbroker to purchase an asset in the name of the legal entity that owns the portfolio. I'm simply recording the fact that a new asset has been allocated to that portfolio. Why is purchasing a new investment considered an activity that the portfolio is taking at all?
@@ -386,9 +386,9 @@ If I can consider allocating an investment to a portfolio to be unrelated to the
 		}
 	}
 
-Note that the service doesn't call `_context.SaveChanges()`. That is left for the consuming code. It could be done in the service itself but because I've got a shared EF context I can take advantage of batching. I could also use a unit of work implementation wrapping the EF context and flushing the context automatically, but that is out of the scope of this post.
+Note that the service doesn't call `_context.SaveChanges()`. That is left for the consuming code. It could be done in the service itself but because I've got a shared EF context I can take advantage of batching. I could also use a unit of work implementation that wraps the EF context and flushes the context automatically.
 
-In an example this trivial I don't think a discrete service class is actually warranted. I may as well just perform the operation in the consuming code. Generally I would defer extracting out service classes until it is clear that the logic will actually be reused and is too complex to enjoy a bit of duplication.
+In an example this trivial I don't think a discrete service class is actually warranted. I may as well just perform the operation in the consuming code. Generally I would defer extracting out service classes until it is clear that the logic will actually be reused and is too complex to be safely duplicated.
 
 
 ## Doesn't this break the Aggregate Root concept?
@@ -455,7 +455,9 @@ This is a contrived example - in this situation a domain event handler is probab
 
 You don't have to buy in wholesale to this approach. It should be ideal for limited usage without affecting the system as a whole. I believe that treating EF as an efficient SQL generation library and data access layer is a viable alternative to attempting to deal with EF as a monolithic ORM, stopping far short of throwing it away in favour of something even more lightweight such as Massive or Dapper, or pivoting to a non-relational data store for a completely different approach.
 
-I wouldn't try to implement this across the board in an application already using navigation properties - there's rarely any benefit to that kind of large scale adoption. It also makes refactoring relationships more difficult, because those relationships are now referenced directly in consuming code rather than as a consequence of the simple possession of a navigation property.
+I wouldn't try to implement this across the board in an application already using navigation properties - there's rarely any benefit to that kind of large scale adoption.
+
+It also makes refactoring relationships more difficult, because those relationships are now referenced directly in consuming code rather than as a consequence of the simple possession of a navigation property.
 
 I would argue that refactoring relationships _should_ be non-trivial. Changing a relationship can have unconsidered and difficult to discover effects on the performance of an application that makes use of navigation properties.
 
