@@ -42,3 +42,7 @@ hr {
 .twitter-link {
 	float: right;
 }
+
+.well.pull-left {
+	margin-right: 1em;
+}

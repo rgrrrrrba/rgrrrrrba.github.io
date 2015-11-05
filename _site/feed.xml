@@ -1,10 +1,1370 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ben d&#39;état - Ben Scott&#39;s blog</title>
+		<title>Ben d'état - Ben Scott's blog</title>
 		<description></description>		
 		<link>http://bendetat.com</link>
 		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Minimum Viable EF</title>
+				<description>&lt;p&gt;LINQ to SQL provides a mechanism for generating complex queries without having to resort to inline SQL or custom query generation syntax. I happen to like LINQ to SQL as a SQL generation tool, and using EF to execute those queries and hydrate objects is a passable experience, especially in the more recent version of EF. Entity Framework also provides reasonable good batching of mutation (update/insert/delete) operations.&lt;/p&gt;
+
+&lt;p&gt;However, Entity Framework spoils us with navigation properties. We get largely simplified query generation at the cost of visibility, and if something fails we are faced with inscrutable errors and increasingly obtuse workarounds.&lt;/p&gt;
+
+&lt;p&gt;In this post I propose reducing and eventually eliminating the reliance on navigation properties. At the same time (and partly as a consequence) I’ll look at moving functionality out of aggregate roots and reducing a tendency to prematurely DRY and deduplicate a design. After years of struggling with EF and building gloriously fragile architectures, I’ve personally had some success when embracing this technique and I’m especially happy with the resulting simplification of architecture that the technique encourages.&lt;/p&gt;
+
+&lt;p&gt;The examples I’m using are based on an extremely simplified investment portfolio management tool. There are multiple portfolios, multiple securities, and each portfolio can have multiple portfolio items. Each portfolio item is linked to a portfolio and a security. Portfolio items also have a count of units, and securities have a current price.&lt;/p&gt;
+
+&lt;p&gt;The test application I developed while writing this is on &lt;a href=&quot;https://github.com/bendetat/minimal-ef-testbed&quot;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;navigation-properties-and-lazy-loading&quot;&gt;Navigation properties and lazy loading&lt;/h2&gt;
+
+&lt;p&gt;Entity Framework has an interesting feature involving navigation properties called &lt;em&gt;lazy loading&lt;/em&gt;. A navigation property (declared as a &lt;code&gt;virtual&lt;/code&gt; property on the entity class) will have its value materialised from the database when it is accessed. This can keep the initial load low if only some navigation properties are required from the initial set of results. These are the simplified entities from my test application with navigation properties present:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Portfolio {
+	public Guid Id { get; set; }
+	public string Name { get; set; }
+	public virtual ICollection&amp;lt;PortfolioItem&amp;gt; Items { get; set; }
+}
+
+class Security {
+	public Guid Id { get; set; }
+	public string Code { get; set; }
+	public string Name { get; set; }
+	public decimal Price { get; set; }
+}
+
+class PortfolioItem {
+	public Guid Id { get; set; }
+	public Guid PortfolioId { get; set; }
+	public virtual Portfolio Portfolio { get; set; }
+	public Guid SecurityId { get; set; }
+	public virtual Security Security { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Navigation properties can be explicitly included in the initial query, opting them into eager loading. This example would get all portfolios, including their items - the &lt;code&gt;.ToArray()&lt;/code&gt; executes the query so everything selected by the query is in memory - &lt;em&gt;materialised&lt;/em&gt; in EF parlance:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var portfolios = context.Portfolios.Include(x =&amp;gt; x.Items).ToArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This SQL that is generated from this query is roughly equivalent to this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;SELECT p.*, i.*
+FROM [dbo].[Portfolio] p
+INNER OUTER JOIN [dbo].[PortfolioItem] i ON p.Id = i.PortfolioId
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 17em&quot;&gt;
+	This is the &lt;em&gt;only&lt;/em&gt; time that I have been impressed by EF Code First migrations.
+&lt;/aside&gt;
+
+&lt;p&gt;The SQL that really gets generated is a bit more complex but the structure is basically the same. You can use LINQPad to view the SQL that gets generated for a given LINQ to SQL query. Add the Entity Framework NuGet package and this code - LINQPad managed to connect to my SQL Server instance and EF created the appropriate database and schema using a Code First migration:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void Main()
+{
+	var context = new Context();
+	
+	var query = context.Portfolios.Include(x =&amp;gt; x.Items);
+		
+	var property = typeof(System.Data.Entity.Infrastructure.DbQuery&amp;lt;Portfolio&amp;gt;).GetProperty(&quot;InternalQuery&quot;, (BindingFlags)int.MaxValue);
+	property.GetValue(query).ToString().Dump();
+}
+
+// ... entity classes as above
+
+class Context : DbContext {
+	public IDbSet&amp;lt;Portfolio&amp;gt; Portfolios { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Whenever a navigation property that wasn’t included in that initial load is accessed, the database is re-queried just for that one item. This is useful if you just wanted to get to the &lt;code&gt;Security&lt;/code&gt; property for a given portfolio item:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var item = context.Portfolios.First().Items.First();
+
+// Accessing .Security performs a second query
+var name = item.Security.Name;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;the-problems&quot;&gt;The problem(s)&lt;/h2&gt;
+
+&lt;p&gt;If I try to pull out the security for every loaded portfolio item, the performance (in terms of database round-trips) goes from O(1) to O(n+1). Given 1000 portfolio items, 1000 additional queries will be round-tripped over the network and executed just to get the security for each item. This is a bad thing. It’s possible to opt in to eager loading of a navigation property (using &lt;code&gt;.Include&lt;/code&gt;) but I’ll get into that later.&lt;/p&gt;
+
+&lt;p&gt;I have several problems with lazy loading of navigation properties:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;The cost (in terms of latency) isn’t clear when accessing a navigation property - without some external tracking mechanism it’s difficult to predict which properties nested in a collection will trigger the load.&lt;/li&gt;
+  &lt;li&gt;Entity Framework executes the navigation properties queries synchronously, whereas the initial query could be performed asynchronously. There is no control over the query mechanism.&lt;/li&gt;
+  &lt;li&gt;Complex or non-standard relationships such as composite keys have to be expressed using attributes or special configuration in the database context. Apart from the effort involved in configuring these relationships (very error prone) they are then an extra maintenance burden.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Unfortunately the prevailing practice of encapsulating logic in the entities by way of the &lt;a href=&quot;http://martinfowler.com/bliki/DDD_Aggregate.html&quot;&gt;Aggregate pattern&lt;/a&gt; when using Entity Framework requires the use of navigation properties for it to be efficient. When writing the query to produce performant code that consumes navigation properties somewhere down the call path you have no choice but to be aware of (usually &lt;em&gt;discover&lt;/em&gt;, often through trial and error) the navigation properties that will be required when the results are processed.&lt;/p&gt;
+
+&lt;p&gt;Here’s the &lt;code&gt;PortfolioItem&lt;/code&gt; class, showing some encapsulated logic (the &lt;code&gt;Value&lt;/code&gt; property):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class PortfolioItem {
+	//...
+	public decimal Units { get; set; }
+	public virtual Security Security { get; set; }
+	public decimal Value =&amp;gt; Units * Security.Price;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is obviously a trivial example, but what happens if the implementation of that encapsulated logic changes and requires a different navigation property? Each place where a query is generated that then uses that encapsulated logic &lt;em&gt;somewhere&lt;/em&gt; along the call path needs to be updated to reflect the new underlying structure. Otherwise you’ll either get a pile of additional queries dragging down performance or a difficult to diagnose null reference exception if the underlying context is somehow closed. I personally prefer the null references - it’s easier to fix your application crashing than to fix users complaining about performance.&lt;/p&gt;
+
+&lt;p&gt;These issues with query visibility are compounded if if we’re reusing query fragments by operating on &lt;code&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public static IQueryable&amp;lt;Portfolio&amp;gt; GetAllPortfoliosBelongingToClient(this IQueryable&amp;lt;Portfolio&amp;gt; portfolios, Guid clientId) {
+	return context.Portfolios
+		.Include(x =&amp;gt; x.Items)
+		.Where(x =&amp;gt; x.ClientId == clientId);
+}
+
+// ...
+
+var portfolios = _context.Portfolios.GetAllPortfoliosBelongingToClient(clientId).ToArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 26em&quot;&gt;
+	The entire reusable query fragment pattern is dreadful, but I'll leave that for another rant. I usually lump it in with 'reusable' mapper classes, misused flag enums, &lt;a href=&quot;http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html&quot;&gt;object initialisation syntax for anything not a DTO&lt;/a&gt;, tuples (although &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/347&quot;&gt;C# 7 may fix this&lt;/a&gt;) and nested ternary expressions.
+&lt;/aside&gt;
+
+&lt;p&gt;&lt;code&gt;Items&lt;/code&gt; are included to make the query more performant by eager loading the collection for each portfolio. Note that the item securities are not included and will be lazily loaded.&lt;/p&gt;
+
+&lt;p&gt;Say that in one of the three places where this query is used, I want to access the current security price for every item. It makes sense to add the new include to the query, right? After all, this is where the query is defined and I’m already specifying that the portfolio items should be eagerly loaded here.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;return portfolios
+	.Include(x =&amp;gt; x.Items)
+	.Include(x =&amp;gt; x.Items.Select(i =&amp;gt; i.Security))
+	.Where(x =&amp;gt; x.ClientId == clientId);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Except now the security is selected and pulled into memory every single time this query is used, which isn’t appropriate in the other two usages of the query fragment and will cause extra load on the database and the network.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;By relying on navigation properties we’re getting simplified query generation at the expense of clean code.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The result is a spaghetti mess of unclear dependencies and configurations,  difficult to diagnose performance issues and ‘fixes’ that have require modifying unrelated parts of the system. Fixes that inevitably produce more bugs.&lt;/p&gt;
+
+&lt;h2 id=&quot;denormalising-data&quot;&gt;Denormalising data&lt;/h2&gt;
+
+&lt;p&gt;An easy, early optimisation that should happen is denormalising some data. When I first started learning about database design, way back in high school, a heavy emphasis was placed on normalisation. The goal with any database design was to get it to the highest Nth Normal Form possible, and damn the consequences.&lt;/p&gt;
+
+&lt;p&gt;A normalised design is crucial to having a performant, modular and extendable system. Aggressively deduplicating data and chasing the perfectly normalised schema imaginable can have precisely the opposite effect.&lt;/p&gt;
+
+&lt;p&gt;To get the security code for an item in a portfolio in SQL requires an extra table join:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;SELECT p.Id, s.Code
+FROM [dbo].[Portfolios] p
+INNER JOIN [dbo].[PortfolioItems] i ON i.[Id] = p.[Id]
+INNER JOIN [dbo].[Securities] s ON s.[Id] = p.[Id]	# &amp;lt;-- this one
+WHERE -- some condition
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 18em&quot;&gt;
+	For all of its faults (and there are plenty) SQL is still a great language for querying a relational database. Hashtag makuthink.
+&lt;/aside&gt;
+
+&lt;p&gt;That doesn’t seem like a big deal. In fact, SQL Server is extremely good at joining tables. There should already be a foreign key relationship between &lt;code&gt;PortfolioItems&lt;/code&gt; and &lt;code&gt;Securities&lt;/code&gt;, which lets SQL Server perform optimisations.&lt;/p&gt;
+
+&lt;p&gt;The problem, as described above, is when our ORM - Entity Framework - needs its hand held to eagerly load the &lt;code&gt;Security&lt;/code&gt; property:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var selectedPortfolios = context.Portfolios
+	.Include(x =&amp;gt; x.Items)
+	.Include(x =&amp;gt; x.Items.Select(i =&amp;gt; i.Security))
+	.Where(x =&amp;gt; /* some condition */)
+	.ToArray();
+
+// later...
+var securityNames = selectedPortfolios
+	.SelectMany(x =&amp;gt; x.Items)
+	.Select(i =&amp;gt; i.Security.Name)
+	.ToArray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 33em&quot;&gt;
+	The &lt;code&gt;// later...&lt;/code&gt; comment is important, because I could just select out the security name in the initial query and obviate this entire example. I'm making an assumption that, as is usually the case in the systems I've worked in and created, the selected portfolios are queried in one place then being consumed elsewhere. Generally both of those places are only tangentially related through some common consumer. As I'll explain soon, this is a bad practice that I would like to challenge.
+&lt;/aside&gt;
+
+&lt;p&gt;If the &lt;code&gt;Security&lt;/code&gt; property isn’t eagerly loaded, I get lazy loading in that final &lt;code&gt;.Select(i =&amp;gt; i.Security.Name)&lt;/code&gt; resulting in O(n) performance.&lt;/p&gt;
+
+&lt;p&gt;To denormalise the structure I can apply a piece of domain knowledge. Security names don’t change very often relative to other pieces of data in a financial system. Currently (start of November) there have been 95 name (and code) changes on the &lt;a href=&quot;http://www.asx.com.au/prices/company-name-and-asx-code-changes-2015.htm&quot;&gt;Australian Stock Exchange&lt;/a&gt; in 2015, out of around 2200 listed companies. So this isn’t a piece of information that changes very frequently. If I copy the security name to the portfolio item, the &lt;code&gt;Security&lt;/code&gt; property no longer needs eager loading.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var securityNames = selectedPortfolios
+	.SelectMany(x =&amp;gt; x.Items)
+	.Select(i =&amp;gt; i.SecurityName)
+	.ToArrray();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To maintain data integrity I can use a domain event that gets triggered whenever a security name is changed. The name of the security doesn’t have to be immediately available to each portfolio item when it changes - a slight delay is ok.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;void Handle(SecurityNameChanged @event) {
+	foreach (var item in portfolioItems.Where(x =&amp;gt; x.SecurityId == @event.SecurityId).ToArray()) {
+		item.UpdateSecurityName(@event.SecurityName);
+	}
+	portfolioItems.SaveChanges();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In many cases this wouldn’t even need to happen in a domain event. A maintenance task could regularly make sure the denormalised security name is consistent with the canonical security, ensuring &lt;em&gt;eventual&lt;/em&gt; data integrity.&lt;/p&gt;
+
+&lt;h2 id=&quot;remove-navigation-properties&quot;&gt;Remove navigation properties&lt;/h2&gt;
+
+&lt;p&gt;Denormalising the structure is a good step when appropriate (and you should first be able to justify it with real numbers), however it does add complexity to the system as a whole when having to deal with data integrity. As I said before, SQL Server is really really good at joining tables.&lt;/p&gt;
+
+&lt;p&gt;What I propose is reducing the reliance on navigation properties - removing them altogether where possible - and replacing them with more explicit queries.&lt;/p&gt;
+
+&lt;p&gt;As an example, this is how you would write a query for all security codes for a portfolio using navigation properties:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var query =
+	from portfolio in context.Portfolios
+	where portfolio.Id == portfolioId
+	let codes = portfolio.Items.Select(x =&amp;gt; x.Security.Code)
+	select codes;
+var result = query.Single();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is how you would write the same query without using navigation properties:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var query =
+	from portfolio in context.Portfolios
+	where portfolio.Id == portfolioId
+	let codes = 
+		from item in context.PortfolioItems
+		where item.PortfolioId == portfolio.Id
+		let security = context.Securities.FirstOrDefault(s =&amp;gt; s.Id == item.SecurityId)
+		select security.Code
+	select codes;
+var result = query.Single();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 27em&quot;&gt;
+	&lt;p&gt;Note that I can't use &lt;code&gt;context.Securities.Single(...)&lt;/code&gt; because, according to LINQ to SQL: &quot;The methods 'Single' and 'SingleOrDefault' can only be used as a final query operation. Consider using the method 'FirstOrDefault' in this instance instead.&quot;&lt;/p&gt;	
+	&lt;p&gt;&lt;code&gt;var result = query.Single()&lt;/code&gt; is ok because it is the 'final query operation'.&lt;/p&gt;
+&lt;/aside&gt;
+
+&lt;p&gt;The query is now more complex, but I’ve moved the previously hidden complexity of navigation properties back into the query. In my opinion the query is where that complexity belongs - not off-loaded to an ORM.&lt;/p&gt;
+
+&lt;h3 id=&quot;addressing-lazy-loading&quot;&gt;Addressing lazy loading&lt;/h3&gt;
+
+&lt;p&gt;Since I’ve removed the navigation properties, I can’t do automatic lazy loading via EF any more. This is a good thing because it forces me to write another query to get the property. Remember that the query was going to happen anyway - I now just have control over how it happens. I can execute it asynchronously and I also have the option to only select the data I require.&lt;/p&gt;
+
+&lt;p&gt;Based on the earlier example of lazily loading the security for a given portfolio item:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var item = items.First();
+
+//var name = item.Security.Name;
+
+var security = context.Securities.Single(x =&amp;gt; x.Id == item.SecurityId);
+var name = security.Name;
+
+// or to just get the name
+var name = context.Securities
+	.Where(x =&amp;gt; x.Id == item.SecurityId)
+	.Select(x =&amp;gt; x.Name)
+	.Single();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;thinking-about-the-query&quot;&gt;Thinking about the query&lt;/h3&gt;
+
+&lt;p&gt;This method forces me to think more about the query I’m writing and how that will be translated into SQL. This gives me an opportunity to write queries that are focused on the job at hand. I can’t just select a heap of data and pass it somewhere else for processing without knowing how that processing will happen - the way to implement that when leveraging navigation properties is with a pile of fragments that get applied at different stages, which is an opaque and dangerous strategy.&lt;/p&gt;
+
+&lt;p&gt;This also means that the query itself can live closer to the calculations that get performed on it in memory. In fact, the query can often be co-located with the calculations that depend on it. This means less spaghetti code and a less ‘sophisticated’ (complicated) architecture.&lt;/p&gt;
+
+&lt;h3 id=&quot;strategies-for-changing-logic-in-the-entity&quot;&gt;Strategies for changing logic in the entity&lt;/h3&gt;
+
+&lt;p&gt;Removing navigation properties from the entity means that logic in the entity that depends on those navigation properties has to change. This is acceptable because it means that the consumers of that logic now have to be aware of what is required to perform that logic and I don’t get saddled with obtuse configuration and O(n) performance issues.&lt;/p&gt;
+
+&lt;p&gt;To deal with this I need some strategies for reimplementing this entity logic.&lt;/p&gt;
+
+&lt;h4 id=&quot;queries&quot;&gt;Queries&lt;/h4&gt;
+
+&lt;p&gt;The value of a portfolio item is simply the number of units multiplied by the current price of the security. A naive implementation of a query to generate a report showing the investments in a portfolio and the values would look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var query =
+    from portfolio in _context.Portfolios
+    where portfolio.Id == portfolioId
+    let items =
+        from item in _context.PortfolioItems
+        where item.PortfolioId == portfolio.Id
+        let security = _context.Securities.FirstOrDefault(s =&amp;gt; s.Id == item.SecurityId)
+        select new
+        {
+            security.Code,
+            Value = item.Units*security.CurrentPrice
+        }
+    select items;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is a very simple calculation so it isn’t really a good target for applying DRY but I’ll use it for now. If I was treating the portfolio item as an aggregate root using navigation properties, that &lt;code&gt;Value&lt;/code&gt; calculation would live as a property on &lt;code&gt;PortfolioItem&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public decimal Value =&amp;gt; this.Units * this.Security.CurrentPrice;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This can be implemented without the navigation property by explicitly passing the current price or the security itself:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public decimal GetValue(decimal currentPrice) =&amp;gt; this.Units * currentPrice;
+
+// or, if you wanted to hide the implementation detail
+// and not make the consumer concerned about where the
+// current price comes from:
+
+public decimal GetValue(Security security) =&amp;gt; this.Units * security.CurrentPrice;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These methods can’t be called directly by EF. This isn’t because I removed the navigation properties. EF wouldn’t be able to call the previous property either with a &lt;code&gt;get;&lt;/code&gt; body or an expression body - LINQ to SQL simply can’t translate the expression into SQL. So I need a second stage to map the results from the EF query into the the final results.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var query =
+    from portfolio in _context.Portfolios
+    where portfolio.Id == portfolioId
+    let items =
+        from item in _context.PortfolioItems
+        where item.PortfolioId == portfolio.Id
+        let security = _context.Securities.FirstOrDefault(s =&amp;gt; s.Id == item.SecurityId)
+        select new
+        {
+            item,
+            security
+        }
+    select items;
+var results =
+    from item in query.Single().ToArray()
+    select new
+    {
+        item.security.Code,
+        Value = item.item.Value(item.security)
+    };
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You may be tempted to break the query and the map stages into separate classes, possibly even calling the map step a mapper. Reconsider! There is a good chance that the query and map are only going to be used in this one place (if not, they probably should be). If you try to DRY your application too much and too soon it will probably crack™. Extracting the stages would also require a pile of intermediary classes to bridge between the stages. &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/206&quot;&gt;Record types in C# 7&lt;/a&gt; (if they happen) will reduce the amount of boilerplate code but until the overheads will outweigh any benefit. For most cases I would just keep the query and the map stage together. They can still be tested as a whole by simply mocking out the EF context.&lt;/p&gt;
+
+&lt;p&gt;That’s not to say that individual complex calculations shouldn’t be refactored into service classes when appropriate. Since the &lt;code&gt;Value&lt;/code&gt; calculation is now being done in memory it could easily be extracted:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class PortfolioItemValueCalculator {
+	public decimal Calculate(PortfolioItem item, Security security) {
+		return item.Units * security.CurrentValue;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is a terrible example so here’s a better one. Warning - I’m about to drop some serious domain knowledge. In a portfolio management system you often need to calculate the cost base of an investment, say to calculate the change in value for the investment, or to work out the tax consequences of selling the investment. There are several methods for calculating a cost base (financial planners are interested in performance, tax accountants are interested in tax consequences) and regardless of the method it can be quite complicated. Cost base is calculated using a number of variables such as the cost of the parcels that make up the investment, any capital returns received, the effect of corporate actions such as demergers, etc. So a cost base calculator for a given method is an excellent candidate for extraction and reuse as a service class. An example calculator signature might look something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class AverageTaxCostBaseCalculator {
+	public decimal Calculate(
+		Parcel[] parcels, 
+		CapitalReturnDistribution[] capitalReturns,
+		CorporateAction[] corporateActions);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id=&quot;updates-inserts-and-deletes&quot;&gt;Updates, inserts and deletes&lt;/h4&gt;
+
+&lt;p&gt;Navigation properties also have the advantage of already being tracked by EF, so any updates to them will be persisted when the context is saved. This doesn’t change when pulling those entities out explicitly in queries - EF will track them as well, as long as you’ve used the same context. In other words, don’t use &lt;code&gt;InstancePerDependency&lt;/code&gt; to register the context in Autofac - use something like &lt;code&gt;InstancePerRequest&lt;/code&gt; or &lt;code&gt;InstancePerLifetimeScope&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Of course, this means that methods in an aggregate root that create or delete child entities will need to be restructured. Take this method that adds a new item to a portfolio using navigation properties:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Portfolio {
+	// ...
+	public virtual ICollection&amp;lt;PortfolioItem&amp;gt; Items { get; set; }
+	public void AddItem(Security security, decimal units) {
+		var item = new PortfolioItem(this, security, units);
+		this.Items.Add(item);
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To work without the &lt;code&gt;Items&lt;/code&gt; navigation property, I need to pass the EF context to the method. Entities are constructed by EF and can’t get dependencies injected by a DI container, so this has to be done explicitly. If you didn’t pass the context in then the caller would be responsible for adding it to EF - a prime opportunity for creating a bug.&lt;/p&gt;
+
+&lt;p&gt;Another consequence of removing the navigation properties is that the portfolio entity &lt;em&gt;per se&lt;/em&gt; now doesn’t have a concept of the items that it contains. To mitigate that the &lt;code&gt;AddItem&lt;/code&gt; could return the new item, which could be consumed in the calling code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public PortfolioItem AddItem(IDbContext context, Security security, decimal units)
+{
+    var item = new PortfolioItem(this, security, units);
+    context.PortfolioItems.Add(item);
+    return item;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 23em&quot;&gt;
+	There are more complicated scenarios such as making multiple passes over a collection of items that are alternately queried and updated. In this situation I argue that a domain object is the incorrect level of abstraction to be holding this collection. It should be the responsibility of the orchestrating function to maintain then persist its state.
+&lt;/aside&gt;
+
+&lt;p&gt;This has the smell of a dirty workaround that will be more trouble than it is worth. It raises a number of questions:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;During an read/write/delete operation, why do I &lt;em&gt;need&lt;/em&gt; to know the items that a portfolio contains? Surely this is an update, not a query? What is that collection of items actually giving me, if I shouldn’t be using it in this operation anyway?&lt;/li&gt;
+  &lt;li&gt;Why does the portfolio even &lt;em&gt;have&lt;/em&gt; a concept of adding an item? An investment portfolio is a collection of assets and other related information. It isn’t the thing that does the purchasing. In reality, the owner or manager of the portfolio instructs a stockbroker to purchase an asset in the name of the legal entity that owns the portfolio. I’m simply recording the fact that a new asset has been allocated to that portfolio. Why is purchasing a new investment considered an activity that the portfolio is taking at all?&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If I can consider allocating an investment to a portfolio to be unrelated to the portfolio, this method should be removed from the portfolio (Single Responsibility Principle) and extracted into a service:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class AddAssetToPortfolio {
+	// ...
+	public void Add(Portfolio portfolio, Security security, decimal units) {
+		var item = new PortfolioItem(portfolio, security, units);
+
+		_context.PortfolioItems.Add(item);
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that the service doesn’t call &lt;code&gt;_context.SaveChanges()&lt;/code&gt;. That is left for the consuming code. It could be done in the service itself but because I’ve got a shared EF context I can take advantage of batching. I could also use a unit of work implementation wrapping the EF context and flushing the context automatically, but that is out of the scope of this post.&lt;/p&gt;
+
+&lt;p&gt;In an example this trivial I don’t think a discrete service class is actually warranted. I may as well just perform the operation in the consuming code. Generally I would defer extracting out service classes until it is clear that the logic will actually be reused and is too complex to enjoy a bit of duplication.&lt;/p&gt;
+
+&lt;h2 id=&quot;doesnt-this-break-the-aggregate-root-concept&quot;&gt;Doesn’t this break the Aggregate Root concept?&lt;/h2&gt;
+
+&lt;p&gt;To a degree. As discussed above, there are strategies for changing the implementation of an aggregate root’s embedded logic that allows for the removal of navigation properties from the aggregate root itself.&lt;/p&gt;
+
+&lt;p&gt;Aggregate roots are a useful thought technology that inform us of how to model discrete pieces of domain functionality by aggregating it into subdomains. Generally this gets expressed as pushing all the domain logic into an entity class. I argue that this is an anti-pattern.&lt;/p&gt;
+
+&lt;p&gt;I’ve seen domain objects become demigod classes, with pages of methods and unseparated concerns. There is a strong and correct argument that these overly complex aggregate roots are the result of bad planning and a lack of large-scale refactoring over time, however the reality is that software does get built like this and I find it disingenuous to try to sell rewrites and large scale refactors to a client as ‘paying off tech debt’.&lt;/p&gt;
+
+&lt;p&gt;Discounting this strict application of aggregate roots doesn’t mean that we can’t aggregate domain functionality in other ways, by pushing common functionality into small service classes or domain event handlers, and by breaking up the domain via microservices as needed. Domain-driven design doesn’t mean simply mean lumping your application’s functionality in your key domain objects.&lt;/p&gt;
+
+&lt;h3 id=&quot;domain-event-handler&quot;&gt;Domain event handler&lt;/h3&gt;
+
+&lt;p&gt;The domain event handler for updating security names (above) is an example of extracting functionality from an aggregate root / entity. The aggregate root way of implementing updating security names would be a method on &lt;code&gt;Security&lt;/code&gt;, using a collection of portfolio items linked to the security:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Security {
+	// ...
+	public virtual ICollection&amp;lt;PortfolioItem&amp;gt; PortfolioItems { get; set; }
+
+	public void UpdateName(string name) {
+		this.Name = name;
+		foreach (var item in this.PortfolioItems) {
+			item.UpdateSecurityName(name);
+		}
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Given this design, whenever I want to update a security name I need to remember to eagerly load the &lt;code&gt;PortfolioItems&lt;/code&gt; as well. Extracting out the update part of that functionality reduces the complexity on the consumer side, and since the update can be performed out-of-band (maybe pushed into another process) the operation of updating a security name becomes simpler and more performant.&lt;/p&gt;
+
+&lt;h3 id=&quot;service-class&quot;&gt;Service class&lt;/h3&gt;
+
+&lt;p&gt;Of course, a domain event handler is just a nice auto-wired wrapper for a (hopefully) single purpose service class. I could instead have a service class that replaces the above aggregate root style &lt;code&gt;Security.UpdateName()&lt;/code&gt; method and also implements the domain event to update the denormalised names on &lt;code&gt;PortfolioItem&lt;/code&gt;. &lt;/p&gt;
+
+&lt;p&gt;This is a contrived example - in this situation a domain event handler is probably a much better choice unless you need to take advantage of EF’s implicit database transaction to maintain integrity in case of a failure.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class UpdateSecurityName {
+	// _context...
+
+	public void Update(Guid securityId, string name) {
+		var query =
+			from security in _context.Securities
+			where security.Id == securityId
+			let items = _context.PortfolioItems.Where(i =&amp;gt; i.SecurityId == securityId)
+			select new {
+				security,
+				items
+			};
+		var result = query.Single();
+
+		result.security.UpdateName(name);
+		foreach (var item in result.items) {
+			item.UpdateSecurityName(name);
+		}
+
+		_context.SaveChanges();
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;isnt-this-all-a-bit-too-hard&quot;&gt;Isn’t this all a bit too hard?&lt;/h2&gt;
+
+&lt;p&gt;You don’t have to buy in wholesale to this approach. It should be ideal for limited usage without affecting the system as a whole. I believe that treating EF as an efficient SQL generation library and data access layer is a viable alternative to attempting to deal with EF as a monolithic ORM, stopping far short of throwing it away in favour of something even more lightweight such as Massive or Dapper, or pivoting to a non-relational data store for a completely different approach.&lt;/p&gt;
+
+&lt;p&gt;I wouldn’t try to implement this across the board in an application already using navigation properties - there’s rarely any benefit to that kind of large scale adoption. It also makes refactoring relationships more difficult, because those relationships are now referenced directly in consuming code rather than as a consequence of the simple possession of a navigation property.&lt;/p&gt;
+
+&lt;p&gt;I would argue that refactoring relationships &lt;em&gt;should&lt;/em&gt; be non-trivial. Changing a relationship can have unconsidered and difficult to discover effects on the performance of an application that makes use of navigation properties.&lt;/p&gt;
+
+&lt;p&gt;My opinion is that making complexity explicit up-front reduces the overall cost of development. By hiding this complexity away you’re buying into a different class of complexity - one that is notoriously difficult to manage and maintain. Combined with an action-oriented approach (vs a domain model / aggregate root based approach) and minimising the code put into a domain model class, using more explicit queries while reducing the dependence on Entity Framework features can vastly simplify an application’s architecture.&lt;/p&gt;
+
+</description>
+				<pubDate>Thu, 05 Nov 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/minimum-viable-ef.html</link>
+				<guid isPermaLink="true">http://bendetat.com/minimum-viable-ef.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Notes on Kerberos and Active Directory</title>
+				<description>&lt;p&gt;These are just some notes I made while reading about Kerberos and Active Directory. They aren’t very technical or well-edited and probably have plenty of errors. Read at your peril!&lt;/p&gt;
+
+&lt;h2 id=&quot;kerberos&quot;&gt;Kerberos&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Kerberos_(protocol)&quot;&gt;https://en.wikipedia.org/wiki/Kerberos_(protocol)&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Requires a trusted third party
+    &lt;ul&gt;
+      &lt;li&gt;Authentication Server and Ticket Granting Service&lt;/li&gt;
+      &lt;li&gt;usually backed by a database - Active Directory for example&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Originally implemented by MIT&lt;/li&gt;
+  &lt;li&gt;Windows 2000 onwards uses the Kerberos protocol (&lt;em&gt;not&lt;/em&gt; MIT’s implementation) as the default auth method
+    &lt;ul&gt;
+      &lt;li&gt;Prior to Windows 2000 it used NTLM&lt;/li&gt;
+      &lt;li&gt;If the machine is not joined to a domain it falls back to NTML between client and server&lt;/li&gt;
+      &lt;li&gt;Intranet web applications can enforce Kerberos as an authentication method for domain joined clients by using APIs provided under SSPI
+        &lt;ul&gt;
+          &lt;li&gt;IIS integrated auth for example&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2015-11-02-notes-on-kerberos-and-active-directory/kerberos-data-flow.jpg&quot; alt=&quot;Kerberos Data Flow&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;authentication-and-sso-service-access&quot;&gt;Authentication and SSO service access&lt;/h3&gt;
+
+&lt;h4 id=&quot;stage-1---initial-sign-on&quot;&gt;Stage 1 - Initial sign-on&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Client sends user ID (in plain text) to authentication server (AS)&lt;/li&gt;
+  &lt;li&gt;AS finds the user in the database (Active Directory) and sends:
+    &lt;ul&gt;
+      &lt;li&gt;TGS Session Key - encrypted with user’s password (from AD)&lt;/li&gt;
+      &lt;li&gt;Ticket Granting Ticket (TGT) - encrypted with the AS’s private key&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Client decrypts Session Key using the password the user entered
+    &lt;ul&gt;
+      &lt;li&gt;If it can’t decrypt the Session Key then it can’t be used and authentication has failed&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now the client has enough information to access the Ticket Granting Server.&lt;/p&gt;
+
+&lt;h4 id=&quot;stage-2---getting-clientserver-ticket-so-the-client-can-access-a-service-server-ss&quot;&gt;Stage 2 - Getting Client/Server ticket, so the client can access a Service Server (SS)&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Client sends to Ticket Granting Server (TGS):
+    &lt;ul&gt;
+      &lt;li&gt;TGT and ID of requested service&lt;/li&gt;
+      &lt;li&gt;Authenticator, encrypted using the TGS Session Key&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;TGS decrypts the TGT using the AS’s private key, which gives it the session key.&lt;/li&gt;
+  &lt;li&gt;TGS uses the session key to decrypt the Authenticator&lt;/li&gt;
+  &lt;li&gt;TGS checks that the client has access to the requested service (using AD)&lt;/li&gt;
+  &lt;li&gt;TGS sends to client:
+    &lt;ul&gt;
+      &lt;li&gt;Client/Server Ticket, encrypted with the Service Server’s (SS) private key (the TGS has the SS’s private keys)&lt;/li&gt;
+      &lt;li&gt;Client/Server Session Key, encrypted with the TGS Session Key&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now the client has enough information to access the Service Server.&lt;/p&gt;
+
+&lt;h4 id=&quot;stage-3---accessing-the-service-server&quot;&gt;Stage 3 - Accessing the Service Server&lt;/h4&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Client sends to SS:
+    &lt;ul&gt;
+      &lt;li&gt;Client/Server Ticket (still encrypted with service’s private key)&lt;/li&gt;
+      &lt;li&gt;A new Authenticator, encrypted using Client/Server Session Key&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;SS decrypts the Client/Server Ticket using its private key&lt;/li&gt;
+  &lt;li&gt;SS uses the Client/Server Ticket to decrypt the Authenticator&lt;/li&gt;
+  &lt;li&gt;SS sends to client a message with the timestamp encoded in the Authenticator, encrypted with the Client/Server Ticket&lt;/li&gt;
+  &lt;li&gt;This verifies to the client that the SS can be trusted and is willing to service the client&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Now the client and the SS can interact.&lt;/p&gt;
+
+&lt;h2 id=&quot;active-directory&quot;&gt;Active Directory&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Active_Directory&quot;&gt;https://en.wikipedia.org/wiki/Active_Directory&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;Domain controller (DC) authenticates and authorises users and computers in the domain&lt;/li&gt;
+  &lt;li&gt;AD implements LDAP (lightweight directory access protocol) (not 100%, there are exceptions)&lt;/li&gt;
+  &lt;li&gt;Stores network objects:
+    &lt;ul&gt;
+      &lt;li&gt;resources (machines, printers)&lt;/li&gt;
+      &lt;li&gt;security principles (user/computer accounts and groups)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Objects have many different attributes&lt;/li&gt;
+  &lt;li&gt;Schema can be extended and modified by administrators&lt;/li&gt;
+  &lt;li&gt;Hierarchical:
+    &lt;ul&gt;
+      &lt;li&gt;A domain is a group of network objects&lt;/li&gt;
+      &lt;li&gt;A tree is a collection of domains and domain trees, linked by a trust hierarchy&lt;/li&gt;
+      &lt;li&gt;A forest is a collection of trees with a common schema, structure and configuration - used as the security boundary&lt;/li&gt;
+      &lt;li&gt;Objects in a domain can be grouped into Organizational Units (OUs). OUs give hierarchy to a domain. OUs should be used for structure instead of domains or sites.&lt;/li&gt;
+      &lt;li&gt;Duplicate usernames are an issue. Can’t have duplicate usernames in a single domain. This is why you get names like &lt;code&gt;DOMAIN\scottbe123&lt;/code&gt;.&lt;/li&gt;
+      &lt;li&gt;OUs aren’t used for access permissions (specific to AD, other directory services support this). Shadow groups are used for this, usually via third party tooling to map a group to an OU.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Physical structure:
+    &lt;ul&gt;
+      &lt;li&gt;Sites are common across the forest - independent of the domain/OU structure&lt;/li&gt;
+      &lt;li&gt;Sites are physical groupings based on 1+ IP subnets&lt;/li&gt;
+      &lt;li&gt;Include concept of connections between sites&lt;/li&gt;
+      &lt;li&gt;Sites are used to control replication between domain controllers and refering clients to the nearest DC&lt;/li&gt;
+      &lt;li&gt;AD info is replicated across peer DCs, each DC has a copy of the AD&lt;/li&gt;
+      &lt;li&gt;AD uses DNS and TCP/IP, each connection -&amp;gt; link has a cost (speed - the type of connection). This determines the network topology and replication strategy&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Replication:
+    &lt;ul&gt;
+      &lt;li&gt;Generally networks using AD will have more than one DC for failover&lt;/li&gt;
+      &lt;li&gt;DCs should be single-purpose - other services on the machine can interfere with AD&lt;/li&gt;
+      &lt;li&gt;virtualisation can help with reducing hardware costs&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Applications can access AD features using COM interfaces - Active Directory Service Interfaces&lt;/li&gt;
+  &lt;li&gt;Trusts:
+    &lt;ul&gt;
+      &lt;li&gt;Allow users in one domain to access resources in another. Lots of different trust types.&lt;/li&gt;
+      &lt;li&gt;There are also forest-level trusts&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Interoperability with *nix systems can be done via LDAP but that doesn’t include all of the features of AD. There are third party AD integration applications including Samba which can act as a DC.&lt;/li&gt;
+  &lt;li&gt;Group policy:
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Group_Policy&quot;&gt;https://en.wikipedia.org/wiki/Group_Policy&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;centralised management of AD configuration&lt;/li&gt;
+      &lt;li&gt;Local Group Policy (LGPO) is a version that enables GPO management in non-domain environments&lt;/li&gt;
+      &lt;li&gt;Controls what users are allows to do on a system, for example password policies, RDP configuration, block access to Task Manager&lt;/li&gt;
+      &lt;li&gt;GPOs are pushed to computers using Active Directory&lt;/li&gt;
+      &lt;li&gt;GPOs are refreshed every 90 minutes + random 30m offset&lt;/li&gt;
+      &lt;li&gt;GPOs on DCs are refreshed every 5 minutes&lt;/li&gt;
+      &lt;li&gt;Windows 8 clients can have forced GPO updates (per OU) running the update within 10 minutes, with a random offset (avoid spiked load on the DC)&lt;/li&gt;
+      &lt;li&gt;Processed in order: local -&amp;gt; site -&amp;gt; domain -&amp;gt; OU&lt;/li&gt;
+      &lt;li&gt;policies use inheritance&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol&quot;&gt;LDAP&lt;/a&gt; - &lt;a href=&quot;https://tools.ietf.org/html/rfc4511&quot;&gt;https://tools.ietf.org/html/rfc4511&lt;/a&gt;:
+    &lt;ul&gt;
+      &lt;li&gt;provides an interface for querying AD - &lt;a href=&quot;https://technet.microsoft.com/en-us/library/aa996205(v=exchg.65).aspx&quot;&gt;LDAP Query Basics (TechNet)&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;can also manipulate data and perform authentication&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Mon, 02 Nov 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/notes-on-kerberos-and-active-directory.html</link>
+				<guid isPermaLink="true">http://bendetat.com/notes-on-kerberos-and-active-directory.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>React - Early thoughts</title>
+				<description>&lt;p&gt;I’ve just started playing with React, so here is a bit of a brain dump of my first impressions.&lt;/p&gt;
+
+&lt;h2 id=&quot;there-are-some-nice-abstractions&quot;&gt;There are some nice abstractions…&lt;/h2&gt;
+
+&lt;p&gt;I’m comparing this mainly with Angular, which I have about 8 months experience with. React seems to be all about the components, which is similar to the directive-first approach that is working well for me in Angular. The components are very nice to work with, especially with JSX using ES6 features. Here’s a very basic example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;export default class HelloWorld extends React.Component {
+	render() {
+		return (
+			&amp;lt;h1&amp;gt;Hello, world!&amp;lt;/h1&amp;gt;
+		);
+	}
+}
+
+React.render(
+	&amp;lt;HelloWorld/&amp;gt;,
+	document.getElementById('content')
+)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This renders the &lt;code&gt;HelloWorld&lt;/code&gt; component inside a div with the ID &lt;code&gt;content&lt;/code&gt;. JSX’s inline style of declaring markup seems strange to look at first, but it’s really just syntactic sugar for commands that create shadow DOM elements.&lt;/p&gt;
+
+&lt;h2 id=&quot;but-it-feels-closer-to-the-metal&quot;&gt;…but it feels closer to the metal&lt;/h2&gt;
+
+&lt;p&gt;Angular includes services such as &lt;code&gt;$http&lt;/code&gt; for AJAX and &lt;code&gt;$q&lt;/code&gt; for promises, and uses separate templates with a templating language to work with the UI. While you don’t have to, use of the included services is recommended - you’re largely buying into the whole ecosystem.&lt;/p&gt;
+
+&lt;p&gt;React is all about the DOM. Inline JSX is syntactic sugar for methods that work directly with the DOM. React doesn’t provide or depend on any particular AJAX library - the tutorials suggest using jQuery directly. This makes React feel very lightweight and gives the impression that it’s not trying to solve too many problems.&lt;/p&gt;
+
+&lt;h2 id=&quot;new-es6-features-and-good-practices&quot;&gt;New ES6 features and good practices&lt;/h2&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://facebook.github.io/react/docs/tutorial.html&quot;&gt;React tutorial&lt;/a&gt; is a good starting point, but it is built using ES5 syntax. ES6 adds classes, which makes working with JSX a lot easier. There are some important changes that need to made though.&lt;/p&gt;
+
+&lt;p&gt;I’m not a huge fan of ES6 and TypeScript classes, partly because it doesn’t give you much over just using functions, and partly because it makes it more difficult to manage &lt;code&gt;this&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Here’s what I mean. In TypeScript (&lt;a href=&quot;http://codepen.io/anon/pen/PPYOzJ?editors=001&quot;&gt;pen&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Child {
+	constructor(private name) {}
+
+	sayName() {
+		console.log(this.name);
+	}
+}
+
+class Parent {
+	sayChildName;
+  
+	constructor(private name, private child) {
+		this.sayChildName = child.sayName;
+	}
+}
+
+var c = new Child(&quot;child&quot;);
+var p = new Parent(&quot;parent&quot;, c);
+
+p.sayChildName()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This writes &lt;code&gt;&quot;parent&quot;&lt;/code&gt; to the console, not &lt;code&gt;&quot;child&quot;&lt;/code&gt; as expected. This is because of JavaScript’s late binding - when the &lt;code&gt;sayChildName&lt;/code&gt; reference is executed, &lt;code&gt;this&lt;/code&gt; is the parent. The &lt;code&gt;this&lt;/code&gt; reference in &lt;code&gt;sayName()&lt;/code&gt; isn’t closed over in the function. To get the correct &lt;code&gt;this&lt;/code&gt; in function-based ES6, we usually assign &lt;code&gt;this&lt;/code&gt; to &lt;code&gt;self&lt;/code&gt;. The working equivalent is this:&lt;/p&gt;
+
+&lt;aside class=&quot;pull-right&quot; style=&quot;width: 15em&quot;&gt;
+	In fact, by removing the &lt;code&gt;self.name = name&lt;/code&gt; you can make &lt;code&gt;name&lt;/code&gt; truly private, something that isn't possible (yet) in ES6/TS classes.
+&lt;/aside&gt;
+
+&lt;pre&gt;&lt;code&gt;function Child(name) {
+	var self = this;
+	
+	self.name = name;
+	
+	self.sayName = () =&amp;gt; {
+		console.log(self.name)
+	};
+}
+
+function Parent(name, child) {
+	var self = this;
+	
+	self.name = name;
+	self.child = child;
+	self.sayChildName = child.sayName;
+}
+
+var c = new Child(&quot;child&quot;);
+var p = new Parent(&quot;parent&quot;, c);
+
+p.sayChildName();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I wanted to use ES6 classes for React because React’s way of creating a component functionally (&lt;code&gt;var MyComponent = React.createClass({...})&lt;/code&gt;) uses object notation, which I find very frustrating to work with, and not having to deal with dependency injection (a la Angular) makes classes feel more lightweight.&lt;/p&gt;
+
+&lt;p&gt;From the tutorial, creating a component functionally is like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var CommentForm = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+    var author = React.findDOMNode(this.refs.author).value.trim();
+    var text = React.findDOMNode(this.refs.text).value.trim();
+    if (!text || !author) {
+      return;
+    }
+    this.props.onCommentSubmit({author: author, text: text});
+    React.findDOMNode(this.refs.author).value = '';
+    React.findDOMNode(this.refs.text).value = '';
+  },
+  render: function() {
+    return (
+      &amp;lt;form className=&quot;commentForm&quot; onSubmit={this.handleSubmit}&amp;gt;
+        &amp;lt;input type=&quot;text&quot; placeholder=&quot;Your name&quot; ref=&quot;author&quot; /&amp;gt;
+        &amp;lt;input type=&quot;text&quot; placeholder=&quot;Say something...&quot; ref=&quot;text&quot; /&amp;gt;
+        &amp;lt;input type=&quot;submit&quot; value=&quot;Post&quot; /&amp;gt;
+      &amp;lt;/form&amp;gt;
+    );
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that in the &lt;code&gt;render&lt;/code&gt; method, the &lt;code&gt;onSubmit&lt;/code&gt; event handler in the form is set to &lt;code&gt;this.handleSubmit&lt;/code&gt;. This works because React &lt;a href=&quot;https://facebook.github.io/react/docs/interactivity-and-dynamic-uis.html#under-the-hood-autobinding-and-event-delegation&quot;&gt;autobinds&lt;/a&gt; &lt;code&gt;this&lt;/code&gt; to the component instance when using &lt;code&gt;React.createClass&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The equivalent using an ES6 class is this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;export default class CommentForm extends React.Component {
+	render() {
+		let handleSubmit = e =&amp;gt; {
+			e.preventDefault();
+			var author = React.findDOMNode(this.refs.author).value.trim();
+			var text = React.findDOMNode(this.refs.text).value.trim();
+			if (!text || !author) {
+				return;
+			}
+			this.props.onCommentSubmit({
+				author: author,
+				text: text
+			});
+			React.findDOMNode(this.refs.author).value = '';
+			React.findDOMNode(this.refs.text).value = '';
+		};
+
+		return (
+			&amp;lt;form className=&quot;commentForm&quot; onSubmit={handleSubmit}&amp;gt;
+				&amp;lt;input type=&quot;text&quot; placeholder=&quot;Your name&quot; ref=&quot;author&quot; /&amp;gt;
+				&amp;lt;input type=&quot;text&quot; placeholder=&quot;Say something...&quot; ref=&quot;text&quot; /&amp;gt;
+				&amp;lt;input type=&quot;submit&quot; value=&quot;Post&quot; /&amp;gt;
+			&amp;lt;/form&amp;gt;
+		);
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;handleSubmit&lt;/code&gt; has changed from being a function on the class to an inline function within the &lt;code&gt;render()&lt;/code&gt; method. This is because the &lt;code&gt;onSubmit&lt;/code&gt; handler is executed in a different context, so if &lt;code&gt;handleSubmit&lt;/code&gt; were a function directly on the &lt;code&gt;CommentForm&lt;/code&gt; class &lt;code&gt;this&lt;/code&gt; would have a different value and the call would fail. React’s ES6 class support doesn’t support autobinding &lt;code&gt;this&lt;/code&gt; so this is a workaround for idiomatic ES6.&lt;/p&gt;
+
+&lt;p&gt;Making the function an inline value is equivalent to doing the following to the above parent/child TypeScript example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;class Child {
+	constructor(private name) {
+		this.sayName = () =&amp;gt; {
+			console.log(this.name);
+		};
+	}
+
+	sayName;
+}
+
+class Parent {
+	sayChildName;
+
+	constructor(private name, private child) {
+		this.sayChildName = child.sayName;
+	}
+}
+
+var c = new Child(&quot;child&quot;);
+var p = new Parent(&quot;parent&quot;, c);
+
+p.sayChildName()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This now outputs &lt;code&gt;&quot;child&quot;&lt;/code&gt; as originally expected.&lt;/p&gt;
+
+&lt;p&gt;Another gotcha I found with using ES6 classes for React components is setting the initial &lt;code&gt;state&lt;/code&gt; value. &lt;code&gt;this.state&lt;/code&gt; is what React uses for one-way binding to the view. The way to set the initial value using the &lt;code&gt;React.createClass&lt;/code&gt; syntax is with a &lt;code&gt;getInitialState&lt;/code&gt; function:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var CommentBox = React.createClass({
+	getInitialState: function() {
+		return {data: []};
+	},
+	// ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Trying to do this with ES6 classes doesn’t work. &lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;export default class CommentBox extends React.Component {
+	getInitialState() {
+		return { data: []};
+	}
+	//...
+
+Warning: getInitialState was defined on CommentBox, a plain JavaScript class. This is only supported for classes created using React.createClass. Did you mean to define a state property instead?
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The correct way is to set &lt;code&gt;this.state&lt;/code&gt; from the constructor:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;export default class CommentBox extends React.Component {
+	constructor() {
+		super();
+
+		this.state = { data: []};
+	}
+	//...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note that &lt;code&gt;this.state&lt;/code&gt; is only set directly like this &lt;em&gt;in the constructor&lt;/em&gt;. Updating the state subsequently has to happen using &lt;code&gt;this.setState&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$.get('/comments').then(data =&amp;gt; this.setState({
+	data: data
+}));
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;But&lt;/strong&gt; you can’t use &lt;code&gt;this.setState&lt;/code&gt; in the constructor, and setting the state &lt;em&gt;outside&lt;/em&gt; of the constructor has to be via &lt;code&gt;this.setState&lt;/code&gt;. Important to remember.&lt;/p&gt;
+
+&lt;h2 id=&quot;one-way-binding&quot;&gt;One-way binding&lt;/h2&gt;
+
+&lt;p&gt;By default, Angular supports two-way binding between a view and its controller. It does that by automatically setting up watchers on binding expressions in the view. This works very well most of the time, but when it doesn’t everything suddenly becomes very difficult to work with. The view is also mutating the state of the controller, leading to possible issues when debugging or tracing the application.&lt;/p&gt;
+
+&lt;p&gt;React also has two-way binding, but &lt;a href=&quot;https://facebook.github.io/react/docs/two-way-binding-helpers.html&quot;&gt;it’s opt-in&lt;/a&gt; with some quite explicit syntax. The default is one-way binding, from &lt;code&gt;this.state&lt;/code&gt; to the view. The view pushes data back to the component using DOM events:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;export default class TestBinding extends React.Component {
+	render() {
+		let testChanged = e =&amp;gt; {
+			console.log(React.findDOMNode(this.refs.test).value);
+		};
+
+		return &amp;lt;input type=&quot;text&quot; ref=&quot;test&quot; onChange={testChanged} /&amp;gt;;
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;the-error-messages-are-superb&quot;&gt;The error messages are superb&lt;/h2&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/2DM7t7Q.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;resources-amp-further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://facebook.github.io/react/docs/tutorial.html&quot;&gt;React tutorial&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://youtu.be/z5e7kWSHWTg&quot;&gt;React.js Conf 2015 - Hype!&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://youtu.be/I7IdS-PbEgI&quot;&gt;React.js Conf 2015 - Immutable Data and React&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Fri, 28 Aug 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/react-early-thoughts.html</link>
+				<guid isPermaLink="true">http://bendetat.com/react-early-thoughts.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Bundling and deploying Azure WebJobs in a Web App with Octopus and Nimbus</title>
+				<description>&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 20em&quot;&gt;
+	&quot;Nimbus is a .NET client library to add an easy to develop against experience against the Azure Service Bus or the Windows Service Bus.&quot;
+&lt;/aside&gt;
+
+&lt;p&gt;I’ve been working on a site hosted in Azure. Up until a few days ago it consisted of a single, monolithic web app, but I had been implementing it against &lt;a href=&quot;http://nimbusapi.github.io/&quot;&gt;Nimbus&lt;/a&gt;’s &lt;a href=&quot;https://www.nuget.org/packages/Nimbus.MessageContracts/&quot;&gt;message&lt;/a&gt; and &lt;a href=&quot;https://www.nuget.org/packages/Nimbus.InfrastructureContracts/&quot;&gt;infrastructure&lt;/a&gt; contract libraries, with a simple in-process bus implementation. This paid off because I reached a point where I needed to offload some asynchronous work to the service layer while keeping things simple in the site layer, and converting the entire application to use Service Bus took a few hours all up.&lt;/p&gt;
+
+&lt;p&gt;That left me with needing somewhere to host the service layer. Load and scalability isn’t an issue so I went with a &lt;a href=&quot;https://azure.microsoft.com/en-us/documentation/articles/web-sites-create-web-jobs/&quot;&gt;WebJob&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;WebJobs are very lightweight and easy to create. They run as part of an Azure web app, so they can be scaled up and out as far as the web app can. This could be a limiting factor in some scenarios. Fortunately a web job that wraps a Nimbus/Service Bus could easily be converted to a different, heavier-weight deployment type, such as a Windows service for use in a VM, a worker role or on-premises.&lt;/p&gt;
+
+&lt;p&gt;Getting a WebJob deployed is fairly easy, but everything has to be correct or the job just won’t run, and there isn’t any support for diagnosing why. As far as Azure is concerned it just doesn’t exist.&lt;/p&gt;
+
+&lt;p&gt;I’m creating a continuous WebJob that uses Nimbus for messaging. The Azure WebJobs API has its own methods for registering endpoints, and for creating triggered or scheduled jobs. Scott Hanselman has a great blog post explaining &lt;a href=&quot;http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx&quot;&gt;how to use the API in this way&lt;/a&gt;. The WebJob will basically be a container for a Nimbus message pump.&lt;/p&gt;
+
+&lt;h2 id=&quot;creating-the-webjob-executable&quot;&gt;Creating the WebJob executable&lt;/h2&gt;
+
+&lt;aside class=&quot;pull-left well&quot; style=&quot;width:15em&quot;&gt;
+	The .exe name is important. &lt;code&gt;MyApplicationWorker.exe&lt;/code&gt; is ok but &lt;code&gt;MyApplication.Worker.exe&lt;/code&gt; is not.
+&lt;/aside&gt;
+
+&lt;p&gt;For use in a C#/.NET application, WebJobs are created as console applications. The name of the generated executable can’t have any punctuation - &lt;code&gt;MyApplicationWorker.exe&lt;/code&gt; is ok but &lt;code&gt;MyApplication.Worker.exe&lt;/code&gt; isn’t. You can still use punctuation in the project name and default namespace, just set the “Assembly name” in the project properties to something valid.&lt;/p&gt;
+
+&lt;p&gt;The application references the &lt;code&gt;Microsoft.Azure.WebJobs&lt;/code&gt; NuGet package, and the &lt;code&gt;Main&lt;/code&gt; method is trivial:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;private static void Main(string[] args)
+{
+    var container = IoC.LetThereBeIoC();
+
+    var connectionString = ConfigurationManager.AppSettings[&quot;WebJobStorageConnectionString&quot;];
+    var configuration = new JobHostConfiguration(connectionString);
+    var host = new JobHost(configuration);
+
+    host.RunAndBlock();
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first line creates the IoC container, which includes all the Nimbus setup. The Nimbus bus then just sits in the background while the app is running, handling messages as they appear on the bus.&lt;/p&gt;
+
+&lt;p&gt;The middle section sets up the WebJob host. It requires a connection string to an Azure Table Storage instance. I tried this with the local storage emulator for testing but it requires an actual instance in Azure - the WebJobs API apparently requires features that are not available in the local storage emulator.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;host.RunAndBlock()&lt;/code&gt; then effectively puts the application into an infinite loop and lets it sit around to handle messages.&lt;/p&gt;
+
+&lt;p&gt;When starting the application locally it complains that “No functions found”. This is because WebJobs have their own message handling model based on Service Bus, by decorating parameters on static methods. Since I’m using Nimbus to handle the messaging via Service Bus there are no WebJob-specific handlers needed.&lt;/p&gt;
+
+&lt;h2 id=&quot;deploying&quot;&gt;Deploying&lt;/h2&gt;
+
+&lt;p&gt;Because WebJobs are part of a web site, they don’t need their own deployment pipeline. Instead the entire job application is copied into a &lt;code&gt;jobs&lt;/code&gt; folder within the web site:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;MySite\&lt;/code&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code&gt;app_data\&lt;/code&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;code&gt;jobs\&lt;/code&gt;
+            &lt;ul&gt;
+              &lt;li&gt;&lt;code&gt;continuous\&lt;/code&gt;
+                &lt;ul&gt;
+                  &lt;li&gt;&lt;code&gt;MyWorkerJob\&lt;/code&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+              &lt;/li&gt;
+            &lt;/ul&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The &lt;code&gt;MyWorkerJob&lt;/code&gt; has to be &lt;em&gt;exactly the same&lt;/em&gt; as the &lt;code&gt;.exe&lt;/code&gt; name. So &lt;code&gt;MyWorkerJob.exe&lt;/code&gt; needs to be deployed to &lt;code&gt;app_data/jobs/continuous/MyWorkerJob&lt;/code&gt;. Jobs can be scheduled as &lt;code&gt;continuous&lt;/code&gt; or &lt;code&gt;triggered&lt;/code&gt;. The Nimbus work needs to run continuously so it gets deployed to &lt;code&gt;App_Data\jobs\continuous&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;For Octopack to include the jobs, the job path just needs to be added to the project’s &lt;code&gt;.nuspec&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;?xml version=&quot;1.0&quot;?&amp;gt;
+&amp;lt;package xmlns=&quot;http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd&quot;&amp;gt;
+	...
+	&amp;lt;files&amp;gt;
+		...
+		&amp;lt;file src=&quot;..\My.Worker\bin\release\**&quot; target=&quot;app_data\jobs\continuous\MyWorker&quot; /&amp;gt;
+	&amp;lt;/files&amp;gt;
+&amp;lt;/package&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The solution’s build order needs to have the job’s built before the web site (so the job’s artifacts are available when building the site). You can do that by right-clicking the project, selecting ‘Project Build Order’, and adding the WebJob as a dependency of the web site.&lt;/p&gt;
+
+&lt;p&gt;That’s pretty much all there is to it. When the solution is built and packed, the WebJob will be included in the &lt;code&gt;.nupkg&lt;/code&gt; file, and Octopus will automatically patch the WebJob’s &lt;code&gt;App.config&lt;/code&gt; when configuring the site. It’s also a good idea to logging using something like &lt;a href=&quot;http://getseq.net/&quot;&gt;Seq&lt;/a&gt; to see the WebJob start up with the site.&lt;/p&gt;
+
+&lt;h2 id=&quot;resources-amp-further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx&quot;&gt;Introducing Windows Azure WebJobs - Scott Hanselman&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.troyhunt.com/2015/01/azure-webjobs-are-awesome-and-you.html&quot;&gt;Azure WebJobs are awesome and you should start using them right now! - Troy Hunt&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://azure.microsoft.com/en-us/documentation/articles/web-sites-create-web-jobs/&quot;&gt;Run Background tasks with WebJobs - Azure&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://robdmoore.id.au/blog/2014/07/22/my-stance-on-azure-worker-roles/&quot;&gt;My stance on Azure Worker Roles - Rob Moore&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://blog.amitapple.com/post/74215124623/deploy-azure-webjobs/#.VbjV2W6qpBf&quot;&gt;How to deploy Azure WebJobs - Amit Apple&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://withouttheloop.com/articles/2015-06-23-deploying-custom-services-as-azure-webjobs/&quot;&gt;Deploying custom services as Azure Webjobs - Liam McLennan&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</link>
+				<guid isPermaLink="true">http://bendetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Build pipeline for React</title>
+				<description>&lt;p&gt;I’m going to eshew Bower and just use NPM as the package manager. I’ve already got &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Node and NPM installed&lt;/a&gt;. The example site I’m creating is &lt;code&gt;survey-thing&lt;/code&gt; - a simple thing for &lt;a href=&quot;https://github.com/bendetat/survey-thing&quot;&gt;creating surveys&lt;/a&gt;. I also have a &lt;a href=&quot;https://github.com/bendetat/stub-projects/tree/master/react-with-gulp-and-bootstrap&quot;&gt;stub package&lt;/a&gt; which just includes a script for setting up the environment and a simple landing page.&lt;/p&gt;
+
+&lt;p&gt;I’m going to use all the shinies - &lt;a href=&quot;http://browserify.org/&quot;&gt;Browserify&lt;/a&gt; for CommonJS modules and &lt;a href=&quot;https://facebook.github.io/react/docs/jsx-in-depth.html&quot;&gt;JSX&lt;/a&gt; instead of the seperate &lt;code&gt;.js&lt;/code&gt;/&lt;code&gt;.html&lt;/code&gt; structure of a typical AngularJS application, using &lt;a href=&quot;https://babeljs.io/&quot;&gt;Babel&lt;/a&gt; for ES6 features and &lt;a href=&quot;http://sass-lang.com/&quot;&gt;SASS&lt;/a&gt; for stylesheet preprocessing.&lt;/p&gt;
+
+&lt;h2 id=&quot;primer-nancy-as-a-static-server&quot;&gt;Primer: Nancy as a static server&lt;/h2&gt;
+
+&lt;p&gt;The site will be hosted in a simple &lt;a href=&quot;http://nancyfx.org/&quot;&gt;Nancy app&lt;/a&gt; so the built React application will be output to &lt;code&gt;src\SurveyThing\app&lt;/code&gt;. Host this in Nancy with a static convention - this example is for an ASP.NET site using OWIN.&lt;/p&gt;
+
+&lt;p&gt;Install some NuGet packages (&lt;code&gt;Microsoft.Owin&lt;/code&gt;, &lt;code&gt;Microsoft.Owin.Host.SystemWeb&lt;/code&gt;, &lt;code&gt;Nancy&lt;/code&gt; and &lt;code&gt;Nancy.Owin&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;Add these values to the &lt;code&gt;web.config&lt;/code&gt; file, within the &lt;code&gt;configuration&lt;/code&gt; element:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;appSettings&amp;gt;
+	&amp;lt;add key=&quot;owin:HandleAllRequests&quot; value=&quot;true&quot; /&amp;gt;
+&amp;lt;/appSettings&amp;gt;
+&amp;lt;system.webServer&amp;gt;
+	&amp;lt;modules runAllManagedModulesForAllRequests=&quot;true&quot;/&amp;gt;
+&amp;lt;/system.webServer&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Add &lt;code&gt;Startup&lt;/code&gt; and &lt;code&gt;Bootstrapper&lt;/code&gt; classes:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class Startup
+{
+    public void Configuration(IAppBuilder app)
+    {
+        app
+            .UseNancy(new NancyOptions
+            {
+                Bootstrapper = new Bootstrapper()
+            })
+            .UseStageMarker(PipelineStage.MapHandler);
+    }
+}
+
+public class Bootstrapper : DefaultNancyBootstrapper
+{
+    protected override void ConfigureConventions(NancyConventions nancyConventions)
+    {
+        Conventions.StaticContentsConventions.Clear();
+        Conventions.StaticContentsConventions.AddDirectory(&quot;/&quot;, &quot;app&quot;);
+
+        base.ConfigureConventions(nancyConventions);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you create &lt;code&gt;\app\test.html&lt;/code&gt; inside the Nancy site’s root it should be served from &lt;code&gt;http://localhost:PORT/test.html&lt;/code&gt;. To serve &lt;code&gt;\app\index.html&lt;/code&gt; when requesting &lt;code&gt;http://localhost:PORT&lt;/code&gt; a static route needs to added:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;public class StaticModule : NancyModule
+{
+    public StaticModule()
+    {
+        Get[&quot;/&quot;] = _ =&amp;gt; Response.AsFile(&quot;app/index.html&quot;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;set-up-gulp&quot;&gt;Set up Gulp&lt;/h2&gt;
+
+&lt;p&gt;I want to use:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;gulp&lt;/code&gt; for the build tool&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;sass&lt;/code&gt; for CSS generation&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;gulp-pleeease&lt;/code&gt; to do &lt;a href=&quot;http://pleeease.io/&quot;&gt;nice things with CSS&lt;/a&gt; including minification&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;babelify&lt;/code&gt; for ES6 and JSX support&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;browserify&lt;/code&gt; for a CommonJs module system&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;vinyl-source-stream&lt;/code&gt; reduces the reliance on gulp plugins (so we can use &lt;code&gt;babelify&lt;/code&gt; instead of &lt;code&gt;gulp-babel&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;react&lt;/code&gt; obviously ;-)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;gulp-streamify&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;uglify&lt;/code&gt; minify JS (used later)&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code&gt;yargs&lt;/code&gt; get command line args (used later)&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code&gt;  npm install --save gulp
+  npm install --save gulp-concat
+  npm install --save gulp-sass
+  npm install --save gulp-pleeease
+  npm install --save babelify
+  npm install --save browserify
+  npm install --save vinyl-source-stream
+  npm install --save react
+  npm install --save gulp-streamify
+  npm install --save uglify
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;There’s a fair bit happening in &lt;a href=&quot;https://github.com/bendetat/survey-thing/blob/master/gulpfile.js&quot;&gt;the &lt;code&gt;gulpfile.js&lt;/code&gt; script&lt;/a&gt; but here are some highlights.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;'code'&lt;/code&gt; step uses browserify to set up the CommonJS module system and uses &lt;code&gt;app/layout/index.jsx&lt;/code&gt; as the entry point to the application. Babel is used to take advantage of ES6 and the script is minified.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt; gulp.task('code', function(){
+	browserify({
+		entries: 'app/layout/layout.jsx',
+		extensions: ['.jsx'],
+		debug: true
+	})
+		.transform(babelify)
+		.bundle()
+		.pipe(source('site.js'))
+		.pipe(gulp.dest(destinationPath));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;CSS preprocessing is done using SASS. The entry point is &lt;code&gt;app/site.scss&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('css', function(){
+	gulp
+		.src([
+			'app/site.scss',
+			'app/**/*.css'
+		])
+		.pipe(sass().on('error', sass.logError))
+		.pipe(pleeease())
+		.pipe(concat('site.css'))
+		.pipe(gulp.dest(destinationPath));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The template HTML file is copied verbatim to the destination path.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('html', function(){
+	gulp
+		.src('app/index.html')
+		.pipe(gulp.dest(destinationPath));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The default gulp task runs all the main tasks (&lt;code&gt;'vendor'&lt;/code&gt; is not shown, it just bundles up vendor CSS and JS into &lt;code&gt;vendor.css&lt;/code&gt; and &lt;code&gt;vendor.js&lt;/code&gt; respectively).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('default', ['code', 'css', 'html', 'vendor']);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;'watch'&lt;/code&gt; task splits up the workload to keep live rebuilds snappy:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gulp.task('watch', ['default'], function() {
+	gulp.watch(
+		['app/**/*.jsx'], 
+		['code']);
+	gulp.watch(
+		['app/**/*.css', 'app/**/*.scss'],
+		['css']);
+	gulp.watch(
+		['app/index.html'],
+		['html']);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;react-app-structure&quot;&gt;React app structure&lt;/h2&gt;
+
+&lt;p&gt;The structure is pretty trivial at this point:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;app/
+	index.html
+	site.scss
+	/layout
+		layout.jsx
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;index.html&lt;/code&gt; references the stylesheets and scripts, and includes a &lt;code&gt;div&lt;/code&gt; with an ID that will be used by the React app:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&amp;lt;html&amp;gt;
+	&amp;lt;head&amp;gt;
+		&amp;lt;title&amp;gt;Survey Thing&amp;lt;/title&amp;gt;
+		&amp;lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;site.css&quot;/&amp;gt;
+		&amp;lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;vendor.css&quot;/&amp;gt;
+	&amp;lt;/head&amp;gt;
+	&amp;lt;body&amp;gt;
+		&amp;lt;div id=&quot;content&quot;&amp;gt;&amp;lt;/div&amp;gt;
+
+		&amp;lt;script src=&quot;site.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+		&amp;lt;script src=&quot;vendor.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
+	&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In &lt;code&gt;layout.jsx&lt;/code&gt;, ‘Hello world’ is rendered into the &lt;code&gt;div&lt;/code&gt; using inline markup:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;import React from 'react';
+
+React.render(
+	&amp;lt;h1&amp;gt;Hello, world!&amp;lt;/h1&amp;gt;,
+	document.getElementById(&quot;content&quot;)
+);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Running &lt;code&gt;gulp&lt;/code&gt; will run the &lt;code&gt;'default'&lt;/code&gt; task, which should build the app and write the artifacts to &lt;code&gt;\src\SurveyThing\app&lt;/code&gt;. Running &lt;code&gt;gulp watch&lt;/code&gt; will run the &lt;code&gt;'watch'&lt;/code&gt; task and rebuild whenever the monitored files change.&lt;/p&gt;
+
+&lt;p&gt;If everything works, we should have a happy ‘hello world’ page. I made mine pink &lt;strike&gt;because pink is cool&lt;/strike&gt; to test SASS:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/rMdt9t7.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;minifying-the-sitejs-file&quot;&gt;Minifying the &lt;code&gt;site.js&lt;/code&gt; file&lt;/h2&gt;
+
+&lt;p&gt;Without minification the &lt;code&gt;site.js&lt;/code&gt; file is huge (1.5M). To conditionally minify the script I check for a &lt;code&gt;--release&lt;/code&gt; argument:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var yargs = require('yargs');
+
+var buildRelease = yargs.argv.release || false;
+
+gulp.task('code', function(){
+	var pipeline = browserify({
+		entries: 'app/layout/layout.jsx',
+		extensions: ['.jsx'],
+		debug: true
+	})
+		.transform(babelify)
+		.bundle()
+		.pipe(source('site.js'));
+
+	if (buildRelease) {
+		pipeline.pipe(streamify(uglify()));
+	}
+
+	pipeline
+		.pipe(gulp.dest(destinationPath));
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now running &lt;code&gt;gulp --release&lt;/code&gt; results in a much more managable 185k file.&lt;/p&gt;
+
+&lt;h2 id=&quot;fin&quot;&gt;fin&lt;/h2&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://github.com/bendetat/survey-thing&quot;&gt;survey-thing&lt;/a&gt; repo for updates and lols.&lt;/p&gt;
+
+&lt;h2 id=&quot;resources-amp-further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/pawelpabich/random-reactjs-hacks&quot;&gt;pawelpabich/random-reactjs-hacks - Pawel Pabich&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/stub-projects/tree/master/react-with-gulp-and-bootstrap&quot;&gt;Stub projects - React with Gulp and Bootstrap&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/build-pipeline-for-react.html</link>
+				<guid isPermaLink="true">http://bendetat.com/build-pipeline-for-react.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Ubuntu Desktop in AWS EC2</title>
+				<description>&lt;p&gt;This turned out to be much harder than I had hoped. Creating and connecting to a Windows Server VM is trivial in Azure but I thought I would try creating an Ubuntu VM with a desktop in AWS for the exercise (and hopefully in less time than it would take to download an Ubuntu ISO and set up a local VM - I failed). The main time sink was messing around with the SSH keys, which is admittedly a good thing because it’s got to be, excuse me, pretty damn secure. The other delay was in properly configuring X-Windows to show the Ubuntu desktop. Again this is probably a good thing because an OOTB Ubuntu instance is quite lean and most server-y things can be done via SSH rather in a GUI. That’s not what I was intending for this exercise though.&lt;/p&gt;
+
+&lt;p&gt;I won’t go into &lt;a href=&quot;http://aws.amazon.com/&quot;&gt;creating an AWS account&lt;/a&gt; but wow, that UI. I thought Azure was arcane.&lt;/p&gt;
+
+&lt;p&gt;To create a VM you find a section called ‘Create instance’, which lets you press a button called ‘Launch Instance’, which launches a virtual server, which is known as an Amazon EC2 instance. In Azure this is a big blue plus sign.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/SOJx4Np.png&quot; alt=&quot;pressss meeeee&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now select your VM image. I picked “Ubuntu Server 14.04 LTS (HVM), SSD Volume Type”. It’s free! For eligible! I selected the ‘t2.micro’ instance type, which is also free. This is exactly how much I want to spend. I left everything else as default and clicked ‘Review and Launch’, mainly because I didn’t realise there were other things to configure.&lt;/p&gt;
+
+&lt;p&gt;By default a new security group will be created when launching a new instance, named something like &lt;code&gt;launch-wizard-1&lt;/code&gt;. This is ‘open to the world’, meaning that any IP address could connect to the instance if it has the proper credentials. A security group is basically a set of firewall rules. The only port open by default is 22 for SSH, which requires a private key. Because I’m using SSH tunnelling to forward the VNC port I don’t actually have to change the security group but you could limit port 22 to your static IP if you’ve got one.&lt;/p&gt;
+
+&lt;p&gt;Now hit Launch. The next step lets you create a public &amp;amp; private key pair. Select ‘Create a new key pair’ and give it a nice name. Press Download Key Pair to download the private key then continue. If you hit ‘View instances’ you can see the new VM get provisioned. It’s not that exciting.&lt;/p&gt;
+
+&lt;p&gt;I followed &lt;a href=&quot;https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html?console_help=true&quot;&gt;these instructions&lt;/a&gt; to use PuTTY to SSH into the VM but you could just use &lt;code&gt;ssh&lt;/code&gt; directly. I ended up needing to use SSH directly later on to create an SSH tunnel anyway.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -i &amp;lt;KEYFILE&amp;gt;.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The value for &lt;code&gt;-i&lt;/code&gt; is the path to the .pem file downloaded previously.&lt;/p&gt;
+
+&lt;p&gt;I followed &lt;a href=&quot;http://xmodulo.com/how-to-set-up-ubuntu-desktop-vm-on-amazon-ec2.html&quot;&gt;these instructions&lt;/a&gt; to install the Ubuntu desktop and a TightVNC server, but I ended up with the grey screen of an empty X-Windows session. I needed some &lt;a href=&quot;http://askubuntu.com/a/475036/29199&quot;&gt;extra work&lt;/a&gt; to get it going. You should just do the following instead ;)&lt;/p&gt;
+
+&lt;p&gt;Update &lt;code&gt;apt-get&lt;/code&gt; and install lots of things:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo apt-get update
+sudo apt-get intall ubuntu-desktop
+sudo apt-get intall tightvncserver
+sudo apt-get install gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Launch VNC server to create an initial configuration file:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;vncserver :1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Open the configuration file in VIM:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;vim ~/.vnc/xstartup
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Edit the configuration file to look like this, using &lt;code&gt;i&lt;/code&gt; to enter insert mode, then &lt;code&gt;&amp;lt;escape&amp;gt;&lt;/code&gt; &lt;code&gt;:wq&lt;/code&gt; to save and exit:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;#!/bin/sh
+
+export XKL_XMODMAP_DISABLE=1
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+[ -x /etc/vnc/xstartup ] &amp;amp;&amp;amp; exec /etc/vnc/xstartup
+[ -r $HOME/.Xresources ] &amp;amp;&amp;amp; xrdb $HOME/.Xresources
+xsetroot -solid grey
+
+vncconfig -iconic &amp;amp;
+gnome-panel &amp;amp;
+gnome-settings-daemon &amp;amp;
+metacity &amp;amp;
+nautilus &amp;amp;
+gnome-terminal &amp;amp;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Kill and restart the VNC server to apply the settings. This needs to happen each time the VNC / X-Windows configuration is updated.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;vncserver -kill :1
+vncserver :1
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After setting up the VNC server you need to create an SSH tunnel. Open a local console that has &lt;code&gt;ssh.exe&lt;/code&gt; in the path (Cmder didn’t have it but vanilla PowerShell did). The command to run is&lt;sup id=&quot;fnref:how-to-specify-a-private-key-in-ssh&quot;&gt;&lt;a href=&quot;#fn:how-to-specify-a-private-key-in-ssh&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -L 5902/127.0.0.1/5901 -i &amp;lt;KEYFILE&amp;gt;.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;-L&lt;/code&gt; sets up the tunnel, from port &lt;code&gt;5902&lt;/code&gt; on &lt;code&gt;127.0.0.1&lt;/code&gt; (localhost) to port &lt;code&gt;5901&lt;/code&gt; on the remote server. Note that I’m setting my local endpoint to port 5902 - 5901 didn’t work for me.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/iYRRB3k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If you’re on Windows, &lt;a href=&quot;http://www.tightvnc.com/download.php&quot;&gt;download Tight-VNC&lt;/a&gt; instead of using apt-get to install VNC. Connect to &lt;code&gt;127.0.0.1::5902&lt;/code&gt; and use the password you gave above. You should now see your new shiny Ubuntu desktop:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/m7PRgMm.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If you see an empty grey window like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/crHgZFM.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;, or if parts of the Ubuntu desktop seem to be missing, you will need to work on the VNC / X-Windows configuration. Make sure you’ve edited the &lt;code&gt;xstartup&lt;/code&gt; file for the user that the tunnel is logged in as for a start.&lt;/p&gt;
+
+&lt;p&gt;Quick note: to delete an instance you just need to terminate it. It doesn’t disappear from the list immediately but apparently it will. &lt;em&gt;refresh&lt;/em&gt; nope, still there.&lt;/p&gt;
+
+&lt;div class=&quot;footnotes&quot;&gt;
+  &lt;ol&gt;
+    &lt;li id=&quot;fn:how-to-specify-a-private-key-in-ssh&quot;&gt;
+      &lt;p&gt;http://xmodulo.com/how-to-specify-private-key-file-in-ssh.html &lt;a href=&quot;#fnref:how-to-specify-a-private-key-in-ssh&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/div&gt;
+</description>
+				<pubDate>Thu, 30 Jul 2015 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/ubuntu-desktop-in-ec2.html</link>
+				<guid isPermaLink="true">http://bendetat.com/ubuntu-desktop-in-ec2.html</guid>
+			</item>
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
@@ -14,16 +1374,16 @@
 &lt;p&gt;Say you’ve got this directive (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/2/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;thing&#39;, function() {
+    .module('app', [])
+    .directive('thing', function() {
         return {
-            restrict: &#39;E&#39;,
+            restrict: 'E',
             replace: true,
-            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
+            template: '&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;',
             controller: function() {
-                this.name = &#39;&#39;;
+                this.name = '';
             },
-            controllerAs: &#39;vm&#39;
+            controllerAs: 'vm'
         };
     });
 &lt;/code&gt;&lt;/pre&gt;
@@ -53,27 +1413,27 @@
 &lt;p&gt;In fact, if you have different directives with the same &lt;code&gt;controllerAs&lt;/code&gt; value, you can see that the &lt;code&gt;vm&lt;/code&gt; instance for each directive is set to the last directive’s controller (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/3/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;firstDirective&#39;, function() {
+    .module('app', [])
+    .directive('firstDirective', function() {
         return {
-            restrict: &#39;E&#39;,
+            restrict: 'E',
             replace: true,
-            template: &#39;&amp;lt;div&amp;gt;first directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
+            template: '&amp;lt;div&amp;gt;first directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;',
             controller: function() {
-                this.foo = &#39;Hi!&#39;;
+                this.foo = 'Hi!';
             },
-            controllerAs: &#39;vm&#39;
+            controllerAs: 'vm'
         };
     })
-    .directive(&#39;secondDirective&#39;, function(){
+    .directive('secondDirective', function(){
         return {
-            restrict: &#39;E&#39;,
+            restrict: 'E',
             replace: true,
-            template: &#39;&amp;lt;div&amp;gt;second directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
+            template: '&amp;lt;div&amp;gt;second directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;',
             controller: function() {
-                this.bar = &#39;There?&#39;;
+                this.bar = 'There?';
             },
-            controllerAs: &#39;vm&#39;
+            controllerAs: 'vm'
         };
     });
 
@@ -85,21 +1445,21 @@
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/9y6Rg6k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;If you change the name of the &lt;code&gt;controllerAs&lt;/code&gt; alias - say to &lt;code&gt;firstDirectiveVm&lt;/code&gt; and &lt;code&gt;secondDirectiveVm&lt;/code&gt; - then the problem goes away, so Angular JS by default is setting &lt;code&gt;vm&lt;/code&gt; globally each time a directive uses &lt;code&gt;controllerAs: &#39;vm&#39;&lt;/code&gt;, and going down the page, meaning the last &lt;code&gt;vm&lt;/code&gt; wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s &lt;code&gt;controllerAs&lt;/code&gt; value won’t work for multiple directives of the same type.&lt;/p&gt;
+&lt;p&gt;If you change the name of the &lt;code&gt;controllerAs&lt;/code&gt; alias - say to &lt;code&gt;firstDirectiveVm&lt;/code&gt; and &lt;code&gt;secondDirectiveVm&lt;/code&gt; - then the problem goes away, so Angular JS by default is setting &lt;code&gt;vm&lt;/code&gt; globally each time a directive uses &lt;code&gt;controllerAs: 'vm'&lt;/code&gt;, and going down the page, meaning the last &lt;code&gt;vm&lt;/code&gt; wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s &lt;code&gt;controllerAs&lt;/code&gt; value won’t work for multiple directives of the same type.&lt;/p&gt;
 
 &lt;p&gt;The solution is to set &lt;code&gt;scope&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in the directive declaration (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/4/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;thing&#39;, function() {
+    .module('app', [])
+    .directive('thing', function() {
         return {
-            restrict: &#39;E&#39;,
+            restrict: 'E',
             replace: true,
-            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
+            template: '&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;',
             controller: function() {
-                this.name = &#39;&#39;;
+                this.name = '';
             },
-            controllerAs: &#39;vm&#39;,
+            controllerAs: 'vm',
             scope: true
         };
     });
@@ -136,7 +1496,7 @@
 
 &lt;p&gt;I’ve started out with an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html&quot;&gt;Azure VM configured with TeamCity 9&lt;/a&gt;. I first installed GitVersion on my build agent using &lt;a href=&quot;https://chocolatey.org/&quot;&gt;Chocolatey&lt;/a&gt;. Install Chocolatey using an elevated Powershell console:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;iex ((new-object net.webclient).DownloadString(&#39;https://chocolatey.org/install.ps1&#39;))
+&lt;pre&gt;&lt;code&gt;iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Then install GitVersion:&lt;/p&gt;
@@ -281,6 +1641,7 @@
 &lt;ol&gt;
   &lt;li&gt;In &lt;em&gt;Project Settings&lt;/em&gt; select &lt;em&gt;VCS Roots&lt;/em&gt;&lt;/li&gt;
   &lt;li&gt;Select the single VCS root created above&lt;/li&gt;
+  &lt;li&gt;Make sure the advanced options are visible&lt;/li&gt;
   &lt;li&gt;In &lt;em&gt;Branch specification&lt;/em&gt;, enter &lt;code&gt;+:refs/heads/*&lt;/code&gt; (&lt;a href=&quot;https://confluence.jetbrains.com/display/TCD8/Working+with+Feature+Branches&quot;&gt;Working with Feature Branches&lt;/a&gt;)&lt;/li&gt;
   &lt;li&gt;Check &lt;em&gt;Enable to use tags in the branch specification&lt;/em&gt;&lt;/li&gt;
   &lt;li&gt;Save&lt;/li&gt;
@@ -333,7 +1694,7 @@ git push
 	// 1. By design, a class built for object initialization syntax has to have public setters,
 	// meaning that the resulting object is mutable.
 
-	// 2. Because a constructor isn&#39;t used, there is no way for business rules or domain
+	// 2. Because a constructor isn't used, there is no way for business rules or domain
 	// invariants to be enforced. It is trivial to miss a value or set a value to something
 	// that breaks a business rule, which can be difficult and annoying to debug and prevent.
 
@@ -344,15 +1705,15 @@ git push
 	
 	//var brokens = new Brokens { Ints = { 1, 2, 3 } };
 	
-	// This is because Ints isn&#39;t initialised, and array initialization syntax is just 
+	// This is because Ints isn't initialised, and array initialization syntax is just 
 	// syntactic sugar for foo.Add(1). You can see this if you try to declare your collection
 	// as a straight-up array:
 	
 	//var brokensWithArray = new BrokensWithArray { Ints = { 1,2,3 } };
-	// Build error: Cannot initialize object of type &#39;int[]&#39; with a collection initializer
+	// Build error: Cannot initialize object of type 'int[]' with a collection initializer
 	
 	// To get the same syntax to work, the class must initialize Ints in the
-	// default constructor (a non-default constructor won&#39;t work):
+	// default constructor (a non-default constructor won't work):
 	
 	var works = new Works { Ints = { 1, 2, 3 } };
 	
@@ -367,7 +1728,7 @@ git push
 	
 	var brokensStruct = new BrokensStruct { Ints = new List&amp;lt;int&amp;gt;() { 1, 2, 3 } };
 	
-	// But since structs can&#39;t have parameterless public constructors, they can never use
+	// But since structs can't have parameterless public constructors, they can never use
 	// the simpler object initialization syntax:
 	
 	//struct WorksStruct {
@@ -422,12 +1783,12 @@ struct BrokensStruct {
 
 let result =
 	match name with 
-	| &quot;Fiona&quot; -&amp;gt; &quot;It&#39;s Fiona!&quot;
-	| &quot;Ben&quot; -&amp;gt; &quot;Hey it&#39;s me!&quot;
+	| &quot;Fiona&quot; -&amp;gt; &quot;It's Fiona!&quot;
+	| &quot;Ben&quot; -&amp;gt; &quot;it me!&quot;
 	| &quot;Steve&quot; -&amp;gt; &quot;Steve you rascal!&quot;
-	| _ -&amp;gt; &quot;I don&#39;t know this person&quot;
+	| _ -&amp;gt; &quot;I don't know this person&quot;
 	
-// result = &quot;Hey it&#39;s me!&quot;
+// result = &quot;it me!&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this &lt;code&gt;switch&lt;/code&gt; construct in C#:&lt;/p&gt;
@@ -437,23 +1798,23 @@ string result;
 
 switch (name) {
 	case &quot;Fiona&quot;:
-		result =  &quot;It&#39;s Fiona!&quot;;
+		result =  &quot;It's Fiona!&quot;;
 		break;
 	case &quot;Ben&quot;:
-		result = &quot;Hey it&#39;s me!&quot;;
+		result = &quot;it me!&quot;;
 		break;
 	case &quot;Steve&quot;:
 		result = &quot;Steve you rascal!&quot;;
 		break;
 	default:
-		result = &quot;I don&#39;t know this person&quot;;
+		result = &quot;I don't know this person&quot;;
 		break;
 }
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This is of course pretty average to read, relies on &lt;code&gt;break&lt;/code&gt; for execution control, and isn’t ‘pure’ since &lt;code&gt;result&lt;/code&gt; is mutated during execution.&lt;/p&gt;
 
-&lt;aside class=&quot;pull-right well&quot;&gt;
+&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 42ex&quot;&gt;
 	&lt;p&gt;I also found a couple of extant libraries that provide similar (and possibly more) functionality:&lt;/p&gt;
 	&lt;ul&gt;
 		&lt;li&gt;&lt;a href=&quot;https://github.com/johansson/PatternMatching&quot;&gt;johansson/PatternMatching&lt;/a&gt;&lt;/li&gt;
@@ -467,10 +1828,10 @@ switch (name) {
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;Ben&quot;;
 var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it&#39;s me!&quot;)
+	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It's Fiona!&quot;)
+	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it's me!&quot;)
 	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(&quot;I don&#39;t know this person&quot;)
+	.Else(&quot;I don't know this person&quot;)
 	.Do();
 &lt;/code&gt;&lt;/pre&gt;
 
@@ -478,13 +1839,13 @@ var result = name.Match()
 
 &lt;pre&gt;&lt;code&gt;var name = &quot;George&quot;;
 var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it&#39;s {0}!&quot;, x))
+	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It's Fiona!&quot;)
+	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it's {0}!&quot;, x))
 	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(x =&amp;gt; string.Format(&quot;I don&#39;t know {0}&quot;, x))
+	.Else(x =&amp;gt; string.Format(&quot;I don't know {0}&quot;, x))
 	.Do();
 
-// result = &quot;I don&#39;t know George&quot;
+// result = &quot;I don't know George&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;code&gt;Else&lt;/code&gt; value is optional but if it falls through without matching and there’s no &lt;code&gt;Else&lt;/code&gt; value it throws an &lt;code&gt;IncompletePatternMatchException&lt;/code&gt;:&lt;/p&gt;
@@ -547,7 +1908,7 @@ var invalidEggs = basket.Do();
 var intention = PatternMatch.Match()
 	.With(() =&amp;gt; footwear == &quot;red slippers&quot;, &quot;following the Yellow Brick Road&quot;)
 	.With(() =&amp;gt; footwear == &quot;boots&quot;, &quot;walking&quot;)
-	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don&#39;t think so&quot;)
+	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don't think so&quot;)
 	.ToFunc();
 
 var walking = intention();
@@ -555,7 +1916,7 @@ footwear = &quot;these shoes&quot;;
 var noWayJose = intention();
 
 // walking = &quot;walking&quot;
-// noWayJose = &quot;I don&#39;t think so&quot;
+// noWayJose = &quot;I don't think so&quot;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This is getting quite DRY but closing over a local mutable value will have the purists climbing the walls, myself included. So the final form goes back to processing an input, deferred until the match statement is executed. The syntax is a little verbose because C# can’t infer the types of the lambdas without help, but I’m pretty happy with the result - a reusable &lt;code&gt;Func&amp;lt;TIn, TOut&amp;gt;&lt;/code&gt; value that is defined declaratively with no flow control or mutated state:&lt;/p&gt;
@@ -586,1555 +1947,6 @@ var xerces = processName(&quot;Xerces&quot;);
 				<pubDate>Fri, 15 May 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/simplicity-pattern-matching-in-c-sharp.html</link>
 				<guid isPermaLink="true">http://bendetat.com/simplicity-pattern-matching-in-c-sharp.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Class and method invariants and validation</title>
-				<description>&lt;p&gt;I was chatting to my man &lt;a href=&quot;https://twitter.com/todthomson&quot;&gt;Tod&lt;/a&gt; and we came up with a cool pattern for validating both class and method invariants in a way that seems to scale.&lt;/p&gt;
-
-&lt;p&gt;Given a simple class &lt;code&gt;Person&lt;/code&gt;, with some methods for updating from another &lt;code&gt;Person&lt;/code&gt; and updating just the name:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public class Person
-{
-	public string Name { get; private set; }
-	private int _age;
-
-	public Person(string name, int age)
-	{
-		Name = name;
-		_age = age;
-	}
-
-	public void UpdateFrom(Person person)
-	{
-		Name = person.Name;
-		_age = person._age;
-	}
-
-	public void UpdateName(string name)
-	{
-		Name = name;
-	}
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The private &lt;code&gt;_age&lt;/code&gt; is just to demonstrate a private field.&lt;/p&gt;
-
-&lt;p&gt;First add some validation on the constructor. I’m using my &lt;a href=&quot;https://github.com/bendetat/check&quot;&gt;Check&lt;/a&gt; library but this could be implemented in any way that throws an exception if the rule isn’t set.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public Person(string name, int age)
-{
-	// method invariants
-	Check.That(() =&amp;gt; name).IsNotNullOrEmpty();
-	Check.That(() =&amp;gt; age &amp;gt;= 0);
-
-	Name = name;
-	_age = age;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is what I’m calling a &lt;em&gt;method invariant&lt;/em&gt; - a set of rules that validate the input to a method.&lt;/p&gt;
-
-&lt;p&gt;We also want to validate the state of a person at the end of the method.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;static void Validate(Person person)
-{
-	Check.That(() =&amp;gt; person.Name).IsNotNullOrEmpty();
-	Check.That(() =&amp;gt; person._ge &amp;gt;= 0);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This should happen at the end of each method that changes the state of the person. For example, the constructor becomes:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public Person(string name, int age)
-{
-	// method invariants
-	Check.That(() =&amp;gt; name).IsNotNullOrEmpty();
-	Check.That(() =&amp;gt; age &amp;gt;= 0);
-
-	Name = name;
-	_age = age;
-
-	// validate myself
-	Validate(this);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;UpdateName()&lt;/code&gt; method needs to do the same thing:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public void UpdateName(string name)
-{
-	Check.That(() =&amp;gt; name).IsNotNullOrEmpty();
-
-	Name = name;
-
-	Validate(this);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;UpdateFrom()&lt;/code&gt; method can validate the entire incoming person:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public void UpdateFrom(Person person)
-{
-	Validate(person);
-
-	Name = person.Name;
-	_age = person._age;
-
-	Validate(this);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Shweet.&lt;/p&gt;
-</description>
-				<pubDate>Tue, 24 Feb 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/class-and-method-invariants-and-validation.html</link>
-				<guid isPermaLink="true">http://bendetat.com/class-and-method-invariants-and-validation.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Karma and Mocha for AngularJS testing</title>
-				<description>&lt;h2 id=&quot;setting-up-karma-with-mocha-phantomjs-and-chai&quot;&gt;Setting up Karma with Mocha, PhantomJS and Chai&lt;/h2&gt;
-
-&lt;p&gt;I’m following the &lt;a href=&quot;http://karma-runner.github.io/0.12/intro/installation.html&quot;&gt;installation guide&lt;/a&gt; at &lt;a href=&quot;http://karma-runner.github.io&quot;&gt;karma-runner.github.io&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;I already have Node.js and NPM installed so I won’t go through the process for that, but I’ve found the easiest way to get running is via &lt;a href=&quot;https://chocolatey.org/packages/nodejs.install&quot;&gt;Chocolatey NuGet&lt;/a&gt; using &lt;code&gt;choco install nodejs.install&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;First up, install Karma:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev karma
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now install some plugins for Karma. The installation instructions are for Jasmine and the Chrome launcher, but I want &lt;a href=&quot;http://mochajs.org/&quot;&gt;Mocha&lt;/a&gt; as the testing framework and &lt;a href=&quot;http://phantomjs.org/&quot;&gt;PhantomJS&lt;/a&gt; for a headless (window-less) test environment.&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;&lt;em&gt;Huh? I thought Karma was the test environment&lt;/em&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Karma is a test &lt;em&gt;runner&lt;/em&gt;. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I’m setting up tests for client-side JavaScript - in particular, I’m going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.&lt;/p&gt;
-
-&lt;p&gt;So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use &lt;a href=&quot;http://chaijs.com/&quot;&gt;Chai&lt;/a&gt; as the assertion library.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev karma-mocha
-npm install --save-dev karma-phantomjs-launcher
-npm install --save-dev karma-chai
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To make it easier to run &lt;code&gt;karma&lt;/code&gt; from the command line you can install &lt;code&gt;karma-cli&lt;/code&gt; globally, which will run the local version without having to specify the path to karma (&lt;code&gt;node node_modules/karma/bin/karma&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g karma-cli
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Karma needs a configuration file. Generate it using &lt;code&gt;karma init&lt;/code&gt; and answer the questions. For this demo all of my code is going to live in &lt;code&gt;./source-and-tests&lt;/code&gt;. If I were using a Gulp build chain this would probably need to be tweaked.&lt;/p&gt;
-
-&lt;dl&gt;
-  &lt;dt&gt;Which testing framework do you want to use ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;mocha&lt;/code&gt;&lt;/dd&gt;
-  &lt;dt&gt;Do you want to use Require.js ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;no&lt;/code&gt;&lt;/dd&gt;
-  &lt;dt&gt;Do you want to capture any browsers automatically ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;PhantomJS&lt;/code&gt;&lt;/dd&gt;
-  &lt;dt&gt;What is the location of your source and test files ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;source-and-tests/**/*.js&lt;/code&gt;&lt;/dd&gt;
-  &lt;dt&gt;Should any of the files included by the previous patterns be excluded ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;em&gt;leave blank&lt;/em&gt;&lt;/dd&gt;
-  &lt;dt&gt;Do you want Karma to watch all the files and run the tests on change ?&lt;/dt&gt;
-  &lt;dd&gt;&lt;code&gt;yes&lt;/code&gt;&lt;/dd&gt;
-&lt;/dl&gt;
-
-&lt;p&gt;This generates a file called &lt;code&gt;karma-conf.js&lt;/code&gt;, which configures Karma for a test run. You can have multiple configuration files pointing to different test suites or browser configurations, which can be run by specifying the name of the configuration file (&lt;code&gt;karma start my.conf.ks&lt;/code&gt;).&lt;/p&gt;
-
-&lt;p&gt;To get Chai included in the test pipeline, we need to edit &lt;code&gt;karma-conf.js&lt;/code&gt; and add it to the &lt;code&gt;frameworks&lt;/code&gt; setting:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;frameworks: [&#39;mocha&#39;, &#39;chai&#39;],
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; will execute the default &lt;code&gt;karma-conf.js&lt;/code&gt; (or &lt;code&gt;karma-conf.coffee&lt;/code&gt;). First we need a test to run. In &lt;code&gt;./source-and-tests/&lt;/code&gt; I created &lt;code&gt;array-tests.js&lt;/code&gt; which just contains the &lt;a href=&quot;http://mochajs.org/#synchronous-code&quot;&gt;first example&lt;/a&gt; from Mocha’s documentation.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe(&#39;Array&#39;, function(){
-  describe(&#39;#indexOf()&#39;, function(){
-    it(&#39;should return -1 when the value is not present&#39;, function(){
-      assert.equal(-1, [1,2,3].indexOf(5));
-      assert.equal(-1, [1,2,3].indexOf(0));
-    })
-  })
-})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Running &lt;code&gt;karma start&lt;/code&gt; should find and run this test, then watch for changes to the watched files and repeating.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/cwTVVjT.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;adding-angularjs-to-the-mix&quot;&gt;Adding AngularJS to the mix&lt;/h2&gt;
-
-&lt;p&gt;I’ll use Bower to install AngularJS.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev bower 
-npm install -g bower
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This installs Bower to &lt;code&gt;./node_modules/bower&lt;/code&gt;, then installs it globally. Now we need to create a configuration file for Bower:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;bower init
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can just &lt;kbd&gt;enter&lt;/kbd&gt; through the configuration, accepting all the defaults. This creates a &lt;code&gt;bower.json&lt;/code&gt; file, which will save the dependencies added by Bower. Now use Bower to install AngularJS and angular-mocks:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;bower install --save angular
-bower install --save angular-mocks
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This installs AngularJS to &lt;code&gt;./bower_components/angular&lt;/code&gt; and angular-mocks to &lt;code&gt;./bower_components/angular-mocks&lt;/code&gt;. The angular-mocks package gives us methods to resolve our application’s components and create mocks of AngularJS services.&lt;/p&gt;
-
-&lt;p&gt;I’m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I’ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.&lt;/p&gt;
-
-&lt;p&gt;To include AngularJS and angular-mocks in Karma’s test run, edit the &lt;code&gt;files&lt;/code&gt; config setting in &lt;code&gt;karma.conf.js&lt;/code&gt;. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;files: [
-	&#39;bower_components/angular/angular.js&#39;,
-	&#39;bower_components/angular-mocks/angular-mocks.js&#39;,
-	&#39;source-and-tests/**/*.js&#39;
-],
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The controller to test is very simple at this stage (&lt;code&gt;MyController.js&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;(function(){
-	angular.module(&#39;my-module&#39;, []);
-
-	angular
-		.module(&#39;my-module&#39;)
-		.controller(&#39;MyController&#39;, [
-			function(){
-				var self = this;
-
-				self.firstName = &#39;&#39;;
-				self.lastName = &#39;&#39;;
-
-				self.getFullName = function(){
-					return self.firstName + &#39; &#39; + self.lastName;
-				};
-
-				return self;
-			}
-	]);
-})();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This creates a module called &lt;code&gt;my-module&lt;/code&gt; and creates a controller called &lt;code&gt;MyController&lt;/code&gt; that exposes &lt;code&gt;firstName&lt;/code&gt;, &lt;code&gt;lastName&lt;/code&gt; and &lt;code&gt;getFullName()&lt;/code&gt;. I want to test the result of &lt;code&gt;getFullName()&lt;/code&gt; (&lt;code&gt;MyControllerTests.js&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe(&#39;MyController&#39;, function(){
-	beforeEach(module(&#39;my-module&#39;));
-
-	describe(&#39;getFullName()&#39;, function(){
-		it(&#39;should handle names correctly&#39;, inject(function($controller){
-			var myController = $controller(&#39;MyController&#39;);
-
-			myController.firstName = &#39;George&#39;;
-			myController.lastName = &#39;Harrison&#39;;
-
-			myController.getFullName().should.equal(&#39;George Harrison&#39;);
-		}));
-	});
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This does some interesting things.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;beforeEach(module(&#39;my-module&#39;));
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This loads the &lt;code&gt;my-module&lt;/code&gt; module before each test in the &lt;code&gt;MyController&lt;/code&gt; suite.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;it(&#39;should handle names correctly&#39;, inject(function($controller){
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This injects &lt;code&gt;$controller&lt;/code&gt; into the test. &lt;code&gt;$controller&lt;/code&gt; allows resolving registered controllers.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var myController = $controller(&#39;MyController&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This resolves an instance of the &lt;code&gt;MyController&lt;/code&gt; controller. The instance is then used as the test subject.&lt;/p&gt;
-
-&lt;h2 id=&quot;scope-injection&quot;&gt;$scope injection&lt;/h2&gt;
-
-&lt;p&gt;The &lt;code&gt;$scope&lt;/code&gt; that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to &lt;code&gt;$scope&lt;/code&gt; for another test. The controller declaration changes to this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;angular
-	.module(&#39;my-module&#39;)
-	.controller(&#39;MyController&#39;, [
-		&#39;$scope&#39;,
-		function($scope){
-			var self = this;
-
-			// ...
-
-			$scope.songs = [
-				&#39;Here Comes The Sun&#39;
-			];
-
-			$scope.addSong = function(song) {
-				$scope.songs.push(song);
-			};
-
-			return self;
-		}
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The existing test can just pass in an empty object to the controller resolution:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var myController = $controller(&#39;MyController&#39;, {
-	$scope: {}
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now the new test can inject, use and inspect a mock scope:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe(&#39;addSong()&#39;, function(){
-	it(&#39;should add songs&#39;, inject(function($controller) {
-		var scope = {};
-		var myController = $controller(&#39;MyController&#39;, {
-			$scope: scope
-		});
-
-		scope.addSong(&#39;While My Guitar Gently Weeps&#39;);
-
-		scope.songs.should.contain(&#39;While My Guitar Gently Weeps&#39;);
-	}));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;injecting-and-mocking-http&quot;&gt;Injecting and mocking $http&lt;/h2&gt;
-
-&lt;p&gt;So now I’ve got a web service that I call to populate something on &lt;code&gt;$scope&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;angular
-	.module(&#39;my-module&#39;)
-	.controller(&#39;MyController&#39;, [
-		&#39;$scope&#39;, &#39;$http&#39;,
-		function($scope, $http){
-			var self = this;
-
-			// ...
-
-			$scope.instruments = [&#39;foo&#39;];
-
-			$http.get(&#39;api/get-instruments&#39;)
-				.success(function(data) {
-					$scope.instruments = data;
-				});
-
-			return self;
-		}
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;a href=&quot;https://docs.angularjs.org/api/ngMock/service/$httpBackend&quot;&gt;&lt;code&gt;$httpBackend&lt;/code&gt;&lt;/a&gt; is an &lt;code&gt;angular-mocks&lt;/code&gt; service that fakes the &lt;code&gt;$http&lt;/code&gt; service:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe(&#39;get-instruments result&#39;, function(){
-	it(&#39;should be added to scope&#39;, inject(function($controller, $httpBackend){
-		var scope = {};
-		$httpBackend
-			.when(&#39;GET&#39;, &#39;api/get-instruments&#39;)
-			.respond([
-				&#39;vocals&#39;, &#39;guitar&#39;, &#39;sitar&#39;
-			]);
-		var myController = $controller(&#39;MyController&#39;, {
-			$scope: scope
-		});
-
-		$httpBackend.flush();
-
-		scope.instruments.should.contain(&#39;guitar&#39;);
-	}));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;$httpBackend.flush()&lt;/code&gt; simulates the async calls completing, so they can be tested synchronously.&lt;/p&gt;
-
-&lt;h2 id=&quot;simulating-http-errors&quot;&gt;Simulating $http errors&lt;/h2&gt;
-
-&lt;p&gt;If the call to &lt;code&gt;api/get-instruments&lt;/code&gt; fails, I want to set a status to ‘ERROR’:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$scope.instruments = [&#39;foo&#39;];
-$scope.status = &#39;&#39;;
-
-$http.get(&#39;api/get-instruments&#39;)
-	.success(function(data) {
-		$scope.instruments = data;
-	})
-	.error(function(e) {
-		$scope.status = &#39;ERROR&#39;;
-	});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To simulate the error, you can just tell the &lt;code&gt;$httpBackend&lt;/code&gt; to respond with an error code (500):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;describe(&#39;get-instruments with error&#39;, function(){
-	it(&#39;should have a status with error&#39;, inject(function($controller, $httpBackend){
-		var scope = {};
-		$httpBackend
-			.when(&#39;GET&#39;, &#39;api/get-instruments&#39;)
-			.respond(500, &#39;&#39;);
-		var myController = $controller(&#39;MyController&#39;, {
-			$scope: scope
-		});
-
-		$httpBackend.flush();
-
-		scope.status.should.equal(&#39;ERROR&#39;);
-	}));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;here-is-a-cat-doing-some-tdd&quot;&gt;Here is a cat doing some TDD&lt;/h2&gt;
-
-&lt;p&gt;Please imagine that this cat is really stoked about now being able to test front-end JavaScript.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://bendetat.com/images/tdd-cat.jpg&quot; alt=&quot;Source: http://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg&quot; /&gt;&lt;/p&gt;
-
-</description>
-				<pubDate>Sat, 21 Feb 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/karma-and-mocha-for-angular-testing.html</link>
-				<guid isPermaLink="true">http://bendetat.com/karma-and-mocha-for-angular-testing.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Cleaning and simplifying the Gulp pipeline</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It’s Gulp!&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Part 3: Cleaning and simplifying the Gulp pipeline&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;I wasn’t entirely happy with how the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js&quot;&gt;previous build script&lt;/a&gt; wrote out the minified JS and CSS files next to &lt;code&gt;index.html&lt;/code&gt;, or how the vendor files had to be specified in the configuration, so I did some playing with the &lt;code&gt;gulp-useref&lt;/code&gt; plugin and cleaned things up significantly.&lt;/p&gt;
-
-&lt;p&gt;I installed two new dependencies.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-useref&quot;&gt;&lt;code&gt;gulp-usered&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-useref
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Parse build blocks in HTML files to replace references to non-optimized scripts or stylesheets.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-if&quot;&gt;&lt;code&gt;gulp-if&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-if
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Conditionally run a task&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;I moved all the dependencies into &lt;code&gt;$&lt;/code&gt;, deleted the dependencies I wouldn’t need any more and added &lt;code&gt;useref&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var $ = {
-	if: require(&#39;gulp-if&#39;),
-	notify: require(&#39;gulp-notify&#39;),
-	rev: require(&#39;gulp-rev&#39;),
-	revReplace: require(&#39;gulp-rev-replace&#39;),
-	useref: require(&#39;gulp-useref&#39;),
-	filter: require(&#39;gulp-filter&#39;),
-	uglify: require(&#39;gulp-uglify&#39;),
-	minifyCss: require(&#39;gulp-minify-css&#39;),
-	del: require(&#39;del&#39;),
-	path: require(&#39;path&#39;),
-	connect: require(&#39;connect&#39;),
-	serveStatic: require(&#39;serve-static&#39;),
-	log: require(&#39;gulp-load-plugins&#39;)()
-		.loadUtils([&#39;log&#39;])
-		.log
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Then I deleted the &lt;code&gt;rev-and-inject&lt;/code&gt; task plus all of the CSS and JS tasks, and replaced the &lt;code&gt;build&lt;/code&gt; task with this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;fonts&#39;, &#39;images&#39;], function() {
-	var cssFilter = $.filter(&#39;**/*.css&#39;);
-	var jsFilter = $.filter(&#39;**/*.js&#39;);
-	var assets = $.useref.assets();
-
-	return gulp
-		.src($.path.join(config.paths.client, &#39;*.html&#39;))
-		.pipe(assets)
-		.pipe($.if(&#39;*.js&#39;, $.uglify()))
-		.pipe($.if(&#39;*.css&#39;, $.minifyCss()))
-		.pipe($.rev())
-		.pipe(assets.restore())
-		.pipe($.useref())
-		.pipe($.revReplace())
-		.pipe(gulp.dest(config.paths.destination))
-
-		.pipe($.notify({
-			onLast: true,
-			message: &#39;Build complete&#39;
-		}))
-		;
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;$useref.assets()&lt;/code&gt; scans the &lt;code&gt;.html&lt;/code&gt; files for JS and CSS references. The &lt;code&gt;gulp-if&lt;/code&gt; plugin lets you do basic logic, this replaces the &lt;code&gt;gulp-filter&lt;/code&gt; plugin to perform conditional minification. &lt;code&gt;rev&lt;/code&gt; and &lt;code&gt;revReplace&lt;/code&gt; do the same cache busting as before.&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;index.html&lt;/code&gt; now contains the relative references to the JS and CSS files. CSS is in the header:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;head&amp;gt;
-    &amp;lt;!-- build:css content/site.min.css --&amp;gt;
-    &amp;lt;link href=&quot;../../bower_components/bootstrap/dist/css/bootstrap.css&quot; rel=&quot;stylesheet&quot;&amp;gt;
-    &amp;lt;link href=&quot;../../bower_components/bootstrap/dist/css/bootstrap-theme.css&quot; rel=&quot;stylesheet&quot;&amp;gt;
-    &amp;lt;link href=&quot;content/css/site.css&quot;/&amp;gt;
-    &amp;lt;!-- endbuild --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;JS at the end of the body:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;	&amp;lt;!-- build:js content/site.min.js --&amp;gt;
-	&amp;lt;script type=&quot;text/javascript&quot; src=&quot;../../bower_components/jquery/dist/jquery.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-	&amp;lt;script type=&quot;text/javascript&quot; src=&quot;../../bower_components/bootstrap/dist/bootstrap.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-	&amp;lt;script type=&quot;text/javascript&quot; src=&quot;content/script/site.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-	&amp;lt;!-- endbuild --&amp;gt;
-&amp;lt;/body&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The output path is specified in the &lt;code&gt;build:css&lt;/code&gt; / &lt;code&gt;build.js&lt;/code&gt; placeholder. Another benefit of this approach is that the development &lt;code&gt;index.html&lt;/code&gt; is actually usable as is - those &lt;code&gt;&amp;lt;script&amp;gt;&lt;/code&gt; and &lt;code&gt;&amp;lt;link&amp;gt;&lt;/code&gt; will resolve to the un-mangled originals.&lt;/p&gt;
-
-&lt;h2 id=&quot;file-watching&quot;&gt;File watching&lt;/h2&gt;
-
-&lt;p&gt;In the &lt;code&gt;serve&lt;/code&gt; task (which sets up a static web server hosting the built site) I used &lt;code&gt;gulp.watch&lt;/code&gt; to listen for changes in the source folder and trigger a build:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;return gulp.watch(config.paths.client + &#39;/**&#39;, [&#39;build&#39;]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now if a file changes, the files get rebuilt in the same process as the server. Because that server is just serving the entire source path any changes are available instantly.&lt;/p&gt;
-
-&lt;p&gt;Here is the &lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as at this post&lt;/a&gt;. Next I’ll get some AngularJS happening.&lt;/p&gt;
-
-&lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&quot;&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;https://github.com/gertjvr/ng-template&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://gulpjs.com/&quot;&gt;http://gulpjs.com/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://nodejs.org/api/&quot;&gt;http://nodejs.org/api/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as of this post&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Fri, 30 Jan 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html</link>
-				<guid isPermaLink="true">http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>A useful build pipeline using Gulp and Bower</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Part 1: &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Hello World! It’s Gulp!&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Part 2: A useful build pipeline using Gulp and Bower&lt;/li&gt;
-  &lt;li&gt;Part 3: &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;Cleaning and simplifying the Gulp pipeline&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Big thanks to my colleague &lt;a href=&quot;http://blog.gertjvr.com/&quot;&gt;Gert JvR&lt;/a&gt; whose &lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;ng-template&lt;/a&gt; project I am deconstructing.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as of this post&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js&quot;&gt;cleaned &lt;code&gt;gulpfile.js&lt;/code&gt;&lt;/a&gt; which I will use from here on&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&quot;have-you-any-bootstrap&quot;&gt;Have you any Bootstrap?&lt;/h2&gt;
-
-&lt;p&gt;I want to use Bootstrap, but…&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://cdn.meme.am/instances/500x/58510881.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Bower is a JavaScript package manager. So is NPM, in fact we’ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM &lt;a href=&quot;http://browserify.org&quot;&gt;can be used for client-side package management&lt;/a&gt; but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.&lt;/p&gt;
-
-&lt;p&gt;Install Bower to the project (and globally) using NPM:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev -g bower
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now create &lt;code&gt;bower.json&lt;/code&gt; by running &lt;code&gt;bower init&lt;/code&gt; and following the instructions. Bower should not be ready to install Bootstrap:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;bower install bootstrap --save
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This installs all of Bootstrap (including the separate jQuery dependency) into &lt;code&gt;/bower_components&lt;/code&gt;. It also adds a reference to the dependency in &lt;code&gt;bower.json&lt;/code&gt; - if it doesn’t you may have forgotten the &lt;code&gt;--save&lt;/code&gt; argument.&lt;/p&gt;
-
-&lt;p&gt;I then copied the &lt;a href=&quot;http://getbootstrap.com/getting-started/#template&quot;&gt;minimal Bootstrap HTML&lt;/a&gt; into &lt;code&gt;src/client/index.html&lt;/code&gt;. This won’t work because we’re not copying or linking in the CSS correctly.&lt;/p&gt;
-
-&lt;h2 id=&quot;vendor-css&quot;&gt;Vendor CSS&lt;/h2&gt;
-
-&lt;p&gt;There are two types of CSS - vendor and site-specific - and each will be handled slightly differently. Vendor CSS is anything that comes from a Bower package, and site-specific CSS will be anything in &lt;code&gt;/src/client/css&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;I’ll start by adding a dependency task to the &lt;code&gt;rev-and-inject&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;], function() {
-	// existing rev-and-inject task
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In my &lt;a href=&quot;hello-world-its-gulp.html&quot;&gt;last post&lt;/a&gt; I declared the &lt;code&gt;config&lt;/code&gt; object within &lt;code&gt;gulpfile.js&lt;/code&gt;. I immediately regret this decision and move it into its own file - &lt;code&gt;gulp-config.json&lt;/code&gt;. Now I need to explicitly add the CSS files that will be included in the site:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-	&quot;paths&quot;: {
-		&quot;client&quot;: &quot;src/client/&quot;,
-		&quot;server&quot;: &quot;src/server/&quot;,
-		&quot;dist&quot;: &quot;src/client-dist&quot;,
-		&quot;vendorcss&quot;: [
-			&quot;bower_components/bootstrap/dist/css/bootstrap.css&quot;,
-			&quot;bower_components/bootstrap/dist/css/bootstrap-theme.css&quot;
-		]
-	}
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;config&lt;/code&gt; object is now initialised using &lt;code&gt;require()&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var config = require(&#39;./gulp-config.json&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now we get to install some more dependencies!&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-concat&quot;&gt;&lt;code&gt;gulp-concat&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-concat
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Concatenates files&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Pull in the &lt;code&gt;concat&lt;/code&gt; dependency at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var concat = require(&#39;gulp-concat&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now add the &lt;code&gt;vendorcss&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;vendorcss&#39;, function(){
-return gulp
-	// set source
-	.src(config.paths.vendorcss)
-	// write to vendor.min.css
-	.pipe(concat(&#39;vendor.min.css&#39;))
-	// write to dest
-	.pipe(gulp.dest(config.paths.destination));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This takes all of the vendor CSS files specified in &lt;code&gt;gulp-config.json&lt;/code&gt; and bundles them into &lt;code&gt;/src/site-dist/vendor.min.css&lt;/code&gt;. Very exciting but it hasn’t minified the CSS yet. Time for some more plugins:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-bytediff&quot;&gt;&lt;code&gt;gulp-bytediff&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-bytediff
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Compare file sizes before and after your gulp build process.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code&gt;bytediff&lt;/code&gt; is just used to output the file size reduction from minification.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-minify-css&quot;&gt;&lt;code&gt;gulp-minify-css&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-minify-css
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Minify css with clean-css.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the &lt;code&gt;bytediff&lt;/code&gt; and &lt;code&gt;minify-css&lt;/code&gt; dependencies at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var bytediff = require(&#39;gulp-bytediff&#39;);
-var minifyCss = require(&#39;gulp-minify-css&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Then add the minify and bytediff steps to the pipeline (in &lt;code&gt;gulp.task(&#39;vendorcss&#39;..&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;return gulp
-	// set source
-	.src(config.paths.vendorcss)
-	// write to vendor.min.css
-	.pipe(concat(&#39;vendor.min.css&#39;))
-
-	// start tracking size
-	.pipe(bytediff.start())
-	// minify css
-	.pipe(minifyCss())
-	// stop tracking size and output it using bytediffFormatter
-	.pipe(bytediff.stop(bytediffFormatter))
-
-	// write to dest
-	.pipe(gulp.dest(config.paths.destination));
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;bytediff.stop(bytediffFormatter)&lt;/code&gt; uses a new function to format the file size difference. This function needs to be added:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;function bytediffFormatter(data) {
-	var formatPercent = function(num, precision) {
-		return (num * 100).toFixed(precision);
-	};
-    var difference = (data.savings &amp;gt; 0) ? &#39; smaller.&#39; : &#39; larger.&#39;;
-    
-    return data.fileName + &#39; went from &#39; +
-        (data.startSize / 1000).toFixed(2) + &#39; kB to &#39; + (data.endSize / 1000).toFixed(2) + &#39; kB&#39; +
-        &#39; and is &#39; + formatPercent(1 - data.percent, 2) + &#39;%&#39; + difference;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now when I run &lt;code&gt;gulp build&lt;/code&gt; the CSS is minified:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[09:10:18] Starting &#39;vendorcss&#39;...
-[gulp] [09:10:18] Compressing, bundling and copying vendor CSS
-[09:10:18] vendor.min.css went from 164.02 kB to 135.50 kB and is 17.39% smaller.
-[09:10:18] Finished &#39;vendorcss&#39; after 298 ms
-[09:10:18] Starting &#39;rev-and-inject&#39;...
-[09:10:18] Finished &#39;rev-and-inject&#39; after 5.79 ms
-[09:10:18] Starting &#39;build&#39;...
-[09:10:18] gulp-notify: [Gulp notification] Build complete
-[09:10:18] Finished &#39;build&#39; after 48 ms
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;index.html&lt;/code&gt; now needs a reference to the minified CSS file. It could be hard-coded to &lt;code&gt;vendor.min.css&lt;/code&gt; but that is subject to change if the build script changes. So we need to &lt;em&gt;inject&lt;/em&gt; the path to the &lt;code&gt;vendor.min.css&lt;/code&gt; artifact directly into &lt;code&gt;index.html&lt;/code&gt; as it is being written.&lt;/p&gt;
-
-&lt;p&gt;Install yet another plugin:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-inject&quot;&gt;&lt;code&gt;gulp-inject&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-inject
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A javascript, stylesheet and webcomponent injection plugin for Gulp, i.e. inject file references into your index.html&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the new &lt;code&gt;inject&lt;/code&gt; dependency to the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var inject = require(&#39;gulp-inject&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task add a local method that wraps &lt;code&gt;inject()&lt;/code&gt; with some common options:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var localInject = function(pathGlob, name) {
-	var options = {
-		// Strip out the &#39;src/client-dist-app&#39; part from the path to vendor.min.css
-		ignorePaths = config.paths.destination,
-		// Don&#39;t read file being injected, just get the path
-		read: false,
-		// add a prefix to the injected path
-		addPrefix: config.paths.buildPrefix
-	};
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;aside&gt;The `read: false` option is interesting, if it is set to true you can use a transform to [inject the contents](https://www.npmjs.com/package/gulp-inject/#injecting-files-contents) of the file into the output.&lt;/aside&gt;
-
-&lt;p&gt;There is a new &lt;code&gt;buildPrefix&lt;/code&gt; value in the config that needs to be added to &lt;code&gt;gulp-config.json&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-	&quot;paths&quot;: {
-		// ...
-		&quot;buildPrefix&quot;: &quot;app&quot;,
-		// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is needed because when the site will get hosted by Nancy, it will be available at &lt;code&gt;{yoursite}/app&lt;/code&gt;. So the injected path will be &lt;code&gt;/app/content/vendor.min.css&lt;/code&gt;. In a minute I’ll set up a static server using Node.js for testing the output.&lt;/p&gt;
-
-&lt;p&gt;The inject step now needs to be added to the &lt;code&gt;rev-and-inject&lt;/code&gt; task pipeline:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;], function() {
-	var indexPath = path.join(config.paths.source, &#39;index.html&#39;);
-
-	var localInject = //...
-
-	return gulp
-		.src([].concat(indexPath))
-
-		// inject into inject-vendor:css
-		.pipe(localInject(
-			path.join(config.paths.destination, &#39;vendor.min.css&#39;),
-			&#39;inject-vendor&#39;))
-
-		.pipe(gulp.dest(config.paths.distribution))
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now in &lt;code&gt;/src/client/index.html&lt;/code&gt; we just need to replace the link to &lt;code&gt;bootstrap.min.css&lt;/code&gt; to the &lt;code&gt;inject-vendor:css&lt;/code&gt; placeholder:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;title&amp;gt;Bootstrap 101 Template&amp;lt;/title&amp;gt;
-
-&amp;lt;!-- inject-vendor:css --&amp;gt;
-&amp;lt;!-- endinject --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now, running &lt;code&gt;gulp build&lt;/code&gt; should inject the correct path into &lt;code&gt;/src/client-dist/index.html&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;!-- inject-vendor:css --&amp;gt;
-&amp;lt;link rel=&quot;stylesheet&quot; href=&quot;/app/vendor.min.css&quot;&amp;gt;
-&amp;lt;!-- endinject --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&quot;use-nodejs-to-serve-the-static-website&quot;&gt;Use Node.js to serve the static website&lt;/h3&gt;
-
-&lt;p&gt;At the moment the output is going to &lt;code&gt;/src/client-dist&lt;/code&gt;. When the site is eventually hosted on Nancy it will be served from &lt;code&gt;/app&lt;/code&gt;, so the injected paths currently all start with &lt;code&gt;/app&lt;/code&gt;, which means that the build output can’t be viewed properly yet. I’m going to set up a quick, static server to publish the site. More dependencies!&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/connect&quot;&gt;&lt;code&gt;connect&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev connect
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;High performance middleware framework&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/serve-static&quot;&gt;&lt;code&gt;serve-static&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev serve-static
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Serve static files&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the new dependencies at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var connect = require(&#39;connect&#39;);
-var serveStatic = require(&#39;serve-static&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now add a new task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;serve&#39;, function(){
-	var sourcePath = path.join(__dirname, config.paths.destination);
-	var port = 12857;
-	var serveFromPath = &#39;/&#39; + config.paths.buildPrefix;
-
-	log(&#39;Hosting &#39; + sourcePath + &#39; at http://localhost:&#39; + port + serveFromPath);
-
-	connect()
-		.use(serveFromPath, serveStatic(sourcePath))
-		.listen(port);
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now running &lt;code&gt;gulp serve&lt;/code&gt; will serve the static content from &lt;a href=&quot;http://localhost:12857/app&quot;&gt;http://localhost:12857/app&lt;/a&gt;. I can leave that running in one console while rebuilding in another.&lt;/p&gt;
-
-&lt;p&gt;Interestingly, this way of serving a static site could probably be used all the way through to production, as the interaction with the server is all done on the client side via REST calls.&lt;/p&gt;
-
-&lt;h2 id=&quot;site-specific-css&quot;&gt;Site-specific CSS&lt;/h2&gt;
-
-&lt;p&gt;In &lt;code&gt;gulpfile.js&lt;/code&gt; add a new &lt;code&gt;css&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;css&#39;, function() {
-	return gulp
-		// set source (src/**/*.css)
-		.src([path.join(config.paths.client, &#39;**/*.css&#39;)])
-		// write to site.min.css
-		.pipe(concat(&#39;site.min.css&#39;))
-		// start tracking size
-		.pipe(bytediff.start())
-		// minify the css
-		.pipe(minifyCss())
-		// stop tracking size and output it
-		.pipe(bytediff.stop(bytediffFormatter))
-		// write to dest/content
-		.pipe(gulp.dest(config.paths.destination));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is getting a bit familiar. Instead of using a set of explicit tasks from &lt;code&gt;gulp-config.json&lt;/code&gt; I’ve just assumed that anything named &lt;code&gt;*.css&lt;/code&gt; anywhere in the client should be injected into the static site distribution. The concatenated, minified output gets written to &lt;code&gt;/src/client-dist/content/site.min.css&lt;/code&gt;. Now in the &lt;code&gt;rev-and-inject&lt;/code&gt; task the &lt;code&gt;css&lt;/code&gt; task needs to be added to the prerequisites:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;], function(){
-	// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And the path to the new &lt;code&gt;site.min.css&lt;/code&gt; needs to be injected (this goes after the &lt;code&gt;inject-vendor:css&lt;/code&gt; injection):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// inject into inject:css
-.pipe(localInject(config.paths.destination))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that there is no name placeholder used. This will inject into the default &lt;code&gt;inject:css&lt;/code&gt; placeholder, which needs to be added to &lt;code&gt;index.html&lt;/code&gt; after the existing &lt;code&gt;inject-vendor:css&lt;/code&gt; placeholder:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;!-- inject:css --&amp;gt;
-&amp;lt;!-- endinject --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now if you add some CSS files to &lt;code&gt;/src/client&lt;/code&gt; they will be injected into &lt;code&gt;index.html&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;vendor-javascript&quot;&gt;Vendor JavaScript&lt;/h2&gt;
-
-&lt;p&gt;One more dependency:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-uglify&quot;&gt;&lt;code&gt;gulp-uglify&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-uglify
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Minify files with UglifyJS.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Vendor JS is configured the same way vendor CSS is, in &lt;code&gt;gulp-config.json&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;	&quot;vendorcss&quot;: [
-		// ...
-	],
-	&quot;vendorjs&quot;: [
-		&quot;bower_components/jquery/dist/jquery.js&quot;,
-		&quot;bower_components/bootstrap/dist/bootstrap.js&quot;
-	]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;uglify&lt;/code&gt; is used instead of &lt;code&gt;minifyCss&lt;/code&gt;. Add the dependency at the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var uglify = require(&#39;gulp-uglify&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now create the &lt;code&gt;vendorjs&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;vendorjs&#39;, function(){
-	return gulp
-		// set source
-		.src(config.paths.vendorjs)
-		// write to vendor.min.js
-		.pipe(concat(&#39;vendor.min.js&#39;))
-		// start tracking size
-		.pipe(bytediff.start())
-		// uglify js
-		.pipe(uglify())
-		// stop tracking size and output it using bytediffFormatter
-		.pipe(bytediff.stop(bytediffFormatter))
- 
-		// write to dest
-		.pipe(gulp.dest(config.paths.destination));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In &lt;code&gt;rev-and-inject&lt;/code&gt;, the &lt;code&gt;vendorcss&lt;/code&gt; prerequisite task needs to be added:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;, &#39;vendorjs&#39;], function(){
-	// ...	
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And the newly minified &lt;code&gt;content/script/vendor.min.js&lt;/code&gt; needs to be injected (after the &lt;code&gt;inject:css&lt;/code&gt; injection):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// inject into inject-vendor:js
-.pipe(localInject(
-	path.join(config.paths.destination, &#39;vendor.min.js&#39;),
-	&#39;inject-vendor&#39;))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now the &lt;code&gt;inject-vendor:css&lt;/code&gt; placeholder needs to be added to &lt;code&gt;index.html&lt;/code&gt; at the end of the &lt;code&gt;&amp;lt;body&amp;gt;&lt;/code&gt; element:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;!-- inject-vendor:css --&amp;gt;
-&amp;lt;!-- endinject --&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;site-specific-javascript&quot;&gt;Site-specific JavaScript&lt;/h2&gt;
-
-&lt;p&gt;To support AngularJS, the site-specific JS task will need a couple of extra steps, but I’ll leave that for the next post. Meanwhile, it will be similar to the site-specific CSS task, bundling and minifying all &lt;code&gt;*.js&lt;/code&gt; files in &lt;code&gt;/src/client&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;js&#39;, function() {
-	return gulp
-		// set source (src/**/*.js)
-		.src([path.join(config.paths.client, &#39;**/*.js&#39;)])
-		// write to site.min.js
-		.pipe(concat(&#39;site.min.js&#39;))
-		// start tracking size
-		.pipe(bytediff.start())
-		// uglify js
-		.pipe(uglify())
-		// stop tracking size and output it using bytediffFormatter
-		.pipe(bytediff.stop(bytediffFormatter))
- 
-		// write to dest
-		.pipe(gulp.dest(config.paths.destination));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In &lt;code&gt;rev-and-inject&lt;/code&gt;, the &lt;code&gt;js&lt;/code&gt; prerequisite task needs to be added:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, [&#39;vendorcss&#39;, &#39;css&#39;, &#39;vendorjs&#39;], function(){
-	// ...	
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;And &lt;code&gt;content/script/site.min.js&lt;/code&gt; needs to be injected (after the &lt;code&gt;inject-vendor:js&lt;/code&gt; injection):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// inject into inject:js
-.pipe(localInject(
-	path.join(config.paths.destination, &#39;site.min.js&#39;)))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;fonts-and-images&quot;&gt;Fonts and images&lt;/h2&gt;
-
-&lt;p&gt;Site assets that aren’t CSS or JS need to be processed as well. Fonts are pretty straightforward, I’ll just copy everything in &lt;code&gt;content/fonts&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;fonts&#39;, function(){
-	log(&#39;Copy fonts&#39;);
-
-	return gulp
-		.src([path.join(config.paths.client, &#39;content/fonts/*&#39;)])
-		.pipe(gulp.dest(path.join(config.paths.destination, &#39;content/fonts&#39;)));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Since this can be done outside of the &lt;code&gt;rev-and-inject&lt;/code&gt; process, it gets added to the &lt;code&gt;build&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;rev-and-inject&#39;, &#39;fonts&#39;], function() {
-	// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Images could be a straight copy as well, or you can pass them through an image optimization plugin. Install two more dependencies:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-cache&quot;&gt;&lt;code&gt;gulp-cache&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-cache
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A cache proxy task for Gulp&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-imagemin&quot;&gt;&lt;code&gt;gulp-imagemin&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-imagemin
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Minify PNG, JPEG, GIF and SVG images&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;code&gt;imagemin&lt;/code&gt; is an image minifier. This performs some compression on PNG images:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;images&#39;, function(){
-	log(&#39;Compress, cache and copy images&#39;);
-
-	return gulp
-		.src([path.join(config.paths.client, &#39;content/images/*&#39;)])
-		.pipe(cache(imagemin({
-			optimizationLevel: 3
-		})))
-		.pipe(gulp.dest(path.join(config.paths.destination, &#39;content/images&#39;)));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This task also gets added as a prerequisite to the &lt;code&gt;build&lt;/code&gt; task:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, [&#39;rev-and-inject&#39;, &#39;fonts&#39;, &#39;images&#39;], function() {
-	// ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;revisioning-and-cache-busting&quot;&gt;Revisioning and cache-busting&lt;/h2&gt;
-
-&lt;p&gt;Revisioning is a way of cache-busting (forcing the browser to reload assets) by appending a hash to the filename. Since this hash is unique for a particular revision of the file (as it is a hash of the file’s contents) as long as the source file doesn’t change, the revisioned file name will stay the same and will reload from the browser’s cache. This uses the &lt;code&gt;gulp-rev&lt;/code&gt; and &lt;code&gt;gulp-rev-replace&lt;/code&gt; plugins:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-rev&quot;&gt;&lt;code&gt;gulp-rev&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-rev
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Static asset revisioning by appending content hash to filenames: unicorn.css =&amp;gt; unicorn-098f6bcd.css&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-rev-replace&quot;&gt;&lt;code&gt;gulp-rev-replace&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-rev-replace
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Rewrite occurences of filenames which have been renamed by gulp-rev&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Add the new dependencies to the top of &lt;code&gt;gulpfile.js&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var rev = require(&#39;gulp-rev&#39;);
-var revReplace = require(&#39;gulp-rev-replace&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now the &lt;code&gt;build&lt;/code&gt; task gets a bit of a rewrite:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var indexFilter = filter(&#39;index.html&#39;);
-var cssFilter = filter(&quot;**/*.min.css&quot;);
-var jsFilter = filter(&quot;**/*.min.js&quot;);
-var manifestFilter = filter(&#39;rev-manifest.json&#39;);
-
-return gulp
-	// 1. set source (/src/client/)
-	.src([].concat(
-		path.join(config.paths.client, &#39;index.html&#39;), 
-		path.join(config.paths.destination, &#39;*.min.css&#39;),
-		path.join(config.paths.destination, &#39;*.min.js&#39;)))
-
-	// 2. add the revision to the css files
-	.pipe(cssFilter)
-	.pipe(rev())
-	.pipe(gulp.dest(config.paths.destination))
-	.pipe(cssFilter.restore())
-
-	// 3. add the revision to the js files
-	.pipe(jsFilter)
-	.pipe(rev())
-	.pipe(gulp.dest(config.paths.destination))
-	.pipe(jsFilter.restore())
-
-	// 4. inject css and js
-	.pipe(indexFilter)
-	.pipe(localInject(path.join(config.paths.destination, &#39;vendor.min.css&#39;), &#39;inject-vendor&#39;))
-	.pipe(localInject(path.join(config.paths.destination, &#39;site.min.css&#39;)))
-	.pipe(localInject(path.join(config.paths.destination, &#39;vendor.min.js&#39;), &#39;inject-vendor&#39;))
-	.pipe(localInject(path.join(config.paths.destination, &#39;site.min.js&#39;)))
-	.pipe(gulp.dest(config.paths.destination))
-	.pipe(indexFilter.restore())
-
-	// 5. substitute in new revved filenames
-	.pipe(revReplace())
-	.pipe(gulp.dest(config.paths.destination));
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’ve numbered the stages of this pipeline. &lt;/p&gt;
-
-&lt;p&gt;In step 1 we select &lt;code&gt;index.html&lt;/code&gt; and the &lt;code&gt;*.min.css&lt;/code&gt; and &lt;code&gt;*.min.js&lt;/code&gt; files.&lt;/p&gt;
-
-&lt;p&gt;In step 2 we filter down to just the &lt;code&gt;*.min.css&lt;/code&gt; files, then apply the revisioning hash to the filenames (using &lt;code&gt;rev()&lt;/code&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;// filter to *.min.css
-.pipe(cssFilter)
-// add the revision to the files
-.pipe(rev())
-// write the files
-.pipe(gulp.dest(config.paths.destination))
-// clear the filter
-.pipe(cssFilter.restore())
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Step 3 is the same as step 2 except for &lt;code&gt;*.min.js&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;In step 4 we filter down to just &lt;code&gt;index.html&lt;/code&gt; and do the existing CSS and JS injections.&lt;/p&gt;
-
-&lt;p&gt;In step 5 we substitute the newly revisioned filenames into &lt;code&gt;index.html&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;and-finally&quot;&gt;And finally…&lt;/h2&gt;
-
-&lt;p&gt;The end result looks like this:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/j3WY60e.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code&gt;index.html&lt;/code&gt; points to the concatenated, minified, and hashed files:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE html&amp;gt;
-&amp;lt;html lang=&quot;en&quot;&amp;gt;
-	&amp;lt;head&amp;gt;
-		&amp;lt;!-- inject-vendor:css --&amp;gt;
-		&amp;lt;link rel=&quot;stylesheet&quot; href=&quot;/app/vendor.min-a491bda8.css&quot;&amp;gt;
-		&amp;lt;!-- endinject --&amp;gt;
-
-		&amp;lt;!-- inject:css --&amp;gt;
-		&amp;lt;link rel=&quot;stylesheet&quot; href=&quot;/app/site.min-238af6ba.css&quot;&amp;gt;
-		&amp;lt;!-- endinject --&amp;gt;
-		&amp;lt;/head&amp;gt;
-	&amp;lt;body&amp;gt;
-		&amp;lt;h1&amp;gt;Hello, world!&amp;lt;/h1&amp;gt;
-
-		&amp;lt;!-- inject-vendor:js --&amp;gt;
-		&amp;lt;script src=&quot;/app/vendor.min-8e07c5e8.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-		&amp;lt;!-- endinject --&amp;gt;
-
-		&amp;lt;!-- inject:js --&amp;gt;
-		&amp;lt;script src=&quot;/app/site.min-5b54178e.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
-		&amp;lt;!-- endinject --&amp;gt;
-	&amp;lt;/body&amp;gt;
-&amp;lt;/html&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I’m not entirely happy with this so &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;next I’ll try to simplify things&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&quot;&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;https://github.com/gertjvr/ng-template&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://gulpjs.com/&quot;&gt;http://gulpjs.com/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://nodejs.org/api/&quot;&gt;http://nodejs.org/api/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js&quot;&gt;&lt;code&gt;gulpfile.js&lt;/code&gt; as of this post&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js&quot;&gt;cleaned &lt;code&gt;gulpfile.js&lt;/code&gt;&lt;/a&gt; which I will use from here on&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Fri, 30 Jan 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html</link>
-				<guid isPermaLink="true">http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Hello World! It&#39;s Gulp!</title>
-				<description>&lt;p&gt;&lt;strong&gt;DISCLAIMER:&lt;/strong&gt; I’m learning in the open here. This is the first time I’ve used Gulp and I’m sure I’m missing a heap of really important stuff. Enjoy!&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Part 1: Hello World! It’s Gulp!&lt;/li&gt;
-  &lt;li&gt;Part 2: &lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;A useful build pipeline using Gulp and Bower&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Part 3: &lt;a href=&quot;http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html&quot;&gt;Cleaning and simplifying the Gulp pipeline&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://gulpjs.org&quot;&gt;Gulp&lt;/a&gt; is a Node.js based build tool. It executes &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.&lt;/p&gt;
-
-&lt;p&gt;This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as &lt;a href=&quot;http://bower.io&quot;&gt;Bower&lt;/a&gt; can be used to manage these complex client-side sites.&lt;/p&gt;
-
-&lt;p&gt;The static site that I’ll hopefully end up generating in the next post will be used with a &lt;a href=&quot;http://nancyfx.org&quot;&gt;Nancy&lt;/a&gt; website. The end result of this post is a Gulp build script that simply copies an &lt;code&gt;index.html&lt;/code&gt; file from &lt;code&gt;/src/client&lt;/code&gt; to &lt;code&gt;/src/client-dist&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
-
-&lt;p&gt;Install Node and NPM. The easiest way may be via &lt;a href=&quot;http://chocolatey.org&quot;&gt;Chocolatey&lt;/a&gt;, this does both:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;cinst nodejs.install
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;After installation, you may need to add &lt;code&gt;C:\Program Files\nodejs&lt;/code&gt; to the system path and create a new folder in &lt;code&gt;C:\Users\ben_000\AppData\Roaming&lt;/code&gt; named &lt;code&gt;npm&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Get NPM to create a &lt;code&gt;package.json&lt;/code&gt; file in the project root by running &lt;code&gt;npm install&lt;/code&gt; and working through the wizard. Now install Gulp using NPM:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;--save-dev&lt;/code&gt; flag adds the dependencies to &lt;code&gt;package.json&lt;/code&gt;. This means that when you open the repository in a new environment you can just do &lt;code&gt;npm install&lt;/code&gt; to automatically install the project’s NPM dependencies. &lt;/p&gt;
-
-&lt;p&gt;Note that Gulp itself should also be installed globally so you can use &lt;code&gt;gulp&lt;/code&gt; on the command line:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g gulp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;helloworlding-gulp&quot;&gt;helloworlding Gulp&lt;/h2&gt;
-
-&lt;p&gt;Create a file &lt;code&gt;gulpfile.js&lt;/code&gt; in the project root. Start out by importing the Gulp module:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var gulp = require(&#39;gulp&#39;);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;gulp.task()&lt;/code&gt; defines a task that’s available from the command line.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;hello&#39;, function() {
-	console.log(&#39;Hello world!&#39;)
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you run &lt;code&gt;gulp hello&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;λ gulp hello
-[10:22:08] Using gulpfile c:\source\angular-learnings\gulpfile.js
-[10:22:08] Starting &#39;hello&#39;...
-Hello world!
-[10:22:08] Finished &#39;hello&#39; after 316 μs
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;code&gt;gulp.task&lt;/code&gt; also lets you run prerequisite tasks:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;hello&#39;, [&#39;one&#39;, &#39;two&#39;, &#39;three&#39;], function() {
-	console.log(&#39;Hello world!&#39;)
-});
-
-gulp.task(&#39;one&#39;, function(){
-	console.log(&#39;one&#39;);
-});
-
-gulp.task(&#39;two&#39;, function(){
-	console.log(&#39;two&#39;);
-});
-
-gulp.task(&#39;three&#39;, function(){
-	console.log(&#39;three&#39;);
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now &lt;code&gt;gulp hello&lt;/code&gt; does this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[10:24:49] Starting &#39;one&#39;...
-one
-[10:24:49] Finished &#39;one&#39; after 200 μs
-[10:24:49] Starting &#39;two&#39;...
-two
-[10:24:49] Finished &#39;two&#39; after 151 μs
-[10:24:49] Starting &#39;three&#39;...
-three
-[10:24:49] Finished &#39;three&#39; after 154 μs
-[10:24:49] Starting &#39;hello&#39;...
-Hello world!
-[10:24:49] Finished &#39;hello&#39; after 135 μs
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now make you a build pipeline. Empty out &lt;code&gt;gulpfile.js&lt;/code&gt; and start again, partner.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://media.giphy.com/media/a1wyl0YQrCGm4/giphy.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;lots-of-scripting-just-to-copy-a-file&quot;&gt;Lots of scripting just to copy a file!&lt;/h2&gt;
-
-&lt;p&gt;I’m just going to start out with a simple build pipeline that basically copies &lt;code&gt;index.html&lt;/code&gt; to the server.&lt;/p&gt;
-
-&lt;p&gt;Install some more NPM packages. &lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-load-plugins&quot;&gt;&lt;code&gt;gulp-load-plugins&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-load-plugins
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Loads in any gulp plugins and attaches them to the global scope, or an object of your choice.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Eg.:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var gutil = require(&#39;gulp-load-plugins&#39;)([
-	&#39;colors&#39;, &#39;env&#39;, &#39;log&#39;, &#39;pipeline&#39;
-]);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-notify&quot;&gt;&lt;code&gt;gulp-notify&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-notify
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;gulp plugin to send messages based on Vinyl Files or Errors to Mac OS X, Linux or Windows using the node-notifier module. Fallbacks to Growl or simply logging&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/gulp-filter&quot;&gt;&lt;code&gt;gulp-filter&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev gulp-filter
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/chalk&quot;&gt;&lt;code&gt;chalk&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev chalk
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Terminal string styling done right&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/dateformat&quot;&gt;&lt;code&gt;dateformat&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev dateformat
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;A node.js package for Steven Levithan’s excellent dateFormat() function.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://www.npmjs.com/package/del&quot;&gt;&lt;code&gt;del&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install --save-dev del
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Delete files/folders using globs&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;Whew, that’s a bunch of dependencies. At the top of &lt;code&gt;gulpfile.js&lt;/code&gt;, pull them in using &lt;code&gt;require()&lt;/code&gt; and get some utility dependencies into scope:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var gulp = require(&#39;gulp&#39;);
-var notify = require(&#39;gulp-notify&#39;);
-var filter = require(&#39;gulp-filter&#39;);
-var plugins = require(&#39;gulp-load-plugins&#39;)();
-var del = require(&#39;del&#39;);
-var path = require(&#39;path&#39;);
-
-var gutil = plugins.loadUtils([
-	&#39;colors&#39;, &#39;log&#39;
-]);
-
-var log = gutil.log;
-var colors = gutil.colors;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To centralise the build paths, add this next:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var config = {
-	&quot;paths&quot;: {
-		&quot;source&quot;: &quot;src/client&quot;,
-		&quot;distribution&quot;: &quot;src/client-dist&quot;
-	}
-};
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This could be put into another file like &lt;code&gt;gulp-config.json&lt;/code&gt; and pulled in with a &lt;code&gt;require()&lt;/code&gt; but for now this will do.&lt;/p&gt;
-
-&lt;p&gt;I’ll split out the actual copy process into a gulp task called &lt;code&gt;rev-and-inject&lt;/code&gt;. This will eventually be more involved including adding a revision number for cache busting and injecting minified and bundled resources.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;rev-and-inject&#39;, function() {
-	var indexPath = path.join(config.paths.source, &#39;index.html&#39;);
-
-	return gulp
-		// set source
-		.src([].concat(indexPath))
-		// write to dest
-		.pipe(gulp.dest(config.paths.distribution))
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;build&lt;/code&gt; task calls &lt;code&gt;rev--and-inject&lt;/code&gt; before displaying a notification (using a toast!):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;build&#39;, function(){
-	return gulp
-		.src(&#39;&#39;)
-		.pipe(notify({
-			onLast: true,
-			message: &#39;Build complete&#39;
-	}));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In &lt;code&gt;src/client&lt;/code&gt; I’ve added an &lt;code&gt;index.html&lt;/code&gt; just for testing. Run &lt;code&gt;gulp build&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[15:05:05] Starting &#39;rev-and-inject&#39;...
-[15:05:05] Finished &#39;rev-and-inject&#39; after 24 ms
-[15:05:05] Starting &#39;build&#39;...
-[15:05:05] gulp-notify: [Gulp notification] Build complete
-[15:05:05] Finished &#39;build&#39; after 35 ms
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can add a quick &lt;code&gt;clean&lt;/code&gt; task too, which will delete the &lt;code&gt;src/client-dist&lt;/code&gt; folder:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;clean&#39;, function(){
-	log(&#39;Cleaning: &#39; + config.paths.distribution);
-
-	del([].concat(config.paths.distribution));
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;a href=&quot;http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html&quot;&gt;Next I’ll add some value to the build pipeline&lt;/a&gt; by minifying and bundling JS and CSS, and injecting the results into &lt;code&gt;index.html&lt;/code&gt;. The result will be a static website set up for some AngularJS work.&lt;/p&gt;
-
-&lt;h2 id=&quot;further-reading-and-resources&quot;&gt;Further reading and resources&lt;/h2&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&quot;&gt;https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/gertjvr/ng-template&quot;&gt;https://github.com/gertjvr/ng-template&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://gulpjs.com/&quot;&gt;http://gulpjs.com/&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;http://nodejs.org/api/&quot;&gt;http://nodejs.org/api/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-</description>
-				<pubDate>Tue, 27 Jan 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/hello-world-its-gulp.html</link>
-				<guid isPermaLink="true">http://bendetat.com/hello-world-its-gulp.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>A convention test for projects referencing other project references instead of NuGet packages</title>
-				<description>&lt;p&gt;Earlier this week I was running into problems when adding a solution to a CI build server. Although there were no problems running the solution locally, the build server was complaining about not being able to resolve a reference for a project.&lt;/p&gt;
-
-&lt;p&gt;The solution was using NuGet package restore, which I happen to prefer over checking in the &lt;code&gt;packages&lt;/code&gt; folder (at least for smaller projects with few developers), but I was confident that the packages were being restored correctly, including the unresolved reference.&lt;/p&gt;
-
-&lt;p&gt;The problem was that the project was referencing an assembly from the &lt;code&gt;/bin/debug&lt;/code&gt; folder of another project, rather than the project referencing the correct NuGet package. This usually happens when using something like Resharper to automatically add a reference. The fix itself is easy:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Delete the reference from the project&lt;/li&gt;
-  &lt;li&gt;Right-click the solution&lt;/li&gt;
-  &lt;li&gt;Select ‘Manage NuGet Packages for Solution’&lt;/li&gt;
-  &lt;li&gt;‘Manage’ the package&lt;/li&gt;
-  &lt;li&gt;Add the project to the package:&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Zr5S9VX.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;What I really want to do is add a convention test to make sure this doesn’t happen again. Why? Because this happens fairly infrequently, but when it does it can be hard to diagnose because it could potentially be caused by a number of things. In my experience, most of the time it is caused by a bad reference. Nevertheless I always seem to burn too much time figuring it out. In my opinion, the ROI of this convention test will probably make it worthwhile.&lt;/p&gt;
-
-&lt;h2 id=&quot;turns-out&quot;&gt;Turns out&lt;/h2&gt;
-
-&lt;p&gt;It’s a bit tricky to get to the projects in a solution file. I didn’t want to waste too much time in the internals of the build system so I found an &lt;a href=&quot;http://stackoverflow.com/a/4634505/149259&quot;&gt;answer on Stack Overflow&lt;/a&gt; that includes two wrapper classes for getting the solution, then iterating on the projects. The wrapper classes can be copied from &lt;a href=&quot;https://gist.github.com/bendetat/9a5a336d82b51ac0b564&quot;&gt;this gist&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;You’ll need to add a reference to &lt;code&gt;Microsoft.Build&lt;/code&gt;. Some of the classes that are used are actually deprecated, but this should work for long enough to get a good return on this test. The &lt;code&gt;Solution&lt;/code&gt; wrapper class reads a &lt;code&gt;.sln&lt;/code&gt; file and exposes a list of &lt;code&gt;SolutionProject&lt;/code&gt; instance. Each &lt;code&gt;SolutionProject&lt;/code&gt; exposes some of the properties of the project within the solution including the relative path, which I use to build a set of &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instances for the convention test.&lt;/p&gt;
-
-&lt;h2 id=&quot;test-cases&quot;&gt;Test cases&lt;/h2&gt;
-
-&lt;p&gt;I’m using NUnit, so my &lt;a href=&quot;http://www.nunit.org/index.php?p=testCaseSource&amp;amp;r=2.5&quot;&gt;test cases&lt;/a&gt; come from a public method that returns an enumeration of &lt;code&gt;TestCastData&lt;/code&gt; instances:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;public IEnumerable&amp;lt;TestCaseData&amp;gt; AllProjects
-{
-    get
-    {
-        var solution = new Solution(&quot;../../../../MySolution.sln&quot;);
-        var allProjects = solution.Projects
-            .Where(x =&amp;gt; x.RelativePath != &quot;.nuget&quot;)
-            .Where(x =&amp;gt; x.ProjectName != &quot;Microsoft.Build.Evaluation.Project&quot;)
-            .ToArray();
-        var allProjectNames = allProjects.Select(x =&amp;gt; x.ProjectName).ToArray();
-        
-        return allProjects.Select(x =&amp;gt;
-        {
-            var project = new Project(&quot;../../../../&quot; + x.RelativePath);
-            var testCase = new TestCaseData(project, allProjectNames);
-            testCase.SetName(x.ProjectName);
-
-            return testCase;
-        });
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Opens the solution file (as an instance of the above &lt;code&gt;Solution&lt;/code&gt; wrapper). I’ve hard-coded the relative path to the solution because there’s no need to get fancy - the tests are running in &lt;code&gt;src/MyProject/bin/[debug|release]/&lt;/code&gt; relative to the solution file. If you don’t keep the projects in a &lt;code&gt;/src&lt;/code&gt; subdirectory then take out one of the &lt;code&gt;../&lt;/code&gt; bits.&lt;/li&gt;
-  &lt;li&gt;Get all of the projects (as an instance of the above &lt;code&gt;SolutionProject&lt;/code&gt; wrapper), except for &lt;code&gt;.nuget&lt;/code&gt; and &lt;code&gt;Microsoft.Build.Evaluation.Project&lt;/code&gt;, which are included in the solution as project references.&lt;/li&gt;
-  &lt;li&gt;Select out all the names of the projects. This is passed into each &lt;code&gt;TestCaseData&lt;/code&gt; for comparison in the actual test.&lt;/li&gt;
-  &lt;li&gt;Build up and return the &lt;code&gt;TestCaseData&lt;/code&gt; enumeration:
-    &lt;ol&gt;
-      &lt;li&gt;Construct a new &lt;code&gt;Microsoft.Build.Project&lt;/code&gt; instance using the relative path. Note that this hasn’t been tested with solution folder (it would &lt;em&gt;probably&lt;/em&gt; work because I would hope that the relative path includes the solution folder).&lt;/li&gt;
-      &lt;li&gt;Build a new &lt;code&gt;TestCaseData&lt;/code&gt; instance with the project and the list of project names build up above.&lt;/li&gt;
-      &lt;li&gt;Set the name of the test case to the name of the project.&lt;/li&gt;
-    &lt;/ol&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;bangarang&quot;&gt;Bangarang&lt;/h2&gt;
-
-&lt;p&gt;That’s a &lt;a href=&quot;http://www.imdb.com/title/tt0102057/&quot;&gt;Hook&lt;/a&gt; reference, not some ‘popular’ EDM song.&lt;/p&gt;
-
-&lt;p&gt;I’m using Shouldly for the assertion.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;[Test, TestCaseSource(&quot;AllProjects&quot;)]
-public void ProjectShouldNotReferenceAssembliesInOtherProjects(Project project, string[] allProjectNames)
-{
-        var startsWithProjectName = new Func&amp;lt;string, string, bool&amp;gt;((x, projectName) =&amp;gt; x.StartsWith(&quot;..\\&quot; + projectName + &quot;\\&quot;));
-        var isReferenceInAnotherProject = new Func&amp;lt;string, bool&amp;gt;(x =&amp;gt; allProjectNames.Any(projectName =&amp;gt; startsWithProjectName(x, projectName)));
-
-        var badReferences = from projectItem in project.GetItems(&quot;Reference&quot;)
-                            from metaData in projectItem.Metadata
-                            let reference = metaData.EvaluatedValue
-                            where isReferenceInAnotherProject(reference)
-                            select reference;
-
-        badReferences.ShouldBeEmpty();
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This was jammed together in LinqPad, but it’s pretty straightforward. The first two lines set up some helpers to simplify the query. Then the bad references are determined by finding the references in the project, then checking if the reference is in another project using a fairly naive path check.&lt;/p&gt;
-
-&lt;p&gt;Failures look like this, showing the bad reference in the &lt;code&gt;Tests&lt;/code&gt; assembly:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Hkc6y9a.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Viz.&lt;/p&gt;
-
-&lt;iframe width=&quot;420&quot; height=&quot;315&quot; src=&quot;//www.youtube.com/embed/E2VCwBzGdPM&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
-
-</description>
-				<pubDate>Sat, 17 Jan 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/convention-test-for-projects-referencing-other-project-references-instead-of-nuget-packages.html</link>
-				<guid isPermaLink="true">http://bendetat.com/convention-test-for-projects-referencing-other-project-references-instead-of-nuget-packages.html</guid>
 			</item>
 		
 	</channel>
