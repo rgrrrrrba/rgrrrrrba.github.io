@@ -8,6 +8,58 @@
 		
 			<item>
 				<author>Ben Scott - ben.scott@readify.net</author>
+				<title>Dumping custom emoji from Slack</title>
+				<description>&lt;p&gt;Ok this is a little geeky and not really programmer-ary.&lt;/p&gt;
+
+&lt;p&gt;This uses some jQuery hackery and Powershell to dump all of the custom emoji out of a Slack instance. It doesn’t require giving a script passwords because of the magic of jQuery and a good multiline text editor. I’m using Sublime for the below instructions.&lt;/p&gt;
+
+&lt;p&gt;Sign in to the correct Slack team and go to “Customize Slack”, which opens the “Customize Your Team” page at the “Emoji” tab. This page includes jQuery so hit F12 to open the developer tools. Go to the console and paste this in:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$(&#39;span[data-original]&#39;).toArray()
+	.map(function(x){return x.attributes[0].nodeValue })
+	.filter(function(x) { return x.indexOf(&#39;emoji.slack-edge&#39;) != -1 })
+	.reduce(function(a,x) { return a + x + &quot;\r\n&quot; }, &#39;&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This just pulls out the original (full size) image URLs from the page and dumps them out. It also strips out aliased emoji, as they have a different URL format so we can’t quickly edit them in bulk, plus they hopefully aren’t needed anyway. Copy all of the URLs and paste them into your favourite multiline text editor, making sure they’re all consistently formatted. The source lines will look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;https://emoji.slack-edge.com/T02CV8783/awesomeface/0641c08ed4fa8e61.png
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;They need to be edited to look like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;invoke-webrequest -Uri &quot;https://emoji.slack-edge.com/T02CV8783/awesomeface/0641c08ed4fa8e61.png&quot; -OutFile awesomeface.png
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In exquisite detail, following are the keystrokes to accomplish this in Sublime Text 3 (and maybe lower). First select all of the URLs, then:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-shift-l&amp;gt;&lt;/code&gt; (that’s an L)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;home&amp;gt;&lt;/code&gt; &lt;code&gt;invoke-webrequest -Uri &quot;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;end&amp;gt;&lt;/code&gt; &lt;code&gt;&quot; -OutFile .&lt;/code&gt; (remember the period at the end)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-left-left-left-left&amp;gt;&lt;/code&gt; (that’s &lt;em&gt;four&lt;/em&gt; lefts)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;shift-ctrl-right&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-c&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;end&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;ctrl-v&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-left-left-left-left-left-left&amp;gt;&lt;/code&gt; (that’s &lt;em&gt;six&lt;/em&gt; lefts)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;left&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;shift-home&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-shift-right-right-right-right-right-right-right-right-right-right&amp;gt;&lt;/code&gt; (that’s an epic &lt;em&gt;ten&lt;/em&gt; rights)&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-c&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;ctrl-left&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;left&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;ctrl-v&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Go through the file and fix any lines that may have been messed up. I ended up with two bad lines out of around 100 URLs.&lt;/p&gt;
+
+&lt;p&gt;Save the script to the folder where you want to dump the emoji as &lt;code&gt;[whatever].ps1&lt;/code&gt;, then open Powershell or equivalant and cd to that folder. Run the script and the emoji should magically appear.&lt;/p&gt;
+
+&lt;p&gt;Go forth and emote, Slack-kin!&lt;/p&gt;
+
+</description>
+				<pubDate>Thu, 11 Feb 2016 00:00:00 +1000</pubDate>
+				<link>http://bendetat.com/dumping-custom-emoji-from-slack.html</link>
+				<guid isPermaLink="true">http://bendetat.com/dumping-custom-emoji-from-slack.html</guid>
+			</item>
+		
+			<item>
+				<author>Ben Scott - ben.scott@readify.net</author>
 				<title>Minimum Viable EF</title>
 				<description>&lt;p&gt;LINQ to SQL provides a mechanism for generating complex queries without having to resort to inline SQL or custom query generation syntax. I happen to like LINQ to SQL as a SQL generation tool, and using EF to execute those queries and hydrate objects is a passable experience, especially in the more recent version of EF. Entity Framework also provides reasonable good batching of mutation (update/insert/delete) operations.&lt;/p&gt;
 
@@ -1772,183 +1824,6 @@ struct BrokensStruct {
 				<pubDate>Fri, 22 May 2015 00:00:00 +1000</pubDate>
 				<link>http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html</link>
 				<guid isPermaLink="true">http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Simplicity - pattern matching in C#</title>
-				<description>&lt;p&gt;&lt;em&gt;TL;DR;&lt;/em&gt; Check out my awesome new library for &lt;a href=&quot;https://www.nuget.org/packages/Simplicity&quot;&gt;pattern matching in C# - Simplicity&lt;/a&gt; (&lt;a href=&quot;https://github.com/bendetat/Simplicity&quot;&gt;GitHub&lt;/a&gt;) or just copy the contents of the &lt;a href=&quot;https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs&quot;&gt;single file&lt;/a&gt; into your project for near-instant gratification.&lt;/p&gt;
-
-&lt;p&gt;Pattern matching is a method of transforming data in some way, similar to &lt;code&gt;map&lt;/code&gt; (&lt;code&gt;.Select()&lt;/code&gt; in LINQ) but closer to a &lt;code&gt;switch&lt;/code&gt; statement in structure. It is a first class language construct in many functional languages including F#:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;let name = &quot;Ben&quot;
-
-let result =
-	match name with 
-	| &quot;Fiona&quot; -&amp;gt; &quot;It&#39;s Fiona!&quot;
-	| &quot;Ben&quot; -&amp;gt; &quot;it me!&quot;
-	| &quot;Steve&quot; -&amp;gt; &quot;Steve you rascal!&quot;
-	| _ -&amp;gt; &quot;I don&#39;t know this person&quot;
-	
-// result = &quot;it me!&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this &lt;code&gt;switch&lt;/code&gt; construct in C#:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var name = &quot;Ben&quot;;
-string result;
-
-switch (name) {
-	case &quot;Fiona&quot;:
-		result =  &quot;It&#39;s Fiona!&quot;;
-		break;
-	case &quot;Ben&quot;:
-		result = &quot;it me!&quot;;
-		break;
-	case &quot;Steve&quot;:
-		result = &quot;Steve you rascal!&quot;;
-		break;
-	default:
-		result = &quot;I don&#39;t know this person&quot;;
-		break;
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is of course pretty average to read, relies on &lt;code&gt;break&lt;/code&gt; for execution control, and isn’t ‘pure’ since &lt;code&gt;result&lt;/code&gt; is mutated during execution.&lt;/p&gt;
-
-&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 42ex&quot;&gt;
-	&lt;p&gt;I also found a couple of extant libraries that provide similar (and possibly more) functionality:&lt;/p&gt;
-	&lt;ul&gt;
-		&lt;li&gt;&lt;a href=&quot;https://github.com/johansson/PatternMatching&quot;&gt;johansson/PatternMatching&lt;/a&gt;&lt;/li&gt;
-		&lt;li&gt;&lt;a href=&quot;https://github.com/Patrickkk/FunctionalSharp&quot;&gt;Patrickkk/FunctionalSharp&lt;/a&gt;&lt;/li&gt;
-	&lt;/ul&gt;
-&lt;/aside&gt;
-
-&lt;p&gt;When I found out about pattern matching I wanted to write code the same way in C#. I found a great &lt;a href=&quot;http://codebetter.com/matthewpodwysocki/2008/09/16/functional-c-pattern-matching/&quot;&gt;article by Matt Podwysocki&lt;/a&gt; and adapted and extended the code into a single-file library called &lt;a href=&quot;https://github.com/bendetat/Simplicity&quot;&gt;Simplicity&lt;/a&gt;. Install it &lt;a href=&quot;https://www.nuget.org/packages/Simplicity&quot;&gt;using NuGet&lt;/a&gt; (&lt;code&gt;install-package PatternMatching&lt;/code&gt;) or just &lt;a href=&quot;https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs&quot;&gt;copy the single file&lt;/a&gt; into your project.&lt;/p&gt;
-
-&lt;p&gt;Now for the fun part. Here’s the above example using my library. It adds an generic extension method called &lt;code&gt;Match()&lt;/code&gt; which is the usual entry point. The match statement is built up using a fluent interface.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var name = &quot;Ben&quot;;
-var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, &quot;Hey it&#39;s me!&quot;)
-	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(&quot;I don&#39;t know this person&quot;)
-	.Do();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The result can be an action, taking the value as a parameter:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var name = &quot;George&quot;;
-var result = name.Match()
-	.With(x =&amp;gt; x == &quot;Fiona&quot;, &quot;It&#39;s Fiona!&quot;)
-	.With(x =&amp;gt; x == &quot;Ben&quot;, x =&amp;gt; string.Format(&quot;Hey it&#39;s {0}!&quot;, x))
-	.With(x =&amp;gt; x == &quot;Steve&quot;, &quot;Steve you rascal!&quot;)
-	.Else(x =&amp;gt; string.Format(&quot;I don&#39;t know {0}&quot;, x))
-	.Do();
-
-// result = &quot;I don&#39;t know George&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;Else&lt;/code&gt; value is optional but if it falls through without matching and there’s no &lt;code&gt;Else&lt;/code&gt; value it throws an &lt;code&gt;IncompletePatternMatchException&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var name = &quot;Elton&quot;;
-var result = name.Match()
-	.With(x =&amp;gt; x == &quot;John&quot;, &quot;matched&quot;)
-	.With(x =&amp;gt; x == &quot;Paul&quot;, &quot;matched&quot;)
-	.Do();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;F# has a wicked type system that C# can’t match, but I can set the output type to dynamic:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var question = &quot;meaning of life&quot;;
-var result = question.Match().WithOutputType&amp;lt;dynamic&amp;gt;()
-    .With(x =&amp;gt; x.Contains(&quot;roads&quot;), &quot;Blowing in the wind&quot;)
-    .With(x =&amp;gt; x.Contains(&quot;life&quot;), 42)
-    .Else(&quot;Ask again later&quot;)
-    .Do();
-
-// result = (int)42
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;Do()&lt;/code&gt; call evaluates the patterns against the value being matched on, but there’s also an implicit cast operator to the output type that removes the need much of the time. When &lt;code&gt;total&lt;/code&gt; is calculated, the &lt;code&gt;gstRate&lt;/code&gt; match is implicitly cast to &lt;code&gt;decimal&lt;/code&gt; from the pattern match type, which is &lt;code&gt;PatternMatchOnValue&amp;lt;string, decimal&amp;gt;&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var country = &quot;NZ&quot;;
-var gstRate = country.Match()
-	.With(&quot;AU&quot;, 0.1m)
-	.With(&quot;NZ&quot;, 0.15m)
-	.Else(0.0m);
-
-var total = 2300.0m * (1.0m + gstRate);
-
-// total = 2645.0m
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;All of the examples up until now have used the &lt;code&gt;Match()&lt;/code&gt; generic extension method to apply the match statement to the value that gets called with &lt;code&gt;Match()&lt;/code&gt;. I’ve also implemented matching without an input value using the static &lt;code&gt;PatternMatch.Match()&lt;/code&gt; method. This lets you write a match statement that can do things like match on different values or methods, or close over a local value as below:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var eggs = 2;
-var basket = PatternMatch.Match()
-	.With(() =&amp;gt; eggs == 0, &quot;No eggs&quot;)
-	.With(() =&amp;gt; eggs == 1, &quot;One egg&quot;)
-	.With(() =&amp;gt; eggs &amp;gt; 1, string.Format(&quot;{0} eggs&quot;, eggs))
-	.Else(&quot;Invalid number of eggs&quot;);
-
-var twoEggs = basket.Do();
-eggs = 0;
-var zeroEggs = basket.Do();
-eggs = int.MinValue;
-var invalidEggs = basket.Do();
-
-// twoEggs = &quot;2 eggs&quot;
-// zeroEggs = &quot;No eggs&quot;
-// invalidEggs = &quot;Invalid number of eggs&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;There’s also a &lt;code&gt;.ToFunc()&lt;/code&gt; method that gets rid of the &lt;code&gt;.Do()&lt;/code&gt; call by transforming the match statement into a &lt;code&gt;Func&amp;lt;TOut&amp;gt;&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var footwear = &quot;boots&quot;;
-var intention = PatternMatch.Match()
-	.With(() =&amp;gt; footwear == &quot;red slippers&quot;, &quot;following the Yellow Brick Road&quot;)
-	.With(() =&amp;gt; footwear == &quot;boots&quot;, &quot;walking&quot;)
-	.With(() =&amp;gt; footwear == &quot;these shoes&quot;, &quot;I don&#39;t think so&quot;)
-	.ToFunc();
-
-var walking = intention();
-footwear = &quot;these shoes&quot;;
-var noWayJose = intention();
-
-// walking = &quot;walking&quot;
-// noWayJose = &quot;I don&#39;t think so&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This is getting quite DRY but closing over a local mutable value will have the purists climbing the walls, myself included. So the final form goes back to processing an input, deferred until the match statement is executed. The syntax is a little verbose because C# can’t infer the types of the lambdas without help, but I’m pretty happy with the result - a reusable &lt;code&gt;Func&amp;lt;TIn, TOut&amp;gt;&lt;/code&gt; value that is defined declaratively with no flow control or mutated state:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var processName = PatternMatch.Match&amp;lt;string, string&amp;gt;()
-	.With(x =&amp;gt; x.StartsWith(&quot;A&quot;), &quot;Starts with A&quot;)
-	.With(x =&amp;gt; x.StartsWith(&quot;B&quot;), &quot;Starts with B&quot;)
-	.With(x =&amp;gt; x.StartsWith(&quot;C&quot;), &quot;Starts with C&quot;)
-	.With(x =&amp;gt; x.StartsWith(&quot;D&quot;), &quot;Starts with D&quot;)
-	.With(x =&amp;gt; x.StartsWith(&quot;E&quot;), &quot;Starts with E&quot;)
-	.With(x =&amp;gt; x.StartsWith(&quot;F&quot;), x =&amp;gt; string.Format(&quot;{0} starts with F&quot;, x))
-	.Else(&quot;Unknown&quot;)
-	.ToFunc();
-	
-var alfred = processName(&quot;Alfred&quot;);
-var fiona = processName(&quot;Fiona&quot;);
-var ben = processName(&quot;Ben&quot;);
-var xerces = processName(&quot;Xerces&quot;);
-
-// alfred = &quot;Starts with A&quot;
-// fiona = &quot;Fiona starts with F&quot;
-// ben = &quot;Starts with B&quot;
-// xerces = &quot;Unknown&quot;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that this isn’t especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. &lt;a href=&quot;https://github.com/bendetat/Simplicity&quot;&gt;Submit a pull request!&lt;/a&gt;&lt;/p&gt;
-</description>
-				<pubDate>Fri, 15 May 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/simplicity-pattern-matching-in-c-sharp.html</link>
-				<guid isPermaLink="true">http://bendetat.com/simplicity-pattern-matching-in-c-sharp.html</guid>
 			</item>
 		
 	</channel>
