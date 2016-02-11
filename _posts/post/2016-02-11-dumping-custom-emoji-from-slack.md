@@ -35,7 +35,8 @@ In exquisite detail, following are the keystrokes to accomplish this in Sublime 
 7. `<ctrl-left-left-left-left-left-left>` (that's _six_ lefts)
 8. `<left>` `<shift-home>`
 9. `<ctrl-shift-right-right-right-right-right-right-right-right-right-right>` (that's an epic _ten_ rights)
-10. `<ctrl-c>` `<ctrl-left>` `<left>` `<ctrl-v>`
+10. `<shit-right`
+11. `<ctrl-c>` `<ctrl-left>` `<left>` `<ctrl-v>`
 
 Go through the file and fix any lines that may have been messed up. I ended up with two bad lines out of around 100 URLs.
 
