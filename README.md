@@ -1,6 +1,6 @@
-# [Ben d'état](http://bendetat.com)
+# [Bec d'état](https://becdetat.com)
 
-Ben Scott's blog - <http://bendetat.com>
+Rebecca Scott's blog - <http://becdetat.com>
 
 The blog formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, formerly known as Belfry Images.
 
