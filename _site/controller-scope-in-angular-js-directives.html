@@ -29,7 +29,7 @@
 
 <p>This is probably basic level Angular JS but I haven’t seen it mentioned anywhere. I’m probably missing something fundamental about directive scope.</p>
 
-<p>Say you’ve got this directive (<a href="http://jsfiddle.net/10qwqc5r/2/">JSFiddle</a>):</p>
+<p>Say you’ve got this directive (<a href="https://jsfiddle.net/10qwqc5r/2/">JSFiddle</a>):</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>angular
     .module('app', [])
@@ -64,11 +64,11 @@
 &lt;/div&gt;
 </code></pre></div></div>
 
-<p><img src="http://i.imgur.com/Oqbl2Yy.png" alt="" /></p>
+<p><img src="https://i.imgur.com/Oqbl2Yy.png" alt="" /></p>
 
 <p>Typing in the first textbox affects all of the other directive views, ie. they are all pointing to the same controller.</p>
 
-<p>In fact, if you have different directives with the same <code class="language-plaintext highlighter-rouge">controllerAs</code> value, you can see that the <code class="language-plaintext highlighter-rouge">vm</code> instance for each directive is set to the last directive’s controller (<a href="http://jsfiddle.net/10qwqc5r/3/">JSFiddle</a>):</p>
+<p>In fact, if you have different directives with the same <code class="language-plaintext highlighter-rouge">controllerAs</code> value, you can see that the <code class="language-plaintext highlighter-rouge">vm</code> instance for each directive is set to the last directive’s controller (<a href="https://jsfiddle.net/10qwqc5r/3/">JSFiddle</a>):</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>angular
     .module('app', [])
@@ -101,11 +101,11 @@
 &lt;/div&gt;
 </code></pre></div></div>
 
-<p><img src="http://i.imgur.com/9y6Rg6k.png" alt="" /></p>
+<p><img src="https://i.imgur.com/9y6Rg6k.png" alt="" /></p>
 
 <p>If you change the name of the <code class="language-plaintext highlighter-rouge">controllerAs</code> alias - say to <code class="language-plaintext highlighter-rouge">firstDirectiveVm</code> and <code class="language-plaintext highlighter-rouge">secondDirectiveVm</code> - then the problem goes away, so Angular JS by default is setting <code class="language-plaintext highlighter-rouge">vm</code> globally each time a directive uses <code class="language-plaintext highlighter-rouge">controllerAs: 'vm'</code>, and going down the page, meaning the last <code class="language-plaintext highlighter-rouge">vm</code> wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s <code class="language-plaintext highlighter-rouge">controllerAs</code> value won’t work for multiple directives of the same type.</p>
 
-<p>The solution is to set <code class="language-plaintext highlighter-rouge">scope</code> to <code class="language-plaintext highlighter-rouge">true</code> in the directive declaration (<a href="http://jsfiddle.net/10qwqc5r/4/">JSFiddle</a>):</p>
+<p>The solution is to set <code class="language-plaintext highlighter-rouge">scope</code> to <code class="language-plaintext highlighter-rouge">true</code> in the directive declaration (<a href="https://jsfiddle.net/10qwqc5r/4/">JSFiddle</a>):</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>angular
     .module('app', [])
@@ -123,7 +123,7 @@
     });
 </code></pre></div></div>
 
-<p><img src="http://i.imgur.com/jUlaSCJ.png" alt="" /></p>
+<p><img src="https://i.imgur.com/jUlaSCJ.png" alt="" /></p>
 
 <p>A lot more can happen in that <code class="language-plaintext highlighter-rouge">scope</code> value than setting it to true. See the Angular JS docs for <a href="https://docs.angularjs.org/guide/directive#isolating-the-scope-of-a-directive">isolating directive scope</a> for examples. Unfortunately, ‘scope’ seems to be an overloaded term in Angular JS world. This kind of ‘scope’ is talking about the scope of the element and attributes provided by the directive, in a way distinct from <code class="language-plaintext highlighter-rouge">$scope</code>, which is what I’m trying to avoid by using <code class="language-plaintext highlighter-rouge">controllerAs</code> in the first place.</p>
 

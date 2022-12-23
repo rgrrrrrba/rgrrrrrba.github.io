@@ -65,7 +65,7 @@ The `MyWorkerJob` has to be _exactly the same_ as the `.exe` name. So `MyWorkerJ
 For Octopack to include the jobs, the job path just needs to be added to the project's `.nuspec`:
 
 	<?xml version="1.0"?>
-	<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<package xmlns="https://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 		...
 		<files>
 			...
@@ -88,15 +88,15 @@ That's pretty much all there is to it. When the solution is built and packed, th
 - [Deploying custom services as Azure Webjobs - Liam McLennan][mclennan-deploying-custom-services-as-azure-webjobs]
 
 
-[nimbus]: http://nimbusapi.github.io/
+[nimbus]: https://nimbusapi.github.io/
 [nimbus-mc]: https://www.nuget.org/packages/Nimbus.MessageContracts/
 [nimbus-infra]: https://www.nuget.org/packages/Nimbus.InfrastructureContracts/
 [azure-webjob]: https://azure.microsoft.com/en-us/documentation/articles/web-sites-create-web-jobs/
-[int-windows-azure-webjobs]: http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx
-[azure-webjobs-are-awesome]: http://www.troyhunt.com/2015/01/azure-webjobs-are-awesome-and-you.html
+[int-windows-azure-webjobs]: https://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx
+[azure-webjobs-are-awesome]: https://www.troyhunt.com/2015/01/azure-webjobs-are-awesome-and-you.html
 [run-background-tasks-with-webjobs]: https://azure.microsoft.com/en-us/documentation/articles/web-sites-create-web-jobs/
 [my-stance-on-azure-worker-roles]: https://robdmoore.id.au/blog/2014/07/22/my-stance-on-azure-worker-roles/
-[how-to-deploy-azure-webjobs]: http://blog.amitapple.com/post/74215124623/deploy-azure-webjobs/#.VbjV2W6qpBf
-[hanselman-introducing-windows-azure-webjobs]: http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx
-[mclennan-deploying-custom-services-as-azure-webjobs]: http://withouttheloop.com/articles/2015-06-23-deploying-custom-services-as-azure-webjobs/
-[getseq]: http://getseq.net/
+[how-to-deploy-azure-webjobs]: https://blog.amitapple.com/post/74215124623/deploy-azure-webjobs/#.VbjV2W6qpBf
+[hanselman-introducing-windows-azure-webjobs]: https://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx
+[mclennan-deploying-custom-services-as-azure-webjobs]: https://withouttheloop.com/articles/2015-06-23-deploying-custom-services-as-azure-webjobs/
+[getseq]: https://getseq.net/

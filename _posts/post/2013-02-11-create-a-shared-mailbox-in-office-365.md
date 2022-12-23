@@ -13,8 +13,8 @@ I keep needing to find the instructions for this so I'm putting them all togethe
 	3. There will probably be a yellow message warning that the connection has been redirected to `podXXX.outlook.com/...`
 	4. `Import-PSSession $Session` – this shows a couple of scroll bars as the O365 commands are loaded in to the PS session.
 2. Create the mail box: `New-Mailbox -Name "Shared mail box name" -Alias shared_mail_box -Shared`
-	1. The `shared_mail_box` alias shown above is used as the name of the mail box, eg `helloworld@swxben.com`
-3. In the Exchange control panel for the organisation (<http://microsoftonline.com>, _Outlook_, _Options_, _See all options_, _Manage_, _Manage My Organization_) create a new distribution group for the people that will need to be able to access the shared mailbox. When creating the group make it a security group.
+	1. The `shared_mail_box` alias shown above is used as the name of the mail box, eg `helloworld@becdetat.com`
+3. In the Exchange control panel for the organisation (<https://microsoftonline.com>, _Outlook_, _Options_, _See all options_, _Manage_, _Manage My Organization_) create a new distribution group for the people that will need to be able to access the shared mailbox. When creating the group make it a security group.
 	1. note that the name of the security group cannot be the same as the shared mailbox created in step 2, I add ‘SG’ to the end od of the group name, eg `HelloWorldSG`
 4. Give the security group access to the mailbox:
 	1. `Add-MailboxPermission "Shared mail box name" -User HelloWorldSG -AccessRights FullAccess`

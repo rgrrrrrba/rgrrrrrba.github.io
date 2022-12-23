@@ -29,10 +29,10 @@
 
 <ol>
   <li>Better boundary detection for the player</li>
-  <li><a href="http://bendetat.com/monogame-shooter-converting-tests-to-bdd-style.html">Converting tests to BDD style</a></li>
+  <li><a href="https://becdetat.com/monogame-shooter-converting-tests-to-bdd-style.html">Converting tests to BDD style</a></li>
 </ol>
 
-<p>This is the first post of hopefully many as I learn MonoGame by extending on a <a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">tutorial series by Tara Walker</a>. The source code is available, both <a href="https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007">before</a> and <a href="https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d">after</a>.</p>
+<p>This is the first post of hopefully many as I learn MonoGame by extending on a <a href="https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">tutorial series by Tara Walker</a>. The source code is available, both <a href="https://github.com/becdetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007">before</a> and <a href="https://github.com/becdetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d">after</a>.</p>
 
 <p>In this post I walk through adding screen edge detection to the player’s ship, using Test-Driven Development practices where possible to keep a high quality of code.</p>
 
@@ -62,11 +62,11 @@
 
 <h3 id="boundary-technique">Boundary technique</h3>
 
-<p>This technique is borrowed from a <a href="http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">Pluralsight course</a> by <a href="https://twitter.com/jsonmez">John Sonmez</a>.</p>
+<p>This technique is borrowed from a <a href="https://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">Pluralsight course</a> by <a href="https://twitter.com/jsonmez">John Sonmez</a>.</p>
 
 <p>Basically we’ll describe four rectangles around the boundary we want to limit the player’s ship to. In practice these will be slightly inset from the screen and a bit further in on the right hand side, to keep the player from going too far forward.</p>
 
-<p><img src="http://i.imgur.com/sMbJiiv.png" alt="" /></p>
+<p><img src="https://i.imgur.com/sMbJiiv.png" alt="" /></p>
 
 <p>To keep things simple, these rectanges will be ‘owned’ by the player.</p>
 
@@ -74,11 +74,11 @@
 
 <p>To make sure that everything is working as we expect, the first test will just confirm that given a ship somewhere in the middle of the screen, with no inputs (keys all up, game pad zeroed), when updating the player, the position does not change. This seems like an obvious test but it will give us a lot of guidance on how to write the rest of the tests and possibly make some changes to help testing along.</p>
 
-<p>I’m using <a href="https://github.com/xunit/xunit">xUnit</a> as the testing framework but the tests should be pretty much the same whether you’re using xUnit, NUnit or some other framework. I have a post on <a href="http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html">how to set up xUnit for a Windows 8 Store app</a> if that’s what you’re targeting. To install xUnit, open the Package Manager Console, select the tests assembly, and enter <code class="language-plaintext highlighter-rouge">install-package xunit</code>.</p>
+<p>I’m using <a href="https://github.com/xunit/xunit">xUnit</a> as the testing framework but the tests should be pretty much the same whether you’re using xUnit, NUnit or some other framework. I have a post on <a href="xunit-tests-with-a-windows-8-1-store-app.html">how to set up xUnit for a Windows 8 Store app</a> if that’s what you’re targeting. To install xUnit, open the Package Manager Console, select the tests assembly, and enter <code class="language-plaintext highlighter-rouge">install-package xunit</code>.</p>
 
-<p><img src="http://i.imgur.com/trq8uv3.png" alt="" /></p>
+<p><img src="https://i.imgur.com/trq8uv3.png" alt="" /></p>
 
-<p>I will need to create some mock objects to pass into the <code class="language-plaintext highlighter-rouge">Player</code> constructor. I’m going to use <a href="http://nsubstitute.github.io/">NSubstitute</a> (<code class="language-plaintext highlighter-rouge">install-package nsubstitute</code>).</p>
+<p>I will need to create some mock objects to pass into the <code class="language-plaintext highlighter-rouge">Player</code> constructor. I’m going to use <a href="https://nsubstitute.github.io/">NSubstitute</a> (<code class="language-plaintext highlighter-rouge">install-package nsubstitute</code>).</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Fact]
 public void ThePositionStaysTheSame()
@@ -96,7 +96,7 @@ public void ThePositionStaysTheSame()
 
 <p>Now for the “act” part of the test. I’ll set an initial position, then call <code class="language-plaintext highlighter-rouge">Update()</code> with no mocked inputs.</p>
 
-<p><img src="http://i.imgur.com/I4C0vsi.png" alt="" /></p>
+<p><img src="https://i.imgur.com/I4C0vsi.png" alt="" /></p>
 
 <p>Creating these test input states are going to be a problem in the long term. For now I’ll just move it into a seperate method. I’ll revisit this in the next test.</p>
 
@@ -111,7 +111,7 @@ player.Update(state);
 
 <p>I run my test again to make sure everything is still happy, and I’m pleased to see it fail. It seems that the <code class="language-plaintext highlighter-rouge">Player.Update()</code> method was using some static <code class="language-plaintext highlighter-rouge">TouchPanel</code> calls, which resulted in a null reference exception outside of the game. I simply updated the <code class="language-plaintext highlighter-rouge">ShooterGameInputState</code> class with the touch panel state, although it looks like mocking out touch panel inputs will be problematic unless they are fully abstracted.</p>
 
-<p>Now I need to assert that the player didn’t move. I’m using <a href="http://shouldly.github.io/">Shouldly</a> as the assertions library (<code class="language-plaintext highlighter-rouge">install-package shouldly</code>).</p>
+<p>Now I need to assert that the player didn’t move. I’m using <a href="https://shouldly.github.io/">Shouldly</a> as the assertions library (<code class="language-plaintext highlighter-rouge">install-package shouldly</code>).</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>player.Position.ShouldBe(initialPosition);
 </code></pre></div></div>
@@ -131,7 +131,7 @@ player.Update(state);
 }
 </code></pre></div></div>
 
-<p>I don’t want to simply copy the player initialization code, especially since I know I’m going to write a pile of these tests. So I’m going to extract out the creation using the <a href="http://martinfowler.com/bliki/ObjectMother.html">Object Mother</a> pattern.</p>
+<p>I don’t want to simply copy the player initialization code, especially since I know I’m going to write a pile of these tests. So I’m going to extract out the creation using the <a href="https://martinfowler.com/bliki/ObjectMother.html">Object Mother</a> pattern.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static partial class ObjectMother
 {
@@ -189,7 +189,7 @@ player.Position = initialPosition;
 }
 </code></pre></div></div>
 
-<p>The <code class="language-plaintext highlighter-rouge">BuilderFor</code> class has some ‘magic’ to let you record the builder configuration using a <a href="https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs">DIY fluent interface</a>. Here’s next part of the test, creating the input state with the left gamepad stick fully up and right. Note that thumbstick vector’s Y value is <em>positive</em> in the <em>up</em> direction and <em>negative</em> in the <em>down</em> direction, which is the opposite to the screen, which decreases to zero at you approach the top of the screen.</p>
+<p>The <code class="language-plaintext highlighter-rouge">BuilderFor</code> class has some ‘magic’ to let you record the builder configuration using a <a href="https://github.com/becdetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs">DIY fluent interface</a>. Here’s next part of the test, creating the input state with the left gamepad stick fully up and right. Note that thumbstick vector’s Y value is <em>positive</em> in the <em>up</em> direction and <em>negative</em> in the <em>down</em> direction, which is the opposite to the screen, which decreases to zero at you approach the top of the screen.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var gamePadState = ObjectMother.Input.GamePadStates.Default
     .WithLeftThumbstick(new Vector2(1, 1))
@@ -208,7 +208,7 @@ player.Position.ShouldBe(initialPosition + new Vector2(player.Speed, -player.Spe
 
 <p>When running this I found something interesting about the game pad thumbsticks. When creating the <code class="language-plaintext highlighter-rouge">GamePadThumbSticks</code> object used to represent the thumbsticks, a static value <code class="language-plaintext highlighter-rouge">GamePadThumbSticks.GateType</code> is used to normalize the input value. The default gate is <code class="language-plaintext highlighter-rouge">Round</code>, which gates the position to a circular shape. Stand back, I’m going to do some math.</p>
 
-<p><img src="http://i.imgur.com/azB0IGU.png" alt="" /></p>
+<p><img src="https://i.imgur.com/azB0IGU.png" alt="" /></p>
 
 <p>So the thumbstick at full extension to the top right is actually <code class="language-plaintext highlighter-rouge">(0.7071, 0.7071)</code>, so the player sprite will move <code class="language-plaintext highlighter-rouge">8 * 0.7071</code> pixels per update in the X and Y axes. I’ll update the test accordingly:</p>
 
@@ -355,7 +355,7 @@ public class PlayerConfiguration : IPlayerConfiguration, IRegistering
 }
 </code></pre></div></div>
 
-<p>I also need to provide the player with a sensible viewport in the tests. To do this I created an <a href="https://github.com/bendetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs">object mother for the viewport</a> and added a <code class="language-plaintext highlighter-rouge">WithViewport()</code> method to the player object mother.</p>
+<p>I also need to provide the player with a sensible viewport in the tests. To do this I created an <a href="https://github.com/becdetat/monogame-tw-tutorial/blob/master/src/ShooterGame.Tests/ObjectMothers/BuilderFor.cs">object mother for the viewport</a> and added a <code class="language-plaintext highlighter-rouge">WithViewport()</code> method to the player object mother.</p>
 
 <h3 id="testing-the-left-boundary">Testing the left boundary</h3>
 
@@ -473,7 +473,7 @@ if (CheckNewPosition(newPosition))
 
 <p>This gets the tests passing, but something strange is going on with the boundaries in the game:</p>
 
-<p><img src="http://i.imgur.com/96xaBhi.png" alt="" /></p>
+<p><img src="https://i.imgur.com/96xaBhi.png" alt="" /></p>
 
 <p>By debugging the game this is aparrently at <code class="language-plaintext highlighter-rouge">X=20</code>, which is obviously being clipped by the edge of the screen, so one of my assumptions is incorrect. The culprit turns out to be in the <code class="language-plaintext highlighter-rouge">Animation.Draw</code> method:</p>
 
@@ -576,11 +576,11 @@ protected Rectangle GetBoundsAt(Vector2 position)
 <h3 id="resources">Resources</h3>
 
 <ul>
-  <li><a href="http://bendetat.com/up-and-running-with-monogame.html">Up and Running with MonoGame</a></li>
-  <li><a href="http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html">xUnit tests in a Windows 8.1 Store App</a></li>
-  <li><a href="http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html">Adding dependency injection to a MonoGame application</a></li>
-  <li><a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s original Shooter Game tutorial</a></li>
-  <li><a href="http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">John Sonmez’ Introduction to 2D Programming with XNA (Pluralsight video)</a> ($)</li>
+  <li><a href="up-and-running-with-monogame.html">Up and Running with MonoGame</a></li>
+  <li><a href="xunit-tests-with-a-windows-8-1-store-app.html">xUnit tests in a Windows 8.1 Store App</a></li>
+  <li><a href="adding-dependency-injection-to-a-monogame-application.html">Adding dependency injection to a MonoGame application</a></li>
+  <li><a href="https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s original Shooter Game tutorial</a></li>
+  <li><a href="https://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">John Sonmez’ Introduction to 2D Programming with XNA (Pluralsight video)</a> ($)</li>
 </ul>
 
 

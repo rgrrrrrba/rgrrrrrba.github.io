@@ -9,7 +9,7 @@ So all I'm doing here is creating a button that has a different images depending
 
 The images used are linked as resources in a resource project - the build action is `Resource`:
 
-![Images are linked using a build action of Resource](http://snag.gy/o9v6X.jpg)
+![Images are linked using a build action of Resource](https://snag.gy/o9v6X.jpg)
 
 The button's view model (`ToggleMyEnumViewModel.cs`):
 
@@ -42,12 +42,12 @@ The button's view model (`ToggleMyEnumViewModel.cs`):
 The button's XAML (`ToggleMyEnumView.xaml`):
 
     <Button x:Class="MyNamespace.ToggleMyEnumButton"
-                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns="https://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="https://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mc="https://schemas.openxmlformats.org/markup-compatibility/2006" 
+                 xmlns:d="https://schemas.microsoft.com/expression/blend/2008"
                  xmlns:local="clr-namespace:MyNamespace"
-                 xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                 xmlns:i="https://schemas.microsoft.com/expression/2010/interactivity"
                  mc:Ignorable="d" 
                  Cursor="Hand"
                  Background="Transparent">

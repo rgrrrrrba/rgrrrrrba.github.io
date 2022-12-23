@@ -27,9 +27,9 @@
 				<h1><a href="/">~/</a>Troubleshooting SQL Server 2008 R2 install on Windows Server 2003 with Windows Platform Installer – WMI service <br/></h1>
 <h2><small><em>28 Feb 2013</em></small></h2>
 
-<p>Short story. Trying to install SQL Server 2008 R2 Express on a Windows Server 2003 (SP2) machine using <a href="http://www.microsoft.com/web/downloads/platform.aspx">WebPI</a> – usually the best way to get server bits by far – but it fails with a meaningless message after a lengthy reboot that interrupted a small office.</p>
+<p>Short story. Trying to install SQL Server 2008 R2 Express on a Windows Server 2003 (SP2) machine using <a href="https://www.microsoft.com/web/downloads/platform.aspx">WebPI</a> – usually the best way to get server bits by far – but it fails with a meaningless message after a lengthy reboot that interrupted a small office.</p>
 
-<p>I tried the <a href="http://www.microsoft.com/en-us/download/details.aspx?id=30438">standalone installer</a> and got a more helpful error regarding the Windows Management Instrumentation (WMI) service. In Services the WMI service appeared to be running fine but <a href="http://social.msdn.microsoft.com/Forums/en/sqlexpress/thread/bae90cfd-702d-427f-a4df-c66cc8c4d56d">this MSDN thread</a> reveals the problem and gives a solution. It’s an old problem that I’ve seen before relating to corrupt WMI bits. The forum post provides the following batch file that reregisters the service:</p>
+<p>I tried the <a href="https://www.microsoft.com/en-us/download/details.aspx?id=30438">standalone installer</a> and got a more helpful error regarding the Windows Management Instrumentation (WMI) service. In Services the WMI service appeared to be running fine but <a href="https://social.msdn.microsoft.com/Forums/en/sqlexpress/thread/bae90cfd-702d-427f-a4df-c66cc8c4d56d">this MSDN thread</a> reveals the problem and gives a solution. It’s an old problem that I’ve seen before relating to corrupt WMI bits. The forum post provides the following batch file that reregisters the service:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@echo on
 cd /d c:\temp

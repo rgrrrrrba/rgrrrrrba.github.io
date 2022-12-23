@@ -29,7 +29,7 @@
 
 <p>I’m really interested in convention tests, and as I want to get into xUnit I thought I would try taking some patterns that I’ve used in NUnit and applying them in xUnit.</p>
 
-<p>The test project I created while writing this post is <a href="https://github.com/bendetat/convention-tests-in-xunit">available on GitHub</a>.</p>
+<p>The test project I created while writing this post is <a href="https://github.com/becdetat/convention-tests-in-xunit">available on GitHub</a>.</p>
 
 <h2 id="first-steps">First steps</h2>
 
@@ -61,13 +61,13 @@
 
 <h2 id="comparisons-with-nunit">Comparisons with NUnit</h2>
 
-<p>The xUnit Wiki has a nice <a href="http://xunit.codeplex.com/wikipage?title=Comparisons">comparison page</a> showing differences between NUnit, MSTest and itself.</p>
+<p>The xUnit Wiki has a nice <a href="https://xunit.codeplex.com/wikipage?title=Comparisons">comparison page</a> showing differences between NUnit, MSTest and itself.</p>
 
 <p>Apart from the obvious <code class="language-plaintext highlighter-rouge">[Fact]</code> vs <code class="language-plaintext highlighter-rouge">[Test]</code> and not needing <code class="language-plaintext highlighter-rouge">[TestFixture]</code>, the big differences seem to be with how the two test frameworks handle fixture setup and teardown. NUnit uses <code class="language-plaintext highlighter-rouge">[SetUp]</code> and <code class="language-plaintext highlighter-rouge">[TearDown]</code> attributes to mark methods, while xUnit adds awesome to the mix by using the public constructor as the setup method. It just creates a new instance of the fixture class for each test. This completely obviates issues that have cropped up for me in NUnit around fixture state being shared between tests. Teardown is done by implementing <code class="language-plaintext highlighter-rouge">IDisposable</code>, in the <code class="language-plaintext highlighter-rouge">Dispose</code> method. I don’t remember the last time I wrote a teardown method anyway, but using <code class="language-plaintext highlighter-rouge">IDisposable</code> is a really nice and obvious convention. Shared fixture state can be implemented with the <code class="language-plaintext highlighter-rouge">IUseFixture&lt;T&gt;</code> interface but I won’t explore that here.</p>
 
 <h2 id="a-data-driven-test">A data-driven test</h2>
 
-<p>I used NUnit’s data-driven tests to TDD a simple Fibonacci number generator (my favourite integer sequence). The implementation of the generator is <a href="https://github.com/bendetat/convention-tests-in-xunit/blob/master/src/MyApp.Shared/FibonacciGenerator.cs">in the repo</a>.</p>
+<p>I used NUnit’s data-driven tests to TDD a simple Fibonacci number generator (my favourite integer sequence). The implementation of the generator is <a href="https://github.com/becdetat/convention-tests-in-xunit/blob/master/src/MyApp.Shared/FibonacciGenerator.cs">in the repo</a>.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Test]
 [TestCase(0, 0)]

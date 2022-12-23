@@ -36,7 +36,7 @@ Any tests that are in the solution are also automatically run and the results re
 AppHarbor supports NuGet package restore - just remember to enable it in the solution :-$
 
 #### More information
-- [Deploying your first application using Git](http://support.appharbor.com/kb/getting-started/deploying-your-first-application-using-git)
+- [Deploying your first application using Git](https://support.appharbor.com/kb/getting-started/deploying-your-first-application-using-git)
 
 
 ### Databases
@@ -45,7 +45,7 @@ Just to see how everything worked, the first application I deployed was the 'Sin
 After installing it the configuration needs to be updated. The `Connectionstring alias` just needs to be set to whatever is in the application's `web.config` file - `DefaultConnection` by default. AppHarbor will inject the connection string into the app's config, or the connection string shown could just be used directly (although this would be publicly available in a public Github repo - so don't do this).
 
 #### More information
-- [AppHarbor FAQ - SQL Server Compact](http://support.appharbor.com/kb/getting-started/frequently-asked-questions#sql-server-compact)
+- [AppHarbor FAQ - SQL Server Compact](https://support.appharbor.com/kb/getting-started/frequently-asked-questions#sql-server-compact)
 
 
 ### Builds
@@ -55,8 +55,8 @@ When you push a new version you have to refresh the application page to see the 
 
 
 ### Glimpse
-For a lark I installed [Glimpse](http://getglimpse.com/), an awesome server side diagnostics tool. This is installed purely through NuGet and hooks in to the ASP.NET pipeline. Glimpse has to be configured to allow access to the Glimpse console from a remote session (ignore LocalPolicy) but once that is done everything works like a dream, including SQL queries via Glimpse's EF 4 plugin.
+For a lark I installed [Glimpse](https://getglimpse.com/), an awesome server side diagnostics tool. This is installed purely through NuGet and hooks in to the ASP.NET pipeline. Glimpse has to be configured to allow access to the Glimpse console from a remote session (ignore LocalPolicy) but once that is done everything works like a dream, including SQL queries via Glimpse's EF 4 plugin.
 
 #### More information
-- [Glimpse configuration](http://getglimpse.com/Help/Configuration)
+- [Glimpse configuration](https://getglimpse.com/Help/Configuration)
 

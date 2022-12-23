@@ -44,5 +44,5 @@ Make sure that jQuery 1.3+ has been included in the page and add the following:
 
 Very basic stuff but it works. It could be jazzed up by fading out the items first or updating a status label. If there is a significant delay between calling the delete action and getting a response the user may not think anything has happened, so perhaps the delete link should change or be disabled.
 
-[1]: http://cakephp.org/
-[2]: http://www.asp.net/mvc/
+[1]: https://cakephp.org/
+[2]: https://www.asp.net/mvc/

@@ -13,7 +13,7 @@ Four hours later and no real data had been sent, so I did some looking and decid
 - [codza - mercurial with ssh setup on windows][3]
 - [PuTTY][4]
 
-[1]: http://bitbucket.org
-[2]: http://mercurial.selenic.com/wiki/AccessingSshRepositoriesFromWindows
-[3]: http://www.codza.com/mercurial-with-ssh-setup-on-windows
-[4]: http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+[1]: https://bitbucket.org
+[2]: https://mercurial.selenic.com/wiki/AccessingSshRepositoriesFromWindows
+[3]: https://www.codza.com/mercurial-with-ssh-setup-on-windows
+[4]: https://www.chiark.greenend.org.uk/~sgtatham/putty/download.html

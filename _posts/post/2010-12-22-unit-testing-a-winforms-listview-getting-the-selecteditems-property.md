@@ -16,5 +16,5 @@ The issue is that since the control being tested is never actually displayed, th
 
 The downside is that the `Accessibility` reference needs to be added to the unit test assembly.
 
-[1]: http://stackoverflow.com/questions/304844/why-do-selectedindices-and-selecteditems-not-work-when-listview-is-instantiated-i
-[2]: http://stackoverflow.com/questions/304844/why-do-selectedindices-and-selecteditems-not-work-when-listview-is-instantiated-i/518411#518411
+[1]: https://stackoverflow.com/questions/304844/why-do-selectedindices-and-selecteditems-not-work-when-listview-is-instantiated-i
+[2]: https://stackoverflow.com/questions/304844/why-do-selectedindices-and-selecteditems-not-work-when-listview-is-instantiated-i/518411#518411

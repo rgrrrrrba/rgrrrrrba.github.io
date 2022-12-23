@@ -5,7 +5,7 @@ date: 2013-09-05
 category: post
 ---
 
-The project I'm working on at the moment is using [Knockout](http://knockoutjs.com/) with some view models that are three deep. Since all the projects scripts are being bundled together that's a lot of JS, so I'm using namespaces to keep things tidy.
+The project I'm working on at the moment is using [Knockout](https://knockoutjs.com/) with some view models that are three deep. Since all the projects scripts are being bundled together that's a lot of JS, so I'm using namespaces to keep things tidy.
 
 The namespaces are being declared like this:
 

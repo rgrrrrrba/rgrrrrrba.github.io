@@ -31,24 +31,24 @@
 
 <ul>
   <li>Part 1: Hello World! It’s Gulp!</li>
-  <li>Part 2: <a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">A useful build pipeline using Gulp and Bower</a></li>
-  <li>Part 3: <a href="http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html">Cleaning and simplifying the Gulp pipeline</a></li>
+  <li>Part 2: <a href="a-useful-build-pipeline-using-gulp-and-bower.html">A useful build pipeline using Gulp and Bower</a></li>
+  <li>Part 3: <a href="cleaning-and-simplifying-the-gulp-pipeline.html">Cleaning and simplifying the Gulp pipeline</a></li>
 </ul>
 
-<p><a href="http://gulpjs.org">Gulp</a> is a Node.js based build tool. It executes <code class="language-plaintext highlighter-rouge">gulpfile.js</code> in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.</p>
+<p><a href="https://gulpjs.org">Gulp</a> is a Node.js based build tool. It executes <code class="language-plaintext highlighter-rouge">gulpfile.js</code> in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.</p>
 
-<p>This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as <a href="http://bower.io">Bower</a> can be used to manage these complex client-side sites.</p>
+<p>This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as <a href="https://bower.io">Bower</a> can be used to manage these complex client-side sites.</p>
 
-<p>The static site that I’ll hopefully end up generating in the next post will be used with a <a href="http://nancyfx.org">Nancy</a> website. The end result of this post is a Gulp build script that simply copies an <code class="language-plaintext highlighter-rouge">index.html</code> file from <code class="language-plaintext highlighter-rouge">/src/client</code> to <code class="language-plaintext highlighter-rouge">/src/client-dist</code>.</p>
+<p>The static site that I’ll hopefully end up generating in the next post will be used with a <a href="https://nancyfx.org">Nancy</a> website. The end result of this post is a Gulp build script that simply copies an <code class="language-plaintext highlighter-rouge">index.html</code> file from <code class="language-plaintext highlighter-rouge">/src/client</code> to <code class="language-plaintext highlighter-rouge">/src/client-dist</code>.</p>
 
 <h2 id="prerequisites">Prerequisites</h2>
 
-<p>Install Node and NPM. The easiest way may be via <a href="http://chocolatey.org">Chocolatey</a>, this does both:</p>
+<p>Install Node and NPM. The easiest way may be via <a href="https://chocolatey.org">Chocolatey</a>, this does both:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cinst nodejs.install
 </code></pre></div></div>
 
-<p>After installation, you may need to add <code class="language-plaintext highlighter-rouge">C:\Program Files\nodejs</code> to the system path and create a new folder in <code class="language-plaintext highlighter-rouge">C:\Users\ben_000\AppData\Roaming</code> named <code class="language-plaintext highlighter-rouge">npm</code>.</p>
+<p>After installation, you may need to add <code class="language-plaintext highlighter-rouge">C:\Program Files\nodejs</code> to the system path and create a new folder in <code class="language-plaintext highlighter-rouge">C:\Users\bec_000\AppData\Roaming</code> named <code class="language-plaintext highlighter-rouge">npm</code>.</p>
 
 <p>Get NPM to create a <code class="language-plaintext highlighter-rouge">package.json</code> file in the project root by running <code class="language-plaintext highlighter-rouge">npm install</code> and working through the wizard. Now install Gulp using NPM:</p>
 
@@ -122,7 +122,7 @@ Hello world!
 
 <p>Now make you a build pipeline. Empty out <code class="language-plaintext highlighter-rouge">gulpfile.js</code> and start again, partner.</p>
 
-<p><img src="http://media.giphy.com/media/a1wyl0YQrCGm4/giphy.gif" alt="" /></p>
+<p><img src="https://media.giphy.com/media/a1wyl0YQrCGm4/giphy.gif" alt="" /></p>
 
 <h2 id="lots-of-scripting-just-to-copy-a-file">Lots of scripting just to copy a file!</h2>
 
@@ -259,15 +259,15 @@ var colors = gutil.colors;
 });
 </code></pre></div></div>
 
-<p><a href="http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html">Next I’ll add some value to the build pipeline</a> by minifying and bundling JS and CSS, and injecting the results into <code class="language-plaintext highlighter-rouge">index.html</code>. The result will be a static website set up for some AngularJS work.</p>
+<p><a href="a-useful-build-pipeline-using-gulp-and-bower.html">Next I’ll add some value to the build pipeline</a> by minifying and bundling JS and CSS, and injecting the results into <code class="language-plaintext highlighter-rouge">index.html</code>. The result will be a static website set up for some AngularJS work.</p>
 
 <h2 id="further-reading-and-resources">Further reading and resources</h2>
 
 <ul>
   <li><a href="https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js">https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js</a></li>
   <li><a href="https://github.com/gertjvr/ng-template">https://github.com/gertjvr/ng-template</a></li>
-  <li><a href="http://gulpjs.com/">http://gulpjs.com/</a></li>
-  <li><a href="http://nodejs.org/api/">http://nodejs.org/api/</a></li>
+  <li><a href="https://gulpjs.com/">https://gulpjs.com/</a></li>
+  <li><a href="https://nodejs.org/api/">https://nodejs.org/api/</a></li>
 </ul>
 
 

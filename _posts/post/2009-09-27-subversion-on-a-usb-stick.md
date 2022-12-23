@@ -15,15 +15,15 @@ Setting up a repository on a USB stick gives me most of the benefits of the typi
 
 So how to do this? First install TortoiseSVN. I’m going to assume familiarity with SVN, and with TortoiseSVN in particular.
 
-On the USB stick, make a folder to store the repositories. I called my folder svnrepos. Inside that folder, make another folder for the first repository. This is the name of the repository so call it something sexy, like `bentest`. Right click the folder, go to TortoiseSVN, and Create repository here. Wheels will turn, and a message should appear saying the repository was created.
+On the USB stick, make a folder to store the repositories. I called my folder svnrepos. Inside that folder, make another folder for the first repository. This is the name of the repository so call it something sexy, like `bectest`. Right click the folder, go to TortoiseSVN, and Create repository here. Wheels will turn, and a message should appear saying the repository was created.
 
 Now go to your development folder, or wherever you want to check out a working copy of the project. Right-click the development folder (eg `C:\Development\www`) and select SVN Checkout.
 
-The URL of repository is the path to the local repository that you created, as a file URL. Mine is `file:///E:/svnrepos/bentest` (note there are three slashes after the file: part). The checkout directory is where the working copy will be created. It should be automatically filled in when editing the repository URL, but can be changed. Mine is `C:\Development\www\bentest`. Click OK and you should have revision 0 of the repository ready to create trunk, branch and tag folders and add content.
+The URL of repository is the path to the local repository that you created, as a file URL. Mine is `file:///E:/svnrepos/bectest` (note there are three slashes after the file: part). The checkout directory is where the working copy will be created. It should be automatically filled in when editing the repository URL, but can be changed. Mine is `C:\Development\www\bectest`. Click OK and you should have revision 0 of the repository ready to create trunk, branch and tag folders and add content.
 
 Version control. Distributed backups of your precious work. No reliance on internet access and access to private Subversion server. Beautiful.
 
 I haven’t experimented with this so far but I suspect there may be issues if the USB drive comes up on another driver letter. The repository url will probably need to be changed in the working copy. That should be possible via the Relocate command in TortoiseSVN’s context menu.
 
-_UPDATE: Relocate is indeed the command to use. TortoiseSVN throws up a warning about corrupting your working copy, but as long as the path entered is the new path to the same place in the repository (eg from `file:///H:/svnrepos/bentest/trunk` to `file:///F:/svnrepos/bentest/trunk`) this is the best/only method._
+_UPDATE: Relocate is indeed the command to use. TortoiseSVN throws up a warning about corrupting your working copy, but as long as the path entered is the new path to the same place in the repository (eg from `file:///H:/svnrepos/bectest/trunk` to `file:///F:/svnrepos/bectest/trunk`) this is the best/only method._
 

@@ -16,9 +16,9 @@ This also doesn't go into dependency injection in a lot of detail. There are ple
 
 ### Building a Shooter Game
 
-I worked my way through all six of [Tara Walker's "Building a Shooter Game"](http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx) tutorials, but the series ends abruptly and hasn't been updated for nine months. So I'm going to continue with my experimenting with the game, and I'll try to document the process as I go.
+I worked my way through all six of [Tara Walker's "Building a Shooter Game"](https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx) tutorials, but the series ends abruptly and hasn't been updated for nine months. So I'm going to continue with my experimenting with the game, and I'll try to document the process as I go.
 
-If you want to play along (sorry) you can either go through Tara's tutorials then tackle this yourself, or download my solution either [before](https://github.com/bendetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36) or [after](https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007) these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to [install and configure MonoGame with Visual Studio](http://bendetat.com/up-and-running-with-monogame.html) before starting.
+If you want to play along (sorry) you can either go through Tara's tutorials then tackle this yourself, or download my solution either [before](https://github.com/becdetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36) or [after](https://github.com/becdetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007) these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to [install and configure MonoGame with Visual Studio](up-and-running-with-monogame.html) before starting.
 
 The first thing I wanted to do is to refactor the code so I can use dependency injection. I have two reasons for this:
 
@@ -252,7 +252,7 @@ This means that classes that want to use the content manager just take a depende
 
 Here the `Player` class has a dependency on an `IContentManager` instance. When the application is running Autofac will provide an instance of `ContentManagerWrapper`, which just wraps the usual content manager, primed with the application's content. Calling `contentManager.Load()` calls the underlying content manager.
 
-If I want to write some unit tests around the `Player` class I can just pass in a mock implementation of `IContentManager`, without having to worry about any underlying implementations. Here is an example using [NSubstitute](http://nsubstitute.github.io/):
+If I want to write some unit tests around the `Player` class I can just pass in a mock implementation of `IContentManager`, without having to worry about any underlying implementations. Here is an example using [NSubstitute](https://nsubstitute.github.io/):
 
 	var texture = Substitute.For<ITexture2D>();
 
@@ -339,4 +339,4 @@ My next post in this series will be around adding unit tests to the `Player` cla
 
 Oh, and here is an obligatory screenshot:
 
-![](http://i.imgur.com/XkRIKoX.png)
+![](https://i.imgur.com/XkRIKoX.png)

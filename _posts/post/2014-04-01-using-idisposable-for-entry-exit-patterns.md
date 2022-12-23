@@ -100,4 +100,4 @@ There is more ceremony involved with the setup and there isn't a heap of immedia
 		}
 	}
 
-This is getting very similar to what you can achieve in [Aspect-oriented programming](http://en.wikipedia.org/wiki/Aspect-oriented_programming) using entry and exit pointcuts, however in AOP the pointcuts can only extend down to method granularity, so the payload would have to be its own method. I think it's a pretty neat compromise.
+This is getting very similar to what you can achieve in [Aspect-oriented programming](https://en.wikipedia.org/wiki/Aspect-oriented_programming) using entry and exit pointcuts, however in AOP the pointcuts can only extend down to method granularity, so the payload would have to be its own method. I think it's a pretty neat compromise.

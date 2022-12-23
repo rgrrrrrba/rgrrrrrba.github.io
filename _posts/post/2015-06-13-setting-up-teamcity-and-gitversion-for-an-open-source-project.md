@@ -10,14 +10,14 @@ Note that I'm using TeamCity 9.0 (build 32060) and GitVersion 2.0.1. These steps
 
 ## Practice makes perfect
 
-I'm setting up TeamCity using GitVersion for a new open source project that I want to deploy via NuGet. I've used TeamCity a few times to set up basic builds but I've never got [SemVer](http://semver.org/) working in a nice way before, so I thought this would be a nice opportunity to try [GitVersion](https://github.com/ParticularLabs/GitVersion).
+I'm setting up TeamCity using GitVersion for a new open source project that I want to deploy via NuGet. I've used TeamCity a few times to set up basic builds but I've never got [SemVer](https://semver.org/) working in a nice way before, so I thought this would be a nice opportunity to try [GitVersion](https://github.com/ParticularLabs/GitVersion).
 
 The Release configuration is triggered manually to deploy the last built version to NuGet. It would probably be nicer to do this from Octopus but for now I'll just use TeamCity.
 
 
 ## Preparing the build agent
 
-I've started out with an [Azure VM configured with TeamCity 9](http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html). I first installed GitVersion on my build agent using [Chocolatey](https://chocolatey.org/). Install Chocolatey using an elevated Powershell console:
+I've started out with an [Azure VM configured with TeamCity 9](set-up-teamcity-on-an-azure-instance-redux.html). I first installed GitVersion on my build agent using [Chocolatey](https://chocolatey.org/). Install Chocolatey using an elevated Powershell console:
 
 	iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
 
@@ -37,7 +37,7 @@ Now start setting up the project in TeamCity.
 3. In the VCS roots, just paste the HTTPS clone URL from Github into the _Repository URL_. Change the _Authentication method_ to _Password_ and enter your Github username and password. *Note:* I'm using HTTPS because GitVersion uses LitGit2Sharp, which doesn't support SSH at the time of writing :'-( (at least GitVersion doesn't support it AFAIK)
 4. Click _Create_
 
-Now create the first build step for GitVersion. I used [Jake Ginnivan's post on his typical TeamCity build setup](http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/) as a guide.
+Now create the first build step for GitVersion. I used [Jake Ginnivan's post on his typical TeamCity build setup](https://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/) as a guide.
 
 1. Click _Add build step_
 2. Select _Command Line_ as the _Runner type_
@@ -47,7 +47,7 @@ Now create the first build step for GitVersion. I used [Jake Ginnivan's post on 
 
 Note that there is a space between the `.` and the `/updateAssemblyInfo`:
 
-![](http://i.imgur.com/stM7oSn.png)
+![](https://i.imgur.com/stM7oSn.png)
 
 *Note* with the 3.0 release of GitVersion the command parameters may be able to be removed in favour of a `GitVersionConfig.yaml` configuration file. Stay tuned.
 
@@ -85,19 +85,19 @@ First you need to add a `nuspec` file alongside the library being released (add 
 			<id>frankenwiki</id> 
 			<title>Frankenwiki</title>
 			<version>0.0.0</version> 
-			<authors>Ben Scott</authors>
+			<authors>Rebecca Scott</authors>
 			<description>Markdown based statically generated wiki engine</description> 
 			<language>en-US</language>
 			<licenseUrl>https://github.com/frankenwiki/frankenwiki/blob/master/LICENSE.md</licenseUrl>
 			<releaseNotes>https://github.com/frankenwiki/frankenwiki/releases</releaseNotes>
-			<projectUrl>http://frankenwiki.com</projectUrl>
+			<projectUrl>https://frankenwiki.com</projectUrl>
 		</metadata>
 		<files>
 			<file src="bin\release\Frankenwiki.dll" target="lib\net451"/>
 		</files>
 	</package>
 
-The easiest way to generate the NuGet package (`.nupkg`) seems to be [Octopack](http://docs.octopusdeploy.com/display/OD/Using+OctoPack). Install Octopack to the library being released and push the changes up to the repository. Now edit the CI configuration and in the _Visual Studio (sln)_ step  (the actual build step) show the advanced options and add this to the _Command line parameters_:
+The easiest way to generate the NuGet package (`.nupkg`) seems to be [Octopack](https://docs.octopusdeploy.com/display/OD/Using+OctoPack). Install Octopack to the library being released and push the changes up to the repository. Now edit the CI configuration and in the _Visual Studio (sln)_ step  (the actual build step) show the advanced options and add this to the _Command line parameters_:
 
 	/p:RunOctoPack=true
 
@@ -109,10 +109,10 @@ Create a new build configuration called _Release_ or _Promote_ or _Fly, my prett
 2. Don't use any of the detected build steps, just _configure build steps manually_
 3. Pick _NuGet Publish_ as the runner type
 4. In _Packages_, use a wildcard to specify the `.nupkg` file (so it is independent of the version). Eg. `Frankenwiki.*.nupkg`.
-5. Paste in your [NuGet API key](http://docs.nuget.org/Create/creating-and-publishing-a-package#publishing-using-nuget-command-line)
+5. Paste in your [NuGet API key](https://docs.nuget.org/Create/creating-and-publishing-a-package#publishing-using-nuget-command-line)
 6. Save
 
-The last few steps are directly based on [Jake's post](http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/). Go to _Build Features_ to set up labelling:
+The last few steps are directly based on [Jake's post](https://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/). Go to _Build Features_ to set up labelling:
 
 1. _Add build feature_
 2. Select _VCS Labelling_
@@ -155,7 +155,7 @@ TeamCity can build feature branches and tags. This lets GitVersion version featu
 
 ## Using GitVersion
 
-Jake's post about [Simple Versioning and Release Notes](http://jake.ginnivan.net/blog/2014/05/25/simple-versioning-and-release-notes/) has some great info about changing the version but a good one seems to be using a feature branching strategy.
+Jake's post about [Simple Versioning and Release Notes](https://jake.ginnivan.net/blog/2014/05/25/simple-versioning-and-release-notes/) has some great info about changing the version but a good one seems to be using a feature branching strategy.
 
 Push a branch with the new version number in the name. For example:
 
@@ -165,7 +165,7 @@ Push a branch with the new version number in the name. For example:
 
 Note that just pushing the branch won't trigger the branch build, there needs to be a non-empty commit.
 
-![Feature branches building in TeamCity](http://i.imgur.com/SGxLhKx.png)
+![Feature branches building in TeamCity](https://i.imgur.com/SGxLhKx.png)
 
 You can see that TeamCity has built a new release from the feature branch and GitVersion has versioned it at `0.3.0-beta.1+4`. Subsequent commits to this feature branch will increment the build number (eg. `0.3.0-beta.1+5`). When the feature branch is merged into master, the master version will become `0.3.0` and you can just manually run the Release configuration to deploy to NuGet.
 

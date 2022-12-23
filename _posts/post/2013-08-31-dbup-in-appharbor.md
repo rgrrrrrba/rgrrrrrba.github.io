@@ -5,7 +5,7 @@ date: 2013-08-31
 category: post
 ---
 
-[Pawel Pabich](https://twitter.com/PawelPabich) has a good way to [run DbUp as part of AppHarbor's build process](http://www.pabich.eu/2011/03/automated-database-deployments-to.html) which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up [DbUp](http://dbup.github.io/) with a web hook.
+[Pawel Pabich](https://twitter.com/PawelPabich) has a good way to [run DbUp as part of AppHarbor's build process](https://www.pabich.eu/2011/03/automated-database-deployments-to.html) which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up [DbUp](https://dbup.github.io/) with a web hook.
 
 Something important to note is that there is no security around this. It relies on an obfuscated controller path, so it is only really useful for bootstrapping an early project. The controller should be moved behind security as soon as possible.
 
@@ -104,5 +104,5 @@ And the view for the `UpdateTheWorld()` action just writes out the log, with add
 	<h1>UpdateTheWorld</h1>
 	@Html.Raw(ViewBag.Log)
 
-Now browsing to `http://<app>.apphb.com/njvfdklnvfjdkslndsie/UpdateTheWorld` will update the existing database. A `ResetTheWorld` action could be added which drops the database before running the scripts.
+Now browsing to `https://<app>.apphb.com/njvfdklnvfjdkslndsie/UpdateTheWorld` will update the existing database. A `ResetTheWorld` action could be added which drops the database before running the scripts.
 

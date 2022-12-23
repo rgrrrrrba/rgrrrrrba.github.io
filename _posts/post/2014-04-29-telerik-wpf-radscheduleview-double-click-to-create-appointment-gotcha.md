@@ -5,7 +5,7 @@ date: 2014-04-29
 category: post
 ---
 
-I'm using [Telerik's RadScheduleView](http://www.telerik.com/help/wpf/radscheduleview-overview.html) in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.
+I'm using [Telerik's RadScheduleView](https://www.telerik.com/help/wpf/radscheduleview-overview.html) in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.
 
 *Turns out* I had changed my custom appointment subclass's default constructor from `public` to `protected`. The schedule view needs a public default constructor or it will just silently not create new appointments:
 

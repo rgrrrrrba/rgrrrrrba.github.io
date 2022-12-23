@@ -27,7 +27,7 @@
 				<h1><a href="/">~/</a>Telerik's WPF RadScheduleView - Double-click to create an appointment gotcha <br/></h1>
 <h2><small><em>29 Apr 2014</em></small></h2>
 
-<p>I’m using <a href="http://www.telerik.com/help/wpf/radscheduleview-overview.html">Telerik’s RadScheduleView</a> in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.</p>
+<p>I’m using <a href="https://www.telerik.com/help/wpf/radscheduleview-overview.html">Telerik’s RadScheduleView</a> in a WPF project. Double-clicking the grid to create an appointment suddenly stopped working.</p>
 
 <p><em>Turns out</em> I had changed my custom appointment subclass’s default constructor from <code class="language-plaintext highlighter-rouge">public</code> to <code class="language-plaintext highlighter-rouge">protected</code>. The schedule view needs a public default constructor or it will just silently not create new appointments:</p>
 

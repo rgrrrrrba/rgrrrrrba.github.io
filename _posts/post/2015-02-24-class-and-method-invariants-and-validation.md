@@ -34,7 +34,7 @@ Given a simple class `Person`, with some methods for updating from another `Pers
 
 The private `_age` is just to demonstrate a private field.
 
-First add some validation on the constructor. I'm using my [Check](https://github.com/bendetat/check) library but this could be implemented in any way that throws an exception if the rule isn't set.
+First add some validation on the constructor. I'm using my [Check](https://github.com/becdetat/check) library but this could be implemented in any way that throws an exception if the rule isn't set.
 
 	public Person(string name, int age)
 	{

@@ -17,7 +17,7 @@ I needed to get all types that implemented a given interface that were registere
 
 What I really need is something like `Consumer(IEnumerable<Type> fooTypes)` where the types are everything implementing `IFoo`, but of course Autofac can't resolve that.
 
-Inspired by [this StackOverflow answer](http://stackoverflow.com/a/9503695/149259), here's an extension method that does what I need:
+Inspired by [this StackOverflow answer](https://stackoverflow.com/a/9503695/149259), here's an extension method that does what I need:
 
     public static class LifetimeScopeExtensions
     {
@@ -48,5 +48,5 @@ Note that I needed to register the types both as the base type `IFoo` (for the i
                 .InstancePerDependency();
 
 
-![](http://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif)
+![](https://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif)
 

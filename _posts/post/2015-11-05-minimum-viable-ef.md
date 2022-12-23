@@ -13,7 +13,7 @@ In this post I propose reducing and eventually eliminating the reliance on navig
 
 The examples I'm using are based on an extremely simplified investment portfolio management tool. There are multiple portfolios, multiple securities, and each portfolio can have multiple portfolio items. Each portfolio item is linked to a portfolio and a security. Portfolio items also have a count of units, and securities have a current price.
 
-The test application I developed while writing this is on [GitHub](https://github.com/bendetat/minimal-ef-testbed).
+The test application I developed while writing this is on [GitHub](https://github.com/becdetat/minimal-ef-testbed).
 
 
 ## Navigation properties and lazy loading
@@ -91,7 +91,7 @@ I have several problems with lazy loading of navigation properties:
 - Entity Framework executes the navigation properties queries synchronously, whereas the initial query could be performed asynchronously. There is no control over the query mechanism.
 - Complex or non-standard relationships such as composite keys have to be expressed using attributes or special configuration in the database context. Apart from the effort involved in configuring these relationships (very error prone) they are then an extra maintenance burden.
 
-Unfortunately the prevailing practice of encapsulating logic in the entities by way of the [Aggregate pattern](http://martinfowler.com/bliki/DDD_Aggregate.html) when using Entity Framework requires the use of navigation properties for it to be efficient. When writing the query to produce performant code that consumes navigation properties somewhere down the call path you have no choice but to be aware of (usually _discover_, often through trial and error) the navigation properties that will be required when the results are processed.
+Unfortunately the prevailing practice of encapsulating logic in the entities by way of the [Aggregate pattern](https://martinfowler.com/bliki/DDD_Aggregate.html) when using Entity Framework requires the use of navigation properties for it to be efficient. When writing the query to produce performant code that consumes navigation properties somewhere down the call path you have no choice but to be aware of (usually _discover_, often through trial and error) the navigation properties that will be required when the results are processed.
 
 Here's the `PortfolioItem` class, showing some encapsulated logic (the `Value` property):
 
@@ -117,7 +117,7 @@ These issues with query visibility are compounded if if we're reusing query frag
 	var portfolios = _context.Portfolios.GetAllPortfoliosBelongingToClient(clientId).ToArray();
 
 <aside class="pull-right well" style="width: 26em">
-	The entire reusable query fragment pattern is dreadful, but I'll leave that for another rant. I usually lump it in with 'reusable' mapper classes, misused flag enums, <a href="http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html">object initialisation syntax for anything not a DTO</a>, tuples (although <a href="https://github.com/dotnet/roslyn/issues/347">C# 7 may fix this</a>) and nested ternary expressions.
+	The entire reusable query fragment pattern is dreadful, but I'll leave that for another rant. I usually lump it in with 'reusable' mapper classes, misused flag enums, <a href="a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html">object initialisation syntax for anything not a DTO</a>, tuples (although <a href="https://github.com/dotnet/roslyn/issues/347">C# 7 may fix this</a>) and nested ternary expressions.
 </aside>
 
 `Items` are included to make the query more performant by eager loading the collection for each portfolio. Note that the item securities are not included and will be lazily loaded.
@@ -176,7 +176,7 @@ The problem, as described above, is when our ORM - Entity Framework - needs its 
 
 If the `Security` property isn't eagerly loaded, I get lazy loading in that final `.Select(i => i.Security.Name)` resulting in O(n) performance.
 
-To denormalise the structure I can apply a piece of domain knowledge. Security names don't change very often relative to other pieces of data in a financial system. Currently (start of November) there have been 95 name (and code) changes on the [Australian Stock Exchange](http://www.asx.com.au/prices/company-name-and-asx-code-changes-2015.htm) in 2015, out of around 2200 listed companies. So this isn't a piece of information that changes very frequently. If I copy the security name to the portfolio item, the `Security` property no longer needs eager loading.
+To denormalise the structure I can apply a piece of domain knowledge. Security names don't change very often relative to other pieces of data in a financial system. Currently (start of November) there have been 95 name (and code) changes on the [Australian Stock Exchange](https://www.asx.com.au/prices/company-name-and-asx-code-changes-2015.htm) in 2015, out of around 2200 listed companies. So this isn't a piece of information that changes very frequently. If I copy the security name to the portfolio item, the `Security` property no longer needs eager loading.
 
 	var securityNames = selectedPortfolios
 		.SelectMany(x => x.Items)

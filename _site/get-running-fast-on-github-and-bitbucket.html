@@ -30,7 +30,7 @@
 <p>These are the steps I use to set up a new PC with Git. I mainly use Git on the command line, with TortoiseGit for staging commits and visualising logs and Beyond Compare for diffs and merges.</p>
 
 <h3 id="gh4w">GH4W</h3>
-<p>I use <a href="http://windows.github.com/">GitHub for Windows</a> to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the <code class="language-plaintext highlighter-rouge">github_rsa.pub</code> file in <code class="language-plaintext highlighter-rouge">C:\Users\**username**\.ssh</code> can be added to BitBucket and other services to get everything running with the same credentials. Generally I won’t use GH4W after this as I’m mostly a command line junky, with gaps filled by TortoiseGit.</p>
+<p>I use <a href="https://windows.github.com/">GitHub for Windows</a> to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the <code class="language-plaintext highlighter-rouge">github_rsa.pub</code> file in <code class="language-plaintext highlighter-rouge">C:\Users\**username**\.ssh</code> can be added to BitBucket and other services to get everything running with the same credentials. Generally I won’t use GH4W after this as I’m mostly a command line junky, with gaps filled by TortoiseGit.</p>
 
 <h3 id="put-cbin-on-the-path">Put <code class="language-plaintext highlighter-rouge">c:\bin</code> on the path</h3>
 <p>Create a folder called <code class="language-plaintext highlighter-rouge">bin</code> somewhere fairly central. I use <code class="language-plaintext highlighter-rouge">c:\bin</code>. Then put it on the path. Now you can drop scripts and executables into the <code class="language-plaintext highlighter-rouge">bin</code> folder and they will work in any console anywhere. To mess with the path:</p>
@@ -43,10 +43,10 @@
   <li>‘OK’ out of the dialogs. You will need to restart any open command prompts to get the path change to work, rebooting is usually the fastest way to make sure the change has gone through (logging out and in may work too).</li>
 </ol>
 
-<p><img src="http://i.imgur.com/hWvTzkl.png" alt="" /></p>
+<p><img src="https://i.imgur.com/hWvTzkl.png" alt="" /></p>
 
 <h3 id="tortoisegit">TortoiseGit</h3>
-<p>I use <a href="http://code.google.com/p/tortoisegit">TortoiseGit</a> to help stage commits and for visualising the log. I can bypass clicking around in Explorer by adding this batch file (named <code class="language-plaintext highlighter-rouge">tgit.bat</code>) to somewhere in my path (I usually add <code class="language-plaintext highlighter-rouge">c:\bin</code> to the path for this reason). This is based on a <a href="http://ayende.com/blog/4749/executing-tortoisegit-from-the-command-line">post by Oren Eini</a>.</p>
+<p>I use <a href="https://code.google.com/p/tortoisegit">TortoiseGit</a> to help stage commits and for visualising the log. I can bypass clicking around in Explorer by adding this batch file (named <code class="language-plaintext highlighter-rouge">tgit.bat</code>) to somewhere in my path (I usually add <code class="language-plaintext highlighter-rouge">c:\bin</code> to the path for this reason). This is based on a <a href="https://ayende.com/blog/4749/executing-tortoisegit-from-the-command-line">post by Oren Eini</a>.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@start "TortoiseGit" "C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe" /command:%1 /path:.
 </code></pre></div></div>
@@ -54,9 +54,9 @@
 <p>TortoiseGit has a number of commands available from the command line. Use <code class="language-plaintext highlighter-rouge">tgit commit</code> to preview, stage and execute a commit, and <code class="language-plaintext highlighter-rouge">tgit log</code> to see the log.</p>
 
 <h3 id="switch-to-cmder">Switch to Cmder</h3>
-<p>I use <a href="http://bliker.github.io/cmder/">Cmder</a> as a console replacement but the msysgit instance included in the full download doesn’t work with the public key named <code class="language-plaintext highlighter-rouge">github_rsa.pub</code>. I just copied <code class="language-plaintext highlighter-rouge">github_rsa.pub</code> to <code class="language-plaintext highlighter-rouge">id_rsa.pub</code> and <code class="language-plaintext highlighter-rouge">github_rsa</code> to <code class="language-plaintext highlighter-rouge">id_rsa</code>. Cmder has support for aliases using the <code class="language-plaintext highlighter-rouge">alias</code> command but I usually use the <code class="language-plaintext highlighter-rouge">c:\bin</code> path with batch files to keep everything relatively portable. Install Cmder to <code class="language-plaintext highlighter-rouge">c:\bin\cmder</code> and drag <code class="language-plaintext highlighter-rouge">C:\bin\cmder\cmder.exe</code> onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (<code class="language-plaintext highlighter-rouge">c:\source</code> is mine):</p>
+<p>I use <a href="https://bliker.github.io/cmder/">Cmder</a> as a console replacement but the msysgit instance included in the full download doesn’t work with the public key named <code class="language-plaintext highlighter-rouge">github_rsa.pub</code>. I just copied <code class="language-plaintext highlighter-rouge">github_rsa.pub</code> to <code class="language-plaintext highlighter-rouge">id_rsa.pub</code> and <code class="language-plaintext highlighter-rouge">github_rsa</code> to <code class="language-plaintext highlighter-rouge">id_rsa</code>. Cmder has support for aliases using the <code class="language-plaintext highlighter-rouge">alias</code> command but I usually use the <code class="language-plaintext highlighter-rouge">c:\bin</code> path with batch files to keep everything relatively portable. Install Cmder to <code class="language-plaintext highlighter-rouge">c:\bin\cmder</code> and drag <code class="language-plaintext highlighter-rouge">C:\bin\cmder\cmder.exe</code> onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (<code class="language-plaintext highlighter-rouge">c:\source</code> is mine):</p>
 
-<p><img src="http://i.imgur.com/22KOl45.png" alt="" /></p>
+<p><img src="https://i.imgur.com/22KOl45.png" alt="" /></p>
 
 <h3 id="fine-tune-git">Fine-tune Git</h3>
 <p>Run this to add a Git alias that opens the global configuration in its default editor (Vim) (<code class="language-plaintext highlighter-rouge">git ec</code>):</p>
@@ -64,7 +64,7 @@
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global alias.ec "config --global -e"
 </code></pre></div></div>
 
-<p>Now that’s in you can hand edit the config to add some or all of <a href="http://haacked.com/archive/2014/07/28/github-flow-aliases/">Phil Haack’s GitHub Flow aliases</a>. I usually just use ‘wipe’, ‘save’ and ‘undo’:</p>
+<p>Now that’s in you can hand edit the config to add some or all of <a href="https://haacked.com/archive/2014/07/28/github-flow-aliases/">Phil Haack’s GitHub Flow aliases</a>. I usually just use ‘wipe’, ‘save’ and ‘undo’:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wipe = !git add -A &amp;&amp; git commit -qm 'WIPE SAVEPOINT' &amp;&amp; git reset HEAD~1 --hard
 save = !git add -A &amp;&amp; git commit -m 'SAVEPOINT'
@@ -93,7 +93,7 @@ git config --global credential.helper wincred
 </code></pre></div></div>
 
 <h3 id="beyond-compare">Beyond Compare</h3>
-<p>I use (and happily pay for) <a href="http://www.scootersoftware.com/moreinfo.php">Beyond Compare 4</a> and the <a href="http://www.scootersoftware.com/support.php?zz=kb_vcs">instructions here</a> were helpful. To get Git to use BC4 for diffs and merges:</p>
+<p>I use (and happily pay for) <a href="https://www.scootersoftware.com/moreinfo.php">Beyond Compare 4</a> and the <a href="https://www.scootersoftware.com/support.php?zz=kb_vcs">instructions here</a> were helpful. To get Git to use BC4 for diffs and merges:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global merge.tool bc4
 git config --global mergetool.bc4.path "C:/Program Files (x86)/Beyond Compare 4/BCompare.exe"                 
@@ -122,7 +122,7 @@ git config --global mergetool.keepBackup false
 
 <p>TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit’s Settings screen (right-click in Explorer, TortoiseGit, Settings, or just use <code class="language-plaintext highlighter-rouge">tgit settings</code> if you added the alias):</p>
 
-<p><img src="http://i.imgur.com/fhkbebQ.png" alt="" /></p>
+<p><img src="https://i.imgur.com/fhkbebQ.png" alt="" /></p>
 
 
 

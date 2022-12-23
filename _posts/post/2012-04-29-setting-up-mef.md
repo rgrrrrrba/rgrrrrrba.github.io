@@ -8,7 +8,7 @@ category: post
 
 *The source code for the example application created while writing this post is available on [GitHub](https://github.com/belfryimages/mef-test).*
 
-I've been working on adding support for plugins to [MarkPad](http://code52.org/DownmarkerWPF/). Initially this was going to use NuGet to drag in the plugins, and MEF to dynamically load the . Because of problems like how to manage updates with new versions and the general awkwardness of the build system, I've decided to drop NuGet for now and just link the plugins statically, still using MEF to handle basic dependency injection and loading up the plugins.
+I've been working on adding support for plugins to [MarkPad](https://code52.org/DownmarkerWPF/). Initially this was going to use NuGet to drag in the plugins, and MEF to dynamically load the . Because of problems like how to manage updates with new versions and the general awkwardness of the build system, I've decided to drop NuGet for now and just link the plugins statically, still using MEF to handle basic dependency injection and loading up the plugins.
 
 MEF seems tragically difficult to debug, especially when setting it up in an existing application like MarkPad, with Autofac already set up and doing magic, so I've set up a test application to get a feel of the general layout. This is a bit of a walkthrough of the result.
 
@@ -121,7 +121,7 @@ The plugins are injected into two sets of collections. MEF uses the exported int
 
 ### Decorating the contract interfaces and importing fields
 
-All the assemblies need to reference `System.ComponentModel.Composition`. As an aside, have you installed the [`PowerCommands`](http://visualstudiogallery.msdn.microsoft.com/e5f41ad9-4edc-4912-bca3-91147db95b99/) extension for Visual Studio 2010? It lets you copy and paste project references within the Solution Explorer. Groovy.
+All the assemblies need to reference `System.ComponentModel.Composition`. As an aside, have you installed the [`PowerCommands`](https://visualstudiogallery.msdn.microsoft.com/e5f41ad9-4edc-4912-bca3-91147db95b99/) extension for Visual Studio 2010? It lets you copy and paste project references within the Solution Explorer. Groovy.
 
 All the contract endpoints (the interfaces that will be imported using MEF) need to have the `InheritedExport` attribute added to the interface. In this example, that means all of the interfaces in **Contracts**. Here is what `IHelloWorldPlugin` should look like with the `InheritedExport` attribute:
 
@@ -154,7 +154,7 @@ The following goes in the consuming application's constructor, after `Initialize
 	var container = new CompositionContainer(catalog);
 	container.ComposeParts(this);
 
-This creates an aggregate catalog, which brings together all the locations (catalogs) where the exported implementations are found. In this case it is just `Plugins.dll`. There are a couple of other `XxxCatalog` implementations that can be used, for more information the [catalogs page](http://mef.codeplex.com/wikipage?title=Using%20Catalogs&referringTitle=Guide) in the [MEF documentation](http://mef.codeplex.com/documentation) touches on them.
+This creates an aggregate catalog, which brings together all the locations (catalogs) where the exported implementations are found. In this case it is just `Plugins.dll`. There are a couple of other `XxxCatalog` implementations that can be used, for more information the [catalogs page](https://mef.codeplex.com/wikipage?title=Using%20Catalogs&referringTitle=Guide) in the [MEF documentation](https://mef.codeplex.com/documentation) touches on them.
 
 The catalog is then used to create a composition container. Each class in the consumer that needs to import classes using MEF will need this catalog, so in more complex applications the composition container will need to be passed around. The `ComposeParts()` method call is what performs the actual dependency injection, finding all the fields decorated with `[Import]` and `[ImportMany]` and assigning them with the exported implementations that were found in the aggregate catalog.
 

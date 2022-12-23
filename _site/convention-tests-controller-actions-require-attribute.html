@@ -29,10 +29,10 @@
 
 <p>I looove convention tests. The idea is you have some assumption about the system that you want to test and enforce. In this case, I want all controller actions (bar some exceptions) to be decorated with the <code class="language-plaintext highlighter-rouge">AuthorizeAttribute</code>.</p>
 
-<p>I’m using <a href="http://nunit.org/">NUnit</a> for the tests and <a href="http://shouldly.github.io/">Shouldly</a> to help with assertions. I’m also using <a href="http://autofac.org/">Autofac</a>, which shouldn’t affect the tests except that it gives me a nice extension method.</p>
+<p>I’m using <a href="https://nunit.org/">NUnit</a> for the tests and <a href="https://shouldly.github.io/">Shouldly</a> to help with assertions. I’m also using <a href="https://autofac.org/">Autofac</a>, which shouldn’t affect the tests except that it gives me a nice extension method.</p>
 
 <h3 id="test-cases-in-nunit">Test cases in NUnit</h3>
-<p>NUnit has a concept of <a href="http://nunit.org/index.php?p=testCase&amp;r=2.6.2">test cases</a> where a <a href="http://nunit.org/index.php?p=testCaseSource&amp;r=2.6.2">test case source</a> provides test casees to a test method. Each test case is executed in the test method as an individual test.</p>
+<p>NUnit has a concept of <a href="https://nunit.org/index.php?p=testCase&amp;r=2.6.2">test cases</a> where a <a href="https://nunit.org/index.php?p=testCaseSource&amp;r=2.6.2">test case source</a> provides test casees to a test method. Each test case is executed in the test method as an individual test.</p>
 
 <p>Here’s a simple example of a test cases. It tests integers from 1 to 10 and fails on any odd values:</p>
 

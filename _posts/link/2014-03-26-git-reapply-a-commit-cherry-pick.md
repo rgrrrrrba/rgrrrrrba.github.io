@@ -13,7 +13,7 @@ Say I pull in some dependency which adds a readme file somewhere, then I delete 
 
 	git cherry-pick 89bec60
 
-[*Turns out*](http://definitivedrupal.org/suggestions/using-git-re-apply-old-over-written-change).
+[*Turns out*](https://definitivedrupal.org/suggestions/using-git-re-apply-old-over-written-change).
 
 
 

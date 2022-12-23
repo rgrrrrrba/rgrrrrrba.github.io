@@ -17,21 +17,21 @@ The problem was that the project was referencing an assembly from the `/bin/debu
 4. 'Manage' the package
 5. Add the project to the package:
 
-![](http://i.imgur.com/Zr5S9VX.png)
+![](https://i.imgur.com/Zr5S9VX.png)
 
 What I really want to do is add a convention test to make sure this doesn't happen again. Why? Because this happens fairly infrequently, but when it does it can be hard to diagnose because it could potentially be caused by a number of things. In my experience, most of the time it is caused by a bad reference. Nevertheless I always seem to burn too much time figuring it out. In my opinion, the ROI of this convention test will probably make it worthwhile.
 
 
 ## Turns out
 
-It's a bit tricky to get to the projects in a solution file. I didn't want to waste too much time in the internals of the build system so I found an [answer on Stack Overflow](http://stackoverflow.com/a/4634505/149259) that includes two wrapper classes for getting the solution, then iterating on the projects. The wrapper classes can be copied from [this gist](https://gist.github.com/bendetat/9a5a336d82b51ac0b564).
+It's a bit tricky to get to the projects in a solution file. I didn't want to waste too much time in the internals of the build system so I found an [answer on Stack Overflow](https://stackoverflow.com/a/4634505/149259) that includes two wrapper classes for getting the solution, then iterating on the projects. The wrapper classes can be copied from [this gist](https://gist.github.com/becdetat/9a5a336d82b51ac0b564).
 
 You'll need to add a reference to `Microsoft.Build`. Some of the classes that are used are actually deprecated, but this should work for long enough to get a good return on this test. The `Solution` wrapper class reads a `.sln` file and exposes a list of `SolutionProject` instance. Each `SolutionProject` exposes some of the properties of the project within the solution including the relative path, which I use to build a set of `Microsoft.Build.Project` instances for the convention test.
 
 
 ## Test cases
 
-I'm using NUnit, so my [test cases](http://www.nunit.org/index.php?p=testCaseSource&r=2.5) come from a public method that returns an enumeration of `TestCastData` instances:
+I'm using NUnit, so my [test cases](https://www.nunit.org/index.php?p=testCaseSource&r=2.5) come from a public method that returns an enumeration of `TestCastData` instances:
 
     public IEnumerable<TestCaseData> AllProjects
     {
@@ -68,7 +68,7 @@ This:
 
 ## Bangarang
 
-That's a [Hook](http://www.imdb.com/title/tt0102057/) reference, not some 'popular' EDM song.
+That's a [Hook](https://www.imdb.com/title/tt0102057/) reference, not some 'popular' EDM song.
 
 I'm using Shouldly for the assertion.
 
@@ -91,7 +91,7 @@ This was jammed together in LinqPad, but it's pretty straightforward. The first 
 
 Failures look like this, showing the bad reference in the `Tests` assembly:
 
-![](http://i.imgur.com/Hkc6y9a.png)
+![](https://i.imgur.com/Hkc6y9a.png)
 
 Viz.
 

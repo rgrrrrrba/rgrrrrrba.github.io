@@ -6,9 +6,9 @@ type: regular
 category: post
 ---
 
-Short story. Trying to install SQL Server 2008 R2 Express on a Windows Server 2003 (SP2) machine using [WebPI](http://www.microsoft.com/web/downloads/platform.aspx) – usually the best way to get server bits by far – but it fails with a meaningless message after a lengthy reboot that interrupted a small office.
+Short story. Trying to install SQL Server 2008 R2 Express on a Windows Server 2003 (SP2) machine using [WebPI](https://www.microsoft.com/web/downloads/platform.aspx) – usually the best way to get server bits by far – but it fails with a meaningless message after a lengthy reboot that interrupted a small office.
 
-I tried the [standalone installer](http://www.microsoft.com/en-us/download/details.aspx?id=30438) and got a more helpful error regarding the Windows Management Instrumentation (WMI) service. In Services the WMI service appeared to be running fine but [this MSDN thread](http://social.msdn.microsoft.com/Forums/en/sqlexpress/thread/bae90cfd-702d-427f-a4df-c66cc8c4d56d) reveals the problem and gives a solution. It’s an old problem that I’ve seen before relating to corrupt WMI bits. The forum post provides the following batch file that reregisters the service:
+I tried the [standalone installer](https://www.microsoft.com/en-us/download/details.aspx?id=30438) and got a more helpful error regarding the Windows Management Instrumentation (WMI) service. In Services the WMI service appeared to be running fine but [this MSDN thread](https://social.msdn.microsoft.com/Forums/en/sqlexpress/thread/bae90cfd-702d-427f-a4df-c66cc8c4d56d) reveals the problem and gives a solution. It’s an old problem that I’ve seen before relating to corrupt WMI bits. The forum post provides the following batch file that reregisters the service:
 
 	@echo on
 	cd /d c:\temp

@@ -7,11 +7,11 @@ category: post
 
 **DISCLAIMER:** I'm learning in the open here. This is the first time I've used Gulp and Bower and I'm sure I'm missing a heap of really important stuff. Enjoy!
 
-- Part 1: [Hello World! It's Gulp!](http://bendetat.com/hello-world-its-gulp.html)
-- Part 2: [A useful build pipeline using Gulp and Bower](http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html)
+- Part 1: [Hello World! It's Gulp!](hello-world-its-gulp.html)
+- Part 2: [A useful build pipeline using Gulp and Bower](a-useful-build-pipeline-using-gulp-and-bower.html)
 - Part 3: Cleaning and simplifying the Gulp pipeline
 
-I wasn't entirely happy with how the [previous build script](https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js) wrote out the minified JS and CSS files next to `index.html`, or how the vendor files had to be specified in the configuration, so I did some playing with the `gulp-useref` plugin and cleaned things up significantly.
+I wasn't entirely happy with how the [previous build script](https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js) wrote out the minified JS and CSS files next to `index.html`, or how the vendor files had to be specified in the configuration, so I did some playing with the `gulp-useref` plugin and cleaned things up significantly.
 
 I installed two new dependencies.
 
@@ -103,15 +103,15 @@ In the `serve` task (which sets up a static web server hosting the built site) I
 
 Now if a file changes, the files get rebuilt in the same process as the server. Because that server is just serving the entire source path any changes are available instantly.
 
-Here is the [`gulpfile.js` as at this post](https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js). Next I'll get some AngularJS happening.
+Here is the [`gulpfile.js` as at this post](https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js). Next I'll get some AngularJS happening.
 
 
 ## Further reading and resources
 
 - <https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js>
 - <https://github.com/gertjvr/ng-template>
-- <http://gulpjs.com/>
-- <http://nodejs.org/api/>
-- [`gulpfile.js` as of this post](https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js)
+- <https://gulpjs.com/>
+- <https://nodejs.org/api/>
+- [`gulpfile.js` as of this post](https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/bfdcced8a1d664d0a933db64c255bfb7268913a0/gulpfile.js)
 
 

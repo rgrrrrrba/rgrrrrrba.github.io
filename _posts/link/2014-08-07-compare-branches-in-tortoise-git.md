@@ -9,13 +9,13 @@ Using a PR / peer review model when developing in a team is a great way keep qua
 
 Unfortunately Bitbucket falls down once PRs reach a certain size:
 
-![This merge is too large to display](http://i.imgur.com/JRllPwb.png)
+![This merge is too large to display](https://i.imgur.com/JRllPwb.png)
 
 _i haz a sadz_
 
 Ideally, PRs should be small enough that this doesn't crop up, but when you're performing large refactors or working on significant feature branches the ideal isn't always possible.
 
-TortoiseGit to the rescue: [Compare (Diff) branches in Tortoise Git, or how to preview changes before doing a merge](http://wikgren.fi/compare-diff-branches-in-tortoise-git-or-how-to-preview-changes-before-doing-a-merge/).
+TortoiseGit to the rescue: [Compare (Diff) branches in Tortoise Git, or how to preview changes before doing a merge](https://wikgren.fi/compare-diff-branches-in-tortoise-git-or-how-to-preview-changes-before-doing-a-merge/).
 
 Basically:
 

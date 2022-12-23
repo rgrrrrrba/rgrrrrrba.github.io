@@ -9,10 +9,10 @@ Is a very annoying error message that you get when writing above average complex
 
 For me at least it happens like this:
 
-1. Ben writes a big meaty query, tests it, all ok
-2. Ben writes query #2, which has the same SELECTed columns as the first query, tests also, also ok
-3. Ben sticks a `UNION ALL` between the two queries, thus making Das Uberquery&trade; and securing his employment
-4. Ben executes said query and gets cryptic error message, spends rest of day tring to debug 300 lines of SQL, goes home with migraine.
+1. Bec writes a big meaty query, tests it, all ok
+2. Bec writes query #2, which has the same SELECTed columns as the first query, tests also, also ok
+3. Bec sticks a `UNION ALL` between the two queries, thus making Das Uberquery&trade; and securing his employment
+4. Bec executes said query and gets cryptic error message, spends rest of day tring to debug 300 lines of SQL, goes home with migraine.
 
 It sounds like one of the queries has an `ORDER BY` clause but of course I’ve taken all of the `ORDER BY`s out when joining them, and I’m ordering the UNION as a whole!
 

@@ -7,7 +7,7 @@ category: post
 
 I'm really interested in convention tests, and as I want to get into xUnit I thought I would try taking some patterns that I've used in NUnit and applying them in xUnit.
 
-The test project I created while writing this post is [available on GitHub](https://github.com/bendetat/convention-tests-in-xunit).
+The test project I created while writing this post is [available on GitHub](https://github.com/becdetat/convention-tests-in-xunit).
 
 
 ## First steps
@@ -39,14 +39,14 @@ So xUnit has `[Fact]`s while NUnit has `[Test]`s. Cool so far. Note that the cla
 
 ## Comparisons with NUnit
 
-The xUnit Wiki has a nice [comparison page](http://xunit.codeplex.com/wikipage?title=Comparisons) showing differences between NUnit, MSTest and itself. 
+The xUnit Wiki has a nice [comparison page](https://xunit.codeplex.com/wikipage?title=Comparisons) showing differences between NUnit, MSTest and itself. 
 
 Apart from the obvious `[Fact]` vs `[Test]` and not needing `[TestFixture]`, the big differences seem to be with how the two test frameworks handle fixture setup and teardown. NUnit uses `[SetUp]` and `[TearDown]` attributes to mark methods, while xUnit adds awesome to the mix by using the public constructor as the setup method. It just creates a new instance of the fixture class for each test. This completely obviates issues that have cropped up for me in NUnit around fixture state being shared between tests. Teardown is done by implementing `IDisposable`, in the `Dispose` method. I don't remember the last time I wrote a teardown method anyway, but using `IDisposable` is a really nice and obvious convention. Shared fixture state can be implemented with the `IUseFixture<T>` interface but I won't explore that here.
 
 
 ## A data-driven test
 
-I used NUnit's data-driven tests to TDD a simple Fibonacci number generator (my favourite integer sequence). The implementation of the generator is [in the repo](https://github.com/bendetat/convention-tests-in-xunit/blob/master/src/MyApp.Shared/FibonacciGenerator.cs).
+I used NUnit's data-driven tests to TDD a simple Fibonacci number generator (my favourite integer sequence). The implementation of the generator is [in the repo](https://github.com/becdetat/convention-tests-in-xunit/blob/master/src/MyApp.Shared/FibonacciGenerator.cs).
 
     [Test]
     [TestCase(0, 0)]

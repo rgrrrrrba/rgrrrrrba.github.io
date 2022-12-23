@@ -10,4 +10,4 @@ I changed the name of a form class and added a new class at the top of the class
 
 Of course the best thing would be to move the other classes into another file but that sounds like work :-)
 
-[1]: http://support.microsoft.com/kb/318603
+[1]: https://support.microsoft.com/kb/318603

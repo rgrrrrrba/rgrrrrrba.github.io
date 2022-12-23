@@ -11,8 +11,8 @@ An iPhone app needs the 4" launch screens present, otherwise the app will run at
 
 Sources:
 
-- <http://docs.xamarin.com/guides/ios/application_fundamentals/working_with_images/#2.5.launch-screen-images>
-- <http://docs.xamarin.com/guides/ios/application_fundamentals/working_with_images/#2.2.1.configuring-icons-with-property-lists>
+- <https://docs.xamarin.com/guides/ios/application_fundamentals/working_with_images/#2.5.launch-screen-images>
+- <https://docs.xamarin.com/guides/ios/application_fundamentals/working_with_images/#2.2.1.configuring-icons-with-property-lists>
 
 ### Launch images
 - 320 x 480

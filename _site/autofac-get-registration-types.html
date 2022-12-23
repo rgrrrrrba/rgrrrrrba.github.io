@@ -40,7 +40,7 @@
 
 <p>What I really need is something like <code class="language-plaintext highlighter-rouge">Consumer(IEnumerable&lt;Type&gt; fooTypes)</code> where the types are everything implementing <code class="language-plaintext highlighter-rouge">IFoo</code>, but of course Autofac can’t resolve that.</p>
 
-<p>Inspired by <a href="http://stackoverflow.com/a/9503695/149259">this StackOverflow answer</a>, here’s an extension method that does what I need:</p>
+<p>Inspired by <a href="https://stackoverflow.com/a/9503695/149259">this StackOverflow answer</a>, here’s an extension method that does what I need:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static class LifetimeScopeExtensions
 {
@@ -73,7 +73,7 @@
             .InstancePerDependency();
 </code></pre></div></div>
 
-<p><img src="http://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif" alt="" /></p>
+<p><img src="https://media.giphy.com/media/xQzml5M6C8Wly/giphy.gif" alt="" /></p>
 
 
 

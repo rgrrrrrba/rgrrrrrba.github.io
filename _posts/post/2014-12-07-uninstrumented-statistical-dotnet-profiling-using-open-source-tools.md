@@ -7,7 +7,7 @@ category: post
 
 Profilers are unusual tools in that you generally never need one, right up to just past the point where users are melting down and you desperately need one. Usually you get a condition that involves many different pieces of code and internal services and libraries put together in way that quickly grinds your application to a painful halt. Those conditions are (hopefully) pretty rare and in my experience come up when you change something in one area that turns out to badly affect a seemingly unrelated area.
 
-This post is about tools for profiling client applications and applications running in-process (like a console application wrapped around a TopShelf service or self-hosting OWIN). So far I haven't had a need for any ASP.NET profiling but it looks like [MiniProfiler](http://miniprofiler.com/) looks compelling - although it doesn't appear to uninstrumented call profiling, which is probably unlikely to help in that environment anyway.
+This post is about tools for profiling client applications and applications running in-process (like a console application wrapped around a TopShelf service or self-hosting OWIN). So far I haven't had a need for any ASP.NET profiling but it looks like [MiniProfiler](https://miniprofiler.com/) looks compelling - although it doesn't appear to uninstrumented call profiling, which is probably unlikely to help in that environment anyway.
 
 Since I don't tend to use or need a profiler that often (although automated profiling should really happen as part of continuous integration) I don't have a profiler of choice. I'm told that I should use windbg but because I don't want to break my mind I'll avoid that as long as a simpler tool solves the immediate problem. JetBrains' [dotTrace](https://www.jetbrains.com/profiler/) product has been recommended to me fairly consistently, so the second last time I needed to diagnose one of those 'crashing halt' issues in a WPF app I downloaded the trial. It was great, I found the issue pretty quickly, but the only view that I actually used was the call tree, which shows the methods that have the most amount of CPU time in a tree. This view lets you crawl down these methods to find the callers, and their callers, and eventually the source of the inefficient operation.
 
@@ -32,7 +32,7 @@ SlimTune also appears to be abandoned, with the latest 0.3.0 version released in
 
 This isn't a pretty application (it's described as early beta) and needs a bit of hand-holding to get the results. It wants to open ports 3000 and 3001 in the firewall, which it uses to communicate between the profiler and the application being profiled.
 
-![](http://i.imgur.com/QeAVxHM.png)
+![](https://i.imgur.com/QeAVxHM.png)
 
 You can't connect to an application that wasn't launched by SlimTune itself, since it needs to attach the instrumentation at startup. This means that you can't connect to an already running application, including one that you've F5ed from Visual Studio. You can start an application from SlimTune and connect to it later, say if you have to navigate to the state that you want to profile and then connect, to limit the amount of data in the profile results to reduce any noise.
 
@@ -57,6 +57,6 @@ That said, if you need a profiler once a month at most and don't want or need VS
 
 
 
-[^1]: A handrolled ORM, cache, IoC container and business layer (with n-level undo! I had been reading a lot of [Rockford Lhotka](http://www.lhotka.net/)'s work) 
+[^1]: A handrolled ORM, cache, IoC container and business layer (with n-level undo! I had been reading a lot of [Rockford Lhotka](https://www.lhotka.net/)'s work) 
 
 

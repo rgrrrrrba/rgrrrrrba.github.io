@@ -40,10 +40,10 @@
   </li>
   <li>Create the mail box: <code class="language-plaintext highlighter-rouge">New-Mailbox -Name "Shared mail box name" -Alias shared_mail_box -Shared</code>
     <ol>
-      <li>The <code class="language-plaintext highlighter-rouge">shared_mail_box</code> alias shown above is used as the name of the mail box, eg <code class="language-plaintext highlighter-rouge">helloworld@swxben.com</code></li>
+      <li>The <code class="language-plaintext highlighter-rouge">shared_mail_box</code> alias shown above is used as the name of the mail box, eg <code class="language-plaintext highlighter-rouge">helloworld@becdetat.com</code></li>
     </ol>
   </li>
-  <li>In the Exchange control panel for the organisation (<a href="http://microsoftonline.com">http://microsoftonline.com</a>, <em>Outlook</em>, <em>Options</em>, <em>See all options</em>, <em>Manage</em>, <em>Manage My Organization</em>) create a new distribution group for the people that will need to be able to access the shared mailbox. When creating the group make it a security group.
+  <li>In the Exchange control panel for the organisation (<a href="https://microsoftonline.com">https://microsoftonline.com</a>, <em>Outlook</em>, <em>Options</em>, <em>See all options</em>, <em>Manage</em>, <em>Manage My Organization</em>) create a new distribution group for the people that will need to be able to access the shared mailbox. When creating the group make it a security group.
     <ol>
       <li>note that the name of the security group cannot be the same as the shared mailbox created in step 2, I add ‘SG’ to the end od of the group name, eg <code class="language-plaintext highlighter-rouge">HelloWorldSG</code></li>
     </ol>

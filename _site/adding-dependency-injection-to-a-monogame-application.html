@@ -37,9 +37,9 @@
 
 <h3 id="building-a-shooter-game">Building a Shooter Game</h3>
 
-<p>I worked my way through all six of <a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s “Building a Shooter Game”</a> tutorials, but the series ends abruptly and hasn’t been updated for nine months. So I’m going to continue with my experimenting with the game, and I’ll try to document the process as I go.</p>
+<p>I worked my way through all six of <a href="https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s “Building a Shooter Game”</a> tutorials, but the series ends abruptly and hasn’t been updated for nine months. So I’m going to continue with my experimenting with the game, and I’ll try to document the process as I go.</p>
 
-<p>If you want to play along (sorry) you can either go through Tara’s tutorials then tackle this yourself, or download my solution either <a href="https://github.com/bendetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36">before</a> or <a href="https://github.com/bendetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007">after</a> these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to <a href="http://bendetat.com/up-and-running-with-monogame.html">install and configure MonoGame with Visual Studio</a> before starting.</p>
+<p>If you want to play along (sorry) you can either go through Tara’s tutorials then tackle this yourself, or download my solution either <a href="https://github.com/becdetat/monogame-tw-tutorial/commit/7398a2628bffb1c931e6755d9ba3a1737c320e36">before</a> or <a href="https://github.com/becdetat/monogame-tw-tutorial/commit/26a12e3595604d807fbe0c76417e34fb99155007">after</a> these changes. I would recommend going through the tutorial at least to get an understanding of the way the game was built up to the final state. It only takes around 1-2 hours all up. You will need to <a href="up-and-running-with-monogame.html">install and configure MonoGame with Visual Studio</a> before starting.</p>
 
 <p>The first thing I wanted to do is to refactor the code so I can use dependency injection. I have two reasons for this:</p>
 
@@ -291,7 +291,7 @@ Additional information: No Graphics Device Manager
 
 <p>Here the <code class="language-plaintext highlighter-rouge">Player</code> class has a dependency on an <code class="language-plaintext highlighter-rouge">IContentManager</code> instance. When the application is running Autofac will provide an instance of <code class="language-plaintext highlighter-rouge">ContentManagerWrapper</code>, which just wraps the usual content manager, primed with the application’s content. Calling <code class="language-plaintext highlighter-rouge">contentManager.Load()</code> calls the underlying content manager.</p>
 
-<p>If I want to write some unit tests around the <code class="language-plaintext highlighter-rouge">Player</code> class I can just pass in a mock implementation of <code class="language-plaintext highlighter-rouge">IContentManager</code>, without having to worry about any underlying implementations. Here is an example using <a href="http://nsubstitute.github.io/">NSubstitute</a>:</p>
+<p>If I want to write some unit tests around the <code class="language-plaintext highlighter-rouge">Player</code> class I can just pass in a mock implementation of <code class="language-plaintext highlighter-rouge">IContentManager</code>, without having to worry about any underlying implementations. Here is an example using <a href="https://nsubstitute.github.io/">NSubstitute</a>:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var texture = Substitute.For&lt;ITexture2D&gt;();
 
@@ -380,7 +380,7 @@ var player = new Player(contentManager, ...);
 
 <p>Oh, and here is an obligatory screenshot:</p>
 
-<p><img src="http://i.imgur.com/XkRIKoX.png" alt="" /></p>
+<p><img src="https://i.imgur.com/XkRIKoX.png" alt="" /></p>
 
 
 <br/>

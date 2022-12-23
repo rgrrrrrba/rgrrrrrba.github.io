@@ -8,23 +8,23 @@ category: post
 **DISCLAIMER:** I'm learning in the open here. This is the first time I've used Gulp and I'm sure I'm missing a heap of really important stuff. Enjoy!
 
 - Part 1: Hello World! It's Gulp!
-- Part 2: [A useful build pipeline using Gulp and Bower](http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html)
-- Part 3: [Cleaning and simplifying the Gulp pipeline](http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html)
+- Part 2: [A useful build pipeline using Gulp and Bower](a-useful-build-pipeline-using-gulp-and-bower.html)
+- Part 3: [Cleaning and simplifying the Gulp pipeline](cleaning-and-simplifying-the-gulp-pipeline.html)
 
-[Gulp](http://gulpjs.org) is a Node.js based build tool. It executes `gulpfile.js` in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.
+[Gulp](https://gulpjs.org) is a Node.js based build tool. It executes `gulpfile.js` in the project root to set up a build pipeline, doing things like bundling, minification, and artifact copying.
 
-This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as [Bower](http://bower.io) can be used to manage these complex client-side sites.
+This is useful in a workflow where you have an essentially static website that uses a client-side framework such as AngularJS, backed onto a web service that exposes functionality via something like a REST API. Build tools like Gulp and JS packagement management tools such as [Bower](https://bower.io) can be used to manage these complex client-side sites.
 
-The static site that I'll hopefully end up generating in the next post will be used with a [Nancy](http://nancyfx.org) website. The end result of this post is a Gulp build script that simply copies an `index.html` file from `/src/client` to `/src/client-dist`.
+The static site that I'll hopefully end up generating in the next post will be used with a [Nancy](https://nancyfx.org) website. The end result of this post is a Gulp build script that simply copies an `index.html` file from `/src/client` to `/src/client-dist`.
 
 
 ## Prerequisites
 
-Install Node and NPM. The easiest way may be via [Chocolatey](http://chocolatey.org), this does both:
+Install Node and NPM. The easiest way may be via [Chocolatey](https://chocolatey.org), this does both:
 
 	cinst nodejs.install
 
-After installation, you may need to add `C:\Program Files\nodejs` to the system path and create a new folder in `C:\Users\ben_000\AppData\Roaming` named `npm`.
+After installation, you may need to add `C:\Program Files\nodejs` to the system path and create a new folder in `C:\Users\bec_000\AppData\Roaming` named `npm`.
 
 Get NPM to create a `package.json` file in the project root by running `npm install` and working through the wizard. Now install Gulp using NPM:
 
@@ -92,7 +92,7 @@ Now `gulp hello` does this:
 
 Now make you a build pipeline. Empty out `gulpfile.js` and start again, partner.
 
-![](http://media.giphy.com/media/a1wyl0YQrCGm4/giphy.gif)
+![](https://media.giphy.com/media/a1wyl0YQrCGm4/giphy.gif)
 
 
 ## Lots of scripting just to copy a file!
@@ -207,14 +207,14 @@ You can add a quick `clean` task too, which will delete the `src/client-dist` fo
 		del([].concat(config.paths.distribution));
 	});
 
-[Next I'll add some value to the build pipeline](http://bendetat.com/a-useful-build-pipeline-using-gulp-and-bower.html) by minifying and bundling JS and CSS, and injecting the results into `index.html`. The result will be a static website set up for some AngularJS work.
+[Next I'll add some value to the build pipeline](a-useful-build-pipeline-using-gulp-and-bower.html) by minifying and bundling JS and CSS, and injecting the results into `index.html`. The result will be a static website set up for some AngularJS work.
 
 
 ## Further reading and resources
 
 - <https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js>
 - <https://github.com/gertjvr/ng-template>
-- <http://gulpjs.com/>
-- <http://nodejs.org/api/>
+- <https://gulpjs.com/>
+- <https://nodejs.org/api/>
 
 

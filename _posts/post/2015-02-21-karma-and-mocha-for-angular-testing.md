@@ -7,7 +7,7 @@ category: post
 
 ## Setting up Karma with Mocha, PhantomJS and Chai
 
-I'm following the [installation guide](http://karma-runner.github.io/0.12/intro/installation.html) at [karma-runner.github.io](http://karma-runner.github.io).
+I'm following the [installation guide](https://karma-runner.github.io/0.12/intro/installation.html) at [karma-runner.github.io](https://karma-runner.github.io).
 
 I already have Node.js and NPM installed so I won't go through the process for that, but I've found the easiest way to get running is via [Chocolatey NuGet](https://chocolatey.org/packages/nodejs.install) using `choco install nodejs.install`.
 
@@ -15,13 +15,13 @@ First up, install Karma:
 
 	npm install --save-dev karma
 
-Now install some plugins for Karma. The installation instructions are for Jasmine and the Chrome launcher, but I want [Mocha](http://mochajs.org/) as the testing framework and [PhantomJS](http://phantomjs.org/) for a headless (window-less) test environment.
+Now install some plugins for Karma. The installation instructions are for Jasmine and the Chrome launcher, but I want [Mocha](https://mochajs.org/) as the testing framework and [PhantomJS](https://phantomjs.org/) for a headless (window-less) test environment.
 
 > *Huh? I thought Karma was the test environment*
 
 Karma is a test *runner*. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I'm setting up tests for client-side JavaScript - in particular, I'm going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.
 
-So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use [Chai](http://chaijs.com/) as the assertion library.
+So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use [Chai](https://chaijs.com/) as the assertion library.
 
 	npm install --save-dev karma-mocha
 	npm install --save-dev karma-phantomjs-launcher
@@ -57,7 +57,7 @@ To get Chai included in the test pipeline, we need to edit `karma-conf.js` and a
 
     frameworks: ['mocha', 'chai'],
 
- Running `karma start` will execute the default `karma-conf.js` (or `karma-conf.coffee`). First we need a test to run. In `./source-and-tests/` I created `array-tests.js` which just contains the [first example](http://mochajs.org/#synchronous-code) from Mocha's documentation.
+ Running `karma start` will execute the default `karma-conf.js` (or `karma-conf.coffee`). First we need a test to run. In `./source-and-tests/` I created `array-tests.js` which just contains the [first example](https://mochajs.org/#synchronous-code) from Mocha's documentation.
 
 	describe('Array', function(){
 	  describe('#indexOf()', function(){
@@ -70,7 +70,7 @@ To get Chai included in the test pipeline, we need to edit `karma-conf.js` and a
 
 Running `karma start` should find and run this test, then watch for changes to the watched files and repeating.
 
-![](http://i.imgur.com/cwTVVjT.png)
+![](https://i.imgur.com/cwTVVjT.png)
 
 
 ## Adding AngularJS to the mix
@@ -288,7 +288,7 @@ To simulate the error, you can just tell the `$httpBackend` to respond with an e
 
 Please imagine that this cat is really stoked about now being able to test front-end JavaScript.
 
-![Source: http://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg](http://bendetat.com/images/tdd-cat.jpg)
+![Source: https://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg](/images/tdd-cat.jpg)
 
 
 

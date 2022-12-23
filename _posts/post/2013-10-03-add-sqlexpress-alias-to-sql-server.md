@@ -10,7 +10,7 @@ categories:
 A lot of code bases are hard-coded to point to `.\sqlexpress` which is the default named instance for SQL Server Express. To add a `.\sqlexpress` alias to an unnamed SQL Server instance (developer edition in my case) follow these simple mind-blowing steps:
 
 1. Open *Sql Server Configuration Manager*
-	- You may not be able to find this from the Start screen. See [here](http://technet.microsoft.com/en-us/library/ms174212.aspx) for more details but I can just open the Run dialog (`win-R`) and enter `sqlservermanager11.msc` (for SQL Server 2012) or `sqlservermanager10.msc` (if you have 2010).
+	- You may not be able to find this from the Start screen. See [here](https://technet.microsoft.com/en-us/library/ms174212.aspx) for more details but I can just open the Run dialog (`win-R`) and enter `sqlservermanager11.msc` (for SQL Server 2012) or `sqlservermanager10.msc` (if you have 2010).
 2. Open *SQL Server Network Configuration*
 3. Open *Protocols for MSSQLSERVER*
 4. Enable TCP/IP

@@ -6,14 +6,14 @@ type: regular
 category: post
 ---
 
-So I’ve been getting my console-fu on since moving to [Mercurial][http://blog.belfryimages.com.au/category/mercurial/] at work, and finding ways to get more efficient. One thing that bugs me is having to spend time grabbing the mouse to search Google via a browser. I’ve also wanted to spend some time with Ruby, so to acheive both goals I wrote a little script that uses the Google AJAX Search API, which returns search results as a JSON object. The full code is available as a [gist on my GitHub][http://gist.github.com/503145]. There are a couple of interesting (for me anyway) parts of the code that I’ll go through now.
+So I’ve been getting my console-fu on since moving to [Mercurial][https://blog.belfryimages.com.au/category/mercurial/] at work, and finding ways to get more efficient. One thing that bugs me is having to spend time grabbing the mouse to search Google via a browser. I’ve also wanted to spend some time with Ruby, so to acheive both goals I wrote a little script that uses the Google AJAX Search API, which returns search results as a JSON object. The full code is available as a [gist on my GitHub][https://gist.github.com/503145]. There are a couple of interesting (for me anyway) parts of the code that I’ll go through now.
 
 The request/response is done via a HTTP GET responding with a JSON-serialised object graph. A query string is built up and parsed into a URI object (using the same reference), then the request is made and parsed from the text JSON representation into an associative array (the result of JSON.parse):
 
 	require 'net/http'
 	require 'json'
 	...
-	queryURI = "http://ajax.google....."
+	queryURI = "https://ajax.google....."
 	queryURI = URI.parse(queryURI)
 	 
 	data = Net::HTTP.get_response(queryURI)

@@ -30,14 +30,14 @@
 <p>Running up a WCF service host on a new address gives this exception:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Unhandled Exception: System.ServiceModel.AddressAccessDeniedException: HTTP could 
-not register URL http://+:61100/HelloWorld.svc/. Your process does not have access rights 
-to this namespace (see http://go.microsoft.com/fwlink/?LinkId=70353 for details). ---&gt; 
+not register URL https://+:61100/HelloWorld.svc/. Your process does not have access rights 
+to this namespace (see https://go.microsoft.com/fwlink/?LinkId=70353 for details). ---&gt; 
 System.Net.HttpListenerException: Access is denied
 </code></pre></div></div>
 
-<p>The <a href="http://go.microsoft.com/fwlink/?LinkId=70353">link</a>  (Configuring HTTP and HTTPS on MSDN) is pretty useful, it resolves to <a href="http://msdn.microsoft.com/en-us/library/ms733768.aspx">here</a> at the moment (go.microsoft.com seems to break links at times). In short, on Win7, open an administrator console and run this:</p>
+<p>The <a href="https://go.microsoft.com/fwlink/?LinkId=70353">link</a>  (Configuring HTTP and HTTPS on MSDN) is pretty useful, it resolves to <a href="https://msdn.microsoft.com/en-us/library/ms733768.aspx">here</a> at the moment (go.microsoft.com seems to break links at times). In short, on Win7, open an administrator console and run this:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netsh http add urlacl url=http://+:61100/HelloWorld.svc user=DOMAIN\USER
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netsh http add urlacl url=https://+:61100/HelloWorld.svc user=DOMAIN\USER
 </code></pre></div></div>
 
 <p>The error messages are pretty cryptic so good luck…</p>

@@ -89,13 +89,13 @@ Quick note: to delete an instance you just need to terminate it. It doesn't disa
 
 
 
-[aws-home]: http://aws.amazon.com/
-[launch-instance-button]: http://i.imgur.com/SOJx4Np.png
-[ssh-tunnel]: http://i.imgur.com/iYRRB3k.png
+[aws-home]: https://aws.amazon.com/
+[launch-instance-button]: https://i.imgur.com/SOJx4Np.png
+[ssh-tunnel]: https://i.imgur.com/iYRRB3k.png
 [ec2-putty]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html?console_help=true
-[set-up-ubuntu-on-ec2]: http://xmodulo.com/how-to-set-up-ubuntu-desktop-vm-on-amazon-ec2.html
-[^how-to-specify-a-private-key-in-ssh]: http://xmodulo.com/how-to-specify-private-key-file-in-ssh.html
-[download-tight-vnc]: http://www.tightvnc.com/download.php
-[make-vnc-server-work-with-ubuntu-desktop]: http://askubuntu.com/a/475036/29199
-[grey-screen-of-x-windows-voidness]: http://i.imgur.com/crHgZFM.png
-[new-shiny-ubuntu]: http://i.imgur.com/m7PRgMm.png
+[set-up-ubuntu-on-ec2]: https://xmodulo.com/how-to-set-up-ubuntu-desktop-vm-on-amazon-ec2.html
+[^how-to-specify-a-private-key-in-ssh]: https://xmodulo.com/how-to-specify-private-key-file-in-ssh.html
+[download-tight-vnc]: https://www.tightvnc.com/download.php
+[make-vnc-server-work-with-ubuntu-desktop]: https://askubuntu.com/a/475036/29199
+[grey-screen-of-x-windows-voidness]: https://i.imgur.com/crHgZFM.png
+[new-shiny-ubuntu]: https://i.imgur.com/m7PRgMm.png

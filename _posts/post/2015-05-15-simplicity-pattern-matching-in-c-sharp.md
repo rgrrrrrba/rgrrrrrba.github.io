@@ -5,16 +5,16 @@ date: 2015-05-15
 category: post
 ---
 
-*TL;DR;* Check out my awesome new library for [pattern matching in C# - Simplicity](https://www.nuget.org/packages/Simplicity) ([GitHub](https://github.com/bendetat/Simplicity)) or just copy the contents of the [single file](https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs) into your project for near-instant gratification.
+*TL;DR;* Check out my awesome new library for [pattern matching in C# - Simplicity](https://www.nuget.org/packages/Simplicity) ([GitHub](https://github.com/becdetat/Simplicity)) or just copy the contents of the [single file](https://github.com/becdetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs) into your project for near-instant gratification.
 
 Pattern matching is a method of transforming data in some way, similar to `map` (`.Select()` in LINQ) but closer to a `switch` statement in structure. It is a first class language construct in many functional languages including F#:
 
-	let name = "Ben"
+	let name = "Rebecca"
 
 	let result =
 		match name with 
 		| "Fiona" -> "It's Fiona!"
-		| "Ben" -> "it me!"
+		| "Rebecca" -> "it me!"
 		| "Steve" -> "Steve you rascal!"
 		| _ -> "I don't know this person"
 		
@@ -22,14 +22,14 @@ Pattern matching is a method of transforming data in some way, similar to `map` 
 
 That's as deep an explanation of pattern matching in F# you're going to get from me at this point, but this is conceptually similar to this `switch` construct in C#:
 
-	var name = "Ben";
+	var name = "Rebecca";
 	string result;
 
 	switch (name) {
 		case "Fiona":
 			result =  "It's Fiona!";
 			break;
-		case "Ben":
+		case "Rebecca":
 			result = "it me!";
 			break;
 		case "Steve":
@@ -50,14 +50,14 @@ This is of course pretty average to read, relies on `break` for execution contro
 	</ul>
 </aside>
 
-When I found out about pattern matching I wanted to write code the same way in C#. I found a great [article by Matt Podwysocki](http://codebetter.com/matthewpodwysocki/2008/09/16/functional-c-pattern-matching/) and adapted and extended the code into a single-file library called [Simplicity](https://github.com/bendetat/Simplicity). Install it [using NuGet](https://www.nuget.org/packages/Simplicity) (`install-package PatternMatching`) or just [copy the single file](https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs) into your project.
+When I found out about pattern matching I wanted to write code the same way in C#. I found a great [article by Matt Podwysocki](https://codebetter.com/matthewpodwysocki/2008/09/16/functional-c-pattern-matching/) and adapted and extended the code into a single-file library called [Simplicity](https://github.com/becdetat/Simplicity). Install it [using NuGet](https://www.nuget.org/packages/Simplicity) (`install-package PatternMatching`) or just [copy the single file](https://github.com/becdetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs) into your project.
 
 Now for the fun part. Here's the above example using my library. It adds an generic extension method called `Match()` which is the usual entry point. The match statement is built up using a fluent interface.
 
-	var name = "Ben";
+	var name = "Rebecca";
 	var result = name.Match()
 		.With(x => x == "Fiona", "It's Fiona!")
-		.With(x => x == "Ben", "Hey it's me!")
+		.With(x => x == "Rebecca", "Hey it's me!")
 		.With(x => x == "Steve", "Steve you rascal!")
 		.Else("I don't know this person")
 		.Do();
@@ -67,7 +67,7 @@ The result can be an action, taking the value as a parameter:
 	var name = "George";
 	var result = name.Match()
 		.With(x => x == "Fiona", "It's Fiona!")
-		.With(x => x == "Ben", x => string.Format("Hey it's {0}!", x))
+		.With(x => x == "Rebecca", x => string.Format("Hey it's {0}!", x))
 		.With(x => x == "Steve", "Steve you rascal!")
 		.Else(x => string.Format("I don't know {0}", x))
 		.Do();
@@ -154,12 +154,12 @@ This is getting quite DRY but closing over a local mutable value will have the p
 		
 	var alfred = processName("Alfred");
 	var fiona = processName("Fiona");
-	var ben = processName("Ben");
+	var bec = processName("Bec");
 	var xerces = processName("Xerces");
 
 	// alfred = "Starts with A"
 	// fiona = "Fiona starts with F"
-	// ben = "Starts with B"
+	// bec = "Starts with B"
 	// xerces = "Unknown"
 
-Note that this isn't especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. [Submit a pull request!](https://github.com/bendetat/Simplicity)
+Note that this isn't especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. [Submit a pull request!](https://github.com/becdetat/Simplicity)

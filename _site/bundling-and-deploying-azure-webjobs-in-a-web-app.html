@@ -31,7 +31,7 @@
 	"Nimbus is a .NET client library to add an easy to develop against experience against the Azure Service Bus or the Windows Service Bus."
 </aside>
 
-<p>I’ve been working on a site hosted in Azure. Up until a few days ago it consisted of a single, monolithic web app, but I had been implementing it against <a href="http://nimbusapi.github.io/">Nimbus</a>’s <a href="https://www.nuget.org/packages/Nimbus.MessageContracts/">message</a> and <a href="https://www.nuget.org/packages/Nimbus.InfrastructureContracts/">infrastructure</a> contract libraries, with a simple in-process bus implementation. This paid off because I reached a point where I needed to offload some asynchronous work to the service layer while keeping things simple in the site layer, and converting the entire application to use Service Bus took a few hours all up.</p>
+<p>I’ve been working on a site hosted in Azure. Up until a few days ago it consisted of a single, monolithic web app, but I had been implementing it against <a href="https://nimbusapi.github.io/">Nimbus</a>’s <a href="https://www.nuget.org/packages/Nimbus.MessageContracts/">message</a> and <a href="https://www.nuget.org/packages/Nimbus.InfrastructureContracts/">infrastructure</a> contract libraries, with a simple in-process bus implementation. This paid off because I reached a point where I needed to offload some asynchronous work to the service layer while keeping things simple in the site layer, and converting the entire application to use Service Bus took a few hours all up.</p>
 
 <p>That left me with needing somewhere to host the service layer. Load and scalability isn’t an issue so I went with a <a href="https://azure.microsoft.com/en-us/documentation/articles/web-sites-create-web-jobs/">WebJob</a>.</p>
 
@@ -39,7 +39,7 @@
 
 <p>Getting a WebJob deployed is fairly easy, but everything has to be correct or the job just won’t run, and there isn’t any support for diagnosing why. As far as Azure is concerned it just doesn’t exist.</p>
 
-<p>I’m creating a continuous WebJob that uses Nimbus for messaging. The Azure WebJobs API has its own methods for registering endpoints, and for creating triggered or scheduled jobs. Scott Hanselman has a great blog post explaining <a href="http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx">how to use the API in this way</a>. The WebJob will basically be a container for a Nimbus message pump.</p>
+<p>I’m creating a continuous WebJob that uses Nimbus for messaging. The Azure WebJobs API has its own methods for registering endpoints, and for creating triggered or scheduled jobs. Scott Hanselman has a great blog post explaining <a href="https://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx">how to use the API in this way</a>. The WebJob will basically be a container for a Nimbus message pump.</p>
 
 <h2 id="creating-the-webjob-executable">Creating the WebJob executable</h2>
 
@@ -100,7 +100,7 @@
 <p>For Octopack to include the jobs, the job path just needs to be added to the project’s <code class="language-plaintext highlighter-rouge">.nuspec</code>:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;?xml version="1.0"?&gt;
-&lt;package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"&gt;
+&lt;package xmlns="https://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"&gt;
 	...
 	&lt;files&gt;
 		...
@@ -111,17 +111,17 @@
 
 <p>The solution’s build order needs to have the job’s built before the web site (so the job’s artifacts are available when building the site). You can do that by right-clicking the project, selecting ‘Project Build Order’, and adding the WebJob as a dependency of the web site.</p>
 
-<p>That’s pretty much all there is to it. When the solution is built and packed, the WebJob will be included in the <code class="language-plaintext highlighter-rouge">.nupkg</code> file, and Octopus will automatically patch the WebJob’s <code class="language-plaintext highlighter-rouge">App.config</code> when configuring the site. It’s also a good idea to logging using something like <a href="http://getseq.net/">Seq</a> to see the WebJob start up with the site.</p>
+<p>That’s pretty much all there is to it. When the solution is built and packed, the WebJob will be included in the <code class="language-plaintext highlighter-rouge">.nupkg</code> file, and Octopus will automatically patch the WebJob’s <code class="language-plaintext highlighter-rouge">App.config</code> when configuring the site. It’s also a good idea to logging using something like <a href="https://getseq.net/">Seq</a> to see the WebJob start up with the site.</p>
 
 <h2 id="resources--further-reading">Resources &amp; further reading:</h2>
 
 <ul>
-  <li><a href="http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx">Introducing Windows Azure WebJobs - Scott Hanselman</a></li>
-  <li><a href="http://www.troyhunt.com/2015/01/azure-webjobs-are-awesome-and-you.html">Azure WebJobs are awesome and you should start using them right now! - Troy Hunt</a></li>
+  <li><a href="https://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx">Introducing Windows Azure WebJobs - Scott Hanselman</a></li>
+  <li><a href="https://www.troyhunt.com/2015/01/azure-webjobs-are-awesome-and-you.html">Azure WebJobs are awesome and you should start using them right now! - Troy Hunt</a></li>
   <li><a href="https://azure.microsoft.com/en-us/documentation/articles/web-sites-create-web-jobs/">Run Background tasks with WebJobs - Azure</a></li>
   <li><a href="https://robdmoore.id.au/blog/2014/07/22/my-stance-on-azure-worker-roles/">My stance on Azure Worker Roles - Rob Moore</a></li>
-  <li><a href="http://blog.amitapple.com/post/74215124623/deploy-azure-webjobs/#.VbjV2W6qpBf">How to deploy Azure WebJobs - Amit Apple</a></li>
-  <li><a href="http://withouttheloop.com/articles/2015-06-23-deploying-custom-services-as-azure-webjobs/">Deploying custom services as Azure Webjobs - Liam McLennan</a></li>
+  <li><a href="https://blog.amitapple.com/post/74215124623/deploy-azure-webjobs/#.VbjV2W6qpBf">How to deploy Azure WebJobs - Amit Apple</a></li>
+  <li><a href="https://withouttheloop.com/articles/2015-06-23-deploying-custom-services-as-azure-webjobs/">Deploying custom services as Azure Webjobs - Liam McLennan</a></li>
 </ul>
 
 

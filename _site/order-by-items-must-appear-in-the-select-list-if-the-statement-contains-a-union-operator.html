@@ -32,10 +32,10 @@
 <p>For me at least it happens like this:</p>
 
 <ol>
-  <li>Ben writes a big meaty query, tests it, all ok</li>
-  <li>Ben writes query #2, which has the same SELECTed columns as the first query, tests also, also ok</li>
-  <li>Ben sticks a <code class="language-plaintext highlighter-rouge">UNION ALL</code> between the two queries, thus making Das Uberquery™ and securing his employment</li>
-  <li>Ben executes said query and gets cryptic error message, spends rest of day tring to debug 300 lines of SQL, goes home with migraine.</li>
+  <li>Bec writes a big meaty query, tests it, all ok</li>
+  <li>Bec writes query #2, which has the same SELECTed columns as the first query, tests also, also ok</li>
+  <li>Bec sticks a <code class="language-plaintext highlighter-rouge">UNION ALL</code> between the two queries, thus making Das Uberquery™ and securing his employment</li>
+  <li>Bec executes said query and gets cryptic error message, spends rest of day tring to debug 300 lines of SQL, goes home with migraine.</li>
 </ol>
 
 <p>It sounds like one of the queries has an <code class="language-plaintext highlighter-rouge">ORDER BY</code> clause but of course I’ve taken all of the <code class="language-plaintext highlighter-rouge">ORDER BY</code>s out when joining them, and I’m ordering the UNION as a whole!</p>

@@ -10,7 +10,7 @@ I'm adding push notifications to an iOS app, sent from an ASP.NET MVC applicatio
 This post skims over some important frameworks:
 
 - [PushSharp](https://github.com/Redth/PushSharp)
-- [RestSharp](http://restsharp.org/)
+- [RestSharp](https://restsharp.org/)
 - ASP.NET Web API
 
 ### 1. Create certificates and profiles
@@ -146,13 +146,13 @@ Assuming everything is configured correctly a notification can be pushed to a de
 		.ForDeviceToken(...)
 		.WithAlert("Alert text"));
 
-The client app must have the notifications allowed by the user and the app must _not_ be in the foreground. If it is in the foreground the push notification has to be handled and displayed by the app itself, [as described here](http://roycornelissen.wordpress.com/2011/05/12/push-notifications-in-ios-with-monotouch/).
+The client app must have the notifications allowed by the user and the app must _not_ be in the foreground. If it is in the foreground the push notification has to be handled and displayed by the app itself, [as described here](https://roycornelissen.wordpress.com/2011/05/12/push-notifications-in-ios-with-monotouch/).
 
 
 ### References
 
 - <https://github.com/Redth/PushSharp/blob/master/Client.Samples/PushSharp.ClientSample.MonoTouch/PushSharp.ClientSample.MonoTouch/AppDelegate.cs>
-- <http://roycornelissen.wordpress.com/2011/05/12/push-notifications-in-ios-with-monotouch/>
+- <https://roycornelissen.wordpress.com/2011/05/12/push-notifications-in-ios-with-monotouch/>
 - <https://developer.apple.com/library/mac/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html>
-- <http://help.adobe.com/en_US/as3/iphone/WS144092a96ffef7cc-371badff126abc17b1f-7fff.html>
+- <https://help.adobe.com/en_US/as3/iphone/WS144092a96ffef7cc-371badff126abc17b1f-7fff.html>
 - <https://code.google.com/p/apns-sharp/wiki/HowToCreatePKCS12Certificate>

@@ -51,7 +51,7 @@ Add `Startup` and `Bootstrapper` classes:
         }
     }
 
-If you create `\app\test.html` inside the Nancy site's root it should be served from `http://localhost:PORT/test.html`. To serve `\app\index.html` when requesting `http://localhost:PORT` a static route needs to added:
+If you create `\app\test.html` inside the Nancy site's root it should be served from `https://localhost:PORT/test.html`. To serve `\app\index.html` when requesting `https://localhost:PORT` a static route needs to added:
 
     public class StaticModule : NancyModule
     {
@@ -185,7 +185,7 @@ Running `gulp` will run the `'default'` task, which should build the app and wri
 
 If everything works, we should have a happy 'hello world' page. I made mine pink <strike>because pink is cool</strike> to test SASS:
 
-![](http://i.imgur.com/rMdt9t7.png)
+![](https://i.imgur.com/rMdt9t7.png)
 
 
 ## Minifying the `site.js` file
@@ -229,15 +229,15 @@ Check out the [survey-thing][survey-thing-repo] repo for updates and lols.
 
 
 [pawel-random-js-hacks]: https://github.com/pawelpabich/random-reactjs-hacks
-[pleeease]: http://pleeease.io/
-[my-gulpfile]: https://github.com/bendetat/survey-thing/blob/master/gulpfile.js
-[survey-thing-repo]: https://github.com/bendetat/survey-thing
-[gulp-hello-world]: http://bendetat.com/hello-world-its-gulp.html
-[browserify]: http://browserify.org/
+[pleeease]: https://pleeease.io/
+[my-gulpfile]: https://github.com/becdetat/survey-thing/blob/master/gulpfile.js
+[survey-thing-repo]: https://github.com/becdetat/survey-thing
+[gulp-hello-world]: hello-world-its-gulp.html
+[browserify]: https://browserify.org/
 [jsx-in-depth]: https://facebook.github.io/react/docs/jsx-in-depth.html
 [babel]: https://babeljs.io/
-[sass]: http://sass-lang.com/
-[nancy]: http://nancyfx.org/
-[react-gulp-bootstrap-stub-project]: https://github.com/bendetat/stub-projects/tree/master/react-with-gulp-and-bootstrap
+[sass]: https://sass-lang.com/
+[nancy]: https://nancyfx.org/
+[react-gulp-bootstrap-stub-project]: https://github.com/becdetat/stub-projects/tree/master/react-with-gulp-and-bootstrap
 
 

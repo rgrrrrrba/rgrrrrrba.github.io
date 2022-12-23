@@ -7,11 +7,11 @@ category: post
 
 I looove convention tests. The idea is you have some assumption about the system that you want to test and enforce. In this case, I want all controller actions (bar some exceptions) to be decorated with the `AuthorizeAttribute`.
 
-I'm using [NUnit](http://nunit.org/) for the tests and [Shouldly](http://shouldly.github.io/) to help with assertions. I'm also using [Autofac](http://autofac.org/), which shouldn't affect the tests except that it gives me a nice extension method.
+I'm using [NUnit](https://nunit.org/) for the tests and [Shouldly](https://shouldly.github.io/) to help with assertions. I'm also using [Autofac](https://autofac.org/), which shouldn't affect the tests except that it gives me a nice extension method.
 
 
 ### Test cases in NUnit
-NUnit has a concept of [test cases](http://nunit.org/index.php?p=testCase&r=2.6.2) where a [test case source](http://nunit.org/index.php?p=testCaseSource&r=2.6.2) provides test casees to a test method. Each test case is executed in the test method as an individual test.
+NUnit has a concept of [test cases](https://nunit.org/index.php?p=testCase&r=2.6.2) where a [test case source](https://nunit.org/index.php?p=testCaseSource&r=2.6.2) provides test casees to a test method. Each test case is executed in the test method as an individual test.
 
 Here's a simple example of a test cases. It tests integers from 1 to 10 and fails on any odd values:
 

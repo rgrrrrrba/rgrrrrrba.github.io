@@ -39,6 +39,6 @@ I had issues getting the trimmed repository over to other copies of the reposito
 
 The [Mercurial Wiki][1] has a fine page on [pruning branches][2] which is where I found these methods.
 
-[1]: http://mercurial.selenic.com/wiki/Mercurial
-[2]: http://mercurial.selenic.com/wiki/PruningDeadBranches
-[3]: http://blog.belfryimages.com.au/post/5203916079/ssh-for-pushing-large-repositories-to-bitbucket
+[1]: https://mercurial.selenic.com/wiki/Mercurial
+[2]: https://mercurial.selenic.com/wiki/PruningDeadBranches
+[3]: https://blog.belfryimages.com.au/post/5203916079/ssh-for-pushing-large-repositories-to-bitbucket

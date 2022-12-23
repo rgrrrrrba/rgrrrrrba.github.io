@@ -30,25 +30,25 @@
 <p><strong>DISCLAIMER:</strong> I’m learning in the open here. This is the first time I’ve used Gulp and Bower and I’m sure I’m missing a heap of really important stuff. Enjoy!</p>
 
 <ul>
-  <li>Part 1: <a href="http://bendetat.com/hello-world-its-gulp.html">Hello World! It’s Gulp!</a></li>
+  <li>Part 1: <a href="hello-world-its-gulp.html">Hello World! It’s Gulp!</a></li>
   <li>Part 2: A useful build pipeline using Gulp and Bower</li>
-  <li>Part 3: <a href="http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html">Cleaning and simplifying the Gulp pipeline</a></li>
+  <li>Part 3: <a href="cleaning-and-simplifying-the-gulp-pipeline.html">Cleaning and simplifying the Gulp pipeline</a></li>
 </ul>
 
-<p>Big thanks to my colleague <a href="http://blog.gertjvr.com/">Gert JvR</a> whose <a href="https://github.com/gertjvr/ng-template">ng-template</a> project I am deconstructing.</p>
+<p>Big thanks to my colleague <a href="https://blog.gertjvr.com/">Gert JvR</a> whose <a href="https://github.com/gertjvr/ng-template">ng-template</a> project I am deconstructing.</p>
 
 <ul>
-  <li><a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js"><code class="language-plaintext highlighter-rouge">gulpfile.js</code> as of this post</a></li>
-  <li><a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js">cleaned <code class="language-plaintext highlighter-rouge">gulpfile.js</code></a> which I will use from here on</li>
+  <li><a href="https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js"><code class="language-plaintext highlighter-rouge">gulpfile.js</code> as of this post</a></li>
+  <li><a href="https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js">cleaned <code class="language-plaintext highlighter-rouge">gulpfile.js</code></a> which I will use from here on</li>
 </ul>
 
 <h2 id="have-you-any-bootstrap">Have you any Bootstrap?</h2>
 
 <p>I want to use Bootstrap, but…</p>
 
-<p><img src="http://cdn.meme.am/instances/500x/58510881.jpg" alt="" /></p>
+<p><img src="https://cdn.meme.am/instances/500x/58510881.jpg" alt="" /></p>
 
-<p>Bower is a JavaScript package manager. So is NPM, in fact we’ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM <a href="http://browserify.org">can be used for client-side package management</a> but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.</p>
+<p>Bower is a JavaScript package manager. So is NPM, in fact we’ll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM <a href="https://browserify.org">can be used for client-side package management</a> but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.</p>
 
 <p>Install Bower to the project (and globally) using NPM:</p>
 
@@ -62,7 +62,7 @@
 
 <p>This installs all of Bootstrap (including the separate jQuery dependency) into <code class="language-plaintext highlighter-rouge">/bower_components</code>. It also adds a reference to the dependency in <code class="language-plaintext highlighter-rouge">bower.json</code> - if it doesn’t you may have forgotten the <code class="language-plaintext highlighter-rouge">--save</code> argument.</p>
 
-<p>I then copied the <a href="http://getbootstrap.com/getting-started/#template">minimal Bootstrap HTML</a> into <code class="language-plaintext highlighter-rouge">src/client/index.html</code>. This won’t work because we’re not copying or linking in the CSS correctly.</p>
+<p>I then copied the <a href="https://getbootstrap.com/getting-started/#template">minimal Bootstrap HTML</a> into <code class="language-plaintext highlighter-rouge">src/client/index.html</code>. This won’t work because we’re not copying or linking in the CSS correctly.</p>
 
 <h2 id="vendor-css">Vendor CSS</h2>
 
@@ -311,7 +311,7 @@ var serveStatic = require('serve-static');
 	var port = 12857;
 	var serveFromPath = '/' + config.paths.buildPrefix;
 
-	log('Hosting ' + sourcePath + ' at http://localhost:' + port + serveFromPath);
+	log('Hosting ' + sourcePath + ' at https://localhost:' + port + serveFromPath);
 
 	connect()
 		.use(serveFromPath, serveStatic(sourcePath))
@@ -319,7 +319,7 @@ var serveStatic = require('serve-static');
 });
 </code></pre></div></div>
 
-<p>Now running <code class="language-plaintext highlighter-rouge">gulp serve</code> will serve the static content from <a href="http://localhost:12857/app">http://localhost:12857/app</a>. I can leave that running in one console while rebuilding in another.</p>
+<p>Now running <code class="language-plaintext highlighter-rouge">gulp serve</code> will serve the static content from <a href="https://localhost:12857/app">https://localhost:12857/app</a>. I can leave that running in one console while rebuilding in another.</p>
 
 <p>Interestingly, this way of serving a static site could probably be used all the way through to production, as the interaction with the server is all done on the client side via REST calls.</p>
 
@@ -621,7 +621,7 @@ return gulp
 
 <p>The end result looks like this:</p>
 
-<p><img src="http://i.imgur.com/j3WY60e.png" alt="" /></p>
+<p><img src="https://i.imgur.com/j3WY60e.png" alt="" /></p>
 
 <p><code class="language-plaintext highlighter-rouge">index.html</code> points to the concatenated, minified, and hashed files:</p>
 
@@ -650,17 +650,17 @@ return gulp
 &lt;/html&gt;
 </code></pre></div></div>
 
-<p>I’m not entirely happy with this so <a href="http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html">next I’ll try to simplify things</a>.</p>
+<p>I’m not entirely happy with this so <a href="cleaning-and-simplifying-the-gulp-pipeline.html">next I’ll try to simplify things</a>.</p>
 
 <h2 id="further-reading-and-resources">Further reading and resources</h2>
 
 <ul>
   <li><a href="https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js">https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js</a></li>
   <li><a href="https://github.com/gertjvr/ng-template">https://github.com/gertjvr/ng-template</a></li>
-  <li><a href="http://gulpjs.com/">http://gulpjs.com/</a></li>
-  <li><a href="http://nodejs.org/api/">http://nodejs.org/api/</a></li>
-  <li><a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js"><code class="language-plaintext highlighter-rouge">gulpfile.js</code> as of this post</a></li>
-  <li><a href="https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js">cleaned <code class="language-plaintext highlighter-rouge">gulpfile.js</code></a> which I will use from here on</li>
+  <li><a href="https://gulpjs.com/">https://gulpjs.com/</a></li>
+  <li><a href="https://nodejs.org/api/">https://nodejs.org/api/</a></li>
+  <li><a href="https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js"><code class="language-plaintext highlighter-rouge">gulpfile.js</code> as of this post</a></li>
+  <li><a href="https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js">cleaned <code class="language-plaintext highlighter-rouge">gulpfile.js</code></a> which I will use from here on</li>
 </ul>
 
 

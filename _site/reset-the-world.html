@@ -29,7 +29,7 @@
 
 <p>Resetting the world refers to resetting a build environment (usually just a database) to a known state. This could include running SSIS scripts to migrate data from existing systems, creating web sites, or setting up dependent services. For a simple system or a system in its infancy it usually just refers to creating or upgrading a database for development, and that is what I’m going to show now. There will be two execution paths here - the first drops any existing database and recreates it from the scripts, and the second just executes any new scripts on an existing database. This technique is taken from several projects that I’ve worked in at Readify. The scripts are run in a console - Powershell if you know what’s good for you :trollface:</p>
 
-<p><a href="http://dbup.github.io/">DbUp</a> is a fantastic tool for running scripts against a database in a known, repeatable way. In the past I’ve used a <a href="https://github.com/swxben/Shu-Er/tree/master/ruby/database_migrations">Ruby script</a> to run my migrations but DbUp allows much more integration with the application.</p>
+<p><a href="https://dbup.github.io/">DbUp</a> is a fantastic tool for running scripts against a database in a known, repeatable way. In the past I’ve used a Ruby script to run my migrations but DbUp allows much more integration with the application.</p>
 
 <p>My DbUp scripts are contained in a DLL which is called by the reset/update scripts in development. My database upgrader looks like this:</p>
 

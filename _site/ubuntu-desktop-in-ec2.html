@@ -29,11 +29,11 @@
 
 <p>This turned out to be much harder than I had hoped. Creating and connecting to a Windows Server VM is trivial in Azure but I thought I would try creating an Ubuntu VM with a desktop in AWS for the exercise (and hopefully in less time than it would take to download an Ubuntu ISO and set up a local VM - I failed). The main time sink was messing around with the SSH keys, which is admittedly a good thing because it’s got to be, excuse me, pretty damn secure. The other delay was in properly configuring X-Windows to show the Ubuntu desktop. Again this is probably a good thing because an OOTB Ubuntu instance is quite lean and most server-y things can be done via SSH rather in a GUI. That’s not what I was intending for this exercise though.</p>
 
-<p>I won’t go into <a href="http://aws.amazon.com/">creating an AWS account</a> but wow, that UI. I thought Azure was arcane.</p>
+<p>I won’t go into <a href="https://aws.amazon.com/">creating an AWS account</a> but wow, that UI. I thought Azure was arcane.</p>
 
 <p>To create a VM you find a section called ‘Create instance’, which lets you press a button called ‘Launch Instance’, which launches a virtual server, which is known as an Amazon EC2 instance. In Azure this is a big blue plus sign.</p>
 
-<p><img src="http://i.imgur.com/SOJx4Np.png" alt="pressss meeeee" /></p>
+<p><img src="https://i.imgur.com/SOJx4Np.png" alt="pressss meeeee" /></p>
 
 <p>Now select your VM image. I picked “Ubuntu Server 14.04 LTS (HVM), SSD Volume Type”. It’s free! For eligible! I selected the ‘t2.micro’ instance type, which is also free. This is exactly how much I want to spend. I left everything else as default and clicked ‘Review and Launch’, mainly because I didn’t realise there were other things to configure.</p>
 
@@ -48,7 +48,7 @@
 
 <p>The value for <code class="language-plaintext highlighter-rouge">-i</code> is the path to the .pem file downloaded previously.</p>
 
-<p>I followed <a href="http://xmodulo.com/how-to-set-up-ubuntu-desktop-vm-on-amazon-ec2.html">these instructions</a> to install the Ubuntu desktop and a TightVNC server, but I ended up with the grey screen of an empty X-Windows session. I needed some <a href="http://askubuntu.com/a/475036/29199">extra work</a> to get it going. You should just do the following instead ;)</p>
+<p>I followed <a href="https://xmodulo.com/how-to-set-up-ubuntu-desktop-vm-on-amazon-ec2.html">these instructions</a> to install the Ubuntu desktop and a TightVNC server, but I ended up with the grey screen of an empty X-Windows session. I needed some <a href="https://askubuntu.com/a/475036/29199">extra work</a> to get it going. You should just do the following instead ;)</p>
 
 <p>Update <code class="language-plaintext highlighter-rouge">apt-get</code> and install lots of things:</p>
 
@@ -101,15 +101,15 @@ vncserver :1
 
 <p><code class="language-plaintext highlighter-rouge">-L</code> sets up the tunnel, from port <code class="language-plaintext highlighter-rouge">5902</code> on <code class="language-plaintext highlighter-rouge">127.0.0.1</code> (localhost) to port <code class="language-plaintext highlighter-rouge">5901</code> on the remote server. Note that I’m setting my local endpoint to port 5902 - 5901 didn’t work for me.</p>
 
-<p><img src="http://i.imgur.com/iYRRB3k.png" alt="" /></p>
+<p><img src="https://i.imgur.com/iYRRB3k.png" alt="" /></p>
 
-<p>If you’re on Windows, <a href="http://www.tightvnc.com/download.php">download Tight-VNC</a> instead of using apt-get to install VNC. Connect to <code class="language-plaintext highlighter-rouge">127.0.0.1::5902</code> and use the password you gave above. You should now see your new shiny Ubuntu desktop:</p>
+<p>If you’re on Windows, <a href="https://www.tightvnc.com/download.php">download Tight-VNC</a> instead of using apt-get to install VNC. Connect to <code class="language-plaintext highlighter-rouge">127.0.0.1::5902</code> and use the password you gave above. You should now see your new shiny Ubuntu desktop:</p>
 
-<p><img src="http://i.imgur.com/m7PRgMm.png" alt="" /></p>
+<p><img src="https://i.imgur.com/m7PRgMm.png" alt="" /></p>
 
 <p>If you see an empty grey window like this:</p>
 
-<p><img src="http://i.imgur.com/crHgZFM.png" alt="" /></p>
+<p><img src="https://i.imgur.com/crHgZFM.png" alt="" /></p>
 
 <p>, or if parts of the Ubuntu desktop seem to be missing, you will need to work on the VNC / X-Windows configuration. Make sure you’ve edited the <code class="language-plaintext highlighter-rouge">xstartup</code> file for the user that the tunnel is logged in as for a start.</p>
 
@@ -118,7 +118,7 @@ vncserver :1
 <div class="footnotes" role="doc-endnotes">
   <ol>
     <li id="fn:how-to-specify-a-private-key-in-ssh" role="doc-endnote">
-      <p>http://xmodulo.com/how-to-specify-private-key-file-in-ssh.html <a href="#fnref:how-to-specify-a-private-key-in-ssh" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
+      <p>https://xmodulo.com/how-to-specify-private-key-file-in-ssh.html <a href="#fnref:how-to-specify-a-private-key-in-ssh" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
 </div>

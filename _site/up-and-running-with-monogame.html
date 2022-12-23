@@ -33,19 +33,19 @@
 
 <h3 id="microsoft-xna">Microsoft XNA</h3>
 
-<p><a href="http://en.wikipedia.org/wiki/Microsoft_XNA">Microsoft XNA</a> is/was a set of tools and a frameworks that provided a relatively easy way to create games using the CLR, sitting on top of DirectX.</p>
+<p><a href="https://en.wikipedia.org/wiki/Microsoft_XNA">Microsoft XNA</a> is/was a set of tools and a frameworks that provided a relatively easy way to create games using the CLR, sitting on top of DirectX.</p>
 
-<p>Microsoft stopped active development of XNA around 2011, and last year <a href="http://www.polygon.com/2013/1/31/3939230/microsoft-has-no-plans-for-future-versions-of-xna-software">it became obvious</a> that XNA would be retired. The former XNA home page now redirects to MSDN’s <a href="http://msdn.microsoft.com/dn629515">Games development page</a>, which (apart from not actually having any useful information about game development on Microsoft’s platforms) is mainly spruiking Microsoft’s partnership with <a href="http://unity3d.com/">Unity</a>.</p>
+<p>Microsoft stopped active development of XNA around 2011, and last year <a href="https://www.polygon.com/2013/1/31/3939230/microsoft-has-no-plans-for-future-versions-of-xna-software">it became obvious</a> that XNA would be retired. The former XNA home page now redirects to MSDN’s <a href="https://msdn.microsoft.com/dn629515">Games development page</a>, which (apart from not actually having any useful information about game development on Microsoft’s platforms) is mainly spruiking Microsoft’s partnership with <a href="https://unity3d.com/">Unity</a>.</p>
 
 <h3 id="a-quick-note-about-unity">A quick note about Unity</h3>
 
 <p>Unity is both a game engine and a component oriented game development environment, with Mono-based scripting using C#. What this means for the average code monkey such as I is that when firing up Unity you are confronted with a drafting board. No comforting <code class="language-plaintext highlighter-rouge">10 PRINT 'HELLO, WORLD!'</code> here folks.</p>
 
-<p><img src="http://media.giphy.com/media/zjQrmdlR9ZCM/giphy.gif" alt="" /></p>
+<p><img src="https://media.giphy.com/media/zjQrmdlR9ZCM/giphy.gif" alt="" /></p>
 
 <h3 id="monogame-to-the-rescue">MonoGame to the rescue!</h3>
 
-<p><a href="http://monogame.net">MonoGame</a> is an open-source rewrite of XNA 4 (the last version), using the same namespaces and with support for both DirectX 11 and OpenGL. Since it is based on Mono, it allows applications to be written and ported to most platforms, including PS4, Wii U, Xbox 360, Windows Desktop and Store, Android, iOS, Windows Phone, Mac OSX and Linux. The big player missing from that list is Xbox One, which currently does not support applications targeting the CLR.</p>
+<p><a href="https://monogame.net">MonoGame</a> is an open-source rewrite of XNA 4 (the last version), using the same namespaces and with support for both DirectX 11 and OpenGL. Since it is based on Mono, it allows applications to be written and ported to most platforms, including PS4, Wii U, Xbox 360, Windows Desktop and Store, Android, iOS, Windows Phone, Mac OSX and Linux. The big player missing from that list is Xbox One, which currently does not support applications targeting the CLR.</p>
 
 <p><code class="language-plaintext highlighter-rouge">&lt;aside&gt;</code> Unity apparently <em>will</em> (soon) support Xbox One so I guess it deploys native code, much like how Xamarin can deploy native code written in C# to target platforms that don’t support the CLR such as iOS. Which begs the question, why not just do the same in MonoGame? A question for smarter cookies than myself. <code class="language-plaintext highlighter-rouge">&lt;/aside&gt;</code></p>
 
@@ -59,9 +59,9 @@
 
 <p>I cloned the <a href="https://github.com/Mono-Game/MonoGame.Samples">samples repo</a> and just tried to run the <code class="language-plaintext highlighter-rouge">WindowsDX</code> (Windows desktop DirectX) solution. No dice. Couldn’t copy resource files, couldn’t resolve all the referenced assemblies.</p>
 
-<p>MonoGame has some <a href="http://www.nuget.org/packages/MonoGame/">NuGet packages</a> so I pulled them into the project. I got it building but still had the same problem with the resource files.</p>
+<p>MonoGame has some <a href="https://www.nuget.org/packages/MonoGame/">NuGet packages</a> so I pulled them into the project. I got it building but still had the same problem with the resource files.</p>
 
-<p>I then installed MonoGame using the installer. This let me create new projects using MonoGame’s templates, so I created a new project and started following <a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">this tutorial series</a> by <a href="http://blogs.msdn.com/b/tarawalker/">Tara Walker</a>. The first part went well, which involved showing a simple image on a surface. The tutorial links to an <code class="language-plaintext highlighter-rouge">.xnb</code> file containing the image, which loads correctly. So far so good, I’ve got stuff on the screen, I’m a game developer.</p>
+<p>I then installed MonoGame using the installer. This let me create new projects using MonoGame’s templates, so I created a new project and started following <a href="https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">this tutorial series</a> by <a href="https://blogs.msdn.com/b/tarawalker/">Tara Walker</a>. The first part went well, which involved showing a simple image on a surface. The tutorial links to an <code class="language-plaintext highlighter-rouge">.xnb</code> file containing the image, which loads correctly. So far so good, I’ve got stuff on the screen, I’m a game developer.</p>
 
 <p>The third part of the series goes through creating that <code class="language-plaintext highlighter-rouge">.xnb</code> file from a source image. This is where I became unstuck.</p>
 
@@ -77,12 +77,12 @@
 
 <p>MonoGame doesn’t have its own content pipeline management system, although it does use XNA’s <code class="language-plaintext highlighter-rouge">.xnb</code> format. For this reason we have to use XNA.</p>
 
-<p><img src="http://i.imgur.com/Lhpog1k.png" alt="" /></p>
+<p><img src="https://i.imgur.com/Lhpog1k.png" alt="" /></p>
 
-<p>XNA 4 only targets VS2010 so it can be tricky to get it working with VS2013. I found a nice post <a href="http://rbwhitaker.wikidot.com/setting-up-xna">here</a>, Mr Whitaker has written a <a href="https://bitbucket.org/rbwhitaker/xna-beyond-vs-2010/downloads/XnaFor2013.ps1">script</a> that downloads the XNA installer and sets it up in whatever versions of Visual Studio from 2010 to 2013 that it can find. I went through the script manually and got it going. Here are the steps:</p>
+<p>XNA 4 only targets VS2010 so it can be tricky to get it working with VS2013. I found a nice post <a href="https://rbwhitaker.wikidot.com/setting-up-xna">here</a>, Mr Whitaker has written a <a href="https://bitbucket.org/rbwhitaker/xna-beyond-vs-2010/downloads/XnaFor2013.ps1">script</a> that downloads the XNA installer and sets it up in whatever versions of Visual Studio from 2010 to 2013 that it can find. I went through the script manually and got it going. Here are the steps:</p>
 
 <ol>
-  <li>Download the installer from here: <a href="http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe">http://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe</a></li>
+  <li>Download the installer from here: <a href="https://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe">https://download.microsoft.com/download/E/C/6/EC68782D-872A-4D58-A8D3-87881995CDD4/XNAGS40_setup.exe</a></li>
   <li>Close Visual Studio</li>
   <li>Open a shell where the installer was downloaded</li>
   <li>Execute: <code class="language-plaintext highlighter-rouge">XNAGS40_setup.exe /extract:XNA</code>, this will extract the installer files into a <code class="language-plaintext highlighter-rouge">.\XNA</code> folder</li>
@@ -111,27 +111,27 @@
 
 <h3 id="bringing-monogame-back-into-the-picture">Bringing MonoGame back into the picture</h3>
 
-<p>As I said above, I also installed the MonoGame binaries, which adds the MonoGame templates to Visual Studio. Download the bits from <a href="http://www.monogame.net/downloads/">MonoGame’s Downloads page</a>.</p>
+<p>As I said above, I also installed the MonoGame binaries, which adds the MonoGame templates to Visual Studio. Download the bits from <a href="https://www.monogame.net/downloads/">MonoGame’s Downloads page</a>.</p>
 
-<p>I kept working through <a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s tutorial series</a> and to prove that the content pipeline is working, here’s a handy screenshot (<a href="https://github.com/bendetat/monogame-tw-tutorial/tree/9945c675303c35e61888de6816a5b165c074cada">Github repo at this revision</a>):</p>
+<p>I kept working through <a href="https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s tutorial series</a> and to prove that the content pipeline is working, here’s a handy screenshot (<a href="https://github.com/becdetat/monogame-tw-tutorial/tree/9945c675303c35e61888de6816a5b165c074cada">Github repo at this revision</a>):</p>
 
-<p><img src="http://i.imgur.com/pE2DmVf.png" alt="" /></p>
+<p><img src="https://i.imgur.com/pE2DmVf.png" alt="" /></p>
 
 <h3 id="resources">Resources</h3>
 
 <ul>
-  <li><a href="http://rbwhitaker.wikidot.com/setting-up-xna">RB Whitaker - Setting up XNA</a></li>
-  <li><a href="http://rbwhitaker.wikidot.com/monogame-accessing-the-xna-content-pipeline">RB Whitaker - Accessing the XNA Content Pipeline</a></li>
-  <li><a href="http://www.monogame.net/documentation/?page=tutorials_md">MonoGame Tutorials</a></li>
-  <li><a href="http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s “Building a Shooter Game” tutorial series, part 1</a></li>
-  <li><a href="http://www.monogame.net/downloads/">MonoGame - Downloads</a></li>
+  <li><a href="https://rbwhitaker.wikidot.com/setting-up-xna">RB Whitaker - Setting up XNA</a></li>
+  <li><a href="https://rbwhitaker.wikidot.com/monogame-accessing-the-xna-content-pipeline">RB Whitaker - Accessing the XNA Content Pipeline</a></li>
+  <li><a href="https://www.monogame.net/documentation/?page=tutorials_md">MonoGame Tutorials</a></li>
+  <li><a href="https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx">Tara Walker’s “Building a Shooter Game” tutorial series, part 1</a></li>
+  <li><a href="https://www.monogame.net/downloads/">MonoGame - Downloads</a></li>
   <li>Pluralsight ($) (note I haven’t watched all of these):
     <ul>
-      <li><a href="http://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">Introduction to 2D Game Programming with XNA</a> by John Sonmez</li>
-      <li><a href="http://pluralsight.com/training/courses/TableOfContents?courseName=monogame&amp;highlight=john-sonmez_monogame-m1-introduction*4!john-sonmez_monogame-m6-wp7!john-sonmez_monogame-m2-building-pong#monogame-m1-introduction">Cross Platform Game Development with MonoGame</a></li>
+      <li><a href="https://pluralsight.com/training/courses/TableOfContents?courseName=xna&amp;highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction">Introduction to 2D Game Programming with XNA</a> by John Sonmez</li>
+      <li><a href="https://pluralsight.com/training/courses/TableOfContents?courseName=monogame&amp;highlight=john-sonmez_monogame-m1-introduction*4!john-sonmez_monogame-m6-wp7!john-sonmez_monogame-m2-building-pong#monogame-m1-introduction">Cross Platform Game Development with MonoGame</a></li>
     </ul>
   </li>
-  <li><a href="https://github.com/bendetat/monogame-tw-tutorial">My repo going through TW’s above tutorial</a></li>
+  <li><a href="https://github.com/cdetat/monogame-tw-tutorial">My repo going through TW’s above tutorial</a></li>
 </ul>
 
 

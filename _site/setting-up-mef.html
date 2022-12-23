@@ -29,7 +29,7 @@
 
 <p><em>The source code for the example application created while writing this post is available on <a href="https://github.com/belfryimages/mef-test">GitHub</a>.</em></p>
 
-<p>I’ve been working on adding support for plugins to <a href="http://code52.org/DownmarkerWPF/">MarkPad</a>. Initially this was going to use NuGet to drag in the plugins, and MEF to dynamically load the . Because of problems like how to manage updates with new versions and the general awkwardness of the build system, I’ve decided to drop NuGet for now and just link the plugins statically, still using MEF to handle basic dependency injection and loading up the plugins.</p>
+<p>I’ve been working on adding support for plugins to <a href="https://code52.org/DownmarkerWPF/">MarkPad</a>. Initially this was going to use NuGet to drag in the plugins, and MEF to dynamically load the . Because of problems like how to manage updates with new versions and the general awkwardness of the build system, I’ve decided to drop NuGet for now and just link the plugins statically, still using MEF to handle basic dependency injection and loading up the plugins.</p>
 
 <p>MEF seems tragically difficult to debug, especially when setting it up in an existing application like MarkPad, with Autofac already set up and doing magic, so I’ve set up a test application to get a feel of the general layout. This is a bit of a walkthrough of the result.</p>
 
@@ -150,7 +150,7 @@ private void GoodbyeCruelWorld_Click(object sender, EventArgs e)
 
 <h3 id="decorating-the-contract-interfaces-and-importing-fields">Decorating the contract interfaces and importing fields</h3>
 
-<p>All the assemblies need to reference <code class="language-plaintext highlighter-rouge">System.ComponentModel.Composition</code>. As an aside, have you installed the <a href="http://visualstudiogallery.msdn.microsoft.com/e5f41ad9-4edc-4912-bca3-91147db95b99/"><code class="language-plaintext highlighter-rouge">PowerCommands</code></a> extension for Visual Studio 2010? It lets you copy and paste project references within the Solution Explorer. Groovy.</p>
+<p>All the assemblies need to reference <code class="language-plaintext highlighter-rouge">System.ComponentModel.Composition</code>. As an aside, have you installed the <a href="https://visualstudiogallery.msdn.microsoft.com/e5f41ad9-4edc-4912-bca3-91147db95b99/"><code class="language-plaintext highlighter-rouge">PowerCommands</code></a> extension for Visual Studio 2010? It lets you copy and paste project references within the Solution Explorer. Groovy.</p>
 
 <p>All the contract endpoints (the interfaces that will be imported using MEF) need to have the <code class="language-plaintext highlighter-rouge">InheritedExport</code> attribute added to the interface. In this example, that means all of the interfaces in <strong>Contracts</strong>. Here is what <code class="language-plaintext highlighter-rouge">IHelloWorldPlugin</code> should look like with the <code class="language-plaintext highlighter-rouge">InheritedExport</code> attribute:</p>
 
@@ -187,7 +187,7 @@ var container = new CompositionContainer(catalog);
 container.ComposeParts(this);
 </code></pre></div></div>
 
-<p>This creates an aggregate catalog, which brings together all the locations (catalogs) where the exported implementations are found. In this case it is just <code class="language-plaintext highlighter-rouge">Plugins.dll</code>. There are a couple of other <code class="language-plaintext highlighter-rouge">XxxCatalog</code> implementations that can be used, for more information the <a href="http://mef.codeplex.com/wikipage?title=Using%20Catalogs&amp;referringTitle=Guide">catalogs page</a> in the <a href="http://mef.codeplex.com/documentation">MEF documentation</a> touches on them.</p>
+<p>This creates an aggregate catalog, which brings together all the locations (catalogs) where the exported implementations are found. In this case it is just <code class="language-plaintext highlighter-rouge">Plugins.dll</code>. There are a couple of other <code class="language-plaintext highlighter-rouge">XxxCatalog</code> implementations that can be used, for more information the <a href="https://mef.codeplex.com/wikipage?title=Using%20Catalogs&amp;referringTitle=Guide">catalogs page</a> in the <a href="https://mef.codeplex.com/documentation">MEF documentation</a> touches on them.</p>
 
 <p>The catalog is then used to create a composition container. Each class in the consumer that needs to import classes using MEF will need this catalog, so in more complex applications the composition container will need to be passed around. The <code class="language-plaintext highlighter-rouge">ComposeParts()</code> method call is what performs the actual dependency injection, finding all the fields decorated with <code class="language-plaintext highlighter-rouge">[Import]</code> and <code class="language-plaintext highlighter-rouge">[ImportMany]</code> and assigning them with the exported implementations that were found in the aggregate catalog.</p>
 

@@ -234,7 +234,7 @@ React also has two-way binding, but [it's opt-in][react-two-way-binding] with so
 
 ## The error messages are superb
 
-![](http://i.imgur.com/2DM7t7Q.png)
+![](https://i.imgur.com/2DM7t7Q.png)
 
 
 
@@ -247,7 +247,7 @@ React also has two-way binding, but [it's opt-in][react-two-way-binding] with so
 
 
 [react-tutorial]: https://facebook.github.io/react/docs/tutorial.html
-[pen-typescript-parent-child-example]: http://codepen.io/anon/pen/PPYOzJ?editors=001
+[pen-typescript-parent-child-example]: https://codepen.io/anon/pen/PPYOzJ?editors=001
 [react-autobind]: https://facebook.github.io/react/docs/interactivity-and-dynamic-uis.html#under-the-hood-autobinding-and-event-delegation
 [react-two-way-binding]: https://facebook.github.io/react/docs/two-way-binding-helpers.html
 

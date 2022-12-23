@@ -27,16 +27,16 @@
 				<h1><a href="/">~/</a>Simplicity - pattern matching in C# <br/></h1>
 <h2><small><em>15 May 2015</em></small></h2>
 
-<p><em>TL;DR;</em> Check out my awesome new library for <a href="https://www.nuget.org/packages/Simplicity">pattern matching in C# - Simplicity</a> (<a href="https://github.com/bendetat/Simplicity">GitHub</a>) or just copy the contents of the <a href="https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs">single file</a> into your project for near-instant gratification.</p>
+<p><em>TL;DR;</em> Check out my awesome new library for <a href="https://www.nuget.org/packages/Simplicity">pattern matching in C# - Simplicity</a> (<a href="https://github.com/becdetat/Simplicity">GitHub</a>) or just copy the contents of the <a href="https://github.com/becdetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs">single file</a> into your project for near-instant gratification.</p>
 
 <p>Pattern matching is a method of transforming data in some way, similar to <code class="language-plaintext highlighter-rouge">map</code> (<code class="language-plaintext highlighter-rouge">.Select()</code> in LINQ) but closer to a <code class="language-plaintext highlighter-rouge">switch</code> statement in structure. It is a first class language construct in many functional languages including F#:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let name = "Ben"
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let name = "Rebecca"
 
 let result =
 	match name with 
 	| "Fiona" -&gt; "It's Fiona!"
-	| "Ben" -&gt; "it me!"
+	| "Rebecca" -&gt; "it me!"
 	| "Steve" -&gt; "Steve you rascal!"
 	| _ -&gt; "I don't know this person"
 	
@@ -45,14 +45,14 @@ let result =
 
 <p>That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this <code class="language-plaintext highlighter-rouge">switch</code> construct in C#:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "Ben";
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "Rebecca";
 string result;
 
 switch (name) {
 	case "Fiona":
 		result =  "It's Fiona!";
 		break;
-	case "Ben":
+	case "Rebecca":
 		result = "it me!";
 		break;
 	case "Steve":
@@ -74,14 +74,14 @@ switch (name) {
 	</ul>
 </aside>
 
-<p>When I found out about pattern matching I wanted to write code the same way in C#. I found a great <a href="http://codebetter.com/matthewpodwysocki/2008/09/16/functional-c-pattern-matching/">article by Matt Podwysocki</a> and adapted and extended the code into a single-file library called <a href="https://github.com/bendetat/Simplicity">Simplicity</a>. Install it <a href="https://www.nuget.org/packages/Simplicity">using NuGet</a> (<code class="language-plaintext highlighter-rouge">install-package PatternMatching</code>) or just <a href="https://github.com/bendetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs">copy the single file</a> into your project.</p>
+<p>When I found out about pattern matching I wanted to write code the same way in C#. I found a great <a href="https://codebetter.com/matthewpodwysocki/2008/09/16/functional-c-pattern-matching/">article by Matt Podwysocki</a> and adapted and extended the code into a single-file library called <a href="https://github.com/becdetat/Simplicity">Simplicity</a>. Install it <a href="https://www.nuget.org/packages/Simplicity">using NuGet</a> (<code class="language-plaintext highlighter-rouge">install-package PatternMatching</code>) or just <a href="https://github.com/becdetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs">copy the single file</a> into your project.</p>
 
 <p>Now for the fun part. Here’s the above example using my library. It adds an generic extension method called <code class="language-plaintext highlighter-rouge">Match()</code> which is the usual entry point. The match statement is built up using a fluent interface.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "Ben";
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "Rebecca";
 var result = name.Match()
 	.With(x =&gt; x == "Fiona", "It's Fiona!")
-	.With(x =&gt; x == "Ben", "Hey it's me!")
+	.With(x =&gt; x == "Rebecca", "Hey it's me!")
 	.With(x =&gt; x == "Steve", "Steve you rascal!")
 	.Else("I don't know this person")
 	.Do();
@@ -92,7 +92,7 @@ var result = name.Match()
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "George";
 var result = name.Match()
 	.With(x =&gt; x == "Fiona", "It's Fiona!")
-	.With(x =&gt; x == "Ben", x =&gt; string.Format("Hey it's {0}!", x))
+	.With(x =&gt; x == "Rebecca", x =&gt; string.Format("Hey it's {0}!", x))
 	.With(x =&gt; x == "Steve", "Steve you rascal!")
 	.Else(x =&gt; string.Format("I don't know {0}", x))
 	.Do();
@@ -185,16 +185,16 @@ var noWayJose = intention();
 	
 var alfred = processName("Alfred");
 var fiona = processName("Fiona");
-var ben = processName("Ben");
+var bec = processName("Bec");
 var xerces = processName("Xerces");
 
 // alfred = "Starts with A"
 // fiona = "Fiona starts with F"
-// ben = "Starts with B"
+// bec = "Starts with B"
 // xerces = "Unknown"
 </code></pre></div></div>
 
-<p>Note that this isn’t especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. <a href="https://github.com/bendetat/Simplicity">Submit a pull request!</a></p>
+<p>Note that this isn’t especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. <a href="https://github.com/becdetat/Simplicity">Submit a pull request!</a></p>
 
 
 <br/>

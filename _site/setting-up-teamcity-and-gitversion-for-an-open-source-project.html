@@ -31,13 +31,13 @@
 
 <h2 id="practice-makes-perfect">Practice makes perfect</h2>
 
-<p>I’m setting up TeamCity using GitVersion for a new open source project that I want to deploy via NuGet. I’ve used TeamCity a few times to set up basic builds but I’ve never got <a href="http://semver.org/">SemVer</a> working in a nice way before, so I thought this would be a nice opportunity to try <a href="https://github.com/ParticularLabs/GitVersion">GitVersion</a>.</p>
+<p>I’m setting up TeamCity using GitVersion for a new open source project that I want to deploy via NuGet. I’ve used TeamCity a few times to set up basic builds but I’ve never got <a href="https://semver.org/">SemVer</a> working in a nice way before, so I thought this would be a nice opportunity to try <a href="https://github.com/ParticularLabs/GitVersion">GitVersion</a>.</p>
 
 <p>The Release configuration is triggered manually to deploy the last built version to NuGet. It would probably be nicer to do this from Octopus but for now I’ll just use TeamCity.</p>
 
 <h2 id="preparing-the-build-agent">Preparing the build agent</h2>
 
-<p>I’ve started out with an <a href="http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html">Azure VM configured with TeamCity 9</a>. I first installed GitVersion on my build agent using <a href="https://chocolatey.org/">Chocolatey</a>. Install Chocolatey using an elevated Powershell console:</p>
+<p>I’ve started out with an <a href="set-up-teamcity-on-an-azure-instance-redux.html">Azure VM configured with TeamCity 9</a>. I first installed GitVersion on my build agent using <a href="https://chocolatey.org/">Chocolatey</a>. Install Chocolatey using an elevated Powershell console:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
 </code></pre></div></div>
@@ -60,7 +60,7 @@
   <li>Click <em>Create</em></li>
 </ol>
 
-<p>Now create the first build step for GitVersion. I used <a href="http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/">Jake Ginnivan’s post on his typical TeamCity build setup</a> as a guide.</p>
+<p>Now create the first build step for GitVersion. I used <a href="https://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/">Jake Ginnivan’s post on his typical TeamCity build setup</a> as a guide.</p>
 
 <ol>
   <li>Click <em>Add build step</em></li>
@@ -72,7 +72,7 @@
 
 <p>Note that there is a space between the <code class="language-plaintext highlighter-rouge">.</code> and the <code class="language-plaintext highlighter-rouge">/updateAssemblyInfo</code>:</p>
 
-<p><img src="http://i.imgur.com/stM7oSn.png" alt="" /></p>
+<p><img src="https://i.imgur.com/stM7oSn.png" alt="" /></p>
 
 <p><em>Note</em> with the 3.0 release of GitVersion the command parameters may be able to be removed in favour of a <code class="language-plaintext highlighter-rouge">GitVersionConfig.yaml</code> configuration file. Stay tuned.</p>
 
@@ -113,12 +113,12 @@
 		&lt;id&gt;frankenwiki&lt;/id&gt; 
 		&lt;title&gt;Frankenwiki&lt;/title&gt;
 		&lt;version&gt;0.0.0&lt;/version&gt; 
-		&lt;authors&gt;Ben Scott&lt;/authors&gt;
+		&lt;authors&gt;Rebecca Scott&lt;/authors&gt;
 		&lt;description&gt;Markdown based statically generated wiki engine&lt;/description&gt; 
 		&lt;language&gt;en-US&lt;/language&gt;
 		&lt;licenseUrl&gt;https://github.com/frankenwiki/frankenwiki/blob/master/LICENSE.md&lt;/licenseUrl&gt;
 		&lt;releaseNotes&gt;https://github.com/frankenwiki/frankenwiki/releases&lt;/releaseNotes&gt;
-		&lt;projectUrl&gt;http://frankenwiki.com&lt;/projectUrl&gt;
+		&lt;projectUrl&gt;https://frankenwiki.com&lt;/projectUrl&gt;
 	&lt;/metadata&gt;
 	&lt;files&gt;
 		&lt;file src="bin\release\Frankenwiki.dll" target="lib\net451"/&gt;
@@ -126,7 +126,7 @@
 &lt;/package&gt;
 </code></pre></div></div>
 
-<p>The easiest way to generate the NuGet package (<code class="language-plaintext highlighter-rouge">.nupkg</code>) seems to be <a href="http://docs.octopusdeploy.com/display/OD/Using+OctoPack">Octopack</a>. Install Octopack to the library being released and push the changes up to the repository. Now edit the CI configuration and in the <em>Visual Studio (sln)</em> step  (the actual build step) show the advanced options and add this to the <em>Command line parameters</em>:</p>
+<p>The easiest way to generate the NuGet package (<code class="language-plaintext highlighter-rouge">.nupkg</code>) seems to be <a href="https://docs.octopusdeploy.com/display/OD/Using+OctoPack">Octopack</a>. Install Octopack to the library being released and push the changes up to the repository. Now edit the CI configuration and in the <em>Visual Studio (sln)</em> step  (the actual build step) show the advanced options and add this to the <em>Command line parameters</em>:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/p:RunOctoPack=true
 </code></pre></div></div>
@@ -140,11 +140,11 @@
   <li>Don’t use any of the detected build steps, just <em>configure build steps manually</em></li>
   <li>Pick <em>NuGet Publish</em> as the runner type</li>
   <li>In <em>Packages</em>, use a wildcard to specify the <code class="language-plaintext highlighter-rouge">.nupkg</code> file (so it is independent of the version). Eg. <code class="language-plaintext highlighter-rouge">Frankenwiki.*.nupkg</code>.</li>
-  <li>Paste in your <a href="http://docs.nuget.org/Create/creating-and-publishing-a-package#publishing-using-nuget-command-line">NuGet API key</a></li>
+  <li>Paste in your <a href="https://docs.nuget.org/Create/creating-and-publishing-a-package#publishing-using-nuget-command-line">NuGet API key</a></li>
   <li>Save</li>
 </ol>
 
-<p>The last few steps are directly based on <a href="http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/">Jake’s post</a>. Go to <em>Build Features</em> to set up labelling:</p>
+<p>The last few steps are directly based on <a href="https://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/">Jake’s post</a>. Go to <em>Build Features</em> to set up labelling:</p>
 
 <ol>
   <li><em>Add build feature</em></li>
@@ -192,7 +192,7 @@
 
 <h2 id="using-gitversion">Using GitVersion</h2>
 
-<p>Jake’s post about <a href="http://jake.ginnivan.net/blog/2014/05/25/simple-versioning-and-release-notes/">Simple Versioning and Release Notes</a> has some great info about changing the version but a good one seems to be using a feature branching strategy.</p>
+<p>Jake’s post about <a href="https://jake.ginnivan.net/blog/2014/05/25/simple-versioning-and-release-notes/">Simple Versioning and Release Notes</a> has some great info about changing the version but a good one seems to be using a feature branching strategy.</p>
 
 <p>Push a branch with the new version number in the name. For example:</p>
 
@@ -203,7 +203,7 @@ git push
 
 <p>Note that just pushing the branch won’t trigger the branch build, there needs to be a non-empty commit.</p>
 
-<p><img src="http://i.imgur.com/SGxLhKx.png" alt="Feature branches building in TeamCity" /></p>
+<p><img src="https://i.imgur.com/SGxLhKx.png" alt="Feature branches building in TeamCity" /></p>
 
 <p>You can see that TeamCity has built a new release from the feature branch and GitVersion has versioned it at <code class="language-plaintext highlighter-rouge">0.3.0-beta.1+4</code>. Subsequent commits to this feature branch will increment the build number (eg. <code class="language-plaintext highlighter-rouge">0.3.0-beta.1+5</code>). When the feature branch is merged into master, the master version will become <code class="language-plaintext highlighter-rouge">0.3.0</code> and you can just manually run the Release configuration to deploy to NuGet.</p>
 

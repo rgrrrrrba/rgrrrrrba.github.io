@@ -41,5 +41,5 @@ It is used by setting up a template (putting it into a `script type="text/html`"
         );
     </script>
 
-<strike>Cliche is licensed under a Creative Commons Attribution 2.5 Australia license. Check it out at http://cliche.belfryimages.com.au.</strike>
+<strike>Cliche is licensed under a Creative Commons Attribution 2.5 Australia license. Check it out at https://cliche.belfryimages.com.au.</strike>
 

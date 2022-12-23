@@ -30,8 +30,8 @@
 <p>Here’s some good resources:</p>
 
 <ul>
-  <li><a href="http://johan.driessen.se/posts/Accessing-an-IIS-Express-site-from-a-remote-computer">Johan Driessen’s blog - Accessing an IIS Express site from a remote computer</a></li>
-  <li><a href="http://www.hanselman.com/blog/WorkingWithSSLAtDevelopmentTimeIsEasierWithIISExpress.aspx">Scott Hanselman - Working with SSL at Development Time is easier with IISExpress</a></li>
+  <li><a href="https://johan.driessen.se/posts/Accessing-an-IIS-Express-site-from-a-remote-computer">Johan Driessen’s blog - Accessing an IIS Express site from a remote computer</a></li>
+  <li><a href="https://www.hanselman.com/blog/WorkingWithSSLAtDevelopmentTimeIsEasierWithIISExpress.aspx">Scott Hanselman - Working with SSL at Development Time is easier with IISExpress</a></li>
 </ul>
 
 <p>Here the down-low:</p>
@@ -49,7 +49,7 @@
 
 <ul>
   <li>Open PowerShell with elevated rights</li>
-  <li>Run this to add the url to the ACL: <code class="language-plaintext highlighter-rouge">netsh http add urlacl url=http://192.168.1.123:PORT/ user=everyone</code></li>
+  <li>Run this to add the url to the ACL: <code class="language-plaintext highlighter-rouge">netsh http add urlacl url=https://192.168.1.123:PORT/ user=everyone</code></li>
   <li>Run this to add an exception to the firewall: <code class="language-plaintext highlighter-rouge">netsh advfirewall firewall add rule name="MySiteIISExpress" dir=in protocol=tcp localport=PORT profile=private remoteip=localsubnet action=allow</code></li>
   <li><strong>YOU’RE NOT DONE YET!</strong> You need to stop the site from the IIS Express notify tray application before running it up in Visual Studio. Just stopping and starting the VS application doesn’t work. This step isn’t mentioned in any of the guides I’ve found.</li>
 </ul>

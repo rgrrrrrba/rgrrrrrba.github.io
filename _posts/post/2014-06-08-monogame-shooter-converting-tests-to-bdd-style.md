@@ -5,17 +5,17 @@ date: 2014-06-08
 category: post
 ---
 
-1. [Better boundary detection for the player](http://bendetat.com/monogame-shooter-better-boundary-detection-for-the-player.html)
+1. [Better boundary detection for the player](monogame-shooter-better-boundary-detection-for-the-player.html)
 2. Converting tests to BDD style
 
-This is the second post of hopefully many as I learn MonoGame by extending on a [tutorial series by Tara Walker](http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx). The source code is available, both [before](https://github.com/bendetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d) and [after](https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b).
+This is the second post of hopefully many as I learn MonoGame by extending on a [tutorial series by Tara Walker](https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx). The source code is available, both [before](https://github.com/becdetat/monogame-tw-tutorial/tree/251ab871697da3b2746dc6be265f15d5acdc2e8d) and [after](https://github.com/becdetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b).
 
 In this post I convert the player boundary detection tests I wrote in the last post to a behavior-driven development (BDD) style to remove some duplication and simplify the tests.
 
 
 ### Behavior-driven development
 
-BDD is an approach to test-driven development that works from the outside in. A BDD test is described using a language that the business understands (the [ubiquitous language](http://martinfowler.com/bliki/UbiquitousLanguage.html)). It then describes the conditions, events and results that make up the desired behavior.
+BDD is an approach to test-driven development that works from the outside in. A BDD test is described using a language that the business understands (the [ubiquitous language](https://martinfowler.com/bliki/UbiquitousLanguage.html)). It then describes the conditions, events and results that make up the desired behavior.
 
 
 ### Existing tests
@@ -59,7 +59,7 @@ A lot of the initial setup and state creation is common across all of the tests.
 
 ### BDDfy
 
-I'm going to use a framework called [BDDfy](http://docs.teststack.net/bddfy/index.html), which uses reflection to step through the methods in the test class and execute them in the 'given, when, then' order. Here's a really simple example:
+I'm going to use a framework called [BDDfy](https://docs.teststack.net/bddfy/index.html), which uses reflection to step through the methods in the test class and execute them in the 'given, when, then' order. Here's a really simple example:
 
     public class WhenEnemyIsDestroyedScenario
     {
@@ -272,7 +272,7 @@ The completed `GivenThePlayerScenarioBase` with the different boundaries is here
         }
     }
 
-As always you can refer to [the current source code](https://github.com/bendetat/monogame-tw-tutorial) or [the source code as at the finish of this post](https://github.com/bendetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b).
+As always you can refer to [the current source code](https://github.com/becdetat/monogame-tw-tutorial) or [the source code as at the finish of this post](https://github.com/becdetat/monogame-tw-tutorial/tree/02000b940a0b0470a5b3ffb66618a54d52378d0b).
 
 
 ### Coming up next
@@ -282,10 +282,10 @@ In my next post I'm going to implement killing the player when it gets hit by an
 
 ### Resources
 
-- [Up and Running with MonoGame](http://bendetat.com/up-and-running-with-monogame.html)
-- [xUnit tests in a Windows 8.1 Store App](http://bendetat.com/xunit-tests-with-a-windows-8-1-store-app.html)
-- [Adding dependency injection to a MonoGame application](http://bendetat.com/adding-dependency-injection-to-a-monogame-application.html)
-- [Tara Walker's original Shooter Game tutorial](http://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx)
-- [John Sonmez' Introduction to 2D Programming with XNA (Pluralsight video)](http://pluralsight.com/training/courses/TableOfContents?courseName=xna&highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction) ($)
+- [Up and Running with MonoGame](up-and-running-with-monogame.html)
+- [xUnit tests in a Windows 8.1 Store App](xunit-tests-with-a-windows-8-1-store-app.html)
+- [Adding dependency injection to a MonoGame application](adding-dependency-injection-to-a-monogame-application.html)
+- [Tara Walker's original Shooter Game tutorial](https://blogs.msdn.com/b/tarawalker/archive/2012/12/04/windows-8-game-development-using-c-xna-and-monogame-3-0-building-a-shooter-game-walkthrough-part-1-overview-installation-monogame-3-0-project-creation.aspx)
+- [John Sonmez' Introduction to 2D Programming with XNA (Pluralsight video)](https://pluralsight.com/training/courses/TableOfContents?courseName=xna&highlight=john-sonmez_xna-m1-introduction*1,6#xna-m1-introduction) ($)
 
 

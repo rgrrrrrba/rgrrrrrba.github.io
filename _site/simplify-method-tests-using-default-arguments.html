@@ -44,7 +44,7 @@ public void Member_first_name_is_updated_correctly()
 }
 </code></pre></div></div>
 
-<p>The member instantiation could be taken care of using an <a href="http://martinfowler.com/bliki/ObjectMother.html">object mother pattern</a> but the complexity of the <code class="language-plaintext highlighter-rouge">Modify()</code> invocation (passing a dummy last name, phone number, etc) hides the intent of the test. That is, given a member, <em>when modifying the first name</em>, the first name matches what it was modified to.</p>
+<p>The member instantiation could be taken care of using an <a href="https://martinfowler.com/bliki/ObjectMother.html">object mother pattern</a> but the complexity of the <code class="language-plaintext highlighter-rouge">Modify()</code> invocation (passing a dummy last name, phone number, etc) hides the intent of the test. That is, given a member, <em>when modifying the first name</em>, the first name matches what it was modified to.</p>
 
 <p>Revealing that intent can be done by creating a proxy method over <code class="language-plaintext highlighter-rouge">member.Modify</code>, which uses default parameters to allow the test to succinctly express the <em>when</em>.</p>
 
@@ -89,7 +89,7 @@ static void ModifyMember(Member member, string first = "first", string last = "l
 
 <p>These proxy methods would quickly need to be used in multiple test fixtures, so could be appropriate to move them to the member’s object mother. They <em>could</em> be made into extension methods, but that may make things more confusing as the tests would appear to operate on the member in a way that isn’t supported in the application itself. If indeed your tests are intended to be documentation for the application. Which they should be. Y’all.</p>
 
-<p>HT to my home boy <a href="http://robdmoore.id.au/">Rob Moore</a> (<a href="https://twitter.com/robdmoore">@robdmoore</a>) for showing me this ONE SIMPLE TRICK.</p>
+<p>HT to my home boy <a href="https://robdmoore.id.au/">Rob Moore</a> (<a href="https://twitter.com/robdmoore">@robdmoore</a>) for showing me this ONE SIMPLE TRICK.</p>
 
 
 

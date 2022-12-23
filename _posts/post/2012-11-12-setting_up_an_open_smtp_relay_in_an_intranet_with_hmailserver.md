@@ -10,7 +10,7 @@ category: post
 
 This doesn't work with Office 365 acting as the external SMTP server. It should work but there's something about Office 365's use of TLS that stops the SMTP relay from authenticating properly in hMailServer. The same problem seems to happen with IIS's built-in SMTP relay so I think I may have been doing something wrong. In any case, although the main `.com.au`'s MX is Office 365, I also have a `.net.au` domain hosted on a shared server with a more straightforward (ie less secure) configuration, which I used as the relay.
 
-1. Install [hMailServer](http://www.hmailserver.com/) on a Windows machine within the intranet. Make sure port 25 isn't blocked by a firewall on the machine. The default self-hosted SQL Server Compact database option in hMailServer should be fine.
+1. Install [hMailServer](https://www.hmailserver.com/) on a Windows machine within the intranet. Make sure port 25 isn't blocked by a firewall on the machine. The default self-hosted SQL Server Compact database option in hMailServer should be fine.
 2. Create an email address on the external mail server. Something like `relay@example.com`.
 3. Create a wildcard route on hMailServer.
 	- This is a domain of *.
@@ -28,5 +28,5 @@ This doesn't work with Office 365 acting as the external SMTP server. It should 
 	4. Under _Require SMTP authentication_, uncheck all of the boxes
 6. Save everything
 
-This can be tested by telnetting (or [PuTTy](http://www.chiark.greenend.org.uk/~sgtatham/putty/)ing) into port 25 of the machine, then sending an email by hand (see [Wikipedia’s entry for SMTP](http://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol#SMTP_transport_example) for an example). Sending the email by hand is a very easy way to figure out configuration problems on the client-facing side of the SMTP relay and is a skill worth learning - also it makes you look like a boss if anybody nearby understands what you are doing. The email should be sent through the hMailServer SMTP relay, through to the external SMTP server (using the relay email address for authentication), then through to its destination. hMailServer also has pretty good logging which can help figure out any bugs or misconfiguration.
+This can be tested by telnetting (or [PuTTy](https://www.chiark.greenend.org.uk/~sgtatham/putty/)ing) into port 25 of the machine, then sending an email by hand (see [Wikipedia’s entry for SMTP](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol#SMTP_transport_example) for an example). Sending the email by hand is a very easy way to figure out configuration problems on the client-facing side of the SMTP relay and is a skill worth learning - also it makes you look like a boss if anybody nearby understands what you are doing. The email should be sent through the hMailServer SMTP relay, through to the external SMTP server (using the relay email address for authentication), then through to its destination. hMailServer also has pretty good logging which can help figure out any bugs or misconfiguration.
 

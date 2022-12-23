@@ -9,16 +9,16 @@ At the time of writing the current version of xUnit (1.9.2) does not support Win
 
 Add a new project. Under `Visual C#`, then `Store Apps`, then `Windows Apps`, select `Class Library (Windows)`:
 
-![](http://i.imgur.com/L9hKws2.png)
+![](https://i.imgur.com/L9hKws2.png)
 
 Install the pre-release version of xUnit by either picking `Include Prelease` in the Package Manager, or open the Package Manager Console (`Tools`, `NuGet Packager Manager`, `Package Manager Console`), select the new test assembly project, and execute `install-package xunit -Pre`.
 
-![](http://i.imgur.com/kbtfRkN.png)
+![](https://i.imgur.com/kbtfRkN.png)
 
 I also use the [xUnit.net Test Support](https://github.com/xunit/resharper-xunit) test runner for Resharper, which has a pre-release version that supports xUnit 2. Install that by opening Resharper's `Extension Manager` and selecting `Include Prerelease` before searching for xUnit:
 
-![](http://i.imgur.com/eIp0x04.png)
+![](https://i.imgur.com/eIp0x04.png)
 
 Results are fields of green:
 
-![](http://i.imgur.com/gMjneQL.png)
+![](https://i.imgur.com/gMjneQL.png)

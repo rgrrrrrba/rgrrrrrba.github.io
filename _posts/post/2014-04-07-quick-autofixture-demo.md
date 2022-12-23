@@ -7,7 +7,7 @@ category: post
 
 **Note:** This is a very basic exploration of AutoFixture, written while I tried out a couple of things. It is not authoritive or representative of best practices. Comments are welcome! As are [pull requests](https://github.com/rgrrrrrba/rgrrrrrba.github.io)!
 
-[AutoFixture](https://github.com/AutoFixture/AutoFixture) is a tool for automating the creation of test objects. It is written by [Mark Seemann](http://blog.ploeh.dk/) ([@ploeh](https://twitter.com/ploeh)).
+[AutoFixture](https://github.com/AutoFixture/AutoFixture) is a tool for automating the creation of test objects. It is written by [Mark Seemann](https://blog.ploeh.dk/) ([@ploeh](https://twitter.com/ploeh)).
 
 I'm just working through a couple of LINQPad tests here. `Fixture` and the `Create()` method are AutoFixture. `Dump()` belongs to LINQPad.
 
@@ -142,4 +142,4 @@ Complex types can be registered in the same way. This registers an instance of `
 
 ## More information
 
-Mark Seeman's blog articles under the [AutoFixture tag](http://blog.ploeh.dk/tags.html#AutoFixture-ref) are the most comprehensive source of information about AutoFixture. 
+Mark Seeman's blog articles under the [AutoFixture tag](https://blog.ploeh.dk/tags.html#AutoFixture-ref) are the most comprehensive source of information about AutoFixture. 

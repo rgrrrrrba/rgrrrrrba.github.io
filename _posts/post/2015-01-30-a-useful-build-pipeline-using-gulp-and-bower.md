@@ -7,23 +7,23 @@ category: post
 
 **DISCLAIMER:** I'm learning in the open here. This is the first time I've used Gulp and Bower and I'm sure I'm missing a heap of really important stuff. Enjoy!
 
-- Part 1: [Hello World! It's Gulp!](http://bendetat.com/hello-world-its-gulp.html)
+- Part 1: [Hello World! It's Gulp!](hello-world-its-gulp.html)
 - Part 2: A useful build pipeline using Gulp and Bower
-- Part 3: [Cleaning and simplifying the Gulp pipeline](http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html)
+- Part 3: [Cleaning and simplifying the Gulp pipeline](cleaning-and-simplifying-the-gulp-pipeline.html)
 
-Big thanks to my colleague [Gert JvR](http://blog.gertjvr.com/) whose [ng-template](https://github.com/gertjvr/ng-template) project I am deconstructing.
+Big thanks to my colleague [Gert JvR](https://blog.gertjvr.com/) whose [ng-template](https://github.com/gertjvr/ng-template) project I am deconstructing.
 
-- [`gulpfile.js` as of this post](https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js)
-- [cleaned `gulpfile.js`](https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js) which I will use from here on
+- [`gulpfile.js` as of this post](https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js)
+- [cleaned `gulpfile.js`](https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js) which I will use from here on
 
 
 ## Have you any Bootstrap?
 
 I want to use Bootstrap, but...
 
-![](http://cdn.meme.am/instances/500x/58510881.jpg)
+![](https://cdn.meme.am/instances/500x/58510881.jpg)
 
-Bower is a JavaScript package manager. So is NPM, in fact we'll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM [can be used for client-side package management](http://browserify.org) but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.
+Bower is a JavaScript package manager. So is NPM, in fact we'll use NPM to install Bower. The difference is that NPM is designed as a server-side (or developer-side) package manager, whereas Bower is only a front-end (client-side) package manager. NPM [can be used for client-side package management](https://browserify.org) but hopefully it will be easier to manage the two scenarios independently by using the package manager designed for the task.
 
 Install Bower to the project (and globally) using NPM:
 
@@ -36,7 +36,7 @@ Now create `bower.json` by running `bower init` and following the instructions. 
 
 This installs all of Bootstrap (including the separate jQuery dependency) into `/bower_components`. It also adds a reference to the dependency in `bower.json` - if it doesn't you may have forgotten the `--save` argument.
 
-I then copied the [minimal Bootstrap HTML](http://getbootstrap.com/getting-started/#template) into `src/client/index.html`. This won't work because we're not copying or linking in the CSS correctly.
+I then copied the [minimal Bootstrap HTML](https://getbootstrap.com/getting-started/#template) into `src/client/index.html`. This won't work because we're not copying or linking in the CSS correctly.
 
 
 ## Vendor CSS
@@ -253,14 +253,14 @@ Now add a new task:
 		var port = 12857;
 		var serveFromPath = '/' + config.paths.buildPrefix;
 
-		log('Hosting ' + sourcePath + ' at http://localhost:' + port + serveFromPath);
+		log('Hosting ' + sourcePath + ' at https://localhost:' + port + serveFromPath);
 
 		connect()
 			.use(serveFromPath, serveStatic(sourcePath))
 			.listen(port);
 	});
 
-Now running `gulp serve` will serve the static content from <http://localhost:12857/app>. I can leave that running in one console while rebuilding in another.
+Now running `gulp serve` will serve the static content from <https://localhost:12857/app>. I can leave that running in one console while rebuilding in another.
 
 Interestingly, this way of serving a static site could probably be used all the way through to production, as the interaction with the server is all done on the client side via REST calls.
 
@@ -532,7 +532,7 @@ In step 5 we substitute the newly revisioned filenames into `index.html`.
 
 The end result looks like this:
 
-![](http://i.imgur.com/j3WY60e.png)
+![](https://i.imgur.com/j3WY60e.png)
 
 `index.html` points to the concatenated, minified, and hashed files:
 
@@ -560,7 +560,7 @@ The end result looks like this:
 		</body>
 	</html>
 
-I'm not entirely happy with this so [next I'll try to simplify things](http://bendetat.com/cleaning-and-simplifying-the-gulp-pipeline.html).
+I'm not entirely happy with this so [next I'll try to simplify things](cleaning-and-simplifying-the-gulp-pipeline.html).
 
 
 
@@ -568,9 +568,9 @@ I'm not entirely happy with this so [next I'll try to simplify things](http://be
 
 - <https://github.com/johnpapa/ng-demos/blob/master/grunt-gulp/build-gulp/gulpfile.js>
 - <https://github.com/gertjvr/ng-template>
-- <http://gulpjs.com/>
-- <http://nodejs.org/api/>
-- [`gulpfile.js` as of this post](https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js)
-- [cleaned `gulpfile.js`](https://github.com/bendetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js) which I will use from here on
+- <https://gulpjs.com/>
+- <https://nodejs.org/api/>
+- [`gulpfile.js` as of this post](https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile-unclean.js)
+- [cleaned `gulpfile.js`](https://github.com/becdetat/nancy-gulp-bower-angular-learnings/blob/8a723f7f95880974b15cbe054891a3db7e32e336/gulpfile.js) which I will use from here on
 
 

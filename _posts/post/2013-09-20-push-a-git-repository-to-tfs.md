@@ -7,7 +7,7 @@ category: post
 
 I've been working on a project using Git and the time has come to move it to TFS. This is for TFS 2012. TFS 2013 should include support for Git out of the box but it looks like that only if the TFS project is created as a Git repo from the start - I may be wrong on this - but these instructions should work regardless. I'm pushing my Git repository in to an empty TFS project.
 
-I've used [Chocolatey NuGet](http://chocolatey.org/packages/gittfs) to install [git-tfs](https://github.com/git-tfs/git-tfs) (`cinst gittfs`).
+I've used [Chocolatey NuGet](https://chocolatey.org/packages/gittfs) to install [git-tfs](https://github.com/git-tfs/git-tfs) (`cinst gittfs`).
 
 1. To keep the TFS migration separate from all my hard work I created a new directory outside of the existing project.
 2. `cd MyProjectTfs` and then clone down the empty TFS project: `git tfs clone https://path.to.tfs/tfs/CollectionName $/MyProject/Trunk`
