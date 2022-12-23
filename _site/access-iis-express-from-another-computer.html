@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Access IIS Express from another computer</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,20 +15,17 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Access IIS Express from another computer <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>17 Sep 2013</em></small></h2>
-
-
 
 <p>Here’s some good resources:</p>
 
@@ -40,69 +37,59 @@
 <p>Here the down-low:</p>
 
 <ul>
-  <li>Open <code>c:\Users\YOUR_USERNAME\Documents\IISExpress\config\applicationhost.config</code>, find your site (<code>&lt;site name="Application.Name" id=</code>, or search for the path to the site).</li>
-  <li>Copy the line <code>&lt;binding protocol="http" bindingInformation="*:PORT:localhost" /&gt;</code> and change <code>localhost</code> to your IP address. So it should look like:</li>
+  <li>Open <code class="language-plaintext highlighter-rouge">c:\Users\YOUR_USERNAME\Documents\IISExpress\config\applicationhost.config</code>, find your site (<code class="language-plaintext highlighter-rouge">&lt;site name="Application.Name" id=</code>, or search for the path to the site).</li>
+  <li>Copy the line <code class="language-plaintext highlighter-rouge">&lt;binding protocol="http" bindingInformation="*:PORT:localhost" /&gt;</code> and change <code class="language-plaintext highlighter-rouge">localhost</code> to your IP address. So it should look like:</li>
 </ul>
 
 <p><!-- code --></p>
 
-<pre><code>&lt;binding protocol="http" bindingInformation="*:PORT:localhost" /&gt;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;binding protocol="http" bindingInformation="*:PORT:localhost" /&gt;
 &lt;binding protocol="http" bindingInformation="*:PORT:192.168.1.123" /&gt;
-</code></pre>
+</code></pre></div></div>
 
 <ul>
   <li>Open PowerShell with elevated rights</li>
-  <li>Run this to add the url to the ACL: <code>netsh http add urlacl url=http://192.168.1.123:PORT/ user=everyone</code></li>
-  <li>Run this to add an exception to the firewall: <code>netsh advfirewall firewall add rule name="MySiteIISExpress" dir=in protocol=tcp localport=PORT profile=private remoteip=localsubnet action=allow</code></li>
+  <li>Run this to add the url to the ACL: <code class="language-plaintext highlighter-rouge">netsh http add urlacl url=http://192.168.1.123:PORT/ user=everyone</code></li>
+  <li>Run this to add an exception to the firewall: <code class="language-plaintext highlighter-rouge">netsh advfirewall firewall add rule name="MySiteIISExpress" dir=in protocol=tcp localport=PORT profile=private remoteip=localsubnet action=allow</code></li>
   <li><strong>YOU’RE NOT DONE YET!</strong> You need to stop the site from the IIS Express notify tray application before running it up in Visual Studio. Just stopping and starting the VS application doesn’t work. This step isn’t mentioned in any of the guides I’ve found.</li>
 </ul>
 
-<p>The site should now be available within the local subnet (<code>255.255.255.0</code>) using the computer’s IP address. Using the machine name should be fine, just replace the IP address with the machine name in the steps above (although I haven’t tested this).</p>
-
-
+<p>The site should now be available within the local subnet (<code class="language-plaintext highlighter-rouge">255.255.255.0</code>) using the computer’s IP address. Using the machine name should be fine, just replace the IP address with the machine name in the steps above (although I haven’t tested this).</p>
 
 
 
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -112,7 +99,6 @@
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

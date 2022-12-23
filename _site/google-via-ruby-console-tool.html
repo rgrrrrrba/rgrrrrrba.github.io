@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Google via Ruby console tool</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,26 +15,23 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Google via Ruby console tool <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>01 Aug 2010</em></small></h2>
-
-
 
 <p>So I’ve been getting my console-fu on since moving to [Mercurial][http://blog.belfryimages.com.au/category/mercurial/] at work, and finding ways to get more efficient. One thing that bugs me is having to spend time grabbing the mouse to search Google via a browser. I’ve also wanted to spend some time with Ruby, so to acheive both goals I wrote a little script that uses the Google AJAX Search API, which returns search results as a JSON object. The full code is available as a [gist on my GitHub][http://gist.github.com/503145]. There are a couple of interesting (for me anyway) parts of the code that I’ll go through now.</p>
 
 <p>The request/response is done via a HTTP GET responding with a JSON-serialised object graph. A query string is built up and parsed into a URI object (using the same reference), then the request is made and parsed from the text JSON representation into an associative array (the result of JSON.parse):</p>
 
-<pre><code>require 'net/http'
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>require 'net/http'
 require 'json'
 ...
 queryURI = "http://ajax.google....."
@@ -43,11 +40,11 @@ queryURI = URI.parse(queryURI)
 data = Net::HTTP.get_response(queryURI)
 data = data.body
 data = JSON.parse(data)
-</code></pre>
+</code></pre></div></div>
 
 <p>I’ve used both pre- and post-fix conditional structures:</p>
 
-<pre><code>if command.to_i.to_s == command &amp;&amp; (1..results.length).include?(command.to_i)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>if command.to_i.to_s == command &amp;&amp; (1..results.length).include?(command.to_i)
   url = results[command.to_i - 1]['url']
   puts "Opening #{url}"
   `start #{url}`
@@ -56,71 +53,61 @@ end
  
 page += 1 if command == '+'
 page -= 1 if command == '-'
-</code></pre>
+</code></pre></div></div>
 
 <p>Rather than using a not operator like ! the unless operator can be more fluent and easier to understand:</p>
 
-<pre><code>command = '' unless ['+','-','q'].include?(command)
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>command = '' unless ['+','-','q'].include?(command)
+</code></pre></div></div>
 
 <p>A problem with C#’s foreach loop syntax is that there is no easy way to include an index short of rolling your own and incrementing in the loop. Usually it is easier to resort to the less pretty for (var i = 0; i &lt; ..; i++) syntax. Ruby includes a variant of Array::each that takes care of the index:</p>
 
-<pre><code>results.each_with_index do |result, index|
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>results.each_with_index do |result, index|
   # ...
 end
-</code></pre>
+</code></pre></div></div>
 
 <p>And of course writing two line breaks is very fun:</p>
 
-<pre><code>2.times { puts '' }
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2.times { puts '' }
+</code></pre></div></div>
 
 <p>All up it was very educational spending some time building something a bit significant in Ruby, and the result should hopefully be pretty fun to use.</p>
-
-
 
 
 
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -130,7 +117,6 @@ end
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Uninstrumented statistical .NET profiling using open source tools</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,20 +15,17 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Uninstrumented statistical .NET profiling using open source tools <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>07 Dec 2014</em></small></h2>
-
-
 
 <p>Profilers are unusual tools in that you generally never need one, right up to just past the point where users are melting down and you desperately need one. Usually you get a condition that involves many different pieces of code and internal services and libraries put together in way that quickly grinds your application to a painful halt. Those conditions are (hopefully) pretty rare and in my experience come up when you change something in one area that turns out to badly affect a seemingly unrelated area.</p>
 
@@ -44,7 +41,7 @@
 
 <h3 id="the-rancid-depths-of-winforms-profiling">The rancid depths of WinForms profiling</h3>
 
-<p>For my sins I spent several years developing a LOB WinForms application, which because reasons<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup> it needed a fair bit of profiling and massaging.</p>
+<p>For my sins I spent several years developing a LOB WinForms application, which because reasons<sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup> it needed a fair bit of profiling and massaging.</p>
 
 <p>Initially I used a tool called <a href="https://code.google.com/p/nprof/">nprof</a>. The 0.9.1 version introduced me to the call tree view, but hadn’t been updated since 2006 and I believe had issues after I moved to .NET 3. The 0.11 version was a bit more recent but appears to have been a rewrite three years later (2009). It turned out to be quite buggy and difficult to get the information I needed. Shortly thereafter the nprof homepage indicated that development had stopped and pointed to <a href="https://code.google.com/p/slimtune/">SlimTune</a> as a successor.</p>
 
@@ -78,57 +75,47 @@
 
 <p>That said, if you need a profiler once a month at most and don’t want or need VS integration, SlimTune is a viable substitute. Just don’t expect too much.</p>
 
-<div class="footnotes">
+<div class="footnotes" role="doc-endnotes">
   <ol>
-    <li id="fn:1">
-      <p>A handrolled ORM, cache, IoC container and business layer (with n-level undo! I had been reading a lot of <a href="http://www.lhotka.net/">Rockford Lhotka</a>’s work)  <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    <li id="fn:1" role="doc-endnote">
+      <p>A handrolled ORM, cache, IoC container and business layer (with n-level undo! I had been reading a lot of <a href="http://www.lhotka.net/">Rockford Lhotka</a>’s work) <a href="#fnref:1" class="reversefootnote" role="doc-backlink">&#8617;</a></p>
     </li>
   </ol>
 </div>
 
 
-
-
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -138,7 +125,6 @@
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8"/>
-		<title>Declaring a class with inheritance and a generic type constraint in C#</title>
+		<title>Copying React props to a child component</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
 		<meta name="author" content="Rebecca Scott"/>
@@ -24,16 +24,28 @@
 
 		<div class="container">
 			<div class="row content">
-				<h1><a href="/">~/</a>Declaring a class with inheritance and a generic type constraint in C# <br/></h1>
-<h2><small><em>13 Nov 2009</em></small></h2>
+				<h1><a href="/">~/</a>Copying React props to a child component <br/></h1>
+<h2><small><em>02 Mar 2018</em></small></h2>
 
-<p>I’m writing a generic class that inherits from a base class, implements an interface, and has a type constraint on the generic class. The class inheritance and interface are straightforward, as is the type constraint, but combined together it’s not obvious how to write this. Any examples of type constraints I could find don’t have inheritance or interfaces as well. So, via a bit of trail and error, here is a right way to declare such a class:</p>
+<p>I just figured out something cool and thought I might blog it bacause it’s been a while. I had a little React component that wrapped creating a menu link, adding some basic logic to apply a <code class="language-plaintext highlighter-rouge">current</code> class to the anchor if the <code class="language-plaintext highlighter-rouge">href</code> passed in matched the current path. I wanted to also pass arbitrary props down to the link - specifically a <code class="language-plaintext highlighter-rouge">data-method="delete"</code> attribute to one of the menu links which hooks into some nasty magic Rails stuff to convert an anchor click into a <code class="language-plaintext highlighter-rouge">DELETE</code> request.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class MyClass&lt;T&gt; :
-    BaseClass&lt;T&gt;, IMyInterface
-    where T : ClassOfT
-{...}
+<p>Obviously I didn’t want to add lots of explicit and optional prop values whenever I wanted to copy a prop down to the anchor. I found <a href="https://zhenyong.github.io/react/docs/transferring-props.html">this</a> (which seems to be an old version of the React docs) which suggests using the ES6 spread operator to transfer props.</p>
+
+<p>So here’s my simple component:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const MenuItem = ({href, children, ...other}) =&gt; {
+  const current = window.location.pathname === href ? 'current' : ''
+
+  return &lt;li&gt;&lt;a href={href} className={current} {...other}&gt;{children}&lt;/a&gt;&lt;/li&gt;
+}
 </code></pre></div></div>
+
+<p>I use it like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;MenuItem href="/profiles/me"&gt;My profile&lt;/MenuItem&gt;
+&lt;MenuItem href="/users/sign_out" data-method="delete"&gt;Sign out&lt;/MenuItem&gt;
+</code></pre></div></div>
+
 
 
 <br/>

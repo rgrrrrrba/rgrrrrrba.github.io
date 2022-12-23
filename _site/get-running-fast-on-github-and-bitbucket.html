@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Get running fast on GitHub and BitBucket</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,98 +15,95 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Get running fast on GitHub and BitBucket <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>29 Nov 2014</em></small></h2>
-
-
 
 <p>These are the steps I use to set up a new PC with Git. I mainly use Git on the command line, with TortoiseGit for staging commits and visualising logs and Beyond Compare for diffs and merges.</p>
 
 <h3 id="gh4w">GH4W</h3>
-<p>I use <a href="http://windows.github.com/">GitHub for Windows</a> to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the <code>github_rsa.pub</code> file in <code>C:\Users\**username**\.ssh</code> can be added to BitBucket and other services to get everything running with the same credentials. Generally I won’t use GH4W after this as I’m mostly a command line junky, with gaps filled by TortoiseGit.</p>
+<p>I use <a href="http://windows.github.com/">GitHub for Windows</a> to get up and running quickly with GitHub on a new machine. It takes care of setting up key files, messing with paths, and making everything play nice with Github. Opening a Powershell instance from GH4W gives me a relatively nice msysgit setup. Then the <code class="language-plaintext highlighter-rouge">github_rsa.pub</code> file in <code class="language-plaintext highlighter-rouge">C:\Users\**username**\.ssh</code> can be added to BitBucket and other services to get everything running with the same credentials. Generally I won’t use GH4W after this as I’m mostly a command line junky, with gaps filled by TortoiseGit.</p>
 
-<h3 id="put-cbin-on-the-path">Put <code>c:\bin</code> on the path</h3>
-<p>Create a folder called <code>bin</code> somewhere fairly central. I use <code>c:\bin</code>. Then put it on the path. Now you can drop scripts and executables into the <code>bin</code> folder and they will work in any console anywhere. To mess with the path:</p>
+<h3 id="put-cbin-on-the-path">Put <code class="language-plaintext highlighter-rouge">c:\bin</code> on the path</h3>
+<p>Create a folder called <code class="language-plaintext highlighter-rouge">bin</code> somewhere fairly central. I use <code class="language-plaintext highlighter-rouge">c:\bin</code>. Then put it on the path. Now you can drop scripts and executables into the <code class="language-plaintext highlighter-rouge">bin</code> folder and they will work in any console anywhere. To mess with the path:</p>
 
 <ol>
-  <li>Open the System control panel item (<code>Win</code>-<code>pause/break</code>)</li>
+  <li>Open the System control panel item (<code class="language-plaintext highlighter-rouge">Win</code>-<code class="language-plaintext highlighter-rouge">pause/break</code>)</li>
   <li>Select Advanced system settings (opens the System Properties dialog)</li>
   <li>Select Environment Variables</li>
-  <li>Update both of the Path variables (in User variables and System variables), add <code>;c:\bin</code> to the end of the values (don’t delete the existing value)</li>
+  <li>Update both of the Path variables (in User variables and System variables), add <code class="language-plaintext highlighter-rouge">;c:\bin</code> to the end of the values (don’t delete the existing value)</li>
   <li>‘OK’ out of the dialogs. You will need to restart any open command prompts to get the path change to work, rebooting is usually the fastest way to make sure the change has gone through (logging out and in may work too).</li>
 </ol>
 
 <p><img src="http://i.imgur.com/hWvTzkl.png" alt="" /></p>
 
 <h3 id="tortoisegit">TortoiseGit</h3>
-<p>I use <a href="http://code.google.com/p/tortoisegit">TortoiseGit</a> to help stage commits and for visualising the log. I can bypass clicking around in Explorer by adding this batch file (named <code>tgit.bat</code>) to somewhere in my path (I usually add <code>c:\bin</code> to the path for this reason). This is based on a <a href="http://ayende.com/blog/4749/executing-tortoisegit-from-the-command-line">post by Oren Eini</a>.</p>
+<p>I use <a href="http://code.google.com/p/tortoisegit">TortoiseGit</a> to help stage commits and for visualising the log. I can bypass clicking around in Explorer by adding this batch file (named <code class="language-plaintext highlighter-rouge">tgit.bat</code>) to somewhere in my path (I usually add <code class="language-plaintext highlighter-rouge">c:\bin</code> to the path for this reason). This is based on a <a href="http://ayende.com/blog/4749/executing-tortoisegit-from-the-command-line">post by Oren Eini</a>.</p>
 
-<pre><code>@start "TortoiseGit" "C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe" /command:%1 /path:.
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@start "TortoiseGit" "C:\Program Files\TortoiseGit\bin\TortoiseGitProc.exe" /command:%1 /path:.
+</code></pre></div></div>
 
-<p>TortoiseGit has a number of commands available from the command line. Use <code>tgit commit</code> to preview, stage and execute a commit, and <code>tgit log</code> to see the log.</p>
+<p>TortoiseGit has a number of commands available from the command line. Use <code class="language-plaintext highlighter-rouge">tgit commit</code> to preview, stage and execute a commit, and <code class="language-plaintext highlighter-rouge">tgit log</code> to see the log.</p>
 
 <h3 id="switch-to-cmder">Switch to Cmder</h3>
-<p>I use <a href="http://bliker.github.io/cmder/">Cmder</a> as a console replacement but the msysgit instance included in the full download doesn’t work with the public key named <code>github_rsa.pub</code>. I just copied <code>github_rsa.pub</code> to <code>id_rsa.pub</code> and <code>github_rsa</code> to <code>id_rsa</code>. Cmder has support for aliases using the <code>alias</code> command but I usually use the <code>c:\bin</code> path with batch files to keep everything relatively portable. Install Cmder to <code>c:\bin\cmder</code> and drag <code>C:\bin\cmder\cmder.exe</code> onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (<code>c:\source</code> is mine):</p>
+<p>I use <a href="http://bliker.github.io/cmder/">Cmder</a> as a console replacement but the msysgit instance included in the full download doesn’t work with the public key named <code class="language-plaintext highlighter-rouge">github_rsa.pub</code>. I just copied <code class="language-plaintext highlighter-rouge">github_rsa.pub</code> to <code class="language-plaintext highlighter-rouge">id_rsa.pub</code> and <code class="language-plaintext highlighter-rouge">github_rsa</code> to <code class="language-plaintext highlighter-rouge">id_rsa</code>. Cmder has support for aliases using the <code class="language-plaintext highlighter-rouge">alias</code> command but I usually use the <code class="language-plaintext highlighter-rouge">c:\bin</code> path with batch files to keep everything relatively portable. Install Cmder to <code class="language-plaintext highlighter-rouge">c:\bin\cmder</code> and drag <code class="language-plaintext highlighter-rouge">C:\bin\cmder\cmder.exe</code> onto the task bar for easy access. Set the startup directory to your usual source folder for easy access (<code class="language-plaintext highlighter-rouge">c:\source</code> is mine):</p>
 
 <p><img src="http://i.imgur.com/22KOl45.png" alt="" /></p>
 
 <h3 id="fine-tune-git">Fine-tune Git</h3>
-<p>Run this to add a Git alias that opens the global configuration in its default editor (Vim) (<code>git ec</code>):</p>
+<p>Run this to add a Git alias that opens the global configuration in its default editor (Vim) (<code class="language-plaintext highlighter-rouge">git ec</code>):</p>
 
-<pre><code>git config --global alias.ec "config --global -e"
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global alias.ec "config --global -e"
+</code></pre></div></div>
 
 <p>Now that’s in you can hand edit the config to add some or all of <a href="http://haacked.com/archive/2014/07/28/github-flow-aliases/">Phil Haack’s GitHub Flow aliases</a>. I usually just use ‘wipe’, ‘save’ and ‘undo’:</p>
 
-<pre><code>wipe = !git add -A &amp;&amp; git commit -qm 'WIPE SAVEPOINT' &amp;&amp; git reset HEAD~1 --hard
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wipe = !git add -A &amp;&amp; git commit -qm 'WIPE SAVEPOINT' &amp;&amp; git reset HEAD~1 --hard
 save = !git add -A &amp;&amp; git commit -m 'SAVEPOINT'
 undo = reset HEAD~1 --mixed
-</code></pre>
+</code></pre></div></div>
 
-<p>Run this to configure git to push the current branch by default, fix long path name issues, set <code>autocrlf</code> to true, and use the <code>wincred</code> credentials helper to store credentials for repositories that don’t support SSH:</p>
+<p>Run this to configure git to push the current branch by default, fix long path name issues, set <code class="language-plaintext highlighter-rouge">autocrlf</code> to true, and use the <code class="language-plaintext highlighter-rouge">wincred</code> credentials helper to store credentials for repositories that don’t support SSH:</p>
 
-<pre><code>git config --global push.default current
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global push.default current
 git config --system core.longpaths true
 git config --global core.autocrlf true
 git config --global credential.helper wincred
-</code></pre>
+</code></pre></div></div>
 
 <p>Do this to get around long path issues:</p>
 
-<pre><code>git config --system core.longpaths true
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --system core.longpaths true
+</code></pre></div></div>
 
 <p>Also check this out: <a href="https://help.github.com/articles/set-up-git">https://help.github.com/articles/set-up-git</a></p>
 
-<p>Looks like password caching is an issue with Cmder’s msysgit, but only with non-SSH remote urls. If <code>.git/config</code> looks like this it shoud use the above keys:</p>
+<p>Looks like password caching is an issue with Cmder’s msysgit, but only with non-SSH remote urls. If <code class="language-plaintext highlighter-rouge">.git/config</code> looks like this it shoud use the above keys:</p>
 
-<pre><code>[remote "origin"]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[remote "origin"]
 	url = git@github.com:rgrrrrrba/rgrrrrrba.github.io.git
-</code></pre>
+</code></pre></div></div>
 
 <h3 id="beyond-compare">Beyond Compare</h3>
 <p>I use (and happily pay for) <a href="http://www.scootersoftware.com/moreinfo.php">Beyond Compare 4</a> and the <a href="http://www.scootersoftware.com/support.php?zz=kb_vcs">instructions here</a> were helpful. To get Git to use BC4 for diffs and merges:</p>
 
-<pre><code>git config --global merge.tool bc4
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global merge.tool bc4
 git config --global mergetool.bc4.path "C:/Program Files (x86)/Beyond Compare 4/BCompare.exe"                 
 git config --global diff.tool bc4
 git config --global difftool.bc4.path "C:/Program Files (x86)/Beyond Compare 4/BCompare.exe"                 
-</code></pre>
+</code></pre></div></div>
 
-<p>Notice that you need to use forward-slashes in the path to BC. <code>~/.gitconfig</code> should end up like this:</p>
+<p>Notice that you need to use forward-slashes in the path to BC. <code class="language-plaintext highlighter-rouge">~/.gitconfig</code> should end up like this:</p>
 
-<pre><code>[merge]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[merge]
 	tool = bc4
 [mergetool "bc4"]
 	path = C:/Program Files (x86)/Beyond Compare 4/BCompare.exe
@@ -114,63 +111,53 @@ git config --global difftool.bc4.path "C:/Program Files (x86)/Beyond Compare 4/B
 	tool = bc4
 [difftool "bc4"]
 	path = C:/Program Files (x86)/Beyond Compare 4/BCompare.exe
-</code></pre>
+</code></pre></div></div>
 
 <p>Run these commands to tighten up things a bit by skipping confirmation prompts and removing merge backups:</p>
 
-<pre><code>git config --global difftool.prompt false
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global difftool.prompt false
 git config --global mergetool.prompt false
 git config --global mergetool.keepBackup false
-</code></pre>
+</code></pre></div></div>
 
-<p>TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit’s Settings screen (right-click in Explorer, TortoiseGit, Settings, or just use <code>tgit settings</code> if you added the alias):</p>
+<p>TortoiseGit also needs to be configured to use Beyond Compare as its diff and merge tool. Do this in TortoiseGit’s Settings screen (right-click in Explorer, TortoiseGit, Settings, or just use <code class="language-plaintext highlighter-rouge">tgit settings</code> if you added the alias):</p>
 
 <p><img src="http://i.imgur.com/fhkbebQ.png" alt="" /></p>
-
-
 
 
 
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -180,7 +167,6 @@ git config --global mergetool.keepBackup false
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

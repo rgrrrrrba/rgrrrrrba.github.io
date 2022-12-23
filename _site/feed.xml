@@ -1,13 +1,168 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Ben d&#39;état - Ben Scott&#39;s blog</title>
+		<title>Bec d&apos;état - Rebecca Scott&apos;s blog</title>
 		<description></description>		
-		<link>http://bendetat.com</link>
-		<atom:link href="http://bendetat.com/feed.xml" rel="self" type="application/rss+xml" />
+		<link>https://becdetat.com</link>
+		<atom:link href="https://becdetat.com/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
+				<author>Rebecca Scott - me@becdetat.com</author>
+				<title>Limit an element to N lines</title>
+				<description>&lt;p&gt;HTML layout tips (and jQuery) are sooooo 2008 but you know.&lt;/p&gt;
+
+&lt;p&gt;Gotta pay the bills.&lt;/p&gt;
+
+&lt;p&gt;So say you want an element to be trimmed responsively so it doesn’t go over &lt;em&gt;n&lt;/em&gt; lines with a nice ellipsis. CSS’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;text-overflow&lt;/code&gt; won’t cut it because it only works for 1 line (it needs &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;white-space: nowrap&lt;/code&gt;). Plus I really wanted to trim by words, not characters, because &lt;em&gt;reasons&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;This code uses jQuery because it’s already in my project, but there’s no reason why this couldn’t be changed to use native DOM methods.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;function maintainElementLineCount($el, lineCount) {
+  const originalText = $el.text()
+
+  function _inner() {
+    $el.text(originalText)
+
+    const words = originalText.split(&apos; &apos;)
+
+    while (words.length) {
+      const elLineCount = $el.height() / parseFloat($el.css(&apos;line-height&apos;))
+
+      if (elLineCount &amp;lt;= lineCount) return
+
+      words.pop()
+      $el.text(words.join(&apos; &apos;) + &apos;...&apos;)
+    }
+  }
+
+  $(window).on(&apos;resize&apos;, _.throttle(() =&amp;gt; _inner(), 100))
+  setTimeout(() =&amp;gt; _inner(), 100)
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It works like so:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;copy the original text&lt;/li&gt;
+  &lt;li&gt;on resize (throttled to 100ms) and 100ms after the function is called, put the original text back in the element, then keep trimming off one word at a time until the height is correct.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Basically it just brute forces trimming the text until it’s the correct height. Not especially efficient but it performs well wherever I’ve tested it - I’m starting with short original text so it only usually trims 5 to 10 words at most, and looping through the entire thing is ok. It could be optimised by figuring out if the resize was bigger or smaller, and working in that direction rather than just starting from the original text, which would be recommended if you’re trying to trim lots of text into a small target area. There are also probably edge conditions that make it fall over but I haven’t encountered anything serious.&lt;/p&gt;
+
+&lt;p&gt;Note that the height of a single line is taken from the CSS &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;line-height&lt;/code&gt; property. There may be cases where this doesn’t work correctly but our line heights are relatively sane.&lt;/p&gt;
+
+&lt;p&gt;This also won’t work if the element’s inner text changes dynamically, as the original text is recorded and closed over by the inner function. Either something would need to watch for changes to the element’s contents, or the handler would need to be detached and set up again manually when changing the inner text.&lt;/p&gt;
+
+&lt;p&gt;To make this work using a data attribute (with static markup only as I haven’t needed to use this with dynamic markup yet - I’ll update this post if I ever need it):&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$(&apos;[data-line-limit]&apos;).each(function() {
+  const $el = $(this)
+  const lineLimit = parseInt($el.data(&apos;line-limit&apos;))
+
+  maintainElementLineCount($el, lineLimit)
+})
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;For example:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;p id=&quot;my_paragraph&quot; data-line-limit=&quot;2&quot;&amp;gt;lots of text here&amp;lt;/p&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</description>
+				<pubDate>Tue, 06 Mar 2018 00:00:00 +1000</pubDate>
+				<link>https://becdetat.com/limit-an-element-to-n-lines.html</link>
+				<guid isPermaLink="true">https://becdetat.com/limit-an-element-to-n-lines.html</guid>
+			</item>
+		
+			<item>
+				<author>Rebecca Scott - me@becdetat.com</author>
+				<title>Copying React props to a child component</title>
+				<description>&lt;p&gt;I just figured out something cool and thought I might blog it bacause it’s been a while. I had a little React component that wrapped creating a menu link, adding some basic logic to apply a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;current&lt;/code&gt; class to the anchor if the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;href&lt;/code&gt; passed in matched the current path. I wanted to also pass arbitrary props down to the link - specifically a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;data-method=&quot;delete&quot;&lt;/code&gt; attribute to one of the menu links which hooks into some nasty magic Rails stuff to convert an anchor click into a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DELETE&lt;/code&gt; request.&lt;/p&gt;
+
+&lt;p&gt;Obviously I didn’t want to add lots of explicit and optional prop values whenever I wanted to copy a prop down to the anchor. I found &lt;a href=&quot;https://zhenyong.github.io/react/docs/transferring-props.html&quot;&gt;this&lt;/a&gt; (which seems to be an old version of the React docs) which suggests using the ES6 spread operator to transfer props.&lt;/p&gt;
+
+&lt;p&gt;So here’s my simple component:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const MenuItem = ({href, children, ...other}) =&amp;gt; {
+  const current = window.location.pathname === href ? &apos;current&apos; : &apos;&apos;
+
+  return &amp;lt;li&amp;gt;&amp;lt;a href={href} className={current} {...other}&amp;gt;{children}&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I use it like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;MenuItem href=&quot;/profiles/me&quot;&amp;gt;My profile&amp;lt;/MenuItem&amp;gt;
+&amp;lt;MenuItem href=&quot;/users/sign_out&quot; data-method=&quot;delete&quot;&amp;gt;Sign out&amp;lt;/MenuItem&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</description>
+				<pubDate>Fri, 02 Mar 2018 00:00:00 +1000</pubDate>
+				<link>https://becdetat.com/copying-react-props-to-a-child-component.html</link>
+				<guid isPermaLink="true">https://becdetat.com/copying-react-props-to-a-child-component.html</guid>
+			</item>
+		
+			<item>
+				<author>Rebecca Scott - me@becdetat.com</author>
+				<title>Vertical whitespace - a fairy tale</title>
+				<description>&lt;p&gt;I saw this in a code review:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dim thing As New Thing(someValue)
+thing.DoSomething()
+Return thing
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;em&gt;(names changed to protect the innocent)&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Apart from it being Visual Basic, there is nothing wrong with the code, but I’m classified as human and humans like to find things to complain about. Now this is absolutely personal preference and I normally would never bug anybody about it, but a trick I’ve been doing the past 18 months especially is to put a line between groups of different types of statements. Like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Dim thing As New Thing(someValue)
+
+thing.DoSomething()
+
+Return thing
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Or to make it clearer:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;function foo() {
+    var a = 1
+    var b = 2
+
+    a = a + b
+    b = a * a
+
+    return b
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I’m aware that I’m totally overthinking things and probably could use a holiday, but I’ve found it makes it easier to parse code at a higher level - this block of statements is to declare variables, this block is doing some operations, this block returns stuff. So if I need to go back in and change something I can find the block faster. It also makes it easier to move stuff around and it reads like a story.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;h3 id=&quot;chapter-1---mrs-premise&quot;&gt;Chapter 1 - Mrs Premise&lt;/h3&gt;
+
+  &lt;p&gt;Once upon a time there was land called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo&lt;/code&gt;. In that land lived a thing called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a&lt;/code&gt; whose value was &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1&lt;/code&gt;, and a thing called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;b&lt;/code&gt; whose value was &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;2&lt;/code&gt;.&lt;/p&gt;
+
+  &lt;h3 id=&quot;chapter-2---mrs-essence&quot;&gt;Chapter 2 - Mrs Essence&lt;/h3&gt;
+
+  &lt;p&gt;The thing called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a&lt;/code&gt; had &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;b&lt;/code&gt;’s value added to it. Then the thing called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;b&lt;/code&gt; had the square of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a&lt;/code&gt;’s value added to it.&lt;/p&gt;
+
+  &lt;h3 id=&quot;chapter-3---mrs-conclusion&quot;&gt;Chapter 3 - Mrs Conclusion&lt;/h3&gt;
+
+  &lt;p&gt;The value of the thing called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;b&lt;/code&gt; left the land called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;foo&lt;/code&gt; and lived happily ever after in the scope of the calling function.&lt;/p&gt;
+
+  &lt;p&gt;&lt;em&gt;THE END&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;iframe width=&quot;854&quot; height=&quot;480&quot; src=&quot;https://www.youtube.com/embed/crIJvcWkVcs&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+</description>
+				<pubDate>Tue, 19 Jul 2016 00:00:00 +1000</pubDate>
+				<link>https://becdetat.com/vertical-whitespace-a-fairy-tale.html</link>
+				<guid isPermaLink="true">https://becdetat.com/vertical-whitespace-a-fairy-tale.html</guid>
+			</item>
+		
+			<item>
+				<author>Rebecca Scott - me@becdetat.com</author>
 				<title>Dumping custom emoji from Slack</title>
 				<description>&lt;p&gt;Ok this is a little geeky and not really programmer-ary.&lt;/p&gt;
 
@@ -15,51 +170,52 @@
 
 &lt;p&gt;Sign in to the correct Slack team and go to “Customize Slack”, which opens the “Customize Your Team” page at the “Emoji” tab. This page includes jQuery so hit F12 to open the developer tools. Go to the console and paste this in:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;$(&#39;span[data-original]&#39;).toArray()
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$(&apos;span[data-original]&apos;).toArray()
 	.map(function(x){return x.attributes[0].nodeValue })
-	.filter(function(x) { return x.indexOf(&#39;emoji.slack-edge&#39;) != -1 })
-	.reduce(function(a,x) { return a + x + &quot;\r\n&quot; }, &#39;&#39;)
-&lt;/code&gt;&lt;/pre&gt;
+	.filter(function(x) { return x.indexOf(&apos;emoji.slack-edge&apos;) != -1 })
+	.reduce(function(a,x) { return a + x + &quot;\r\n&quot; }, &apos;&apos;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This just pulls out the original (full size) image URLs from the page and dumps them out. It also strips out aliased emoji, as they have a different URL format so we can’t quickly edit them in bulk, plus they hopefully aren’t needed anyway. Copy all of the URLs and paste them into your favourite multiline text editor, making sure they’re all consistently formatted. The source lines will look like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;https://emoji.slack-edge.com/T02CV8783/awesomeface/0641c08ed4fa8e61.png
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;https://emoji.slack-edge.com/T02CV8783/awesomeface/0641c08ed4fa8e61.png
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;They need to be edited to look like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;invoke-webrequest -Uri &quot;https://emoji.slack-edge.com/T02CV8783/awesomeface/0641c08ed4fa8e61.png&quot; -OutFile awesomeface.png
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;invoke-webrequest -Uri &quot;https://emoji.slack-edge.com/T02CV8783/awesomeface/0641c08ed4fa8e61.png&quot; -OutFile awesomeface.png
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;In exquisite detail, following are the keystrokes to accomplish this in Sublime Text 3 (and maybe lower). First select all of the URLs, then:&lt;/p&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-shift-l&amp;gt;&lt;/code&gt; (that’s an L)&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;home&amp;gt;&lt;/code&gt; &lt;code&gt;invoke-webrequest -Uri &quot;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;end&amp;gt;&lt;/code&gt; &lt;code&gt;&quot; -OutFile .&lt;/code&gt; (remember the period at the end)&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-left-left-left-left&amp;gt;&lt;/code&gt; (that’s &lt;em&gt;four&lt;/em&gt; lefts)&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;shift-ctrl-right&amp;gt;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-c&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;end&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;ctrl-v&amp;gt;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-left-left-left-left-left-left&amp;gt;&lt;/code&gt; (that’s &lt;em&gt;six&lt;/em&gt; lefts)&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;left&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;shift-home&amp;gt;&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-shift-right-right-right-right-right-right-right-right-right-right&amp;gt;&lt;/code&gt; (that’s an epic &lt;em&gt;ten&lt;/em&gt; rights)&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;&amp;lt;ctrl-c&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;ctrl-left&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;left&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;ctrl-v&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-shift-l&amp;gt;&lt;/code&gt; (that’s an L)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;home&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;invoke-webrequest -Uri &quot;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;end&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&quot; -OutFile .&lt;/code&gt; (remember the period at the end)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-left-left-left-left&amp;gt;&lt;/code&gt; (that’s &lt;em&gt;four&lt;/em&gt; lefts)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;shift-ctrl-right&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-c&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;end&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-v&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-left-left-left-left-left-left&amp;gt;&lt;/code&gt; (that’s &lt;em&gt;six&lt;/em&gt; lefts)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;left&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;shift-home&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-shift-right-right-right-right-right-right-right-right-right-right&amp;gt;&lt;/code&gt; (that’s an epic &lt;em&gt;ten&lt;/em&gt; rights)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;shift-right&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-c&amp;gt;&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;end&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-left&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;left&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;ctrl-v&amp;gt;&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;Go through the file and fix any lines that may have been messed up. I ended up with two bad lines out of around 100 URLs.&lt;/p&gt;
 
-&lt;p&gt;Save the script to the folder where you want to dump the emoji as &lt;code&gt;[whatever].ps1&lt;/code&gt;, then open Powershell or equivalant and cd to that folder. Run the script and the emoji should magically appear.&lt;/p&gt;
+&lt;p&gt;Save the script to the folder where you want to dump the emoji as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[whatever].ps1&lt;/code&gt;, then open Powershell or equivalant and cd to that folder. Run the script and the emoji should magically appear.&lt;/p&gt;
 
 &lt;p&gt;Go forth and emote, Slack-kin!&lt;/p&gt;
 
 </description>
 				<pubDate>Thu, 11 Feb 2016 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/dumping-custom-emoji-from-slack.html</link>
-				<guid isPermaLink="true">http://bendetat.com/dumping-custom-emoji-from-slack.html</guid>
+				<link>https://becdetat.com/dumping-custom-emoji-from-slack.html</link>
+				<guid isPermaLink="true">https://becdetat.com/dumping-custom-emoji-from-slack.html</guid>
 			</item>
 		
 			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
+				<author>Rebecca Scott - me@becdetat.com</author>
 				<title>Minimum Viable EF</title>
 				<description>&lt;p&gt;LINQ to SQL provides a mechanism for generating complex queries without having to resort to inline SQL or custom query generation syntax. I happen to like LINQ to SQL as a SQL generation tool, and using EF to execute those queries and hydrate objects is a passable experience, especially in the more recent version of EF. Entity Framework also provides reasonable good batching of mutation (update/insert/delete) operations.&lt;/p&gt;
 
@@ -73,9 +229,9 @@
 
 &lt;h2 id=&quot;navigation-properties-and-lazy-loading&quot;&gt;Navigation properties and lazy loading&lt;/h2&gt;
 
-&lt;p&gt;Entity Framework has an interesting feature involving navigation properties called &lt;em&gt;lazy loading&lt;/em&gt;. A navigation property (declared as a &lt;code&gt;virtual&lt;/code&gt; property on the entity class) will have its value materialised from the database when it is accessed. This can keep the initial load low if only some navigation properties are required from the initial set of results. These are the simplified entities from my test application with navigation properties present:&lt;/p&gt;
+&lt;p&gt;Entity Framework has an interesting feature involving navigation properties called &lt;em&gt;lazy loading&lt;/em&gt;. A navigation property (declared as a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;virtual&lt;/code&gt; property on the entity class) will have its value materialised from the database when it is accessed. This can keep the initial load low if only some navigation properties are required from the initial set of results. These are the simplified entities from my test application with navigation properties present:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class Portfolio {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class Portfolio {
 	public Guid Id { get; set; }
 	public string Name { get; set; }
 	public virtual ICollection&amp;lt;PortfolioItem&amp;gt; Items { get; set; }
@@ -95,19 +251,19 @@ class PortfolioItem {
 	public Guid SecurityId { get; set; }
 	public virtual Security Security { get; set; }
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Navigation properties can be explicitly included in the initial query, opting them into eager loading. This example would get all portfolios, including their items - the &lt;code&gt;.ToArray()&lt;/code&gt; executes the query so everything selected by the query is in memory - &lt;em&gt;materialised&lt;/em&gt; in EF parlance:&lt;/p&gt;
+&lt;p&gt;Navigation properties can be explicitly included in the initial query, opting them into eager loading. This example would get all portfolios, including their items - the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.ToArray()&lt;/code&gt; executes the query so everything selected by the query is in memory - &lt;em&gt;materialised&lt;/em&gt; in EF parlance:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var portfolios = context.Portfolios.Include(x =&amp;gt; x.Items).ToArray();
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var portfolios = context.Portfolios.Include(x =&amp;gt; x.Items).ToArray();
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This SQL that is generated from this query is roughly equivalent to this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;SELECT p.*, i.*
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;SELECT p.*, i.*
 FROM [dbo].[Portfolio] p
 INNER OUTER JOIN [dbo].[PortfolioItem] i ON p.Id = i.PortfolioId
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 17em&quot;&gt;
 	This is the &lt;em&gt;only&lt;/em&gt; time that I have been impressed by EF Code First migrations.
@@ -115,7 +271,7 @@ INNER OUTER JOIN [dbo].[PortfolioItem] i ON p.Id = i.PortfolioId
 
 &lt;p&gt;The SQL that really gets generated is a bit more complex but the structure is basically the same. You can use LINQPad to view the SQL that gets generated for a given LINQ to SQL query. Add the Entity Framework NuGet package and this code - LINQPad managed to connect to my SQL Server instance and EF created the appropriate database and schema using a Code First migration:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;void Main()
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;void Main()
 {
 	var context = new Context();
 	
@@ -130,19 +286,19 @@ INNER OUTER JOIN [dbo].[PortfolioItem] i ON p.Id = i.PortfolioId
 class Context : DbContext {
 	public IDbSet&amp;lt;Portfolio&amp;gt; Portfolios { get; set; }
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Whenever a navigation property that wasn’t included in that initial load is accessed, the database is re-queried just for that one item. This is useful if you just wanted to get to the &lt;code&gt;Security&lt;/code&gt; property for a given portfolio item:&lt;/p&gt;
+&lt;p&gt;Whenever a navigation property that wasn’t included in that initial load is accessed, the database is re-queried just for that one item. This is useful if you just wanted to get to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Security&lt;/code&gt; property for a given portfolio item:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var item = context.Portfolios.First().Items.First();
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var item = context.Portfolios.First().Items.First();
 
 // Accessing .Security performs a second query
 var name = item.Security.Name;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;the-problems&quot;&gt;The problem(s)&lt;/h2&gt;
 
-&lt;p&gt;If I try to pull out the security for every loaded portfolio item, the performance (in terms of database round-trips) goes from O(1) to O(n+1). Given 1000 portfolio items, 1000 additional queries will be round-tripped over the network and executed just to get the security for each item. This is a bad thing. It’s possible to opt in to eager loading of a navigation property (using &lt;code&gt;.Include&lt;/code&gt;) but I’ll get into that later.&lt;/p&gt;
+&lt;p&gt;If I try to pull out the security for every loaded portfolio item, the performance (in terms of database round-trips) goes from O(1) to O(n+1). Given 1000 portfolio items, 1000 additional queries will be round-tripped over the network and executed just to get the security for each item. This is a bad thing. It’s possible to opt in to eager loading of a navigation property (using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.Include&lt;/code&gt;) but I’ll get into that later.&lt;/p&gt;
 
 &lt;p&gt;I have several problems with lazy loading of navigation properties:&lt;/p&gt;
 
@@ -154,21 +310,21 @@ var name = item.Security.Name;
 
 &lt;p&gt;Unfortunately the prevailing practice of encapsulating logic in the entities by way of the &lt;a href=&quot;http://martinfowler.com/bliki/DDD_Aggregate.html&quot;&gt;Aggregate pattern&lt;/a&gt; when using Entity Framework requires the use of navigation properties for it to be efficient. When writing the query to produce performant code that consumes navigation properties somewhere down the call path you have no choice but to be aware of (usually &lt;em&gt;discover&lt;/em&gt;, often through trial and error) the navigation properties that will be required when the results are processed.&lt;/p&gt;
 
-&lt;p&gt;Here’s the &lt;code&gt;PortfolioItem&lt;/code&gt; class, showing some encapsulated logic (the &lt;code&gt;Value&lt;/code&gt; property):&lt;/p&gt;
+&lt;p&gt;Here’s the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PortfolioItem&lt;/code&gt; class, showing some encapsulated logic (the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Value&lt;/code&gt; property):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class PortfolioItem {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class PortfolioItem {
 	//...
 	public decimal Units { get; set; }
 	public virtual Security Security { get; set; }
 	public decimal Value =&amp;gt; Units * Security.Price;
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This is obviously a trivial example, but what happens if the implementation of that encapsulated logic changes and requires a different navigation property? Each place where a query is generated that then uses that encapsulated logic &lt;em&gt;somewhere&lt;/em&gt; along the call path needs to be updated to reflect the new underlying structure. Otherwise you’ll either get a pile of additional queries dragging down performance or a difficult to diagnose null reference exception if the underlying context is somehow closed. I personally prefer the null references - it’s easier to fix your application crashing than to fix users complaining about performance.&lt;/p&gt;
 
-&lt;p&gt;These issues with query visibility are compounded if if we’re reusing query fragments by operating on &lt;code&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These issues with query visibility are compounded if if we’re reusing query fragments by operating on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;IQueryable&amp;lt;T&amp;gt;&lt;/code&gt;.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;public static IQueryable&amp;lt;Portfolio&amp;gt; GetAllPortfoliosBelongingToClient(this IQueryable&amp;lt;Portfolio&amp;gt; portfolios, Guid clientId) {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static IQueryable&amp;lt;Portfolio&amp;gt; GetAllPortfoliosBelongingToClient(this IQueryable&amp;lt;Portfolio&amp;gt; portfolios, Guid clientId) {
 	return context.Portfolios
 		.Include(x =&amp;gt; x.Items)
 		.Where(x =&amp;gt; x.ClientId == clientId);
@@ -177,21 +333,21 @@ var name = item.Security.Name;
 // ...
 
 var portfolios = _context.Portfolios.GetAllPortfoliosBelongingToClient(clientId).ToArray();
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 26em&quot;&gt;
-	The entire reusable query fragment pattern is dreadful, but I&#39;ll leave that for another rant. I usually lump it in with &#39;reusable&#39; mapper classes, misused flag enums, &lt;a href=&quot;http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html&quot;&gt;object initialisation syntax for anything not a DTO&lt;/a&gt;, tuples (although &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/347&quot;&gt;C# 7 may fix this&lt;/a&gt;) and nested ternary expressions.
+	The entire reusable query fragment pattern is dreadful, but I&apos;ll leave that for another rant. I usually lump it in with &apos;reusable&apos; mapper classes, misused flag enums, &lt;a href=&quot;http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html&quot;&gt;object initialisation syntax for anything not a DTO&lt;/a&gt;, tuples (although &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/347&quot;&gt;C# 7 may fix this&lt;/a&gt;) and nested ternary expressions.
 &lt;/aside&gt;
 
-&lt;p&gt;&lt;code&gt;Items&lt;/code&gt; are included to make the query more performant by eager loading the collection for each portfolio. Note that the item securities are not included and will be lazily loaded.&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Items&lt;/code&gt; are included to make the query more performant by eager loading the collection for each portfolio. Note that the item securities are not included and will be lazily loaded.&lt;/p&gt;
 
 &lt;p&gt;Say that in one of the three places where this query is used, I want to access the current security price for every item. It makes sense to add the new include to the query, right? After all, this is where the query is defined and I’m already specifying that the portfolio items should be eagerly loaded here.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;return portfolios
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;return portfolios
 	.Include(x =&amp;gt; x.Items)
 	.Include(x =&amp;gt; x.Items.Select(i =&amp;gt; i.Security))
 	.Where(x =&amp;gt; x.ClientId == clientId);
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Except now the security is selected and pulled into memory every single time this query is used, which isn’t appropriate in the other two usages of the query fragment and will cause extra load on the database and the network.&lt;/p&gt;
 
@@ -207,22 +363,22 @@ var portfolios = _context.Portfolios.GetAllPortfoliosBelongingToClient(clientId)
 
 &lt;p&gt;To get the security code for an item in a portfolio in SQL requires an extra table join:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;SELECT p.Id, s.Code
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;SELECT p.Id, s.Code
 FROM [dbo].[Portfolios] p
 INNER JOIN [dbo].[PortfolioItems] i ON i.[Id] = p.[Id]
 INNER JOIN [dbo].[Securities] s ON s.[Id] = p.[Id]	# &amp;lt;-- this one
 WHERE -- some condition
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 18em&quot;&gt;
 	For all of its faults (and there are plenty) SQL is still a great language for querying a relational database. Hashtag makuthink.
 &lt;/aside&gt;
 
-&lt;p&gt;That doesn’t seem like a big deal. In fact, SQL Server is extremely good at joining tables. There should already be a foreign key relationship between &lt;code&gt;PortfolioItems&lt;/code&gt; and &lt;code&gt;Securities&lt;/code&gt;, which lets SQL Server perform optimisations.&lt;/p&gt;
+&lt;p&gt;That doesn’t seem like a big deal. In fact, SQL Server is extremely good at joining tables. There should already be a foreign key relationship between &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PortfolioItems&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Securities&lt;/code&gt;, which lets SQL Server perform optimisations.&lt;/p&gt;
 
-&lt;p&gt;The problem, as described above, is when our ORM - Entity Framework - needs its hand held to eagerly load the &lt;code&gt;Security&lt;/code&gt; property:&lt;/p&gt;
+&lt;p&gt;The problem, as described above, is when our ORM - Entity Framework - needs its hand held to eagerly load the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Security&lt;/code&gt; property:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var selectedPortfolios = context.Portfolios
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var selectedPortfolios = context.Portfolios
 	.Include(x =&amp;gt; x.Items)
 	.Include(x =&amp;gt; x.Items.Select(i =&amp;gt; i.Security))
 	.Where(x =&amp;gt; /* some condition */)
@@ -233,31 +389,31 @@ var securityNames = selectedPortfolios
 	.SelectMany(x =&amp;gt; x.Items)
 	.Select(i =&amp;gt; i.Security.Name)
 	.ToArray();
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 33em&quot;&gt;
-	The &lt;code&gt;// later...&lt;/code&gt; comment is important, because I could just select out the security name in the initial query and obviate this entire example. I&#39;m making an assumption that, as is usually the case in the systems I&#39;ve worked in and created, the selected portfolios are queried in one place then being consumed elsewhere. Generally both of those places are only tangentially related through some common consumer. As I&#39;ll explain soon, this is a bad practice that I would like to challenge.
+	The &lt;code&gt;// later...&lt;/code&gt; comment is important, because I could just select out the security name in the initial query and obviate this entire example. I&apos;m making an assumption that, as is usually the case in the systems I&apos;ve worked in and created, the selected portfolios are queried in one place then being consumed elsewhere. Generally both of those places are only tangentially related through some common consumer. As I&apos;ll explain soon, this is a bad practice that I would like to challenge.
 &lt;/aside&gt;
 
-&lt;p&gt;If the &lt;code&gt;Security&lt;/code&gt; property isn’t eagerly loaded, I get lazy loading in that final &lt;code&gt;.Select(i =&amp;gt; i.Security.Name)&lt;/code&gt; resulting in O(n) performance.&lt;/p&gt;
+&lt;p&gt;If the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Security&lt;/code&gt; property isn’t eagerly loaded, I get lazy loading in that final &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.Select(i =&amp;gt; i.Security.Name)&lt;/code&gt; resulting in O(n) performance.&lt;/p&gt;
 
-&lt;p&gt;To denormalise the structure I can apply a piece of domain knowledge. Security names don’t change very often relative to other pieces of data in a financial system. Currently (start of November) there have been 95 name (and code) changes on the &lt;a href=&quot;http://www.asx.com.au/prices/company-name-and-asx-code-changes-2015.htm&quot;&gt;Australian Stock Exchange&lt;/a&gt; in 2015, out of around 2200 listed companies. So this isn’t a piece of information that changes very frequently. If I copy the security name to the portfolio item, the &lt;code&gt;Security&lt;/code&gt; property no longer needs eager loading.&lt;/p&gt;
+&lt;p&gt;To denormalise the structure I can apply a piece of domain knowledge. Security names don’t change very often relative to other pieces of data in a financial system. Currently (start of November) there have been 95 name (and code) changes on the &lt;a href=&quot;http://www.asx.com.au/prices/company-name-and-asx-code-changes-2015.htm&quot;&gt;Australian Stock Exchange&lt;/a&gt; in 2015, out of around 2200 listed companies. So this isn’t a piece of information that changes very frequently. If I copy the security name to the portfolio item, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Security&lt;/code&gt; property no longer needs eager loading.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var securityNames = selectedPortfolios
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var securityNames = selectedPortfolios
 	.SelectMany(x =&amp;gt; x.Items)
 	.Select(i =&amp;gt; i.SecurityName)
 	.ToArrray();
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;To maintain data integrity I can use a domain event that gets triggered whenever a security name is changed. The name of the security doesn’t have to be immediately available to each portfolio item when it changes - a slight delay is ok.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;void Handle(SecurityNameChanged @event) {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;void Handle(SecurityNameChanged @event) {
 	foreach (var item in portfolioItems.Where(x =&amp;gt; x.SecurityId == @event.SecurityId).ToArray()) {
 		item.UpdateSecurityName(@event.SecurityName);
 	}
 	portfolioItems.SaveChanges();
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;In many cases this wouldn’t even need to happen in a domain event. A maintenance task could regularly make sure the denormalised security name is consistent with the canonical security, ensuring &lt;em&gt;eventual&lt;/em&gt; data integrity.&lt;/p&gt;
 
@@ -269,17 +425,17 @@ var securityNames = selectedPortfolios
 
 &lt;p&gt;As an example, this is how you would write a query for all security codes for a portfolio using navigation properties:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var query =
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var query =
 	from portfolio in context.Portfolios
 	where portfolio.Id == portfolioId
 	let codes = portfolio.Items.Select(x =&amp;gt; x.Security.Code)
 	select codes;
 var result = query.Single();
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This is how you would write the same query without using navigation properties:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var query =
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var query =
 	from portfolio in context.Portfolios
 	where portfolio.Id == portfolioId
 	let codes = 
@@ -289,11 +445,11 @@ var result = query.Single();
 		select security.Code
 	select codes;
 var result = query.Single();
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 27em&quot;&gt;
-	&lt;p&gt;Note that I can&#39;t use &lt;code&gt;context.Securities.Single(...)&lt;/code&gt; because, according to LINQ to SQL: &quot;The methods &#39;Single&#39; and &#39;SingleOrDefault&#39; can only be used as a final query operation. Consider using the method &#39;FirstOrDefault&#39; in this instance instead.&quot;&lt;/p&gt;	
-	&lt;p&gt;&lt;code&gt;var result = query.Single()&lt;/code&gt; is ok because it is the &#39;final query operation&#39;.&lt;/p&gt;
+	&lt;p&gt;Note that I can&apos;t use &lt;code&gt;context.Securities.Single(...)&lt;/code&gt; because, according to LINQ to SQL: &quot;The methods &apos;Single&apos; and &apos;SingleOrDefault&apos; can only be used as a final query operation. Consider using the method &apos;FirstOrDefault&apos; in this instance instead.&quot;&lt;/p&gt;	
+	&lt;p&gt;&lt;code&gt;var result = query.Single()&lt;/code&gt; is ok because it is the &apos;final query operation&apos;.&lt;/p&gt;
 &lt;/aside&gt;
 
 &lt;p&gt;The query is now more complex, but I’ve moved the previously hidden complexity of navigation properties back into the query. In my opinion the query is where that complexity belongs - not off-loaded to an ORM.&lt;/p&gt;
@@ -304,7 +460,7 @@ var result = query.Single();
 
 &lt;p&gt;Based on the earlier example of lazily loading the security for a given portfolio item:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var item = items.First();
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var item = items.First();
 
 //var name = item.Security.Name;
 
@@ -316,7 +472,7 @@ var name = context.Securities
 	.Where(x =&amp;gt; x.Id == item.SecurityId)
 	.Select(x =&amp;gt; x.Name)
 	.Single();
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h3 id=&quot;thinking-about-the-query&quot;&gt;Thinking about the query&lt;/h3&gt;
 
@@ -334,7 +490,7 @@ var name = context.Securities
 
 &lt;p&gt;The value of a portfolio item is simply the number of units multiplied by the current price of the security. A naive implementation of a query to generate a report showing the investments in a portfolio and the values would look like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var query =
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var query =
     from portfolio in _context.Portfolios
     where portfolio.Id == portfolioId
     let items =
@@ -347,27 +503,27 @@ var name = context.Securities
             Value = item.Units*security.CurrentPrice
         }
     select items;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;This is a very simple calculation so it isn’t really a good target for applying DRY but I’ll use it for now. If I was treating the portfolio item as an aggregate root using navigation properties, that &lt;code&gt;Value&lt;/code&gt; calculation would live as a property on &lt;code&gt;PortfolioItem&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;This is a very simple calculation so it isn’t really a good target for applying DRY but I’ll use it for now. If I was treating the portfolio item as an aggregate root using navigation properties, that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Value&lt;/code&gt; calculation would live as a property on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PortfolioItem&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;public decimal Value =&amp;gt; this.Units * this.Security.CurrentPrice;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public decimal Value =&amp;gt; this.Units * this.Security.CurrentPrice;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This can be implemented without the navigation property by explicitly passing the current price or the security itself:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;public decimal GetValue(decimal currentPrice) =&amp;gt; this.Units * currentPrice;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public decimal GetValue(decimal currentPrice) =&amp;gt; this.Units * currentPrice;
 
 // or, if you wanted to hide the implementation detail
 // and not make the consumer concerned about where the
 // current price comes from:
 
 public decimal GetValue(Security security) =&amp;gt; this.Units * security.CurrentPrice;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;These methods can’t be called directly by EF. This isn’t because I removed the navigation properties. EF wouldn’t be able to call the previous property either with a &lt;code&gt;get;&lt;/code&gt; body or an expression body - LINQ to SQL simply can’t translate the expression into SQL. So I need a second stage to map the results from the EF query into the the final results.&lt;/p&gt;
+&lt;p&gt;These methods can’t be called directly by EF. This isn’t because I removed the navigation properties. EF wouldn’t be able to call the previous property either with a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;get;&lt;/code&gt; body or an expression body - LINQ to SQL simply can’t translate the expression into SQL. So I need a second stage to map the results from the EF query into the the final results.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var query =
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var query =
     from portfolio in _context.Portfolios
     where portfolio.Id == portfolioId
     let items =
@@ -387,36 +543,36 @@ var results =
         item.security.Code,
         Value = item.item.Value(item.security)
     };
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;You may be tempted to break the query and the map stages into separate classes, possibly even calling the map step a mapper. Reconsider! There is a good chance that the query and map are only going to be used in this one place (if not, they probably should be). If you try to DRY your application too much and too soon it will probably crack™. Extracting the stages would also require a pile of intermediary classes to bridge between the stages. &lt;a href=&quot;https://github.com/dotnet/roslyn/issues/206&quot;&gt;Record types in C# 7&lt;/a&gt; (if they happen) will reduce the amount of boilerplate code but until then the overheads will likely outweigh any benefit. For most cases I would just keep the query and the map stage together. They can still be tested as a whole by simply mocking out the EF context.&lt;/p&gt;
 
-&lt;p&gt;That’s not to say that individual complex calculations shouldn’t be refactored into service classes when appropriate. Since the &lt;code&gt;Value&lt;/code&gt; calculation is now being done in memory it could easily be extracted:&lt;/p&gt;
+&lt;p&gt;That’s not to say that individual complex calculations shouldn’t be refactored into service classes when appropriate. Since the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Value&lt;/code&gt; calculation is now being done in memory it could easily be extracted:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class PortfolioItemValueCalculator {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class PortfolioItemValueCalculator {
 	public decimal Calculate(PortfolioItem item, Security security) {
 		return item.Units * security.CurrentValue;
 	}
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;This is a terrible example so here’s a better one. Warning - I’m about to drop some serious domain knowledge. In a portfolio management system you often need to calculate the cost base of an investment, say to calculate the change in value for the investment, or to work out the tax consequences of selling the investment. There are several methods for calculating a cost base (financial planners are interested in performance, tax accountants are interested in tax consequences) and regardless of the method it can be quite complicated. Cost base is calculated using a number of variables such as the cost of the parcels that make up the investment, any capital returns received, the effect of corporate actions such as demergers, etc. So a cost base calculator for a given method is an excellent candidate for extraction and reuse as a service class. An example calculator signature might look something like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class AverageTaxCostBaseCalculator {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class AverageTaxCostBaseCalculator {
 	public decimal Calculate(
 		Parcel[] parcels, 
 		CapitalReturnDistribution[] capitalReturns,
 		CorporateAction[] corporateActions);
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h4 id=&quot;updates-inserts-and-deletes&quot;&gt;Updates, inserts and deletes&lt;/h4&gt;
 
-&lt;p&gt;Navigation properties also have the advantage of already being tracked by EF, so any updates to them will be persisted when the context is saved. This doesn’t change when pulling those entities out explicitly in queries - EF will track them as well, as long as you’ve used the same context. In other words, don’t use &lt;code&gt;InstancePerDependency&lt;/code&gt; to register the context in Autofac - use something like &lt;code&gt;InstancePerRequest&lt;/code&gt; or &lt;code&gt;InstancePerLifetimeScope&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Navigation properties also have the advantage of already being tracked by EF, so any updates to them will be persisted when the context is saved. This doesn’t change when pulling those entities out explicitly in queries - EF will track them as well, as long as you’ve used the same context. In other words, don’t use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;InstancePerDependency&lt;/code&gt; to register the context in Autofac - use something like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;InstancePerRequest&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;InstancePerLifetimeScope&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Of course, this means that methods in an aggregate root that create or delete child entities will need to be restructured. Take this method that adds a new item to a portfolio using navigation properties:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class Portfolio {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class Portfolio {
 	// ...
 	public virtual ICollection&amp;lt;PortfolioItem&amp;gt; Items { get; set; }
 	public void AddItem(Security security, decimal units) {
@@ -424,19 +580,19 @@ var results =
 		this.Items.Add(item);
 	}
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;To work without the &lt;code&gt;Items&lt;/code&gt; navigation property, I need to pass the EF context to the method. Entities are constructed by EF and can’t get dependencies injected by a DI container, so this has to be done explicitly. If you didn’t pass the context in then the caller would be responsible for adding it to EF - a prime opportunity for creating a bug.&lt;/p&gt;
+&lt;p&gt;To work without the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Items&lt;/code&gt; navigation property, I need to pass the EF context to the method. Entities are constructed by EF and can’t get dependencies injected by a DI container, so this has to be done explicitly. If you didn’t pass the context in then the caller would be responsible for adding it to EF - a prime opportunity for creating a bug.&lt;/p&gt;
 
-&lt;p&gt;Another consequence of removing the navigation properties is that the portfolio entity &lt;em&gt;per se&lt;/em&gt; now doesn’t have a concept of the items that it contains. To mitigate that the &lt;code&gt;AddItem&lt;/code&gt; could return the new item, which could be consumed in the calling code:&lt;/p&gt;
+&lt;p&gt;Another consequence of removing the navigation properties is that the portfolio entity &lt;em&gt;per se&lt;/em&gt; now doesn’t have a concept of the items that it contains. To mitigate that the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AddItem&lt;/code&gt; could return the new item, which could be consumed in the calling code:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;public PortfolioItem AddItem(IDbContext context, Security security, decimal units)
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public PortfolioItem AddItem(IDbContext context, Security security, decimal units)
 {
     var item = new PortfolioItem(this, security, units);
     context.PortfolioItems.Add(item);
     return item;
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;aside class=&quot;pull-right well&quot; style=&quot;width: 23em&quot;&gt;
 	There are more complicated scenarios such as making multiple passes over a collection of items that are alternately queried and updated. In this situation I argue that a domain object is the incorrect level of abstraction to be holding this collection. It should be the responsibility of the orchestrating function to maintain then persist its state.
@@ -451,7 +607,7 @@ var results =
 
 &lt;p&gt;If I can consider allocating an investment to a portfolio to be unrelated to the portfolio, this method should be removed from the portfolio (Single Responsibility Principle) and extracted into a service:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class AddAssetToPortfolio {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class AddAssetToPortfolio {
 	// ...
 	public void Add(Portfolio portfolio, Security security, decimal units) {
 		var item = new PortfolioItem(portfolio, security, units);
@@ -459,9 +615,9 @@ var results =
 		_context.PortfolioItems.Add(item);
 	}
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Note that the service doesn’t call &lt;code&gt;_context.SaveChanges()&lt;/code&gt;. That is left for the consuming code. It could be done in the service itself but because I’ve got a shared EF context I can take advantage of batching. I could also use a unit of work implementation that wraps the EF context and flushes the context automatically.&lt;/p&gt;
+&lt;p&gt;Note that the service doesn’t call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_context.SaveChanges()&lt;/code&gt;. That is left for the consuming code. It could be done in the service itself but because I’ve got a shared EF context I can take advantage of batching. I could also use a unit of work implementation that wraps the EF context and flushes the context automatically.&lt;/p&gt;
 
 &lt;p&gt;In an example this trivial I don’t think a discrete service class is actually warranted. I may as well just perform the operation in the consuming code. Generally I would defer extracting out service classes until it is clear that the logic will actually be reused and is too complex to be safely duplicated.&lt;/p&gt;
 
@@ -477,9 +633,9 @@ var results =
 
 &lt;h3 id=&quot;domain-event-handler&quot;&gt;Domain event handler&lt;/h3&gt;
 
-&lt;p&gt;The domain event handler for updating security names (above) is an example of extracting functionality from an aggregate root / entity. The aggregate root way of implementing updating security names would be a method on &lt;code&gt;Security&lt;/code&gt;, using a collection of portfolio items linked to the security:&lt;/p&gt;
+&lt;p&gt;The domain event handler for updating security names (above) is an example of extracting functionality from an aggregate root / entity. The aggregate root way of implementing updating security names would be a method on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Security&lt;/code&gt;, using a collection of portfolio items linked to the security:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class Security {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class Security {
 	// ...
 	public virtual ICollection&amp;lt;PortfolioItem&amp;gt; PortfolioItems { get; set; }
 
@@ -490,17 +646,17 @@ var results =
 		}
 	}
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Given this design, whenever I want to update a security name I need to remember to eagerly load the &lt;code&gt;PortfolioItems&lt;/code&gt; as well. Extracting out the update part of that functionality reduces the complexity on the consumer side, and since the update can be performed out-of-band (maybe pushed into another process) the operation of updating a security name becomes simpler and more performant.&lt;/p&gt;
+&lt;p&gt;Given this design, whenever I want to update a security name I need to remember to eagerly load the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PortfolioItems&lt;/code&gt; as well. Extracting out the update part of that functionality reduces the complexity on the consumer side, and since the update can be performed out-of-band (maybe pushed into another process) the operation of updating a security name becomes simpler and more performant.&lt;/p&gt;
 
 &lt;h3 id=&quot;service-class&quot;&gt;Service class&lt;/h3&gt;
 
-&lt;p&gt;Of course, a domain event handler is just a nice auto-wired wrapper for a (hopefully) single purpose service class. I could instead have a service class that replaces the above aggregate root style &lt;code&gt;Security.UpdateName()&lt;/code&gt; method and also implements the domain event to update the denormalised names on &lt;code&gt;PortfolioItem&lt;/code&gt;. &lt;/p&gt;
+&lt;p&gt;Of course, a domain event handler is just a nice auto-wired wrapper for a (hopefully) single purpose service class. I could instead have a service class that replaces the above aggregate root style &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Security.UpdateName()&lt;/code&gt; method and also implements the domain event to update the denormalised names on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PortfolioItem&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;This is a contrived example - in this situation a domain event handler is probably a much better choice unless you need to take advantage of EF’s implicit database transaction to maintain integrity in case of a failure.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class UpdateSecurityName {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class UpdateSecurityName {
 	// _context...
 
 	public void Update(Guid securityId, string name) {
@@ -522,7 +678,7 @@ var results =
 		_context.SaveChanges();
 	}
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;isnt-this-all-a-bit-too-hard&quot;&gt;Isn’t this all a bit too hard?&lt;/h2&gt;
 
@@ -538,12 +694,12 @@ var results =
 
 </description>
 				<pubDate>Thu, 05 Nov 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/minimum-viable-ef.html</link>
-				<guid isPermaLink="true">http://bendetat.com/minimum-viable-ef.html</guid>
+				<link>https://becdetat.com/minimum-viable-ef.html</link>
+				<guid isPermaLink="true">https://becdetat.com/minimum-viable-ef.html</guid>
 			</item>
 		
 			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
+				<author>Rebecca Scott - me@becdetat.com</author>
 				<title>Notes on Kerberos and Active Directory</title>
 				<description>&lt;p&gt;These are just some notes I made while reading about Kerberos and Active Directory. They aren’t very technical or well-edited and probably have plenty of errors. Read at your peril!&lt;/p&gt;
 
@@ -653,7 +809,7 @@ var results =
       &lt;li&gt;A tree is a collection of domains and domain trees, linked by a trust hierarchy&lt;/li&gt;
       &lt;li&gt;A forest is a collection of trees with a common schema, structure and configuration - used as the security boundary&lt;/li&gt;
       &lt;li&gt;Objects in a domain can be grouped into Organizational Units (OUs). OUs give hierarchy to a domain. OUs should be used for structure instead of domains or sites.&lt;/li&gt;
-      &lt;li&gt;Duplicate usernames are an issue. Can’t have duplicate usernames in a single domain. This is why you get names like &lt;code&gt;DOMAIN\scottbe123&lt;/code&gt;.&lt;/li&gt;
+      &lt;li&gt;Duplicate usernames are an issue. Can’t have duplicate usernames in a single domain. This is why you get names like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DOMAIN\scottbe123&lt;/code&gt;.&lt;/li&gt;
       &lt;li&gt;OUs aren’t used for access permissions (specific to AD, other directory services support this). Shadow groups are used for this, usually via third party tooling to map a group to an OU.&lt;/li&gt;
     &lt;/ul&gt;
   &lt;/li&gt;
@@ -706,12 +862,12 @@ var results =
 
 </description>
 				<pubDate>Mon, 02 Nov 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/notes-on-kerberos-and-active-directory.html</link>
-				<guid isPermaLink="true">http://bendetat.com/notes-on-kerberos-and-active-directory.html</guid>
+				<link>https://becdetat.com/notes-on-kerberos-and-active-directory.html</link>
+				<guid isPermaLink="true">https://becdetat.com/notes-on-kerberos-and-active-directory.html</guid>
 			</item>
 		
 			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
+				<author>Rebecca Scott - me@becdetat.com</author>
 				<title>React - Early thoughts</title>
 				<description>&lt;p&gt;I’ve just started playing with React, so here is a bit of a brain dump of my first impressions.&lt;/p&gt;
 
@@ -719,7 +875,7 @@ var results =
 
 &lt;p&gt;I’m comparing this mainly with Angular, which I have about 8 months experience with. React seems to be all about the components, which is similar to the directive-first approach that is working well for me in Angular. The components are very nice to work with, especially with JSX using ES6 features. Here’s a very basic example:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;export default class HelloWorld extends React.Component {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;export default class HelloWorld extends React.Component {
 	render() {
 		return (
 			&amp;lt;h1&amp;gt;Hello, world!&amp;lt;/h1&amp;gt;
@@ -729,15 +885,15 @@ var results =
 
 React.render(
 	&amp;lt;HelloWorld/&amp;gt;,
-	document.getElementById(&#39;content&#39;)
+	document.getElementById(&apos;content&apos;)
 )
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;This renders the &lt;code&gt;HelloWorld&lt;/code&gt; component inside a div with the ID &lt;code&gt;content&lt;/code&gt;. JSX’s inline style of declaring markup seems strange to look at first, but it’s really just syntactic sugar for commands that create shadow DOM elements.&lt;/p&gt;
+&lt;p&gt;This renders the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HelloWorld&lt;/code&gt; component inside a div with the ID &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;content&lt;/code&gt;. JSX’s inline style of declaring markup seems strange to look at first, but it’s really just syntactic sugar for commands that create shadow DOM elements.&lt;/p&gt;
 
 &lt;h2 id=&quot;but-it-feels-closer-to-the-metal&quot;&gt;…but it feels closer to the metal&lt;/h2&gt;
 
-&lt;p&gt;Angular includes services such as &lt;code&gt;$http&lt;/code&gt; for AJAX and &lt;code&gt;$q&lt;/code&gt; for promises, and uses separate templates with a templating language to work with the UI. While you don’t have to, use of the included services is recommended - you’re largely buying into the whole ecosystem.&lt;/p&gt;
+&lt;p&gt;Angular includes services such as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$http&lt;/code&gt; for AJAX and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$q&lt;/code&gt; for promises, and uses separate templates with a templating language to work with the UI. While you don’t have to, use of the included services is recommended - you’re largely buying into the whole ecosystem.&lt;/p&gt;
 
 &lt;p&gt;React is all about the DOM. Inline JSX is syntactic sugar for methods that work directly with the DOM. React doesn’t provide or depend on any particular AJAX library - the tutorials suggest using jQuery directly. This makes React feel very lightweight and gives the impression that it’s not trying to solve too many problems.&lt;/p&gt;
 
@@ -745,11 +901,11 @@ React.render(
 
 &lt;p&gt;The &lt;a href=&quot;https://facebook.github.io/react/docs/tutorial.html&quot;&gt;React tutorial&lt;/a&gt; is a good starting point, but it is built using ES5 syntax. ES6 adds classes, which makes working with JSX a lot easier. There are some important changes that need to made though.&lt;/p&gt;
 
-&lt;p&gt;I’m not a huge fan of ES6 and TypeScript classes, partly because it doesn’t give you much over just using functions, and partly because it makes it more difficult to manage &lt;code&gt;this&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I’m not a huge fan of ES6 and TypeScript classes, partly because it doesn’t give you much over just using functions, and partly because it makes it more difficult to manage &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;Here’s what I mean. In TypeScript (&lt;a href=&quot;http://codepen.io/anon/pen/PPYOzJ?editors=001&quot;&gt;pen&lt;/a&gt;):&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class Child {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class Child {
 	constructor(private name) {}
 
 	sayName() {
@@ -769,15 +925,15 @@ var c = new Child(&quot;child&quot;);
 var p = new Parent(&quot;parent&quot;, c);
 
 p.sayChildName()
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;This writes &lt;code&gt;&quot;parent&quot;&lt;/code&gt; to the console, not &lt;code&gt;&quot;child&quot;&lt;/code&gt; as expected. This is because of JavaScript’s late binding - when the &lt;code&gt;sayChildName&lt;/code&gt; reference is executed, &lt;code&gt;this&lt;/code&gt; is the parent. The &lt;code&gt;this&lt;/code&gt; reference in &lt;code&gt;sayName()&lt;/code&gt; isn’t closed over in the function. To get the correct &lt;code&gt;this&lt;/code&gt; in function-based ES6, we usually assign &lt;code&gt;this&lt;/code&gt; to &lt;code&gt;self&lt;/code&gt;. The working equivalent is this:&lt;/p&gt;
+&lt;p&gt;This writes &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&quot;parent&quot;&lt;/code&gt; to the console, not &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&quot;child&quot;&lt;/code&gt; as expected. This is because of JavaScript’s late binding - when the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sayChildName&lt;/code&gt; reference is executed, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this&lt;/code&gt; is the parent. The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this&lt;/code&gt; reference in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sayName()&lt;/code&gt; isn’t closed over in the function. To get the correct &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this&lt;/code&gt; in function-based ES6, we usually assign &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;self&lt;/code&gt;. The working equivalent is this:&lt;/p&gt;
 
 &lt;aside class=&quot;pull-right&quot; style=&quot;width: 15em&quot;&gt;
-	In fact, by removing the &lt;code&gt;self.name = name&lt;/code&gt; you can make &lt;code&gt;name&lt;/code&gt; truly private, something that isn&#39;t possible (yet) in ES6/TS classes.
+	In fact, by removing the &lt;code&gt;self.name = name&lt;/code&gt; you can make &lt;code&gt;name&lt;/code&gt; truly private, something that isn&apos;t possible (yet) in ES6/TS classes.
 &lt;/aside&gt;
 
-&lt;pre&gt;&lt;code&gt;function Child(name) {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;function Child(name) {
 	var self = this;
 	
 	self.name = name;
@@ -799,13 +955,13 @@ var c = new Child(&quot;child&quot;);
 var p = new Parent(&quot;parent&quot;, c);
 
 p.sayChildName();
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;I wanted to use ES6 classes for React because React’s way of creating a component functionally (&lt;code&gt;var MyComponent = React.createClass({...})&lt;/code&gt;) uses object notation, which I find very frustrating to work with, and not having to deal with dependency injection (a la Angular) makes classes feel more lightweight.&lt;/p&gt;
+&lt;p&gt;I wanted to use ES6 classes for React because React’s way of creating a component functionally (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;var MyComponent = React.createClass({...})&lt;/code&gt;) uses object notation, which I find very frustrating to work with, and not having to deal with dependency injection (a la Angular) makes classes feel more lightweight.&lt;/p&gt;
 
 &lt;p&gt;From the tutorial, creating a component functionally is like this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var CommentForm = React.createClass({
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var CommentForm = React.createClass({
   handleSubmit: function(e) {
     e.preventDefault();
     var author = React.findDOMNode(this.refs.author).value.trim();
@@ -814,8 +970,8 @@ p.sayChildName();
       return;
     }
     this.props.onCommentSubmit({author: author, text: text});
-    React.findDOMNode(this.refs.author).value = &#39;&#39;;
-    React.findDOMNode(this.refs.text).value = &#39;&#39;;
+    React.findDOMNode(this.refs.author).value = &apos;&apos;;
+    React.findDOMNode(this.refs.text).value = &apos;&apos;;
   },
   render: function() {
     return (
@@ -827,13 +983,13 @@ p.sayChildName();
     );
   }
 });
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Note that in the &lt;code&gt;render&lt;/code&gt; method, the &lt;code&gt;onSubmit&lt;/code&gt; event handler in the form is set to &lt;code&gt;this.handleSubmit&lt;/code&gt;. This works because React &lt;a href=&quot;https://facebook.github.io/react/docs/interactivity-and-dynamic-uis.html#under-the-hood-autobinding-and-event-delegation&quot;&gt;autobinds&lt;/a&gt; &lt;code&gt;this&lt;/code&gt; to the component instance when using &lt;code&gt;React.createClass&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Note that in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;render&lt;/code&gt; method, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;onSubmit&lt;/code&gt; event handler in the form is set to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.handleSubmit&lt;/code&gt;. This works because React &lt;a href=&quot;https://facebook.github.io/react/docs/interactivity-and-dynamic-uis.html#under-the-hood-autobinding-and-event-delegation&quot;&gt;autobinds&lt;/a&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this&lt;/code&gt; to the component instance when using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;React.createClass&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;The equivalent using an ES6 class is this:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;export default class CommentForm extends React.Component {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;export default class CommentForm extends React.Component {
 	render() {
 		let handleSubmit = e =&amp;gt; {
 			e.preventDefault();
@@ -846,8 +1002,8 @@ p.sayChildName();
 				author: author,
 				text: text
 			});
-			React.findDOMNode(this.refs.author).value = &#39;&#39;;
-			React.findDOMNode(this.refs.text).value = &#39;&#39;;
+			React.findDOMNode(this.refs.author).value = &apos;&apos;;
+			React.findDOMNode(this.refs.text).value = &apos;&apos;;
 		};
 
 		return (
@@ -859,13 +1015,13 @@ p.sayChildName();
 		);
 	}
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;code&gt;handleSubmit&lt;/code&gt; has changed from being a function on the class to an inline function within the &lt;code&gt;render()&lt;/code&gt; method. This is because the &lt;code&gt;onSubmit&lt;/code&gt; handler is executed in a different context, so if &lt;code&gt;handleSubmit&lt;/code&gt; were a function directly on the &lt;code&gt;CommentForm&lt;/code&gt; class &lt;code&gt;this&lt;/code&gt; would have a different value and the call would fail. React’s ES6 class support doesn’t support autobinding &lt;code&gt;this&lt;/code&gt; so this is a workaround for idiomatic ES6.&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;handleSubmit&lt;/code&gt; has changed from being a function on the class to an inline function within the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;render()&lt;/code&gt; method. This is because the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;onSubmit&lt;/code&gt; handler is executed in a different context, so if &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;handleSubmit&lt;/code&gt; were a function directly on the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CommentForm&lt;/code&gt; class &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this&lt;/code&gt; would have a different value and the call would fail. React’s ES6 class support doesn’t support autobinding &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this&lt;/code&gt; so this is a workaround for idiomatic ES6.&lt;/p&gt;
 
 &lt;p&gt;Making the function an inline value is equivalent to doing the following to the above parent/child TypeScript example:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;class Child {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class Child {
 	constructor(private name) {
 		this.sayName = () =&amp;gt; {
 			console.log(this.name);
@@ -887,57 +1043,57 @@ var c = new Child(&quot;child&quot;);
 var p = new Parent(&quot;parent&quot;, c);
 
 p.sayChildName()
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;This now outputs &lt;code&gt;&quot;child&quot;&lt;/code&gt; as originally expected.&lt;/p&gt;
+&lt;p&gt;This now outputs &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&quot;child&quot;&lt;/code&gt; as originally expected.&lt;/p&gt;
 
-&lt;p&gt;Another gotcha I found with using ES6 classes for React components is setting the initial &lt;code&gt;state&lt;/code&gt; value. &lt;code&gt;this.state&lt;/code&gt; is what React uses for one-way binding to the view. The way to set the initial value using the &lt;code&gt;React.createClass&lt;/code&gt; syntax is with a &lt;code&gt;getInitialState&lt;/code&gt; function:&lt;/p&gt;
+&lt;p&gt;Another gotcha I found with using ES6 classes for React components is setting the initial &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;state&lt;/code&gt; value. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.state&lt;/code&gt; is what React uses for one-way binding to the view. The way to set the initial value using the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;React.createClass&lt;/code&gt; syntax is with a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;getInitialState&lt;/code&gt; function:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var CommentBox = React.createClass({
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var CommentBox = React.createClass({
 	getInitialState: function() {
 		return {data: []};
 	},
 	// ...
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Trying to do this with ES6 classes doesn’t work. &lt;/p&gt;
+&lt;p&gt;Trying to do this with ES6 classes doesn’t work.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;export default class CommentBox extends React.Component {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;export default class CommentBox extends React.Component {
 	getInitialState() {
 		return { data: []};
 	}
 	//...
 
 Warning: getInitialState was defined on CommentBox, a plain JavaScript class. This is only supported for classes created using React.createClass. Did you mean to define a state property instead?
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;The correct way is to set &lt;code&gt;this.state&lt;/code&gt; from the constructor:&lt;/p&gt;
+&lt;p&gt;The correct way is to set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.state&lt;/code&gt; from the constructor:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;export default class CommentBox extends React.Component {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;export default class CommentBox extends React.Component {
 	constructor() {
 		super();
 
 		this.state = { data: []};
 	}
 	//...
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Note that &lt;code&gt;this.state&lt;/code&gt; is only set directly like this &lt;em&gt;in the constructor&lt;/em&gt;. Updating the state subsequently has to happen using &lt;code&gt;this.setState&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;Note that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.state&lt;/code&gt; is only set directly like this &lt;em&gt;in the constructor&lt;/em&gt;. Updating the state subsequently has to happen using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.setState&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;$.get(&#39;/comments&#39;).then(data =&amp;gt; this.setState({
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$.get(&apos;/comments&apos;).then(data =&amp;gt; this.setState({
 	data: data
 }));
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;strong&gt;But&lt;/strong&gt; you can’t use &lt;code&gt;this.setState&lt;/code&gt; in the constructor, and setting the state &lt;em&gt;outside&lt;/em&gt; of the constructor has to be via &lt;code&gt;this.setState&lt;/code&gt;. Important to remember.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;But&lt;/strong&gt; you can’t use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.setState&lt;/code&gt; in the constructor, and setting the state &lt;em&gt;outside&lt;/em&gt; of the constructor has to be via &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.setState&lt;/code&gt;. Important to remember.&lt;/p&gt;
 
 &lt;h2 id=&quot;one-way-binding&quot;&gt;One-way binding&lt;/h2&gt;
 
 &lt;p&gt;By default, Angular supports two-way binding between a view and its controller. It does that by automatically setting up watchers on binding expressions in the view. This works very well most of the time, but when it doesn’t everything suddenly becomes very difficult to work with. The view is also mutating the state of the controller, leading to possible issues when debugging or tracing the application.&lt;/p&gt;
 
-&lt;p&gt;React also has two-way binding, but &lt;a href=&quot;https://facebook.github.io/react/docs/two-way-binding-helpers.html&quot;&gt;it’s opt-in&lt;/a&gt; with some quite explicit syntax. The default is one-way binding, from &lt;code&gt;this.state&lt;/code&gt; to the view. The view pushes data back to the component using DOM events:&lt;/p&gt;
+&lt;p&gt;React also has two-way binding, but &lt;a href=&quot;https://facebook.github.io/react/docs/two-way-binding-helpers.html&quot;&gt;it’s opt-in&lt;/a&gt; with some quite explicit syntax. The default is one-way binding, from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.state&lt;/code&gt; to the view. The view pushes data back to the component using DOM events:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;export default class TestBinding extends React.Component {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;export default class TestBinding extends React.Component {
 	render() {
 		let testChanged = e =&amp;gt; {
 			console.log(React.findDOMNode(this.refs.test).value);
@@ -946,13 +1102,13 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 		return &amp;lt;input type=&quot;text&quot; ref=&quot;test&quot; onChange={testChanged} /&amp;gt;;
 	}
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;the-error-messages-are-superb&quot;&gt;The error messages are superb&lt;/h2&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/2DM7t7Q.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&quot;resources-amp-further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
+&lt;h2 id=&quot;resources--further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://facebook.github.io/react/docs/tutorial.html&quot;&gt;React tutorial&lt;/a&gt;&lt;/li&gt;
@@ -962,12 +1118,12 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 
 </description>
 				<pubDate>Fri, 28 Aug 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/react-early-thoughts.html</link>
-				<guid isPermaLink="true">http://bendetat.com/react-early-thoughts.html</guid>
+				<link>https://becdetat.com/react-early-thoughts.html</link>
+				<guid isPermaLink="true">https://becdetat.com/react-early-thoughts.html</guid>
 			</item>
 		
 			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
+				<author>Rebecca Scott - me@becdetat.com</author>
 				<title>Bundling and deploying Azure WebJobs in a Web App with Octopus and Nimbus</title>
 				<description>&lt;aside class=&quot;pull-right well&quot; style=&quot;width: 20em&quot;&gt;
 	&quot;Nimbus is a .NET client library to add an easy to develop against experience against the Azure Service Bus or the Windows Service Bus.&quot;
@@ -989,11 +1145,11 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 	The .exe name is important. &lt;code&gt;MyApplicationWorker.exe&lt;/code&gt; is ok but &lt;code&gt;MyApplication.Worker.exe&lt;/code&gt; is not.
 &lt;/aside&gt;
 
-&lt;p&gt;For use in a C#/.NET application, WebJobs are created as console applications. The name of the generated executable can’t have any punctuation - &lt;code&gt;MyApplicationWorker.exe&lt;/code&gt; is ok but &lt;code&gt;MyApplication.Worker.exe&lt;/code&gt; isn’t. You can still use punctuation in the project name and default namespace, just set the “Assembly name” in the project properties to something valid.&lt;/p&gt;
+&lt;p&gt;For use in a C#/.NET application, WebJobs are created as console applications. The name of the generated executable can’t have any punctuation - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MyApplicationWorker.exe&lt;/code&gt; is ok but &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MyApplication.Worker.exe&lt;/code&gt; isn’t. You can still use punctuation in the project name and default namespace, just set the “Assembly name” in the project properties to something valid.&lt;/p&gt;
 
-&lt;p&gt;The application references the &lt;code&gt;Microsoft.Azure.WebJobs&lt;/code&gt; NuGet package, and the &lt;code&gt;Main&lt;/code&gt; method is trivial:&lt;/p&gt;
+&lt;p&gt;The application references the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Microsoft.Azure.WebJobs&lt;/code&gt; NuGet package, and the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Main&lt;/code&gt; method is trivial:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;private static void Main(string[] args)
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private static void Main(string[] args)
 {
     var container = IoC.LetThereBeIoC();
 
@@ -1003,30 +1159,30 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 
     host.RunAndBlock();
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;The first line creates the IoC container, which includes all the Nimbus setup. The Nimbus bus then just sits in the background while the app is running, handling messages as they appear on the bus.&lt;/p&gt;
 
 &lt;p&gt;The middle section sets up the WebJob host. It requires a connection string to an Azure Table Storage instance. I tried this with the local storage emulator for testing but it requires an actual instance in Azure - the WebJobs API apparently requires features that are not available in the local storage emulator.&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;host.RunAndBlock()&lt;/code&gt; then effectively puts the application into an infinite loop and lets it sit around to handle messages.&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;host.RunAndBlock()&lt;/code&gt; then effectively puts the application into an infinite loop and lets it sit around to handle messages.&lt;/p&gt;
 
 &lt;p&gt;When starting the application locally it complains that “No functions found”. This is because WebJobs have their own message handling model based on Service Bus, by decorating parameters on static methods. Since I’m using Nimbus to handle the messaging via Service Bus there are no WebJob-specific handlers needed.&lt;/p&gt;
 
 &lt;h2 id=&quot;deploying&quot;&gt;Deploying&lt;/h2&gt;
 
-&lt;p&gt;Because WebJobs are part of a web site, they don’t need their own deployment pipeline. Instead the entire job application is copied into a &lt;code&gt;jobs&lt;/code&gt; folder within the web site:&lt;/p&gt;
+&lt;p&gt;Because WebJobs are part of a web site, they don’t need their own deployment pipeline. Instead the entire job application is copied into a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jobs&lt;/code&gt; folder within the web site:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;MySite\&lt;/code&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MySite\&lt;/code&gt;
     &lt;ul&gt;
-      &lt;li&gt;&lt;code&gt;app_data\&lt;/code&gt;
+      &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;app_data\&lt;/code&gt;
         &lt;ul&gt;
-          &lt;li&gt;&lt;code&gt;jobs\&lt;/code&gt;
+          &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jobs\&lt;/code&gt;
             &lt;ul&gt;
-              &lt;li&gt;&lt;code&gt;continuous\&lt;/code&gt;
+              &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;continuous\&lt;/code&gt;
                 &lt;ul&gt;
-                  &lt;li&gt;&lt;code&gt;MyWorkerJob\&lt;/code&gt;&lt;/li&gt;
+                  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MyWorkerJob\&lt;/code&gt;&lt;/li&gt;
                 &lt;/ul&gt;
               &lt;/li&gt;
             &lt;/ul&gt;
@@ -1037,11 +1193,11 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
   &lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;The &lt;code&gt;MyWorkerJob&lt;/code&gt; has to be &lt;em&gt;exactly the same&lt;/em&gt; as the &lt;code&gt;.exe&lt;/code&gt; name. So &lt;code&gt;MyWorkerJob.exe&lt;/code&gt; needs to be deployed to &lt;code&gt;app_data/jobs/continuous/MyWorkerJob&lt;/code&gt;. Jobs can be scheduled as &lt;code&gt;continuous&lt;/code&gt; or &lt;code&gt;triggered&lt;/code&gt;. The Nimbus work needs to run continuously so it gets deployed to &lt;code&gt;App_Data\jobs\continuous&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MyWorkerJob&lt;/code&gt; has to be &lt;em&gt;exactly the same&lt;/em&gt; as the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.exe&lt;/code&gt; name. So &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MyWorkerJob.exe&lt;/code&gt; needs to be deployed to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;app_data/jobs/continuous/MyWorkerJob&lt;/code&gt;. Jobs can be scheduled as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;continuous&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;triggered&lt;/code&gt;. The Nimbus work needs to run continuously so it gets deployed to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;App_Data\jobs\continuous&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;For Octopack to include the jobs, the job path just needs to be added to the project’s &lt;code&gt;.nuspec&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;For Octopack to include the jobs, the job path just needs to be added to the project’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.nuspec&lt;/code&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;&amp;lt;?xml version=&quot;1.0&quot;?&amp;gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;?xml version=&quot;1.0&quot;?&amp;gt;
 &amp;lt;package xmlns=&quot;http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd&quot;&amp;gt;
 	...
 	&amp;lt;files&amp;gt;
@@ -1049,13 +1205,13 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 		&amp;lt;file src=&quot;..\My.Worker\bin\release\**&quot; target=&quot;app_data\jobs\continuous\MyWorker&quot; /&amp;gt;
 	&amp;lt;/files&amp;gt;
 &amp;lt;/package&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;The solution’s build order needs to have the job’s built before the web site (so the job’s artifacts are available when building the site). You can do that by right-clicking the project, selecting ‘Project Build Order’, and adding the WebJob as a dependency of the web site.&lt;/p&gt;
 
-&lt;p&gt;That’s pretty much all there is to it. When the solution is built and packed, the WebJob will be included in the &lt;code&gt;.nupkg&lt;/code&gt; file, and Octopus will automatically patch the WebJob’s &lt;code&gt;App.config&lt;/code&gt; when configuring the site. It’s also a good idea to logging using something like &lt;a href=&quot;http://getseq.net/&quot;&gt;Seq&lt;/a&gt; to see the WebJob start up with the site.&lt;/p&gt;
+&lt;p&gt;That’s pretty much all there is to it. When the solution is built and packed, the WebJob will be included in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.nupkg&lt;/code&gt; file, and Octopus will automatically patch the WebJob’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;App.config&lt;/code&gt; when configuring the site. It’s also a good idea to logging using something like &lt;a href=&quot;http://getseq.net/&quot;&gt;Seq&lt;/a&gt; to see the WebJob start up with the site.&lt;/p&gt;
 
-&lt;h2 id=&quot;resources-amp-further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
+&lt;h2 id=&quot;resources--further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;http://www.hanselman.com/blog/IntroducingWindowsAzureWebJobs.aspx&quot;&gt;Introducing Windows Azure WebJobs - Scott Hanselman&lt;/a&gt;&lt;/li&gt;
@@ -1068,36 +1224,36 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 
 </description>
 				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</link>
-				<guid isPermaLink="true">http://bendetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</guid>
+				<link>https://becdetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</link>
+				<guid isPermaLink="true">https://becdetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</guid>
 			</item>
 		
 			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
+				<author>Rebecca Scott - me@becdetat.com</author>
 				<title>Build pipeline for React</title>
-				<description>&lt;p&gt;I’m going to eshew Bower and just use NPM as the package manager. I’ve already got &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Node and NPM installed&lt;/a&gt;. The example site I’m creating is &lt;code&gt;survey-thing&lt;/code&gt; - a simple thing for &lt;a href=&quot;https://github.com/bendetat/survey-thing&quot;&gt;creating surveys&lt;/a&gt;. I also have a &lt;a href=&quot;https://github.com/bendetat/stub-projects/tree/master/react-with-gulp-and-bootstrap&quot;&gt;stub package&lt;/a&gt; which just includes a script for setting up the environment and a simple landing page.&lt;/p&gt;
+				<description>&lt;p&gt;I’m going to eshew Bower and just use NPM as the package manager. I’ve already got &lt;a href=&quot;http://bendetat.com/hello-world-its-gulp.html&quot;&gt;Node and NPM installed&lt;/a&gt;. The example site I’m creating is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;survey-thing&lt;/code&gt; - a simple thing for &lt;a href=&quot;https://github.com/bendetat/survey-thing&quot;&gt;creating surveys&lt;/a&gt;. I also have a &lt;a href=&quot;https://github.com/bendetat/stub-projects/tree/master/react-with-gulp-and-bootstrap&quot;&gt;stub package&lt;/a&gt; which just includes a script for setting up the environment and a simple landing page.&lt;/p&gt;
 
-&lt;p&gt;I’m going to use all the shinies - &lt;a href=&quot;http://browserify.org/&quot;&gt;Browserify&lt;/a&gt; for CommonJS modules and &lt;a href=&quot;https://facebook.github.io/react/docs/jsx-in-depth.html&quot;&gt;JSX&lt;/a&gt; instead of the seperate &lt;code&gt;.js&lt;/code&gt;/&lt;code&gt;.html&lt;/code&gt; structure of a typical AngularJS application, using &lt;a href=&quot;https://babeljs.io/&quot;&gt;Babel&lt;/a&gt; for ES6 features and &lt;a href=&quot;http://sass-lang.com/&quot;&gt;SASS&lt;/a&gt; for stylesheet preprocessing.&lt;/p&gt;
+&lt;p&gt;I’m going to use all the shinies - &lt;a href=&quot;http://browserify.org/&quot;&gt;Browserify&lt;/a&gt; for CommonJS modules and &lt;a href=&quot;https://facebook.github.io/react/docs/jsx-in-depth.html&quot;&gt;JSX&lt;/a&gt; instead of the seperate &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.js&lt;/code&gt;/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.html&lt;/code&gt; structure of a typical AngularJS application, using &lt;a href=&quot;https://babeljs.io/&quot;&gt;Babel&lt;/a&gt; for ES6 features and &lt;a href=&quot;http://sass-lang.com/&quot;&gt;SASS&lt;/a&gt; for stylesheet preprocessing.&lt;/p&gt;
 
 &lt;h2 id=&quot;primer-nancy-as-a-static-server&quot;&gt;Primer: Nancy as a static server&lt;/h2&gt;
 
-&lt;p&gt;The site will be hosted in a simple &lt;a href=&quot;http://nancyfx.org/&quot;&gt;Nancy app&lt;/a&gt; so the built React application will be output to &lt;code&gt;src\SurveyThing\app&lt;/code&gt;. Host this in Nancy with a static convention - this example is for an ASP.NET site using OWIN.&lt;/p&gt;
+&lt;p&gt;The site will be hosted in a simple &lt;a href=&quot;http://nancyfx.org/&quot;&gt;Nancy app&lt;/a&gt; so the built React application will be output to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;src\SurveyThing\app&lt;/code&gt;. Host this in Nancy with a static convention - this example is for an ASP.NET site using OWIN.&lt;/p&gt;
 
-&lt;p&gt;Install some NuGet packages (&lt;code&gt;Microsoft.Owin&lt;/code&gt;, &lt;code&gt;Microsoft.Owin.Host.SystemWeb&lt;/code&gt;, &lt;code&gt;Nancy&lt;/code&gt; and &lt;code&gt;Nancy.Owin&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;Install some NuGet packages (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Microsoft.Owin&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Microsoft.Owin.Host.SystemWeb&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Nancy&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Nancy.Owin&lt;/code&gt;).&lt;/p&gt;
 
-&lt;p&gt;Add these values to the &lt;code&gt;web.config&lt;/code&gt; file, within the &lt;code&gt;configuration&lt;/code&gt; element:&lt;/p&gt;
+&lt;p&gt;Add these values to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;web.config&lt;/code&gt; file, within the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;configuration&lt;/code&gt; element:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;&amp;lt;appSettings&amp;gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;appSettings&amp;gt;
 	&amp;lt;add key=&quot;owin:HandleAllRequests&quot; value=&quot;true&quot; /&amp;gt;
 &amp;lt;/appSettings&amp;gt;
 &amp;lt;system.webServer&amp;gt;
 	&amp;lt;modules runAllManagedModulesForAllRequests=&quot;true&quot;/&amp;gt;
 &amp;lt;/system.webServer&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Add &lt;code&gt;Startup&lt;/code&gt; and &lt;code&gt;Bootstrapper&lt;/code&gt; classes:&lt;/p&gt;
+&lt;p&gt;Add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Startup&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Bootstrapper&lt;/code&gt; classes:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;public class Startup
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class Startup
 {
     public void Configuration(IAppBuilder app)
     {
@@ -1120,37 +1276,37 @@ public class Bootstrapper : DefaultNancyBootstrapper
         base.ConfigureConventions(nancyConventions);
     }
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;If you create &lt;code&gt;\app\test.html&lt;/code&gt; inside the Nancy site’s root it should be served from &lt;code&gt;http://localhost:PORT/test.html&lt;/code&gt;. To serve &lt;code&gt;\app\index.html&lt;/code&gt; when requesting &lt;code&gt;http://localhost:PORT&lt;/code&gt; a static route needs to added:&lt;/p&gt;
+&lt;p&gt;If you create &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;\app\test.html&lt;/code&gt; inside the Nancy site’s root it should be served from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://localhost:PORT/test.html&lt;/code&gt;. To serve &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;\app\index.html&lt;/code&gt; when requesting &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://localhost:PORT&lt;/code&gt; a static route needs to added:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;public class StaticModule : NancyModule
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class StaticModule : NancyModule
 {
     public StaticModule()
     {
         Get[&quot;/&quot;] = _ =&amp;gt; Response.AsFile(&quot;app/index.html&quot;);
     }
 }
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;set-up-gulp&quot;&gt;Set up Gulp&lt;/h2&gt;
 
 &lt;p&gt;I want to use:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;gulp&lt;/code&gt; for the build tool&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;sass&lt;/code&gt; for CSS generation&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;gulp-pleeease&lt;/code&gt; to do &lt;a href=&quot;http://pleeease.io/&quot;&gt;nice things with CSS&lt;/a&gt; including minification&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;babelify&lt;/code&gt; for ES6 and JSX support&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;browserify&lt;/code&gt; for a CommonJs module system&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;vinyl-source-stream&lt;/code&gt; reduces the reliance on gulp plugins (so we can use &lt;code&gt;babelify&lt;/code&gt; instead of &lt;code&gt;gulp-babel&lt;/code&gt;)&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;react&lt;/code&gt; obviously ;-)&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;gulp-streamify&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;uglify&lt;/code&gt; minify JS (used later)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gulp&lt;/code&gt; for the build tool&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sass&lt;/code&gt; for CSS generation&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gulp-pleeease&lt;/code&gt; to do &lt;a href=&quot;http://pleeease.io/&quot;&gt;nice things with CSS&lt;/a&gt; including minification&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;babelify&lt;/code&gt; for ES6 and JSX support&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;browserify&lt;/code&gt; for a CommonJs module system&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vinyl-source-stream&lt;/code&gt; reduces the reliance on gulp plugins (so we can use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;babelify&lt;/code&gt; instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gulp-babel&lt;/code&gt;)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;react&lt;/code&gt; obviously ;-)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gulp-streamify&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;uglify&lt;/code&gt; minify JS (used later)&lt;/li&gt;
   &lt;li&gt;
-    &lt;p&gt;&lt;code&gt;yargs&lt;/code&gt; get command line args (used later)&lt;/p&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;yargs&lt;/code&gt; get command line args (used later)&lt;/p&gt;
 
-    &lt;pre&gt;&lt;code&gt;  npm install --save gulp
+    &lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  npm install --save gulp
   npm install --save gulp-concat
   npm install --save gulp-sass
   npm install --save gulp-pleeease
@@ -1160,85 +1316,85 @@ public class Bootstrapper : DefaultNancyBootstrapper
   npm install --save react
   npm install --save gulp-streamify
   npm install --save uglify
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;There’s a fair bit happening in &lt;a href=&quot;https://github.com/bendetat/survey-thing/blob/master/gulpfile.js&quot;&gt;the &lt;code&gt;gulpfile.js&lt;/code&gt; script&lt;/a&gt; but here are some highlights.&lt;/p&gt;
+&lt;p&gt;There’s a fair bit happening in &lt;a href=&quot;https://github.com/bendetat/survey-thing/blob/master/gulpfile.js&quot;&gt;the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gulpfile.js&lt;/code&gt; script&lt;/a&gt; but here are some highlights.&lt;/p&gt;
 
-&lt;p&gt;The &lt;code&gt;&#39;code&#39;&lt;/code&gt; step uses browserify to set up the CommonJS module system and uses &lt;code&gt;app/layout/index.jsx&lt;/code&gt; as the entry point to the application. Babel is used to take advantage of ES6 and the script is minified.&lt;/p&gt;
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;code&apos;&lt;/code&gt; step uses browserify to set up the CommonJS module system and uses &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;app/layout/index.jsx&lt;/code&gt; as the entry point to the application. Babel is used to take advantage of ES6 and the script is minified.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt; gulp.task(&#39;code&#39;, function(){
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; gulp.task(&apos;code&apos;, function(){
 	browserify({
-		entries: &#39;app/layout/layout.jsx&#39;,
-		extensions: [&#39;.jsx&#39;],
+		entries: &apos;app/layout/layout.jsx&apos;,
+		extensions: [&apos;.jsx&apos;],
 		debug: true
 	})
 		.transform(babelify)
 		.bundle()
-		.pipe(source(&#39;site.js&#39;))
+		.pipe(source(&apos;site.js&apos;))
 		.pipe(gulp.dest(destinationPath));
 });
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;CSS preprocessing is done using SASS. The entry point is &lt;code&gt;app/site.scss&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;CSS preprocessing is done using SASS. The entry point is &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;app/site.scss&lt;/code&gt;.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;css&#39;, function(){
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gulp.task(&apos;css&apos;, function(){
 	gulp
 		.src([
-			&#39;app/site.scss&#39;,
-			&#39;app/**/*.css&#39;
+			&apos;app/site.scss&apos;,
+			&apos;app/**/*.css&apos;
 		])
-		.pipe(sass().on(&#39;error&#39;, sass.logError))
+		.pipe(sass().on(&apos;error&apos;, sass.logError))
 		.pipe(pleeease())
-		.pipe(concat(&#39;site.css&#39;))
+		.pipe(concat(&apos;site.css&apos;))
 		.pipe(gulp.dest(destinationPath));
 });
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;The template HTML file is copied verbatim to the destination path.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;html&#39;, function(){
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gulp.task(&apos;html&apos;, function(){
 	gulp
-		.src(&#39;app/index.html&#39;)
+		.src(&apos;app/index.html&apos;)
 		.pipe(gulp.dest(destinationPath));
 });
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;The default gulp task runs all the main tasks (&lt;code&gt;&#39;vendor&#39;&lt;/code&gt; is not shown, it just bundles up vendor CSS and JS into &lt;code&gt;vendor.css&lt;/code&gt; and &lt;code&gt;vendor.js&lt;/code&gt; respectively).&lt;/p&gt;
+&lt;p&gt;The default gulp task runs all the main tasks (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;vendor&apos;&lt;/code&gt; is not shown, it just bundles up vendor CSS and JS into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vendor.css&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vendor.js&lt;/code&gt; respectively).&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;default&#39;, [&#39;code&#39;, &#39;css&#39;, &#39;html&#39;, &#39;vendor&#39;]);
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gulp.task(&apos;default&apos;, [&apos;code&apos;, &apos;css&apos;, &apos;html&apos;, &apos;vendor&apos;]);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;The &lt;code&gt;&#39;watch&#39;&lt;/code&gt; task splits up the workload to keep live rebuilds snappy:&lt;/p&gt;
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;watch&apos;&lt;/code&gt; task splits up the workload to keep live rebuilds snappy:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;gulp.task(&#39;watch&#39;, [&#39;default&#39;], function() {
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gulp.task(&apos;watch&apos;, [&apos;default&apos;], function() {
 	gulp.watch(
-		[&#39;app/**/*.jsx&#39;], 
-		[&#39;code&#39;]);
+		[&apos;app/**/*.jsx&apos;], 
+		[&apos;code&apos;]);
 	gulp.watch(
-		[&#39;app/**/*.css&#39;, &#39;app/**/*.scss&#39;],
-		[&#39;css&#39;]);
+		[&apos;app/**/*.css&apos;, &apos;app/**/*.scss&apos;],
+		[&apos;css&apos;]);
 	gulp.watch(
-		[&#39;app/index.html&#39;],
-		[&#39;html&#39;]);
+		[&apos;app/index.html&apos;],
+		[&apos;html&apos;]);
 });
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;react-app-structure&quot;&gt;React app structure&lt;/h2&gt;
 
 &lt;p&gt;The structure is pretty trivial at this point:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;app/
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;app/
 	index.html
 	site.scss
 	/layout
 		layout.jsx
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;code&gt;index.html&lt;/code&gt; references the stylesheets and scripts, and includes a &lt;code&gt;div&lt;/code&gt; with an ID that will be used by the React app:&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;index.html&lt;/code&gt; references the stylesheets and scripts, and includes a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;div&lt;/code&gt; with an ID that will be used by the React app:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;&amp;lt;!DOCTYPE html&amp;gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;!DOCTYPE html&amp;gt;
 &amp;lt;html&amp;gt;
 	&amp;lt;head&amp;gt;
 		&amp;lt;title&amp;gt;Survey Thing&amp;lt;/title&amp;gt;
@@ -1252,41 +1408,41 @@ public class Bootstrapper : DefaultNancyBootstrapper
 		&amp;lt;script src=&quot;vendor.js&quot;&amp;gt;&amp;lt;/script&amp;gt;
 	&amp;lt;/body&amp;gt;
 &amp;lt;/html&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;In &lt;code&gt;layout.jsx&lt;/code&gt;, ‘Hello world’ is rendered into the &lt;code&gt;div&lt;/code&gt; using inline markup:&lt;/p&gt;
+&lt;p&gt;In &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;layout.jsx&lt;/code&gt;, ‘Hello world’ is rendered into the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;div&lt;/code&gt; using inline markup:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;import React from &#39;react&#39;;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;import React from &apos;react&apos;;
 
 React.render(
 	&amp;lt;h1&amp;gt;Hello, world!&amp;lt;/h1&amp;gt;,
 	document.getElementById(&quot;content&quot;)
 );
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Running &lt;code&gt;gulp&lt;/code&gt; will run the &lt;code&gt;&#39;default&#39;&lt;/code&gt; task, which should build the app and write the artifacts to &lt;code&gt;\src\SurveyThing\app&lt;/code&gt;. Running &lt;code&gt;gulp watch&lt;/code&gt; will run the &lt;code&gt;&#39;watch&#39;&lt;/code&gt; task and rebuild whenever the monitored files change.&lt;/p&gt;
+&lt;p&gt;Running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gulp&lt;/code&gt; will run the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;default&apos;&lt;/code&gt; task, which should build the app and write the artifacts to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;\src\SurveyThing\app&lt;/code&gt;. Running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gulp watch&lt;/code&gt; will run the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&apos;watch&apos;&lt;/code&gt; task and rebuild whenever the monitored files change.&lt;/p&gt;
 
 &lt;p&gt;If everything works, we should have a happy ‘hello world’ page. I made mine pink &lt;strike&gt;because pink is cool&lt;/strike&gt; to test SASS:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/rMdt9t7.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&quot;minifying-the-sitejs-file&quot;&gt;Minifying the &lt;code&gt;site.js&lt;/code&gt; file&lt;/h2&gt;
+&lt;h2 id=&quot;minifying-the-sitejs-file&quot;&gt;Minifying the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;site.js&lt;/code&gt; file&lt;/h2&gt;
 
-&lt;p&gt;Without minification the &lt;code&gt;site.js&lt;/code&gt; file is huge (1.5M). To conditionally minify the script I check for a &lt;code&gt;--release&lt;/code&gt; argument:&lt;/p&gt;
+&lt;p&gt;Without minification the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;site.js&lt;/code&gt; file is huge (1.5M). To conditionally minify the script I check for a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--release&lt;/code&gt; argument:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;var yargs = require(&#39;yargs&#39;);
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var yargs = require(&apos;yargs&apos;);
 
 var buildRelease = yargs.argv.release || false;
 
-gulp.task(&#39;code&#39;, function(){
+gulp.task(&apos;code&apos;, function(){
 	var pipeline = browserify({
-		entries: &#39;app/layout/layout.jsx&#39;,
-		extensions: [&#39;.jsx&#39;],
+		entries: &apos;app/layout/layout.jsx&apos;,
+		extensions: [&apos;.jsx&apos;],
 		debug: true
 	})
 		.transform(babelify)
 		.bundle()
-		.pipe(source(&#39;site.js&#39;));
+		.pipe(source(&apos;site.js&apos;));
 
 	if (buildRelease) {
 		pipeline.pipe(streamify(uglify()));
@@ -1295,15 +1451,15 @@ gulp.task(&#39;code&#39;, function(){
 	pipeline
 		.pipe(gulp.dest(destinationPath));
 });
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Now running &lt;code&gt;gulp --release&lt;/code&gt; results in a much more managable 185k file.&lt;/p&gt;
+&lt;p&gt;Now running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gulp --release&lt;/code&gt; results in a much more managable 185k file.&lt;/p&gt;
 
 &lt;h2 id=&quot;fin&quot;&gt;fin&lt;/h2&gt;
 
 &lt;p&gt;Check out the &lt;a href=&quot;https://github.com/bendetat/survey-thing&quot;&gt;survey-thing&lt;/a&gt; repo for updates and lols.&lt;/p&gt;
 
-&lt;h2 id=&quot;resources-amp-further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
+&lt;h2 id=&quot;resources--further-reading&quot;&gt;Resources &amp;amp; further reading:&lt;/h2&gt;
 
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://github.com/pawelpabich/random-reactjs-hacks&quot;&gt;pawelpabich/random-reactjs-hacks - Pawel Pabich&lt;/a&gt;&lt;/li&gt;
@@ -1312,12 +1468,12 @@ gulp.task(&#39;code&#39;, function(){
 
 </description>
 				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/build-pipeline-for-react.html</link>
-				<guid isPermaLink="true">http://bendetat.com/build-pipeline-for-react.html</guid>
+				<link>https://becdetat.com/build-pipeline-for-react.html</link>
+				<guid isPermaLink="true">https://becdetat.com/build-pipeline-for-react.html</guid>
 			</item>
 		
 			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
+				<author>Rebecca Scott - me@becdetat.com</author>
 				<title>Ubuntu Desktop in AWS EC2</title>
 				<description>&lt;p&gt;This turned out to be much harder than I had hoped. Creating and connecting to a Windows Server VM is trivial in Azure but I thought I would try creating an Ubuntu VM with a desktop in AWS for the exercise (and hopefully in less time than it would take to download an Ubuntu ISO and set up a local VM - I failed). The main time sink was messing around with the SSH keys, which is admittedly a good thing because it’s got to be, excuse me, pretty damn secure. The other delay was in properly configuring X-Windows to show the Ubuntu desktop. Again this is probably a good thing because an OOTB Ubuntu instance is quite lean and most server-y things can be done via SSH rather in a GUI. That’s not what I was intending for this exercise though.&lt;/p&gt;
 
@@ -1329,40 +1485,40 @@ gulp.task(&#39;code&#39;, function(){
 
 &lt;p&gt;Now select your VM image. I picked “Ubuntu Server 14.04 LTS (HVM), SSD Volume Type”. It’s free! For eligible! I selected the ‘t2.micro’ instance type, which is also free. This is exactly how much I want to spend. I left everything else as default and clicked ‘Review and Launch’, mainly because I didn’t realise there were other things to configure.&lt;/p&gt;
 
-&lt;p&gt;By default a new security group will be created when launching a new instance, named something like &lt;code&gt;launch-wizard-1&lt;/code&gt;. This is ‘open to the world’, meaning that any IP address could connect to the instance if it has the proper credentials. A security group is basically a set of firewall rules. The only port open by default is 22 for SSH, which requires a private key. Because I’m using SSH tunnelling to forward the VNC port I don’t actually have to change the security group but you could limit port 22 to your static IP if you’ve got one.&lt;/p&gt;
+&lt;p&gt;By default a new security group will be created when launching a new instance, named something like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;launch-wizard-1&lt;/code&gt;. This is ‘open to the world’, meaning that any IP address could connect to the instance if it has the proper credentials. A security group is basically a set of firewall rules. The only port open by default is 22 for SSH, which requires a private key. Because I’m using SSH tunnelling to forward the VNC port I don’t actually have to change the security group but you could limit port 22 to your static IP if you’ve got one.&lt;/p&gt;
 
 &lt;p&gt;Now hit Launch. The next step lets you create a public &amp;amp; private key pair. Select ‘Create a new key pair’ and give it a nice name. Press Download Key Pair to download the private key then continue. If you hit ‘View instances’ you can see the new VM get provisioned. It’s not that exciting.&lt;/p&gt;
 
-&lt;p&gt;I followed &lt;a href=&quot;https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html?console_help=true&quot;&gt;these instructions&lt;/a&gt; to use PuTTY to SSH into the VM but you could just use &lt;code&gt;ssh&lt;/code&gt; directly. I ended up needing to use SSH directly later on to create an SSH tunnel anyway.&lt;/p&gt;
+&lt;p&gt;I followed &lt;a href=&quot;https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html?console_help=true&quot;&gt;these instructions&lt;/a&gt; to use PuTTY to SSH into the VM but you could just use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh&lt;/code&gt; directly. I ended up needing to use SSH directly later on to create an SSH tunnel anyway.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -i &amp;lt;KEYFILE&amp;gt;.pem
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -i &amp;lt;KEYFILE&amp;gt;.pem
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;The value for &lt;code&gt;-i&lt;/code&gt; is the path to the .pem file downloaded previously.&lt;/p&gt;
+&lt;p&gt;The value for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-i&lt;/code&gt; is the path to the .pem file downloaded previously.&lt;/p&gt;
 
 &lt;p&gt;I followed &lt;a href=&quot;http://xmodulo.com/how-to-set-up-ubuntu-desktop-vm-on-amazon-ec2.html&quot;&gt;these instructions&lt;/a&gt; to install the Ubuntu desktop and a TightVNC server, but I ended up with the grey screen of an empty X-Windows session. I needed some &lt;a href=&quot;http://askubuntu.com/a/475036/29199&quot;&gt;extra work&lt;/a&gt; to get it going. You should just do the following instead ;)&lt;/p&gt;
 
-&lt;p&gt;Update &lt;code&gt;apt-get&lt;/code&gt; and install lots of things:&lt;/p&gt;
+&lt;p&gt;Update &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt-get&lt;/code&gt; and install lots of things:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;sudo apt-get update
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo apt-get update
 sudo apt-get intall ubuntu-desktop
 sudo apt-get intall tightvncserver
 sudo apt-get install gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Launch VNC server to create an initial configuration file:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;vncserver :1
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vncserver :1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Open the configuration file in VIM:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;vim ~/.vnc/xstartup
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vim ~/.vnc/xstartup
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;Edit the configuration file to look like this, using &lt;code&gt;i&lt;/code&gt; to enter insert mode, then &lt;code&gt;&amp;lt;escape&amp;gt;&lt;/code&gt; &lt;code&gt;:wq&lt;/code&gt; to save and exit:&lt;/p&gt;
+&lt;p&gt;Edit the configuration file to look like this, using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;i&lt;/code&gt; to enter insert mode, then &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;escape&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;:wq&lt;/code&gt; to save and exit:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;#!/bin/sh
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/sh
 
 export XKL_XMODMAP_DISABLE=1
 unset SESSION_MANAGER
@@ -1378,24 +1534,24 @@ gnome-settings-daemon &amp;amp;
 metacity &amp;amp;
 nautilus &amp;amp;
 gnome-terminal &amp;amp;
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;Kill and restart the VNC server to apply the settings. This needs to happen each time the VNC / X-Windows configuration is updated.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;vncserver -kill :1
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vncserver -kill :1
 vncserver :1
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;After setting up the VNC server you need to create an SSH tunnel. Open a local console that has &lt;code&gt;ssh.exe&lt;/code&gt; in the path (Cmder didn’t have it but vanilla PowerShell did). The command to run is&lt;sup id=&quot;fnref:how-to-specify-a-private-key-in-ssh&quot;&gt;&lt;a href=&quot;#fn:how-to-specify-a-private-key-in-ssh&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
+&lt;p&gt;After setting up the VNC server you need to create an SSH tunnel. Open a local console that has &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh.exe&lt;/code&gt; in the path (Cmder didn’t have it but vanilla PowerShell did). The command to run is&lt;sup id=&quot;fnref:how-to-specify-a-private-key-in-ssh&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:how-to-specify-a-private-key-in-ssh&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -L 5902/127.0.0.1/5901 -i &amp;lt;KEYFILE&amp;gt;.pem
-&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -L 5902/127.0.0.1/5901 -i &amp;lt;KEYFILE&amp;gt;.pem
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;code&gt;-L&lt;/code&gt; sets up the tunnel, from port &lt;code&gt;5902&lt;/code&gt; on &lt;code&gt;127.0.0.1&lt;/code&gt; (localhost) to port &lt;code&gt;5901&lt;/code&gt; on the remote server. Note that I’m setting my local endpoint to port 5902 - 5901 didn’t work for me.&lt;/p&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-L&lt;/code&gt; sets up the tunnel, from port &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;5902&lt;/code&gt; on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1&lt;/code&gt; (localhost) to port &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;5901&lt;/code&gt; on the remote server. Note that I’m setting my local endpoint to port 5902 - 5901 didn’t work for me.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/iYRRB3k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;If you’re on Windows, &lt;a href=&quot;http://www.tightvnc.com/download.php&quot;&gt;download Tight-VNC&lt;/a&gt; instead of using apt-get to install VNC. Connect to &lt;code&gt;127.0.0.1::5902&lt;/code&gt; and use the password you gave above. You should now see your new shiny Ubuntu desktop:&lt;/p&gt;
+&lt;p&gt;If you’re on Windows, &lt;a href=&quot;http://www.tightvnc.com/download.php&quot;&gt;download Tight-VNC&lt;/a&gt; instead of using apt-get to install VNC. Connect to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1::5902&lt;/code&gt; and use the password you gave above. You should now see your new shiny Ubuntu desktop:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/m7PRgMm.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
@@ -1403,427 +1559,21 @@ vncserver :1
 
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/crHgZFM.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;, or if parts of the Ubuntu desktop seem to be missing, you will need to work on the VNC / X-Windows configuration. Make sure you’ve edited the &lt;code&gt;xstartup&lt;/code&gt; file for the user that the tunnel is logged in as for a start.&lt;/p&gt;
+&lt;p&gt;, or if parts of the Ubuntu desktop seem to be missing, you will need to work on the VNC / X-Windows configuration. Make sure you’ve edited the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;xstartup&lt;/code&gt; file for the user that the tunnel is logged in as for a start.&lt;/p&gt;
 
 &lt;p&gt;Quick note: to delete an instance you just need to terminate it. It doesn’t disappear from the list immediately but apparently it will. &lt;em&gt;refresh&lt;/em&gt; nope, still there.&lt;/p&gt;
 
-&lt;div class=&quot;footnotes&quot;&gt;
+&lt;div class=&quot;footnotes&quot; role=&quot;doc-endnotes&quot;&gt;
   &lt;ol&gt;
-    &lt;li id=&quot;fn:how-to-specify-a-private-key-in-ssh&quot;&gt;
-      &lt;p&gt;http://xmodulo.com/how-to-specify-private-key-file-in-ssh.html &lt;a href=&quot;#fnref:how-to-specify-a-private-key-in-ssh&quot; class=&quot;reversefootnote&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
+    &lt;li id=&quot;fn:how-to-specify-a-private-key-in-ssh&quot; role=&quot;doc-endnote&quot;&gt;
+      &lt;p&gt;http://xmodulo.com/how-to-specify-private-key-file-in-ssh.html &lt;a href=&quot;#fnref:how-to-specify-a-private-key-in-ssh&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
     &lt;/li&gt;
   &lt;/ol&gt;
 &lt;/div&gt;
 </description>
 				<pubDate>Thu, 30 Jul 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/ubuntu-desktop-in-ec2.html</link>
-				<guid isPermaLink="true">http://bendetat.com/ubuntu-desktop-in-ec2.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Controller scope in Angular JS directives</title>
-				<description>&lt;p&gt;This is probably basic level Angular JS but I haven’t seen it mentioned anywhere. I’m probably missing something fundamental about directive scope.&lt;/p&gt;
-
-&lt;p&gt;Say you’ve got this directive (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/2/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;thing&#39;, function() {
-        return {
-            restrict: &#39;E&#39;,
-            replace: true,
-            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
-            controller: function() {
-                this.name = &#39;&#39;;
-            },
-            controllerAs: &#39;vm&#39;
-        };
-    });
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Using it once works great:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;div ng-app=&quot;app&quot;&amp;gt;
-	&amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;But if you use the directive multiple times, it becomes clear that the directive views all share the same controller:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;div ng-app=&quot;app&quot;&amp;gt;
-    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
-    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
-    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
-    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
-    &amp;lt;thing&amp;gt;&amp;lt;/thing&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/Oqbl2Yy.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Typing in the first textbox affects all of the other directive views, ie. they are all pointing to the same controller.&lt;/p&gt;
-
-&lt;p&gt;In fact, if you have different directives with the same &lt;code&gt;controllerAs&lt;/code&gt; value, you can see that the &lt;code&gt;vm&lt;/code&gt; instance for each directive is set to the last directive’s controller (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/3/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;firstDirective&#39;, function() {
-        return {
-            restrict: &#39;E&#39;,
-            replace: true,
-            template: &#39;&amp;lt;div&amp;gt;first directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
-            controller: function() {
-                this.foo = &#39;Hi!&#39;;
-            },
-            controllerAs: &#39;vm&#39;
-        };
-    })
-    .directive(&#39;secondDirective&#39;, function(){
-        return {
-            restrict: &#39;E&#39;,
-            replace: true,
-            template: &#39;&amp;lt;div&amp;gt;second directive: &amp;lt;pre&amp;gt;&amp;lt;/pre&amp;gt;&amp;lt;/div&amp;gt;&#39;,
-            controller: function() {
-                this.bar = &#39;There?&#39;;
-            },
-            controllerAs: &#39;vm&#39;
-        };
-    });
-
-&amp;lt;div ng-app=&quot;app&quot;&amp;gt;
-	&amp;lt;first-directive&amp;gt;&amp;lt;/first-directive&amp;gt;
-	&amp;lt;second-directive&amp;gt;&amp;lt;/second-directive&amp;gt;
-&amp;lt;/div&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/9y6Rg6k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;If you change the name of the &lt;code&gt;controllerAs&lt;/code&gt; alias - say to &lt;code&gt;firstDirectiveVm&lt;/code&gt; and &lt;code&gt;secondDirectiveVm&lt;/code&gt; - then the problem goes away, so Angular JS by default is setting &lt;code&gt;vm&lt;/code&gt; globally each time a directive uses &lt;code&gt;controllerAs: &#39;vm&#39;&lt;/code&gt;, and going down the page, meaning the last &lt;code&gt;vm&lt;/code&gt; wins. This can obviously be a pretty tricky problem to diagnose. Besides which, this workaround of changing each directive’s &lt;code&gt;controllerAs&lt;/code&gt; value won’t work for multiple directives of the same type.&lt;/p&gt;
-
-&lt;p&gt;The solution is to set &lt;code&gt;scope&lt;/code&gt; to &lt;code&gt;true&lt;/code&gt; in the directive declaration (&lt;a href=&quot;http://jsfiddle.net/10qwqc5r/4/&quot;&gt;JSFiddle&lt;/a&gt;):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;angular
-    .module(&#39;app&#39;, [])
-    .directive(&#39;thing&#39;, function() {
-        return {
-            restrict: &#39;E&#39;,
-            replace: true,
-            template: &#39;&amp;lt;div&amp;gt;&amp;lt;input ng-model=&quot;vm.name&quot;/&amp;gt; Name: &amp;lt;/div&amp;gt;&#39;,
-            controller: function() {
-                this.name = &#39;&#39;;
-            },
-            controllerAs: &#39;vm&#39;,
-            scope: true
-        };
-    });
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/jUlaSCJ.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;A lot more can happen in that &lt;code&gt;scope&lt;/code&gt; value than setting it to true. See the Angular JS docs for &lt;a href=&quot;https://docs.angularjs.org/guide/directive#isolating-the-scope-of-a-directive&quot;&gt;isolating directive scope&lt;/a&gt; for examples. Unfortunately, ‘scope’ seems to be an overloaded term in Angular JS world. This kind of ‘scope’ is talking about the scope of the element and attributes provided by the directive, in a way distinct from &lt;code&gt;$scope&lt;/code&gt;, which is what I’m trying to avoid by using &lt;code&gt;controllerAs&lt;/code&gt; in the first place.&lt;/p&gt;
-
-&lt;p&gt;It seems strange to me that shared scope is the default, and that you need to set &lt;code&gt;scope&lt;/code&gt; to a non-falsy value to opt out of that. I’m sure I’m missing a lot of nuance around the reasons. In any case, setting &lt;code&gt;scope: true&lt;/code&gt; seems to be the happy path. &lt;/p&gt;
-
-&lt;p&gt;I just wish I hadn’t wasted a full day rewriting an entire site before figuring out what was happening.&lt;/p&gt;
-
-&lt;p&gt;:-(&lt;/p&gt;
-
-</description>
-				<pubDate>Sun, 28 Jun 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/controller-scope-in-angular-js-directives.html</link>
-				<guid isPermaLink="true">http://bendetat.com/controller-scope-in-angular-js-directives.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>Setting up TeamCity and GitVersion for an open source project</title>
-				<description>&lt;p&gt;Note that I’m using TeamCity 9.0 (build 32060) and GitVersion 2.0.1. These steps may be different in future versions. GitVersion seems to be slated for a 3.0 release very soon.&lt;/p&gt;
-
-&lt;h2 id=&quot;practice-makes-perfect&quot;&gt;Practice makes perfect&lt;/h2&gt;
-
-&lt;p&gt;I’m setting up TeamCity using GitVersion for a new open source project that I want to deploy via NuGet. I’ve used TeamCity a few times to set up basic builds but I’ve never got &lt;a href=&quot;http://semver.org/&quot;&gt;SemVer&lt;/a&gt; working in a nice way before, so I thought this would be a nice opportunity to try &lt;a href=&quot;https://github.com/ParticularLabs/GitVersion&quot;&gt;GitVersion&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;The Release configuration is triggered manually to deploy the last built version to NuGet. It would probably be nicer to do this from Octopus but for now I’ll just use TeamCity.&lt;/p&gt;
-
-&lt;h2 id=&quot;preparing-the-build-agent&quot;&gt;Preparing the build agent&lt;/h2&gt;
-
-&lt;p&gt;I’ve started out with an &lt;a href=&quot;http://bendetat.com/set-up-teamcity-on-an-azure-instance-redux.html&quot;&gt;Azure VM configured with TeamCity 9&lt;/a&gt;. I first installed GitVersion on my build agent using &lt;a href=&quot;https://chocolatey.org/&quot;&gt;Chocolatey&lt;/a&gt;. Install Chocolatey using an elevated Powershell console:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;iex ((new-object net.webclient).DownloadString(&#39;https://chocolatey.org/install.ps1&#39;))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Then install GitVersion:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;cinst gitversion.portable
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You may also have to install &lt;a href=&quot;https://msysgit.github.io/&quot;&gt;msysgit&lt;/a&gt;. TeamCity has its own Git client built into the server but GitVersion needs to be able to access the Git history on the agent, which means the VCS checkout has to happen on the agent (configured below). Reboot the machine once this is done to make sure everything is on the path.&lt;/p&gt;
-
-&lt;h2 id=&quot;teamcity-setup&quot;&gt;TeamCity setup&lt;/h2&gt;
-
-&lt;p&gt;Now start setting up the project in TeamCity.&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Under &lt;em&gt;Administration&lt;/em&gt;, create a new project&lt;/li&gt;
-  &lt;li&gt;Create a build configuration called &lt;code&gt;CI&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;In the VCS roots, just paste the HTTPS clone URL from Github into the &lt;em&gt;Repository URL&lt;/em&gt;. Change the &lt;em&gt;Authentication method&lt;/em&gt; to &lt;em&gt;Password&lt;/em&gt; and enter your Github username and password. &lt;em&gt;Note:&lt;/em&gt; I’m using HTTPS because GitVersion uses LitGit2Sharp, which doesn’t support SSH at the time of writing :’-( (at least GitVersion doesn’t support it AFAIK)&lt;/li&gt;
-  &lt;li&gt;Click &lt;em&gt;Create&lt;/em&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Now create the first build step for GitVersion. I used &lt;a href=&quot;http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/&quot;&gt;Jake Ginnivan’s post on his typical TeamCity build setup&lt;/a&gt; as a guide.&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Click &lt;em&gt;Add build step&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;Select &lt;em&gt;Command Line&lt;/em&gt; as the &lt;em&gt;Runner type&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;Change the &lt;em&gt;Run&lt;/em&gt; value to &lt;em&gt;Executable with parameters&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;Command executable&lt;/em&gt; is &lt;code&gt;GitVersion&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;Command parameters&lt;/em&gt; is &lt;code&gt;. /updateAssemblyInfo /assemblyVersionFormat MajorMinorPatch /output buildserver&lt;/code&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Note that there is a space between the &lt;code&gt;.&lt;/code&gt; and the &lt;code&gt;/updateAssemblyInfo&lt;/code&gt;:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/stM7oSn.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;Note&lt;/em&gt; with the 3.0 release of GitVersion the command parameters may be able to be removed in favour of a &lt;code&gt;GitVersionConfig.yaml&lt;/code&gt; configuration file. Stay tuned.&lt;/p&gt;
-
-&lt;p&gt;Now create another build step to build the solution.&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Under &lt;em&gt;Build Steps&lt;/em&gt; click &lt;em&gt;Auto-detect build steps&lt;/em&gt;, which scans the repository and finds things to build. In this case it identified a &lt;em&gt;Visual Studio (sln)&lt;/em&gt; build step which just builds &lt;code&gt;PROJECT_NAME.sln&lt;/code&gt;. Select the step then clicked &lt;em&gt;Use selected&lt;/em&gt;.&lt;/li&gt;
-  &lt;li&gt;Under &lt;em&gt;Version Control Settings&lt;/em&gt;, change the &lt;em&gt;VCS checkout mode&lt;/em&gt; from &lt;em&gt;Automatically on server&lt;/em&gt; to &lt;em&gt;Automatically on agent&lt;/em&gt;. This will check out the repository on the agent, which means the &lt;code&gt;.git&lt;/code&gt; folder will exist and GitVersion should work properly.&lt;/li&gt;
-  &lt;li&gt;Also check the &lt;em&gt;Clean build&lt;/em&gt; option.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;To run GitVersion before building the solution:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Reorder build steps&lt;/li&gt;
-  &lt;li&gt;Drag &lt;em&gt;GitVersion&lt;/em&gt; above &lt;em&gt;Visual Studio (sln)&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;Apply&lt;/em&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Now select &lt;em&gt;Triggers&lt;/em&gt; and &lt;em&gt;Add a new trigger&lt;/em&gt;. Select &lt;em&gt;VCS Trigger&lt;/em&gt; then &lt;em&gt;Save&lt;/em&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;i-wonder-what-happens-if-i-press-this&quot;&gt;I wonder what happens if I press this…&lt;/h2&gt;
-
-&lt;p&gt;Running the configuration worked for me at this point, resulting in a build versioned &lt;code&gt;0.1.0+21&lt;/code&gt; (there were 22 commits, so that’s 21 commits since version &lt;code&gt;0.0.0&lt;/code&gt;). If you get an error about not being able to find &lt;code&gt;GitVersion&lt;/code&gt; or &lt;code&gt;git.exe&lt;/code&gt; make sure the build agent has rebooted and that GitVersion and Git are on the path.&lt;/p&gt;
-
-&lt;p&gt;Next you can add a step to run tests. I’m using xUnit. This is just a &lt;em&gt;Command Line&lt;/em&gt; runner with the following custom script:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;packages\xunit.runner.console.2.0.0\tools\xunit.console.exe src\YOUR_PROJECT.Tests\bin\Release\YOUR_PROJECT.Tests.dll
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&quot;releasing-to-nuget&quot;&gt;Releasing to NuGet&lt;/h2&gt;
-
-&lt;p&gt;First you need to add a &lt;code&gt;nuspec&lt;/code&gt; file alongside the library being released (add it to the project in Visual Studio) and push it up so TeamCity can see it. For example, &lt;code&gt;.\src\frankenwiki\Frankenwiki.nuspec&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt; 
-&amp;lt;package&amp;gt; 
-	&amp;lt;metadata&amp;gt; 
-		&amp;lt;id&amp;gt;frankenwiki&amp;lt;/id&amp;gt; 
-		&amp;lt;title&amp;gt;Frankenwiki&amp;lt;/title&amp;gt;
-		&amp;lt;version&amp;gt;0.0.0&amp;lt;/version&amp;gt; 
-		&amp;lt;authors&amp;gt;Ben Scott&amp;lt;/authors&amp;gt;
-		&amp;lt;description&amp;gt;Markdown based statically generated wiki engine&amp;lt;/description&amp;gt; 
-		&amp;lt;language&amp;gt;en-US&amp;lt;/language&amp;gt;
-		&amp;lt;licenseUrl&amp;gt;https://github.com/frankenwiki/frankenwiki/blob/master/LICENSE.md&amp;lt;/licenseUrl&amp;gt;
-		&amp;lt;releaseNotes&amp;gt;https://github.com/frankenwiki/frankenwiki/releases&amp;lt;/releaseNotes&amp;gt;
-		&amp;lt;projectUrl&amp;gt;http://frankenwiki.com&amp;lt;/projectUrl&amp;gt;
-	&amp;lt;/metadata&amp;gt;
-	&amp;lt;files&amp;gt;
-		&amp;lt;file src=&quot;bin\release\Frankenwiki.dll&quot; target=&quot;lib\net451&quot;/&amp;gt;
-	&amp;lt;/files&amp;gt;
-&amp;lt;/package&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The easiest way to generate the NuGet package (&lt;code&gt;.nupkg&lt;/code&gt;) seems to be &lt;a href=&quot;http://docs.octopusdeploy.com/display/OD/Using+OctoPack&quot;&gt;Octopack&lt;/a&gt;. Install Octopack to the library being released and push the changes up to the repository. Now edit the CI configuration and in the &lt;em&gt;Visual Studio (sln)&lt;/em&gt; step  (the actual build step) show the advanced options and add this to the &lt;em&gt;Command line parameters&lt;/em&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;/p:RunOctoPack=true
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now when a build happens, OctoPack will create the &lt;code&gt;.nupkg&lt;/code&gt; file named something like &lt;code&gt;Frankenwiki.0.1.0.nupkg&lt;/code&gt;. This package gets consumed in the next step. Trigger a build now to make sure everything works and the package is created as an artifact.&lt;/p&gt;
-
-&lt;p&gt;Create a new build configuration called &lt;em&gt;Release&lt;/em&gt; or &lt;em&gt;Promote&lt;/em&gt; or &lt;em&gt;Fly, my pretties, ah hahahaha!&lt;/em&gt;:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Attach it to the existing VCS root created above&lt;/li&gt;
-  &lt;li&gt;Don’t use any of the detected build steps, just &lt;em&gt;configure build steps manually&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;Pick &lt;em&gt;NuGet Publish&lt;/em&gt; as the runner type&lt;/li&gt;
-  &lt;li&gt;In &lt;em&gt;Packages&lt;/em&gt;, use a wildcard to specify the &lt;code&gt;.nupkg&lt;/code&gt; file (so it is independent of the version). Eg. &lt;code&gt;Frankenwiki.*.nupkg&lt;/code&gt;.&lt;/li&gt;
-  &lt;li&gt;Paste in your &lt;a href=&quot;http://docs.nuget.org/Create/creating-and-publishing-a-package#publishing-using-nuget-command-line&quot;&gt;NuGet API key&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;Save&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;The last few steps are directly based on &lt;a href=&quot;http://jake.ginnivan.net/blog/2014/07/09/my-typical-teamcity-build-setup/&quot;&gt;Jake’s post&lt;/a&gt;. Go to &lt;em&gt;Build Features&lt;/em&gt; to set up labelling:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;&lt;em&gt;Add build feature&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;Select &lt;em&gt;VCS Labelling&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;Select the existing VCS root&lt;/li&gt;
-  &lt;li&gt;The default labelling pattern is &lt;code&gt;build-%system.build.number%&lt;/code&gt;. Take out the &lt;code&gt;build-&lt;/code&gt; part so it is just &lt;code&gt;%system.build.number%&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;Save&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Now go to &lt;em&gt;Dependencies&lt;/em&gt; to set up the build chain:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Add a new snapshot dependency&lt;/li&gt;
-  &lt;li&gt;Pick the CI build configuration and any other configurations that run before the Release configuration&lt;/li&gt;
-  &lt;li&gt;&lt;em&gt;Do not run new build if there is a suitable one&lt;/em&gt; and &lt;em&gt;Only use successful builds from suitable ones&lt;/em&gt; should both be ticked, if they aren’t then tick them&lt;/li&gt;
-  &lt;li&gt;Save&lt;/li&gt;
-  &lt;li&gt;Add a new artifact dependency&lt;/li&gt;
-  &lt;li&gt;Change &lt;em&gt;Get artifacts from&lt;/em&gt; to &lt;em&gt;Build from the same chain&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;In &lt;em&gt;Artifacts rules&lt;/em&gt; use the same wildcard specification as above to select the &lt;code&gt;.nupkg&lt;/code&gt; file&lt;/li&gt;
-  &lt;li&gt;Check &lt;em&gt;Clean destination paths before downloading artifacts&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;Save&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;Go to &lt;em&gt;General Settings&lt;/em&gt; and show advanced options. Change the &lt;em&gt;Build number format&lt;/em&gt; to the following:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;%dep.MyProject_Ci.build.number%
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;where &lt;code&gt;MyProject_Ci&lt;/code&gt; is the build configuration ID of the CI step. Once you type in &lt;code&gt;%dep&lt;/code&gt; it will suggest the available configurations.&lt;/p&gt;
-
-&lt;p&gt;Now you should be able to trigger a Release, which should successfully publish the package to NuGet! If everything works.&lt;/p&gt;
-
-&lt;h2 id=&quot;tell-teamcity-to-build-feature-branches-and-tags&quot;&gt;Tell TeamCity to build feature branches and tags&lt;/h2&gt;
-
-&lt;p&gt;TeamCity can build feature branches and tags. This lets GitVersion version feature branches to reduce surprises.&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;In &lt;em&gt;Project Settings&lt;/em&gt; select &lt;em&gt;VCS Roots&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;Select the single VCS root created above&lt;/li&gt;
-  &lt;li&gt;Make sure the advanced options are visible&lt;/li&gt;
-  &lt;li&gt;In &lt;em&gt;Branch specification&lt;/em&gt;, enter &lt;code&gt;+:refs/heads/*&lt;/code&gt; (&lt;a href=&quot;https://confluence.jetbrains.com/display/TCD8/Working+with+Feature+Branches&quot;&gt;Working with Feature Branches&lt;/a&gt;)&lt;/li&gt;
-  &lt;li&gt;Check &lt;em&gt;Enable to use tags in the branch specification&lt;/em&gt;&lt;/li&gt;
-  &lt;li&gt;Save&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;using-gitversion&quot;&gt;Using GitVersion&lt;/h2&gt;
-
-&lt;p&gt;Jake’s post about &lt;a href=&quot;http://jake.ginnivan.net/blog/2014/05/25/simple-versioning-and-release-notes/&quot;&gt;Simple Versioning and Release Notes&lt;/a&gt; has some great info about changing the version but a good one seems to be using a feature branching strategy.&lt;/p&gt;
-
-&lt;p&gt;Push a branch with the new version number in the name. For example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git checkout -b version-0.3.0
-git commit ...
-git push
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Note that just pushing the branch won’t trigger the branch build, there needs to be a non-empty commit.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/SGxLhKx.png&quot; alt=&quot;Feature branches building in TeamCity&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;You can see that TeamCity has built a new release from the feature branch and GitVersion has versioned it at &lt;code&gt;0.3.0-beta.1+4&lt;/code&gt;. Subsequent commits to this feature branch will increment the build number (eg. &lt;code&gt;0.3.0-beta.1+5&lt;/code&gt;). When the feature branch is merged into master, the master version will become &lt;code&gt;0.3.0&lt;/code&gt; and you can just manually run the Release configuration to deploy to NuGet.&lt;/p&gt;
-
-&lt;h2 id=&quot;extra-tricks-and-gotchas&quot;&gt;Extra tricks and gotchas&lt;/h2&gt;
-
-&lt;h3 id=&quot;commits-with-number-can-have-unexpected-results&quot;&gt;Commits with number can have unexpected results&lt;/h3&gt;
-
-&lt;p&gt;Don’t add a branch or a commit with a version number in it unless you expect it to bump the version number. I merged a branch called &lt;code&gt;change-to-dotnet-4.5.1&lt;/code&gt; which GitVersion helpfully interpreted as a version bump to &lt;code&gt;4.5.1&lt;/code&gt;. I had to fix this by rewriting the commit comments to say &lt;code&gt;4dot5dot1&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h3 id=&quot;check-the-versioning-scheme&quot;&gt;Check the versioning scheme&lt;/h3&gt;
-
-&lt;p&gt;If GitVersion report a particular version but Octopack generates nuspec files with a different version, check in the &lt;code&gt;AssemblyInfo.cs&lt;/code&gt; file for a different version in the &lt;code&gt;AssemblyVersion&lt;/code&gt; and &lt;code&gt;AssemblyFileVersion&lt;/code&gt; attributes. This can be due to the versioning scheme, which can be set using the &lt;code&gt;/assemblyVersionFormat&lt;/code&gt; parameter as above (or in &lt;code&gt;GitVersionConfig.yaml&lt;/code&gt; once it is supported by GitVersion).&lt;/p&gt;
-
-</description>
-				<pubDate>Thu, 25 Jun 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/setting-up-teamcity-and-gitversion-for-an-open-source-project.html</link>
-				<guid isPermaLink="true">http://bendetat.com/setting-up-teamcity-and-gitversion-for-an-open-source-project.html</guid>
-			</item>
-		
-			<item>
-				<author>Ben Scott - ben.scott@readify.net</author>
-				<title>A short, executable rant on why I dislike object initialization syntax</title>
-				<description>&lt;pre&gt;&lt;code&gt;void Main()
-{
-	// Why I ~~Hate~ Dislike Object Initialization Syntax
-	// (executable in LinqPad)
-	
-	// There are three reasons why I despise initialization syntax for all but the most trivial
-	// applications. The first two are fairly common and obvious:
-
-	// 1. By design, a class built for object initialization syntax has to have public setters,
-	// meaning that the resulting object is mutable.
-
-	// 2. Because a constructor isn&#39;t used, there is no way for business rules or domain
-	// invariants to be enforced. It is trivial to miss a value or set a value to something
-	// that breaks a business rule, which can be difficult and annoying to debug and prevent.
-
-	// The third reason is a bit less common and seems to defy expectations. It involves using
-	// array initialization syntax inside of an object initializer.
-	
-	// This throws a null reference exception:
-	
-	//var brokens = new Brokens { Ints = { 1, 2, 3 } };
-	
-	// This is because Ints isn&#39;t initialised, and array initialization syntax is just 
-	// syntactic sugar for foo.Add(1). You can see this if you try to declare your collection
-	// as a straight-up array:
-	
-	//var brokensWithArray = new BrokensWithArray { Ints = { 1,2,3 } };
-	// Build error: Cannot initialize object of type &#39;int[]&#39; with a collection initializer
-	
-	// To get the same syntax to work, the class must initialize Ints in the
-	// default constructor (a non-default constructor won&#39;t work):
-	
-	var works = new Works { Ints = { 1, 2, 3 } };
-	
-	// But as far as the consumer is concerned, Brokens and Works are equivalent (they have
-	// matching public interfaces). This means hours of fun debugging!
-	
-	// This syntax also works, by initializing the list before adding the values:
-	
-	var worksUsingBrokens = new Brokens { Ints = new List&amp;lt;int&amp;gt;() { 1, 2, 3 } };
-	
-	// This also works with a struct:
-	
-	var brokensStruct = new BrokensStruct { Ints = new List&amp;lt;int&amp;gt;() { 1, 2, 3 } };
-	
-	// But since structs can&#39;t have parameterless public constructors, they can never use
-	// the simpler object initialization syntax:
-	
-	//struct WorksStruct {
-	//	public List&amp;lt;int&amp;gt; Ints { get; set; }
-	//	public WorksStruct() {
-	//		Ints = new List&amp;lt;int&amp;gt;();
-	//	}
-	//}
-	// Build error: Structs cannot contain explicit parameterless constructors
-
-	// The moral of the story: In C#, prefer using an explicit, parameterised constructor
-	// over object initialization syntax. If you need a default constructor (eg. for
-	// serialization), mark it with [Obsolete] to indicate your deep dissatifaction with
-	// the code you have been forced to write.
-}
-
-// Define other methods and classes here
-class Brokens {
-	public List&amp;lt;int&amp;gt; Ints { get; set; }
-}
-
-class Works {
-	public List&amp;lt;int&amp;gt; Ints { get; set; }
-	
-	public Works() {
-		Ints = new List&amp;lt;int&amp;gt;();
-	}
-}
-
-class BrokensWithArray {
-	public int[] Ints { get; set; }
-}
-
-struct BrokensStruct {
-	public List&amp;lt;int&amp;gt; Ints { get; set; }
-}
-&lt;/code&gt;&lt;/pre&gt;
-</description>
-				<pubDate>Fri, 22 May 2015 00:00:00 +1000</pubDate>
-				<link>http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html</link>
-				<guid isPermaLink="true">http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html</guid>
+				<link>https://becdetat.com/ubuntu-desktop-in-ec2.html</link>
+				<guid isPermaLink="true">https://becdetat.com/ubuntu-desktop-in-ec2.html</guid>
 			</item>
 		
 	</channel>

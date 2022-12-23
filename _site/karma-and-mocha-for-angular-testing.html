@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Karma and Mocha for AngularJS testing</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,31 +15,28 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Karma and Mocha for AngularJS testing <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>21 Feb 2015</em></small></h2>
-
-
 
 <h2 id="setting-up-karma-with-mocha-phantomjs-and-chai">Setting up Karma with Mocha, PhantomJS and Chai</h2>
 
 <p>I’m following the <a href="http://karma-runner.github.io/0.12/intro/installation.html">installation guide</a> at <a href="http://karma-runner.github.io">karma-runner.github.io</a>.</p>
 
-<p>I already have Node.js and NPM installed so I won’t go through the process for that, but I’ve found the easiest way to get running is via <a href="https://chocolatey.org/packages/nodejs.install">Chocolatey NuGet</a> using <code>choco install nodejs.install</code>.</p>
+<p>I already have Node.js and NPM installed so I won’t go through the process for that, but I’ve found the easiest way to get running is via <a href="https://chocolatey.org/packages/nodejs.install">Chocolatey NuGet</a> using <code class="language-plaintext highlighter-rouge">choco install nodejs.install</code>.</p>
 
 <p>First up, install Karma:</p>
 
-<pre><code>npm install --save-dev karma
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save-dev karma
+</code></pre></div></div>
 
 <p>Now install some plugins for Karma. The installation instructions are for Jasmine and the Chrome launcher, but I want <a href="http://mochajs.org/">Mocha</a> as the testing framework and <a href="http://phantomjs.org/">PhantomJS</a> for a headless (window-less) test environment.</p>
 
@@ -51,43 +48,43 @@
 
 <p>So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use <a href="http://chaijs.com/">Chai</a> as the assertion library.</p>
 
-<pre><code>npm install --save-dev karma-mocha
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save-dev karma-mocha
 npm install --save-dev karma-phantomjs-launcher
 npm install --save-dev karma-chai
-</code></pre>
+</code></pre></div></div>
 
-<p>To make it easier to run <code>karma</code> from the command line you can install <code>karma-cli</code> globally, which will run the local version without having to specify the path to karma (<code>node node_modules/karma/bin/karma</code>):</p>
+<p>To make it easier to run <code class="language-plaintext highlighter-rouge">karma</code> from the command line you can install <code class="language-plaintext highlighter-rouge">karma-cli</code> globally, which will run the local version without having to specify the path to karma (<code class="language-plaintext highlighter-rouge">node node_modules/karma/bin/karma</code>):</p>
 
-<pre><code>npm install -g karma-cli
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install -g karma-cli
+</code></pre></div></div>
 
-<p>Karma needs a configuration file. Generate it using <code>karma init</code> and answer the questions. For this demo all of my code is going to live in <code>./source-and-tests</code>. If I were using a Gulp build chain this would probably need to be tweaked.</p>
+<p>Karma needs a configuration file. Generate it using <code class="language-plaintext highlighter-rouge">karma init</code> and answer the questions. For this demo all of my code is going to live in <code class="language-plaintext highlighter-rouge">./source-and-tests</code>. If I were using a Gulp build chain this would probably need to be tweaked.</p>
 
 <dl>
   <dt>Which testing framework do you want to use ?</dt>
-  <dd><code>mocha</code></dd>
+  <dd><code class="language-plaintext highlighter-rouge">mocha</code></dd>
   <dt>Do you want to use Require.js ?</dt>
-  <dd><code>no</code></dd>
+  <dd><code class="language-plaintext highlighter-rouge">no</code></dd>
   <dt>Do you want to capture any browsers automatically ?</dt>
-  <dd><code>PhantomJS</code></dd>
+  <dd><code class="language-plaintext highlighter-rouge">PhantomJS</code></dd>
   <dt>What is the location of your source and test files ?</dt>
-  <dd><code>source-and-tests/**/*.js</code></dd>
+  <dd><code class="language-plaintext highlighter-rouge">source-and-tests/**/*.js</code></dd>
   <dt>Should any of the files included by the previous patterns be excluded ?</dt>
   <dd><em>leave blank</em></dd>
   <dt>Do you want Karma to watch all the files and run the tests on change ?</dt>
-  <dd><code>yes</code></dd>
+  <dd><code class="language-plaintext highlighter-rouge">yes</code></dd>
 </dl>
 
-<p>This generates a file called <code>karma-conf.js</code>, which configures Karma for a test run. You can have multiple configuration files pointing to different test suites or browser configurations, which can be run by specifying the name of the configuration file (<code>karma start my.conf.ks</code>).</p>
+<p>This generates a file called <code class="language-plaintext highlighter-rouge">karma-conf.js</code>, which configures Karma for a test run. You can have multiple configuration files pointing to different test suites or browser configurations, which can be run by specifying the name of the configuration file (<code class="language-plaintext highlighter-rouge">karma start my.conf.ks</code>).</p>
 
-<p>To get Chai included in the test pipeline, we need to edit <code>karma-conf.js</code> and add it to the <code>frameworks</code> setting:</p>
+<p>To get Chai included in the test pipeline, we need to edit <code class="language-plaintext highlighter-rouge">karma-conf.js</code> and add it to the <code class="language-plaintext highlighter-rouge">frameworks</code> setting:</p>
 
-<pre><code>frameworks: ['mocha', 'chai'],
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>frameworks: ['mocha', 'chai'],
+</code></pre></div></div>
 
-<p>Running <code>karma start</code> will execute the default <code>karma-conf.js</code> (or <code>karma-conf.coffee</code>). First we need a test to run. In <code>./source-and-tests/</code> I created <code>array-tests.js</code> which just contains the <a href="http://mochajs.org/#synchronous-code">first example</a> from Mocha’s documentation.</p>
+<p>Running <code class="language-plaintext highlighter-rouge">karma start</code> will execute the default <code class="language-plaintext highlighter-rouge">karma-conf.js</code> (or <code class="language-plaintext highlighter-rouge">karma-conf.coffee</code>). First we need a test to run. In <code class="language-plaintext highlighter-rouge">./source-and-tests/</code> I created <code class="language-plaintext highlighter-rouge">array-tests.js</code> which just contains the <a href="http://mochajs.org/#synchronous-code">first example</a> from Mocha’s documentation.</p>
 
-<pre><code>describe('Array', function(){
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('Array', function(){
   describe('#indexOf()', function(){
     it('should return -1 when the value is not present', function(){
       assert.equal(-1, [1,2,3].indexOf(5));
@@ -95,9 +92,9 @@ npm install --save-dev karma-chai
     })
   })
 })
-</code></pre>
+</code></pre></div></div>
 
-<p>Running <code>karma start</code> should find and run this test, then watch for changes to the watched files and repeating.</p>
+<p>Running <code class="language-plaintext highlighter-rouge">karma start</code> should find and run this test, then watch for changes to the watched files and repeating.</p>
 
 <p><img src="http://i.imgur.com/cwTVVjT.png" alt="" /></p>
 
@@ -105,37 +102,37 @@ npm install --save-dev karma-chai
 
 <p>I’ll use Bower to install AngularJS.</p>
 
-<pre><code>npm install --save-dev bower 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save-dev bower 
 npm install -g bower
-</code></pre>
+</code></pre></div></div>
 
-<p>This installs Bower to <code>./node_modules/bower</code>, then installs it globally. Now we need to create a configuration file for Bower:</p>
+<p>This installs Bower to <code class="language-plaintext highlighter-rouge">./node_modules/bower</code>, then installs it globally. Now we need to create a configuration file for Bower:</p>
 
-<pre><code>bower init
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bower init
+</code></pre></div></div>
 
-<p>You can just <kbd>enter</kbd> through the configuration, accepting all the defaults. This creates a <code>bower.json</code> file, which will save the dependencies added by Bower. Now use Bower to install AngularJS and angular-mocks:</p>
+<p>You can just <kbd>enter</kbd> through the configuration, accepting all the defaults. This creates a <code class="language-plaintext highlighter-rouge">bower.json</code> file, which will save the dependencies added by Bower. Now use Bower to install AngularJS and angular-mocks:</p>
 
-<pre><code>bower install --save angular
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bower install --save angular
 bower install --save angular-mocks
-</code></pre>
+</code></pre></div></div>
 
-<p>This installs AngularJS to <code>./bower_components/angular</code> and angular-mocks to <code>./bower_components/angular-mocks</code>. The angular-mocks package gives us methods to resolve our application’s components and create mocks of AngularJS services.</p>
+<p>This installs AngularJS to <code class="language-plaintext highlighter-rouge">./bower_components/angular</code> and angular-mocks to <code class="language-plaintext highlighter-rouge">./bower_components/angular-mocks</code>. The angular-mocks package gives us methods to resolve our application’s components and create mocks of AngularJS services.</p>
 
 <p>I’m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I’ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.</p>
 
-<p>To include AngularJS and angular-mocks in Karma’s test run, edit the <code>files</code> config setting in <code>karma.conf.js</code>. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.</p>
+<p>To include AngularJS and angular-mocks in Karma’s test run, edit the <code class="language-plaintext highlighter-rouge">files</code> config setting in <code class="language-plaintext highlighter-rouge">karma.conf.js</code>. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.</p>
 
-<pre><code>files: [
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>files: [
 	'bower_components/angular/angular.js',
 	'bower_components/angular-mocks/angular-mocks.js',
 	'source-and-tests/**/*.js'
 ],
-</code></pre>
+</code></pre></div></div>
 
-<p>The controller to test is very simple at this stage (<code>MyController.js</code>):</p>
+<p>The controller to test is very simple at this stage (<code class="language-plaintext highlighter-rouge">MyController.js</code>):</p>
 
-<pre><code>(function(){
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(function(){
 	angular.module('my-module', []);
 
 	angular
@@ -155,11 +152,11 @@ bower install --save angular-mocks
 			}
 	]);
 })();
-</code></pre>
+</code></pre></div></div>
 
-<p>This creates a module called <code>my-module</code> and creates a controller called <code>MyController</code> that exposes <code>firstName</code>, <code>lastName</code> and <code>getFullName()</code>. I want to test the result of <code>getFullName()</code> (<code>MyControllerTests.js</code>):</p>
+<p>This creates a module called <code class="language-plaintext highlighter-rouge">my-module</code> and creates a controller called <code class="language-plaintext highlighter-rouge">MyController</code> that exposes <code class="language-plaintext highlighter-rouge">firstName</code>, <code class="language-plaintext highlighter-rouge">lastName</code> and <code class="language-plaintext highlighter-rouge">getFullName()</code>. I want to test the result of <code class="language-plaintext highlighter-rouge">getFullName()</code> (<code class="language-plaintext highlighter-rouge">MyControllerTests.js</code>):</p>
 
-<pre><code>describe('MyController', function(){
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('MyController', function(){
 	beforeEach(module('my-module'));
 
 	describe('getFullName()', function(){
@@ -173,30 +170,30 @@ bower install --save angular-mocks
 		}));
 	});
 });
-</code></pre>
+</code></pre></div></div>
 
 <p>This does some interesting things.</p>
 
-<pre><code>beforeEach(module('my-module'));
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>beforeEach(module('my-module'));
+</code></pre></div></div>
 
-<p>This loads the <code>my-module</code> module before each test in the <code>MyController</code> suite.</p>
+<p>This loads the <code class="language-plaintext highlighter-rouge">my-module</code> module before each test in the <code class="language-plaintext highlighter-rouge">MyController</code> suite.</p>
 
-<pre><code>it('should handle names correctly', inject(function($controller){
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>it('should handle names correctly', inject(function($controller){
+</code></pre></div></div>
 
-<p>This injects <code>$controller</code> into the test. <code>$controller</code> allows resolving registered controllers.</p>
+<p>This injects <code class="language-plaintext highlighter-rouge">$controller</code> into the test. <code class="language-plaintext highlighter-rouge">$controller</code> allows resolving registered controllers.</p>
 
-<pre><code>var myController = $controller('MyController');
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var myController = $controller('MyController');
+</code></pre></div></div>
 
-<p>This resolves an instance of the <code>MyController</code> controller. The instance is then used as the test subject.</p>
+<p>This resolves an instance of the <code class="language-plaintext highlighter-rouge">MyController</code> controller. The instance is then used as the test subject.</p>
 
 <h2 id="scope-injection">$scope injection</h2>
 
-<p>The <code>$scope</code> that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to <code>$scope</code> for another test. The controller declaration changes to this:</p>
+<p>The <code class="language-plaintext highlighter-rouge">$scope</code> that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to <code class="language-plaintext highlighter-rouge">$scope</code> for another test. The controller declaration changes to this:</p>
 
-<pre><code>angular
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>angular
 	.module('my-module')
 	.controller('MyController', [
 		'$scope',
@@ -216,18 +213,18 @@ bower install --save angular-mocks
 			return self;
 		}
 ]);
-</code></pre>
+</code></pre></div></div>
 
 <p>The existing test can just pass in an empty object to the controller resolution:</p>
 
-<pre><code>var myController = $controller('MyController', {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var myController = $controller('MyController', {
 	$scope: {}
 });
-</code></pre>
+</code></pre></div></div>
 
 <p>Now the new test can inject, use and inspect a mock scope:</p>
 
-<pre><code>describe('addSong()', function(){
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('addSong()', function(){
 	it('should add songs', inject(function($controller) {
 		var scope = {};
 		var myController = $controller('MyController', {
@@ -239,13 +236,13 @@ bower install --save angular-mocks
 		scope.songs.should.contain('While My Guitar Gently Weeps');
 	}));
 });
-</code></pre>
+</code></pre></div></div>
 
 <h2 id="injecting-and-mocking-http">Injecting and mocking $http</h2>
 
-<p>So now I’ve got a web service that I call to populate something on <code>$scope</code>:</p>
+<p>So now I’ve got a web service that I call to populate something on <code class="language-plaintext highlighter-rouge">$scope</code>:</p>
 
-<pre><code>angular
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>angular
 	.module('my-module')
 	.controller('MyController', [
 		'$scope', '$http',
@@ -264,11 +261,11 @@ bower install --save angular-mocks
 			return self;
 		}
 ]);
-</code></pre>
+</code></pre></div></div>
 
-<p>The <a href="https://docs.angularjs.org/api/ngMock/service/$httpBackend"><code>$httpBackend</code></a> is an <code>angular-mocks</code> service that fakes the <code>$http</code> service:</p>
+<p>The <a href="https://docs.angularjs.org/api/ngMock/service/$httpBackend"><code class="language-plaintext highlighter-rouge">$httpBackend</code></a> is an <code class="language-plaintext highlighter-rouge">angular-mocks</code> service that fakes the <code class="language-plaintext highlighter-rouge">$http</code> service:</p>
 
-<pre><code>describe('get-instruments result', function(){
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('get-instruments result', function(){
 	it('should be added to scope', inject(function($controller, $httpBackend){
 		var scope = {};
 		$httpBackend
@@ -285,15 +282,15 @@ bower install --save angular-mocks
 		scope.instruments.should.contain('guitar');
 	}));
 });
-</code></pre>
+</code></pre></div></div>
 
-<p>The <code>$httpBackend.flush()</code> simulates the async calls completing, so they can be tested synchronously.</p>
+<p>The <code class="language-plaintext highlighter-rouge">$httpBackend.flush()</code> simulates the async calls completing, so they can be tested synchronously.</p>
 
 <h2 id="simulating-http-errors">Simulating $http errors</h2>
 
-<p>If the call to <code>api/get-instruments</code> fails, I want to set a status to ‘ERROR’:</p>
+<p>If the call to <code class="language-plaintext highlighter-rouge">api/get-instruments</code> fails, I want to set a status to ‘ERROR’:</p>
 
-<pre><code>$scope.instruments = ['foo'];
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$scope.instruments = ['foo'];
 $scope.status = '';
 
 $http.get('api/get-instruments')
@@ -303,11 +300,11 @@ $http.get('api/get-instruments')
 	.error(function(e) {
 		$scope.status = 'ERROR';
 	});
-</code></pre>
+</code></pre></div></div>
 
-<p>To simulate the error, you can just tell the <code>$httpBackend</code> to respond with an error code (500):</p>
+<p>To simulate the error, you can just tell the <code class="language-plaintext highlighter-rouge">$httpBackend</code> to respond with an error code (500):</p>
 
-<pre><code>describe('get-instruments with error', function(){
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('get-instruments with error', function(){
 	it('should have a status with error', inject(function($controller, $httpBackend){
 		var scope = {};
 		$httpBackend
@@ -322,7 +319,7 @@ $http.get('api/get-instruments')
 		scope.status.should.equal('ERROR');
 	}));
 });
-</code></pre>
+</code></pre></div></div>
 
 <h2 id="here-is-a-cat-doing-some-tdd">Here is a cat doing some TDD</h2>
 
@@ -332,48 +329,38 @@ $http.get('api/get-instruments')
 
 
 
-
-
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -383,7 +370,6 @@ $http.get('api/get-instruments')
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

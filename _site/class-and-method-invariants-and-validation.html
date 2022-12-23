@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Class and method invariants and validation</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,26 +15,23 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Class and method invariants and validation <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>24 Feb 2015</em></small></h2>
-
-
 
 <p>I was chatting to my man <a href="https://twitter.com/todthomson">Tod</a> and we came up with a cool pattern for validating both class and method invariants in a way that seems to scale.</p>
 
-<p>Given a simple class <code>Person</code>, with some methods for updating from another <code>Person</code> and updating just the name:</p>
+<p>Given a simple class <code class="language-plaintext highlighter-rouge">Person</code>, with some methods for updating from another <code class="language-plaintext highlighter-rouge">Person</code> and updating just the name:</p>
 
-<pre><code>public class Person
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Person
 {
 	public string Name { get; private set; }
 	private int _age;
@@ -56,13 +53,13 @@
 		Name = name;
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>The private <code>_age</code> is just to demonstrate a private field.</p>
+<p>The private <code class="language-plaintext highlighter-rouge">_age</code> is just to demonstrate a private field.</p>
 
 <p>First add some validation on the constructor. I’m using my <a href="https://github.com/bendetat/check">Check</a> library but this could be implemented in any way that throws an exception if the rule isn’t set.</p>
 
-<pre><code>public Person(string name, int age)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public Person(string name, int age)
 {
 	// method invariants
 	Check.That(() =&gt; name).IsNotNullOrEmpty();
@@ -71,22 +68,22 @@
 	Name = name;
 	_age = age;
 }
-</code></pre>
+</code></pre></div></div>
 
 <p>This is what I’m calling a <em>method invariant</em> - a set of rules that validate the input to a method.</p>
 
 <p>We also want to validate the state of a person at the end of the method.</p>
 
-<pre><code>static void Validate(Person person)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>static void Validate(Person person)
 {
 	Check.That(() =&gt; person.Name).IsNotNullOrEmpty();
 	Check.That(() =&gt; person._ge &gt;= 0);
 }
-</code></pre>
+</code></pre></div></div>
 
 <p>This should happen at the end of each method that changes the state of the person. For example, the constructor becomes:</p>
 
-<pre><code>public Person(string name, int age)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public Person(string name, int age)
 {
 	// method invariants
 	Check.That(() =&gt; name).IsNotNullOrEmpty();
@@ -98,11 +95,11 @@
 	// validate myself
 	Validate(this);
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>The <code>UpdateName()</code> method needs to do the same thing:</p>
+<p>The <code class="language-plaintext highlighter-rouge">UpdateName()</code> method needs to do the same thing:</p>
 
-<pre><code>public void UpdateName(string name)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public void UpdateName(string name)
 {
 	Check.That(() =&gt; name).IsNotNullOrEmpty();
 
@@ -110,11 +107,11 @@
 
 	Validate(this);
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>The <code>UpdateFrom()</code> method can validate the entire incoming person:</p>
+<p>The <code class="language-plaintext highlighter-rouge">UpdateFrom()</code> method can validate the entire incoming person:</p>
 
-<pre><code>public void UpdateFrom(Person person)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public void UpdateFrom(Person person)
 {
 	Validate(person);
 
@@ -123,53 +120,43 @@
 
 	Validate(this);
 }
-</code></pre>
+</code></pre></div></div>
 
 <p>Shweet.</p>
-
-
 
 
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -179,7 +166,6 @@
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

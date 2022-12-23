@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>TGIF – 2 November 2012</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,20 +15,17 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>TGIF – 2 November 2012 <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>02 Nov 2012</em></small></h2>
-
-
 
 <p>TGIF is going to be (an attempt at) a weekly wrap-up of what has happened in the world of SWXBEN, such as the odd OSS contribution, tech news, or something picked up during development.</p>
 
@@ -36,13 +33,13 @@
 
 <p>I’m using Twitter Bootstrap as a basis for a couple of web-based LOB applications that are in development. This is a fantastic framework that speeds up development times considerably and version 2.2.1 just came out. Quick tip, I needed a date picker, I found a <a href="https://github.com/eternicode/bootstrap-datepicker">really easy date picker designed for Twitter Bootstrap</a> and it is a thing of beauty. The markup looks like this:</p>
 
-<pre><code>&lt;div class="input-append date" id="received_date" data-date="2012-10-31" data-date-format="yyyy-mm-dd"&gt; &lt;input class="input-medium" type="date" name="ReceivedDate" value="2012-10-31")" readonly /&gt; &lt;span class="add-on"&gt;&lt;i class="icon-th"&gt;&lt;/i&gt;&lt;/span&gt; &lt;/div&gt; 
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;div class="input-append date" id="received_date" data-date="2012-10-31" data-date-format="yyyy-mm-dd"&gt; &lt;input class="input-medium" type="date" name="ReceivedDate" value="2012-10-31")" readonly /&gt; &lt;span class="add-on"&gt;&lt;i class="icon-th"&gt;&lt;/i&gt;&lt;/span&gt; &lt;/div&gt; 
+</code></pre></div></div>
 
 <p>It is then initialised like so:</p>
 
-<pre><code>$('#received_date').datepicker({ autoclose: true }); 
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$('#received_date').datepicker({ autoclose: true }); 
+</code></pre></div></div>
 
 <h2 id="nancy">Nancy</h2>
 
@@ -57,7 +54,7 @@
 <p>Last weekend I moved <a href="http://www.capinvest.com.au/">Capricorn Investment Partners</a> from a self-hosted Exchange 2003 server over to Office 365, which is basically Exchange, Sharepoint and Lync hosted in the cloud. Some tips:</p>
 
 <ul>
-  <li>Export each user’s PST using Outlook on their desktop. If you try to use Exchange’s <code>ExMerge</code> utility it will silently hit a limit at around 2 GB, resulting in a corrupted export. Exporting the PST on the desktop gets around that limit.</li>
+  <li>Export each user’s PST using Outlook on their desktop. If you try to use Exchange’s <code class="language-plaintext highlighter-rouge">ExMerge</code> utility it will silently hit a limit at around 2 GB, resulting in a corrupted export. Exporting the PST on the desktop gets around that limit.</li>
   <li>When you import the PST back up into the cloud, you’ll quickly flood the outbound connection. 10 years of operation resulted in a total mailbox size of around 70 GB and that takes some time to upload on an ADSL 2+ connection. Be prepared to write off your weekend – at least.</li>
   <li>Kill the old Exchange services before setting up the new account, and create the new account in a new profile, otherwise the old domain settings will mess with the new configuration.</li>
 </ul>
@@ -65,48 +62,38 @@
 <p>Big thanks to <a href="http://www.cscm.com.au/">Clint from Centre State Computer Maintenance</a> and <a href="http://www.ultimateit.com.au/">Petros from Ultimate IT</a> for their help and tips during the setup.</p>
 
 
-
-
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -116,7 +103,6 @@
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

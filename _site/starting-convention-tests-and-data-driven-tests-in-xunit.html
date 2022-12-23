@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Starting out with convention tests and data-driven tests in xUnit</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,20 +15,17 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Starting out with convention tests and data-driven tests in xUnit <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>14 Dec 2013</em></small></h2>
-
-
 
 <p>I’m really interested in convention tests, and as I want to get into xUnit I thought I would try taking some patterns that I’ve used in NUnit and applying them in xUnit.</p>
 
@@ -38,7 +35,7 @@
 
 <p>The first thing to notice is the xUnit has slightly different naming conventions compared to NUnit. This is a simple test in NUnit:</p>
 
-<pre><code>public class ItShouldHaveTests
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class ItShouldHaveTests
 {
 	[Test]
 	public void AndItDoes()
@@ -46,11 +43,11 @@
 		Assert.True(true);
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
 <p>The equivalent in xUnit:</p>
 
-<pre><code>public class ItShouldHaveTests
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class ItShouldHaveTests
 {
     [Fact]
     public void AndItDoes()
@@ -58,21 +55,21 @@
         Assert.True(true);
     }
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>So xUnit has <code>[Fact]</code>s while NUnit has <code>[Test]</code>s. Cool so far. Note that the class has to be public. In NUnit I would usually mark test fixtures with <code>[TestFixture]</code> and the class usually ends up <code>internal</code>, which Resharper’s test runner will pick up. NUnit has been able to pick up public classes without the <code>[TestFixture]</code> decoration for the past couple of years IIRC but I’ve had mixed success with Resharper’s test runner. Sometimes I would spend valuable seconds wondering why tests weren’t running and looking dumb, so I would automatically add the attribute. xUnit doesn’t have a <code>[TestFixture]</code> equivalent. It will just find all public classes that contain tests.</p>
+<p>So xUnit has <code class="language-plaintext highlighter-rouge">[Fact]</code>s while NUnit has <code class="language-plaintext highlighter-rouge">[Test]</code>s. Cool so far. Note that the class has to be public. In NUnit I would usually mark test fixtures with <code class="language-plaintext highlighter-rouge">[TestFixture]</code> and the class usually ends up <code class="language-plaintext highlighter-rouge">internal</code>, which Resharper’s test runner will pick up. NUnit has been able to pick up public classes without the <code class="language-plaintext highlighter-rouge">[TestFixture]</code> decoration for the past couple of years IIRC but I’ve had mixed success with Resharper’s test runner. Sometimes I would spend valuable seconds wondering why tests weren’t running and looking dumb, so I would automatically add the attribute. xUnit doesn’t have a <code class="language-plaintext highlighter-rouge">[TestFixture]</code> equivalent. It will just find all public classes that contain tests.</p>
 
 <h2 id="comparisons-with-nunit">Comparisons with NUnit</h2>
 
-<p>The xUnit Wiki has a nice <a href="http://xunit.codeplex.com/wikipage?title=Comparisons">comparison page</a> showing differences between NUnit, MSTest and itself. </p>
+<p>The xUnit Wiki has a nice <a href="http://xunit.codeplex.com/wikipage?title=Comparisons">comparison page</a> showing differences between NUnit, MSTest and itself.</p>
 
-<p>Apart from the obvious <code>[Fact]</code> vs <code>[Test]</code> and not needing <code>[TestFixture]</code>, the big differences seem to be with how the two test frameworks handle fixture setup and teardown. NUnit uses <code>[SetUp]</code> and <code>[TearDown]</code> attributes to mark methods, while xUnit adds awesome to the mix by using the public constructor as the setup method. It just creates a new instance of the fixture class for each test. This completely obviates issues that have cropped up for me in NUnit around fixture state being shared between tests. Teardown is done by implementing <code>IDisposable</code>, in the <code>Dispose</code> method. I don’t remember the last time I wrote a teardown method anyway, but using <code>IDisposable</code> is a really nice and obvious convention. Shared fixture state can be implemented with the <code>IUseFixture&lt;T&gt;</code> interface but I won’t explore that here.</p>
+<p>Apart from the obvious <code class="language-plaintext highlighter-rouge">[Fact]</code> vs <code class="language-plaintext highlighter-rouge">[Test]</code> and not needing <code class="language-plaintext highlighter-rouge">[TestFixture]</code>, the big differences seem to be with how the two test frameworks handle fixture setup and teardown. NUnit uses <code class="language-plaintext highlighter-rouge">[SetUp]</code> and <code class="language-plaintext highlighter-rouge">[TearDown]</code> attributes to mark methods, while xUnit adds awesome to the mix by using the public constructor as the setup method. It just creates a new instance of the fixture class for each test. This completely obviates issues that have cropped up for me in NUnit around fixture state being shared between tests. Teardown is done by implementing <code class="language-plaintext highlighter-rouge">IDisposable</code>, in the <code class="language-plaintext highlighter-rouge">Dispose</code> method. I don’t remember the last time I wrote a teardown method anyway, but using <code class="language-plaintext highlighter-rouge">IDisposable</code> is a really nice and obvious convention. Shared fixture state can be implemented with the <code class="language-plaintext highlighter-rouge">IUseFixture&lt;T&gt;</code> interface but I won’t explore that here.</p>
 
 <h2 id="a-data-driven-test">A data-driven test</h2>
 
 <p>I used NUnit’s data-driven tests to TDD a simple Fibonacci number generator (my favourite integer sequence). The implementation of the generator is <a href="https://github.com/bendetat/convention-tests-in-xunit/blob/master/src/MyApp.Shared/FibonacciGenerator.cs">in the repo</a>.</p>
 
-<pre><code>[Test]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Test]
 [TestCase(0, 0)]
 [TestCase(1, 1)]
 [TestCase(2, 1)]
@@ -87,11 +84,11 @@ public void TestNumber(int sequence, int result)
 {
     Assert.AreEqual(result, FibonacciGenerator.For(sequence));
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>xUnit uses Theories for data driven tests, which sounds so cool. Interestingly, theories aren’t part of xUnit out of the box. You need to install the <code>xunit.extensions</code> package. Apart from the naming differences everything is pretty much the same.</p>
+<p>xUnit uses Theories for data driven tests, which sounds so cool. Interestingly, theories aren’t part of xUnit out of the box. You need to install the <code class="language-plaintext highlighter-rouge">xunit.extensions</code> package. Apart from the naming differences everything is pretty much the same.</p>
 
-<pre><code>[Theory]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Theory]
 [InlineData(0, 0)]
 [InlineData(1, 1)]
 [InlineData(2, 1)]
@@ -106,23 +103,23 @@ public void TestNumber(int sequence, int result)
 {
     Assert.Equal(result, FibonacciGenerator.For(sequence));
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>xUnit uses some reflection magic to show the name of the parameters in the test runner output, so while NUnit shows <code>TestNumber(7, 13)</code>, xUnit shows <code>TestNumber(sequence: 7, result: 13)</code>.</p>
+<p>xUnit uses some reflection magic to show the name of the parameters in the test runner output, so while NUnit shows <code class="language-plaintext highlighter-rouge">TestNumber(7, 13)</code>, xUnit shows <code class="language-plaintext highlighter-rouge">TestNumber(sequence: 7, result: 13)</code>.</p>
 
 <h2 id="theory-data-sources">Theory data sources</h2>
 
-<p><code>InlineData</code> is only one of the data sources that xUnit provides. There doesn’t seem to be much documentation around the source types, so I’m working from the <a href="https://github.com/xunit/xunit/tree/master/test/test.xunit1/xunit.extensions/DataTheories/AcceptanceTests">acceptance tests in the xUnit source</a>.</p>
+<p><code class="language-plaintext highlighter-rouge">InlineData</code> is only one of the data sources that xUnit provides. There doesn’t seem to be much documentation around the source types, so I’m working from the <a href="https://github.com/xunit/xunit/tree/master/test/test.xunit1/xunit.extensions/DataTheories/AcceptanceTests">acceptance tests in the xUnit source</a>.</p>
 
 <h3 id="inlinedata">InlineData</h3>
 
-<p>As shown above, this is obviously on par with NUnit’s <code>TestCase</code>. It takes a <code>params</code> array of objects and passes them into the test method.</p>
+<p>As shown above, this is obviously on par with NUnit’s <code class="language-plaintext highlighter-rouge">TestCase</code>. It takes a <code class="language-plaintext highlighter-rouge">params</code> array of objects and passes them into the test method.</p>
 
 <h3 id="classdata">ClassData</h3>
 
-<p>This uses a class as the source for the test data. The data source class implements <code>IEnumerable&lt;object[]&gt;</code>.</p>
+<p>This uses a class as the source for the test data. The data source class implements <code class="language-plaintext highlighter-rouge">IEnumerable&lt;object[]&gt;</code>.</p>
 
-<pre><code>public class FibonacciTestUsingClassData
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class FibonacciTestUsingClassData
 {
     [Theory]
     [ClassData(typeof(FibonacciTestSource))]
@@ -146,9 +143,9 @@ class FibonacciTestSource : IEnumerable&lt;object[]&gt;
         return GetEnumerator();
     }
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>The test data still has to be an array of <code>object</code>, so I couldn’t strongly type my test data. This is something I never liked about NUnit’s data-driven tests, so it is disappointing that xUnit has the same limitation. However class data sources are obviously a great way of sharing test cases between fixtures.</p>
+<p>The test data still has to be an array of <code class="language-plaintext highlighter-rouge">object</code>, so I couldn’t strongly type my test data. This is something I never liked about NUnit’s data-driven tests, so it is disappointing that xUnit has the same limitation. However class data sources are obviously a great way of sharing test cases between fixtures.</p>
 
 <h3 id="exceldata">ExcelData</h3>
 
@@ -156,19 +153,19 @@ class FibonacciTestSource : IEnumerable&lt;object[]&gt;
 
 <p>So I couldn’t get to work, but I think this is how Excel driven tests would look:</p>
 
-<pre><code>[Theory]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Theory]
 [ExcelData(@"MyApp.Tests\FibonacchiTestData.xlsx", "select * from Data")]
 public void TestNumber(int sequence, int result)
 {
     Assert.Equal(result, FibonacciGenerator.For(sequence));
 }
-</code></pre>
+</code></pre></div></div>
 
 <h3 id="propertydata">PropertyData</h3>
 
-<p><code>PropertyData</code> is very similar to <code>ClassData</code> but obviously on a property of the test class rather than a class of its own. This also looks closest to NUnit’s <code>TestCaseSource</code>, which references a method that returns <code>IEnumerable&lt;TestCaseData&gt;</code>. xUnit doesn’t have as much ceremony around the test data, although the enumerable still has return arrays of <code>object</code>s.</p>
+<p><code class="language-plaintext highlighter-rouge">PropertyData</code> is very similar to <code class="language-plaintext highlighter-rouge">ClassData</code> but obviously on a property of the test class rather than a class of its own. This also looks closest to NUnit’s <code class="language-plaintext highlighter-rouge">TestCaseSource</code>, which references a method that returns <code class="language-plaintext highlighter-rouge">IEnumerable&lt;TestCaseData&gt;</code>. xUnit doesn’t have as much ceremony around the test data, although the enumerable still has return arrays of <code class="language-plaintext highlighter-rouge">object</code>s.</p>
 
-<pre><code>public static IEnumerable&lt;object[]&gt; TestData
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static IEnumerable&lt;object[]&gt; TestData
 {
     get
     {
@@ -184,51 +181,51 @@ public void TestNumber(int sequence, int result)
 {
     Assert.Equal(result, FibonacciGenerator.For(sequence));
 }
-</code></pre>
+</code></pre></div></div>
 
 <h2 id="a-simple-convention-test">A simple convention test</h2>
 
-<p>So it looks like <code>PropertyData</code> is the most appropriate for the simple convention test I’m going to put together.</p>
+<p>So it looks like <code class="language-plaintext highlighter-rouge">PropertyData</code> is the most appropriate for the simple convention test I’m going to put together.</p>
 
 <p>This is going to be really basic. The convention I’m testing is:</p>
 
 <blockquote>
-  <p>All classes that implement <code>IDomainObject</code> must have an empty constructor</p>
+  <p>All classes that implement <code class="language-plaintext highlighter-rouge">IDomainObject</code> must have an empty constructor</p>
 </blockquote>
 
 <p>This might be because those classes have to work with Entity Framework or nHibernate, or need to be deserialised in some way.</p>
 
 <p>So the first part is defining the data source:</p>
 
-<pre><code>public static IEnumerable&lt;object[]&gt; DomainObjectClasses
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static IEnumerable&lt;object[]&gt; DomainObjectClasses
 {
 	get
 	{
 		// ... returns Types
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>I like to think of this in terms of “get all types that inherit from <code>IDomainObject</code>”. The <code>Type</code> class has an <code>IsAssignableFrom(Type)</code> method but for that to work I would have to invert the query, so something like:</p>
+<p>I like to think of this in terms of “get all types that inherit from <code class="language-plaintext highlighter-rouge">IDomainObject</code>”. The <code class="language-plaintext highlighter-rouge">Type</code> class has an <code class="language-plaintext highlighter-rouge">IsAssignableFrom(Type)</code> method but for that to work I would have to invert the query, so something like:</p>
 
-<pre><code>from t in [types] where typeof(IDomainObject).IsAssignableFrom(t)
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from t in [types] where typeof(IDomainObject).IsAssignableFrom(t)
+</code></pre></div></div>
 
 <p>That doesn’t read very naturally so I like to invert the method with an extension method, and add some generic love to the mix:</p>
 
-<pre><code>public static bool IsAssignableTo&lt;T&gt;(this Type fromType)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static bool IsAssignableTo&lt;T&gt;(this Type fromType)
 {
     return typeof(T).IsAssignableFrom(fromType);
 }
-</code></pre>
+</code></pre></div></div>
 
 <p><strong>NOTE</strong> Know what? This is included in Autofac. Loove Autofac.</p>
 
-<p>I also need to exclude abstract types from the query, so that abstract types can take a parameter in their constructor but concrete implementations have to provide a default constructor. This excludes the interface itself as well. There are a number of interesting methods and properties given by the <code>Type</code> class.</p>
+<p>I also need to exclude abstract types from the query, so that abstract types can take a parameter in their constructor but concrete implementations have to provide a default constructor. This excludes the interface itself as well. There are a number of interesting methods and properties given by the <code class="language-plaintext highlighter-rouge">Type</code> class.</p>
 
 <p>The complete data source is this:</p>
 
-<pre><code>public static IEnumerable&lt;object[]&gt; DomainObjectClasses 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static IEnumerable&lt;object[]&gt; DomainObjectClasses 
 {
     get
     {
@@ -239,17 +236,17 @@ public void TestNumber(int sequence, int result)
             select new [] { type };
     }
 }
-</code></pre>
+</code></pre></div></div>
 
 <p>The test itself is hot:</p>
 
-<pre><code>[Theory]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Theory]
 [PropertyData("DomainObjectClasses")]
 public void DomainObjectHasDefaultConstructor(Type type)
 {
     Assert.NotNull(type.GetConstructor(Type.EmptyTypes));
 }
-</code></pre>
+</code></pre></div></div>
 
 <h2 id="er">Er…</h2>
 
@@ -257,48 +254,38 @@ public void DomainObjectHasDefaultConstructor(Type type)
 
 
 
-
-
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -308,7 +295,6 @@ public void DomainObjectHasDefaultConstructor(Type type)
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

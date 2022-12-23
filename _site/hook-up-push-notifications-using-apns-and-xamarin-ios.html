@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Hook up push notifications using APNS and Xamarin.iOS</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,20 +15,17 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Hook up push notifications using APNS and Xamarin.iOS <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>22 Sep 2013</em></small></h2>
-
-
 
 <p>I’m adding push notifications to an iOS app, sent from an ASP.NET MVC application. I’m developing the iOS application on a Mac using Xamarin Studio and the ASP.NET application on Windows using Visual Studio. I haven’t taken this past a sandbox environment. The server component uses <a href="https://github.com/Redth/PushSharp">PushSharp</a>, a library that handles the interface to Apple’s APNS as well as Google and Microsoft’s equivalent services for Android and Windows phones.</p>
 
@@ -40,7 +37,7 @@
   <li>ASP.NET Web API</li>
 </ul>
 
-<h3 id="create-certificates-and-profiles">1. Create certificates and profiles</h3>
+<h3 id="1-create-certificates-and-profiles">1. Create certificates and profiles</h3>
 
 <p>Create an app ID for the application. This is then used to create a provisioning profile and certificate. A wildcard id/profile won’t do as the APN service needs an explicit App ID.</p>
 
@@ -50,23 +47,23 @@
   <p>To create an explicit App ID, enter a unique string in the Bundle ID field. This string should match the Bundle ID of your app.</p>
 </blockquote>
 
-<p>Make sure <code>Push Notifications</code> is selected in the <code>App Services</code> section.</p>
+<p>Make sure <code class="language-plaintext highlighter-rouge">Push Notifications</code> is selected in the <code class="language-plaintext highlighter-rouge">App Services</code> section.</p>
 
 <p>Generate, install and download a certificate and provisioning profile for the app ID.</p>
 
 <p>You need to use the new provisioning profile for the application and set the bundle ID of the application to the app ID you created. You <em>don’t</em> need to include the App Id Prefix.</p>
 
-<h3 id="export-the-certificate-as-a-p12-file">2. Export the certificate as a <code>.p12</code> file</h3>
+<h3 id="2-export-the-certificate-as-a-p12-file">2. Export the certificate as a <code class="language-plaintext highlighter-rouge">.p12</code> file</h3>
 
-<p>You need a copy of the development certificate for the server (ASP.NET MVC) part of the application to talk to the APN service. This is done using Keychain Access. Pick the <strong>Certificates</strong> category on the left. This is crazy but you can’t export a certificate as a <code>.p12</code> if you select the certificate with <strong>All Items</strong> selected. You <em>have</em> to pick <strong>Certificates</strong>. Right-click or control-click the new certificate, it should be named something like <code>Apple Development IOS Push Services: com.your.application</code>. Select Export and make sure <code>Personal Information Exchange (.p12)</code> is selected. Export the certificate somewhere and copy it to the server project (the ASP.NET application). You will be prompted for a password. Make a note of the password.</p>
+<p>You need a copy of the development certificate for the server (ASP.NET MVC) part of the application to talk to the APN service. This is done using Keychain Access. Pick the <strong>Certificates</strong> category on the left. This is crazy but you can’t export a certificate as a <code class="language-plaintext highlighter-rouge">.p12</code> if you select the certificate with <strong>All Items</strong> selected. You <em>have</em> to pick <strong>Certificates</strong>. Right-click or control-click the new certificate, it should be named something like <code class="language-plaintext highlighter-rouge">Apple Development IOS Push Services: com.your.application</code>. Select Export and make sure <code class="language-plaintext highlighter-rouge">Personal Information Exchange (.p12)</code> is selected. Export the certificate somewhere and copy it to the server project (the ASP.NET application). You will be prompted for a password. Make a note of the password.</p>
 
-<h3 id="hook-up-pushsharp">3. Hook up PushSharp</h3>
+<h3 id="3-hook-up-pushsharp">3. Hook up PushSharp</h3>
 
-<p>Install PushSharp into the ASP.NET MVC application via <a href="https://www.nuget.org/packages/PushSharp">NuGet</a>. Add the <code>.p12</code> certificate somewhere so it is available to the project, for example as an embedded resource. If you open the project’s properties, select ‘Resources’ then ‘Add Resource’, you can refer to the certificate directly in code as below.</p>
+<p>Install PushSharp into the ASP.NET MVC application via <a href="https://www.nuget.org/packages/PushSharp">NuGet</a>. Add the <code class="language-plaintext highlighter-rouge">.p12</code> certificate somewhere so it is available to the project, for example as an embedded resource. If you open the project’s properties, select ‘Resources’ then ‘Add Resource’, you can refer to the certificate directly in code as below.</p>
 
-<p>In the application’s startup code set up a <code>PushBroker</code>:</p>
+<p>In the application’s startup code set up a <code class="language-plaintext highlighter-rouge">PushBroker</code>:</p>
 
-<pre><code>var production = false;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var production = false;
 var password = "see step 2";
 var certificate = Properties.Resources.com_your_application; // or File.ReadAllBytes(pathToCertificate);
 
@@ -76,15 +73,15 @@ pushBroker.RegisterAppleService(new ApplePushChannelSettings(
 	certificate,
 	password));
 // register pushBroker with an IOC container
-</code></pre>
+</code></pre></div></div>
 
-<h3 id="endpoint-for-recording-device-tokens">4. Endpoint for recording device tokens</h3>
+<h3 id="4-endpoint-for-recording-device-tokens">4. Endpoint for recording device tokens</h3>
 
 <p>The server application needs some way of recording device tokens for the clients. Each device token is unique to the device so the token needs to be recorded against the user so that it can be used to push notifications to the user. Remember each user could have multiple devices so you may need to record multiple device token per user.</p>
 
 <p>I just set up a simple Web API endpoint to record the device token. The endpoint will be called by the client in the next step.</p>
 
-<pre><code>public class SetDeviceTokenController : ApiController
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class SetDeviceTokenController : ApiController
 {
     public HttpResponseMessage Post(SetDeviceTokenPostModel model)
     {
@@ -100,29 +97,29 @@ public class SetDeviceTokenPostModel
     public Guid UserId { get; set; }
     public string DeviceToken { get; set; }
 }
-</code></pre>
+</code></pre></div></div>
 
-<h3 id="client-registration-and-device-token">5. Client registration and device token</h3>
+<h3 id="5-client-registration-and-device-token">5. Client registration and device token</h3>
 
 <p>In the startup code for the client app you need to register the the notification types that will be sent from the server:</p>
 
-<pre><code>UIApplication.SharedApplication.RegisterForRemoteNotificationTypes(notificationTypes);
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>UIApplication.SharedApplication.RegisterForRemoteNotificationTypes(notificationTypes);
+</code></pre></div></div>
 
-<p><code>notificationTypes</code> is an OR masked set of <code>UIRemoteNotificationType</code>, which has the following possible values:</p>
+<p><code class="language-plaintext highlighter-rouge">notificationTypes</code> is an OR masked set of <code class="language-plaintext highlighter-rouge">UIRemoteNotificationType</code>, which has the following possible values:</p>
 
-<pre><code>Alert
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Alert
 Badge
 NewsstandContentAvailability
 None
 Sound
-</code></pre>
+</code></pre></div></div>
 
-<p>You can register for a notification type even if the server never needs to send that type of notification, so registering <code>UIRemoteNotificationType.Alert | UIRemoteNotificationType.Badge | UIRemoteNotificationType.Sound</code> is a pretty safe bet.</p>
+<p>You can register for a notification type even if the server never needs to send that type of notification, so registering <code class="language-plaintext highlighter-rouge">UIRemoteNotificationType.Alert | UIRemoteNotificationType.Badge | UIRemoteNotificationType.Sound</code> is a pretty safe bet.</p>
 
-<p>Calling this registration the first time causes iOS to open a confirmation dialog for the user. Once the notifications are confirmed a method in the <code>AppDelegate</code> is called. Override the method to get the device token and send it to the server. This method may be called many times if the notification settings are changed or the app is restarted. You only need to send the token if it has changed from the last time it was sent. I’m using a <code>_settingsProvider</code> which uses a SQLite database to persist the last device ID sent - the <code>_settingsProvider</code> also has the base URL of my server’s API. There is also a method that can be overriden if the registration failed. The endpoint is called using RestSharp in the <code>SendDeviceToken</code> method.</p>
+<p>Calling this registration the first time causes iOS to open a confirmation dialog for the user. Once the notifications are confirmed a method in the <code class="language-plaintext highlighter-rouge">AppDelegate</code> is called. Override the method to get the device token and send it to the server. This method may be called many times if the notification settings are changed or the app is restarted. You only need to send the token if it has changed from the last time it was sent. I’m using a <code class="language-plaintext highlighter-rouge">_settingsProvider</code> which uses a SQLite database to persist the last device ID sent - the <code class="language-plaintext highlighter-rouge">_settingsProvider</code> also has the base URL of my server’s API. There is also a method that can be overriden if the registration failed. The endpoint is called using RestSharp in the <code class="language-plaintext highlighter-rouge">SendDeviceToken</code> method.</p>
 
-<pre><code>public override void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken) {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public override void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken) {
 {
 	var oldDeviceToken = _settingsProvider.DeviceToken;
 	var newDeviceToken = GetCurrentDeviceToken(deviceToken);
@@ -167,16 +164,16 @@ void SendDeviceToken() {
 		_settingsProvider.DeviceToken = "";
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
-<h3 id="sending-a-push-notification">6. Sending a push notification</h3>
+<h3 id="6-sending-a-push-notification">6. Sending a push notification</h3>
 
 <p>Assuming everything is configured correctly a notification can be pushed to a device from the server like so:</p>
 
-<pre><code>_pushBroker.QueueNotification(new AppleNotification()
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_pushBroker.QueueNotification(new AppleNotification()
 	.ForDeviceToken(...)
 	.WithAlert("Alert text"));
-</code></pre>
+</code></pre></div></div>
 
 <p>The client app must have the notifications allowed by the user and the app must <em>not</em> be in the foreground. If it is in the foreground the push notification has to be handled and displayed by the app itself, <a href="http://roycornelissen.wordpress.com/2011/05/12/push-notifications-in-ios-with-monotouch/">as described here</a>.</p>
 
@@ -191,48 +188,38 @@ void SendDeviceToken() {
 </ul>
 
 
-
-
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -242,7 +229,6 @@ void SendDeviceToken() {
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

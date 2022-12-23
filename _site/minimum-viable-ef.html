@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Minimum Viable EF</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,20 +15,17 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Minimum Viable EF <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>05 Nov 2015</em></small></h2>
-
-
 
 <p>LINQ to SQL provides a mechanism for generating complex queries without having to resort to inline SQL or custom query generation syntax. I happen to like LINQ to SQL as a SQL generation tool, and using EF to execute those queries and hydrate objects is a passable experience, especially in the more recent version of EF. Entity Framework also provides reasonable good batching of mutation (update/insert/delete) operations.</p>
 
@@ -42,9 +39,9 @@
 
 <h2 id="navigation-properties-and-lazy-loading">Navigation properties and lazy loading</h2>
 
-<p>Entity Framework has an interesting feature involving navigation properties called <em>lazy loading</em>. A navigation property (declared as a <code>virtual</code> property on the entity class) will have its value materialised from the database when it is accessed. This can keep the initial load low if only some navigation properties are required from the initial set of results. These are the simplified entities from my test application with navigation properties present:</p>
+<p>Entity Framework has an interesting feature involving navigation properties called <em>lazy loading</em>. A navigation property (declared as a <code class="language-plaintext highlighter-rouge">virtual</code> property on the entity class) will have its value materialised from the database when it is accessed. This can keep the initial load low if only some navigation properties are required from the initial set of results. These are the simplified entities from my test application with navigation properties present:</p>
 
-<pre><code>class Portfolio {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Portfolio {
 	public Guid Id { get; set; }
 	public string Name { get; set; }
 	public virtual ICollection&lt;PortfolioItem&gt; Items { get; set; }
@@ -64,19 +61,19 @@ class PortfolioItem {
 	public Guid SecurityId { get; set; }
 	public virtual Security Security { get; set; }
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>Navigation properties can be explicitly included in the initial query, opting them into eager loading. This example would get all portfolios, including their items - the <code>.ToArray()</code> executes the query so everything selected by the query is in memory - <em>materialised</em> in EF parlance:</p>
+<p>Navigation properties can be explicitly included in the initial query, opting them into eager loading. This example would get all portfolios, including their items - the <code class="language-plaintext highlighter-rouge">.ToArray()</code> executes the query so everything selected by the query is in memory - <em>materialised</em> in EF parlance:</p>
 
-<pre><code>var portfolios = context.Portfolios.Include(x =&gt; x.Items).ToArray();
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var portfolios = context.Portfolios.Include(x =&gt; x.Items).ToArray();
+</code></pre></div></div>
 
 <p>This SQL that is generated from this query is roughly equivalent to this:</p>
 
-<pre><code>SELECT p.*, i.*
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SELECT p.*, i.*
 FROM [dbo].[Portfolio] p
 INNER OUTER JOIN [dbo].[PortfolioItem] i ON p.Id = i.PortfolioId
-</code></pre>
+</code></pre></div></div>
 
 <aside class="pull-right well" style="width: 17em">
 	This is the <em>only</em> time that I have been impressed by EF Code First migrations.
@@ -84,7 +81,7 @@ INNER OUTER JOIN [dbo].[PortfolioItem] i ON p.Id = i.PortfolioId
 
 <p>The SQL that really gets generated is a bit more complex but the structure is basically the same. You can use LINQPad to view the SQL that gets generated for a given LINQ to SQL query. Add the Entity Framework NuGet package and this code - LINQPad managed to connect to my SQL Server instance and EF created the appropriate database and schema using a Code First migration:</p>
 
-<pre><code>void Main()
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>void Main()
 {
 	var context = new Context();
 	
@@ -99,19 +96,19 @@ INNER OUTER JOIN [dbo].[PortfolioItem] i ON p.Id = i.PortfolioId
 class Context : DbContext {
 	public IDbSet&lt;Portfolio&gt; Portfolios { get; set; }
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>Whenever a navigation property that wasn’t included in that initial load is accessed, the database is re-queried just for that one item. This is useful if you just wanted to get to the <code>Security</code> property for a given portfolio item:</p>
+<p>Whenever a navigation property that wasn’t included in that initial load is accessed, the database is re-queried just for that one item. This is useful if you just wanted to get to the <code class="language-plaintext highlighter-rouge">Security</code> property for a given portfolio item:</p>
 
-<pre><code>var item = context.Portfolios.First().Items.First();
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var item = context.Portfolios.First().Items.First();
 
 // Accessing .Security performs a second query
 var name = item.Security.Name;
-</code></pre>
+</code></pre></div></div>
 
 <h2 id="the-problems">The problem(s)</h2>
 
-<p>If I try to pull out the security for every loaded portfolio item, the performance (in terms of database round-trips) goes from O(1) to O(n+1). Given 1000 portfolio items, 1000 additional queries will be round-tripped over the network and executed just to get the security for each item. This is a bad thing. It’s possible to opt in to eager loading of a navigation property (using <code>.Include</code>) but I’ll get into that later.</p>
+<p>If I try to pull out the security for every loaded portfolio item, the performance (in terms of database round-trips) goes from O(1) to O(n+1). Given 1000 portfolio items, 1000 additional queries will be round-tripped over the network and executed just to get the security for each item. This is a bad thing. It’s possible to opt in to eager loading of a navigation property (using <code class="language-plaintext highlighter-rouge">.Include</code>) but I’ll get into that later.</p>
 
 <p>I have several problems with lazy loading of navigation properties:</p>
 
@@ -123,21 +120,21 @@ var name = item.Security.Name;
 
 <p>Unfortunately the prevailing practice of encapsulating logic in the entities by way of the <a href="http://martinfowler.com/bliki/DDD_Aggregate.html">Aggregate pattern</a> when using Entity Framework requires the use of navigation properties for it to be efficient. When writing the query to produce performant code that consumes navigation properties somewhere down the call path you have no choice but to be aware of (usually <em>discover</em>, often through trial and error) the navigation properties that will be required when the results are processed.</p>
 
-<p>Here’s the <code>PortfolioItem</code> class, showing some encapsulated logic (the <code>Value</code> property):</p>
+<p>Here’s the <code class="language-plaintext highlighter-rouge">PortfolioItem</code> class, showing some encapsulated logic (the <code class="language-plaintext highlighter-rouge">Value</code> property):</p>
 
-<pre><code>class PortfolioItem {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class PortfolioItem {
 	//...
 	public decimal Units { get; set; }
 	public virtual Security Security { get; set; }
 	public decimal Value =&gt; Units * Security.Price;
 }
-</code></pre>
+</code></pre></div></div>
 
 <p>This is obviously a trivial example, but what happens if the implementation of that encapsulated logic changes and requires a different navigation property? Each place where a query is generated that then uses that encapsulated logic <em>somewhere</em> along the call path needs to be updated to reflect the new underlying structure. Otherwise you’ll either get a pile of additional queries dragging down performance or a difficult to diagnose null reference exception if the underlying context is somehow closed. I personally prefer the null references - it’s easier to fix your application crashing than to fix users complaining about performance.</p>
 
-<p>These issues with query visibility are compounded if if we’re reusing query fragments by operating on <code>IQueryable&lt;T&gt;</code>.</p>
+<p>These issues with query visibility are compounded if if we’re reusing query fragments by operating on <code class="language-plaintext highlighter-rouge">IQueryable&lt;T&gt;</code>.</p>
 
-<pre><code>public static IQueryable&lt;Portfolio&gt; GetAllPortfoliosBelongingToClient(this IQueryable&lt;Portfolio&gt; portfolios, Guid clientId) {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static IQueryable&lt;Portfolio&gt; GetAllPortfoliosBelongingToClient(this IQueryable&lt;Portfolio&gt; portfolios, Guid clientId) {
 	return context.Portfolios
 		.Include(x =&gt; x.Items)
 		.Where(x =&gt; x.ClientId == clientId);
@@ -146,21 +143,21 @@ var name = item.Security.Name;
 // ...
 
 var portfolios = _context.Portfolios.GetAllPortfoliosBelongingToClient(clientId).ToArray();
-</code></pre>
+</code></pre></div></div>
 
 <aside class="pull-right well" style="width: 26em">
 	The entire reusable query fragment pattern is dreadful, but I'll leave that for another rant. I usually lump it in with 'reusable' mapper classes, misused flag enums, <a href="http://bendetat.com/a-short-executable-rant-on-why-i-dislike-object-initialization-syntax.html">object initialisation syntax for anything not a DTO</a>, tuples (although <a href="https://github.com/dotnet/roslyn/issues/347">C# 7 may fix this</a>) and nested ternary expressions.
 </aside>
 
-<p><code>Items</code> are included to make the query more performant by eager loading the collection for each portfolio. Note that the item securities are not included and will be lazily loaded.</p>
+<p><code class="language-plaintext highlighter-rouge">Items</code> are included to make the query more performant by eager loading the collection for each portfolio. Note that the item securities are not included and will be lazily loaded.</p>
 
 <p>Say that in one of the three places where this query is used, I want to access the current security price for every item. It makes sense to add the new include to the query, right? After all, this is where the query is defined and I’m already specifying that the portfolio items should be eagerly loaded here.</p>
 
-<pre><code>return portfolios
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>return portfolios
 	.Include(x =&gt; x.Items)
 	.Include(x =&gt; x.Items.Select(i =&gt; i.Security))
 	.Where(x =&gt; x.ClientId == clientId);
-</code></pre>
+</code></pre></div></div>
 
 <p>Except now the security is selected and pulled into memory every single time this query is used, which isn’t appropriate in the other two usages of the query fragment and will cause extra load on the database and the network.</p>
 
@@ -176,22 +173,22 @@ var portfolios = _context.Portfolios.GetAllPortfoliosBelongingToClient(clientId)
 
 <p>To get the security code for an item in a portfolio in SQL requires an extra table join:</p>
 
-<pre><code>SELECT p.Id, s.Code
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SELECT p.Id, s.Code
 FROM [dbo].[Portfolios] p
 INNER JOIN [dbo].[PortfolioItems] i ON i.[Id] = p.[Id]
 INNER JOIN [dbo].[Securities] s ON s.[Id] = p.[Id]	# &lt;-- this one
 WHERE -- some condition
-</code></pre>
+</code></pre></div></div>
 
 <aside class="pull-right well" style="width: 18em">
 	For all of its faults (and there are plenty) SQL is still a great language for querying a relational database. Hashtag makuthink.
 </aside>
 
-<p>That doesn’t seem like a big deal. In fact, SQL Server is extremely good at joining tables. There should already be a foreign key relationship between <code>PortfolioItems</code> and <code>Securities</code>, which lets SQL Server perform optimisations.</p>
+<p>That doesn’t seem like a big deal. In fact, SQL Server is extremely good at joining tables. There should already be a foreign key relationship between <code class="language-plaintext highlighter-rouge">PortfolioItems</code> and <code class="language-plaintext highlighter-rouge">Securities</code>, which lets SQL Server perform optimisations.</p>
 
-<p>The problem, as described above, is when our ORM - Entity Framework - needs its hand held to eagerly load the <code>Security</code> property:</p>
+<p>The problem, as described above, is when our ORM - Entity Framework - needs its hand held to eagerly load the <code class="language-plaintext highlighter-rouge">Security</code> property:</p>
 
-<pre><code>var selectedPortfolios = context.Portfolios
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var selectedPortfolios = context.Portfolios
 	.Include(x =&gt; x.Items)
 	.Include(x =&gt; x.Items.Select(i =&gt; i.Security))
 	.Where(x =&gt; /* some condition */)
@@ -202,31 +199,31 @@ var securityNames = selectedPortfolios
 	.SelectMany(x =&gt; x.Items)
 	.Select(i =&gt; i.Security.Name)
 	.ToArray();
-</code></pre>
+</code></pre></div></div>
 
 <aside class="pull-right well" style="width: 33em">
 	The <code>// later...</code> comment is important, because I could just select out the security name in the initial query and obviate this entire example. I'm making an assumption that, as is usually the case in the systems I've worked in and created, the selected portfolios are queried in one place then being consumed elsewhere. Generally both of those places are only tangentially related through some common consumer. As I'll explain soon, this is a bad practice that I would like to challenge.
 </aside>
 
-<p>If the <code>Security</code> property isn’t eagerly loaded, I get lazy loading in that final <code>.Select(i =&gt; i.Security.Name)</code> resulting in O(n) performance.</p>
+<p>If the <code class="language-plaintext highlighter-rouge">Security</code> property isn’t eagerly loaded, I get lazy loading in that final <code class="language-plaintext highlighter-rouge">.Select(i =&gt; i.Security.Name)</code> resulting in O(n) performance.</p>
 
-<p>To denormalise the structure I can apply a piece of domain knowledge. Security names don’t change very often relative to other pieces of data in a financial system. Currently (start of November) there have been 95 name (and code) changes on the <a href="http://www.asx.com.au/prices/company-name-and-asx-code-changes-2015.htm">Australian Stock Exchange</a> in 2015, out of around 2200 listed companies. So this isn’t a piece of information that changes very frequently. If I copy the security name to the portfolio item, the <code>Security</code> property no longer needs eager loading.</p>
+<p>To denormalise the structure I can apply a piece of domain knowledge. Security names don’t change very often relative to other pieces of data in a financial system. Currently (start of November) there have been 95 name (and code) changes on the <a href="http://www.asx.com.au/prices/company-name-and-asx-code-changes-2015.htm">Australian Stock Exchange</a> in 2015, out of around 2200 listed companies. So this isn’t a piece of information that changes very frequently. If I copy the security name to the portfolio item, the <code class="language-plaintext highlighter-rouge">Security</code> property no longer needs eager loading.</p>
 
-<pre><code>var securityNames = selectedPortfolios
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var securityNames = selectedPortfolios
 	.SelectMany(x =&gt; x.Items)
 	.Select(i =&gt; i.SecurityName)
 	.ToArrray();
-</code></pre>
+</code></pre></div></div>
 
 <p>To maintain data integrity I can use a domain event that gets triggered whenever a security name is changed. The name of the security doesn’t have to be immediately available to each portfolio item when it changes - a slight delay is ok.</p>
 
-<pre><code>void Handle(SecurityNameChanged @event) {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>void Handle(SecurityNameChanged @event) {
 	foreach (var item in portfolioItems.Where(x =&gt; x.SecurityId == @event.SecurityId).ToArray()) {
 		item.UpdateSecurityName(@event.SecurityName);
 	}
 	portfolioItems.SaveChanges();
 }
-</code></pre>
+</code></pre></div></div>
 
 <p>In many cases this wouldn’t even need to happen in a domain event. A maintenance task could regularly make sure the denormalised security name is consistent with the canonical security, ensuring <em>eventual</em> data integrity.</p>
 
@@ -238,17 +235,17 @@ var securityNames = selectedPortfolios
 
 <p>As an example, this is how you would write a query for all security codes for a portfolio using navigation properties:</p>
 
-<pre><code>var query =
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var query =
 	from portfolio in context.Portfolios
 	where portfolio.Id == portfolioId
 	let codes = portfolio.Items.Select(x =&gt; x.Security.Code)
 	select codes;
 var result = query.Single();
-</code></pre>
+</code></pre></div></div>
 
 <p>This is how you would write the same query without using navigation properties:</p>
 
-<pre><code>var query =
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var query =
 	from portfolio in context.Portfolios
 	where portfolio.Id == portfolioId
 	let codes = 
@@ -258,7 +255,7 @@ var result = query.Single();
 		select security.Code
 	select codes;
 var result = query.Single();
-</code></pre>
+</code></pre></div></div>
 
 <aside class="pull-right well" style="width: 27em">
 	<p>Note that I can't use <code>context.Securities.Single(...)</code> because, according to LINQ to SQL: "The methods 'Single' and 'SingleOrDefault' can only be used as a final query operation. Consider using the method 'FirstOrDefault' in this instance instead."</p>	
@@ -273,7 +270,7 @@ var result = query.Single();
 
 <p>Based on the earlier example of lazily loading the security for a given portfolio item:</p>
 
-<pre><code>var item = items.First();
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var item = items.First();
 
 //var name = item.Security.Name;
 
@@ -285,7 +282,7 @@ var name = context.Securities
 	.Where(x =&gt; x.Id == item.SecurityId)
 	.Select(x =&gt; x.Name)
 	.Single();
-</code></pre>
+</code></pre></div></div>
 
 <h3 id="thinking-about-the-query">Thinking about the query</h3>
 
@@ -303,7 +300,7 @@ var name = context.Securities
 
 <p>The value of a portfolio item is simply the number of units multiplied by the current price of the security. A naive implementation of a query to generate a report showing the investments in a portfolio and the values would look like this:</p>
 
-<pre><code>var query =
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var query =
     from portfolio in _context.Portfolios
     where portfolio.Id == portfolioId
     let items =
@@ -316,27 +313,27 @@ var name = context.Securities
             Value = item.Units*security.CurrentPrice
         }
     select items;
-</code></pre>
+</code></pre></div></div>
 
-<p>This is a very simple calculation so it isn’t really a good target for applying DRY but I’ll use it for now. If I was treating the portfolio item as an aggregate root using navigation properties, that <code>Value</code> calculation would live as a property on <code>PortfolioItem</code>:</p>
+<p>This is a very simple calculation so it isn’t really a good target for applying DRY but I’ll use it for now. If I was treating the portfolio item as an aggregate root using navigation properties, that <code class="language-plaintext highlighter-rouge">Value</code> calculation would live as a property on <code class="language-plaintext highlighter-rouge">PortfolioItem</code>:</p>
 
-<pre><code>public decimal Value =&gt; this.Units * this.Security.CurrentPrice;
-</code></pre>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public decimal Value =&gt; this.Units * this.Security.CurrentPrice;
+</code></pre></div></div>
 
 <p>This can be implemented without the navigation property by explicitly passing the current price or the security itself:</p>
 
-<pre><code>public decimal GetValue(decimal currentPrice) =&gt; this.Units * currentPrice;
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public decimal GetValue(decimal currentPrice) =&gt; this.Units * currentPrice;
 
 // or, if you wanted to hide the implementation detail
 // and not make the consumer concerned about where the
 // current price comes from:
 
 public decimal GetValue(Security security) =&gt; this.Units * security.CurrentPrice;
-</code></pre>
+</code></pre></div></div>
 
-<p>These methods can’t be called directly by EF. This isn’t because I removed the navigation properties. EF wouldn’t be able to call the previous property either with a <code>get;</code> body or an expression body - LINQ to SQL simply can’t translate the expression into SQL. So I need a second stage to map the results from the EF query into the the final results.</p>
+<p>These methods can’t be called directly by EF. This isn’t because I removed the navigation properties. EF wouldn’t be able to call the previous property either with a <code class="language-plaintext highlighter-rouge">get;</code> body or an expression body - LINQ to SQL simply can’t translate the expression into SQL. So I need a second stage to map the results from the EF query into the the final results.</p>
 
-<pre><code>var query =
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var query =
     from portfolio in _context.Portfolios
     where portfolio.Id == portfolioId
     let items =
@@ -356,36 +353,36 @@ var results =
         item.security.Code,
         Value = item.item.Value(item.security)
     };
-</code></pre>
+</code></pre></div></div>
 
 <p>You may be tempted to break the query and the map stages into separate classes, possibly even calling the map step a mapper. Reconsider! There is a good chance that the query and map are only going to be used in this one place (if not, they probably should be). If you try to DRY your application too much and too soon it will probably crack™. Extracting the stages would also require a pile of intermediary classes to bridge between the stages. <a href="https://github.com/dotnet/roslyn/issues/206">Record types in C# 7</a> (if they happen) will reduce the amount of boilerplate code but until then the overheads will likely outweigh any benefit. For most cases I would just keep the query and the map stage together. They can still be tested as a whole by simply mocking out the EF context.</p>
 
-<p>That’s not to say that individual complex calculations shouldn’t be refactored into service classes when appropriate. Since the <code>Value</code> calculation is now being done in memory it could easily be extracted:</p>
+<p>That’s not to say that individual complex calculations shouldn’t be refactored into service classes when appropriate. Since the <code class="language-plaintext highlighter-rouge">Value</code> calculation is now being done in memory it could easily be extracted:</p>
 
-<pre><code>class PortfolioItemValueCalculator {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class PortfolioItemValueCalculator {
 	public decimal Calculate(PortfolioItem item, Security security) {
 		return item.Units * security.CurrentValue;
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
 <p>This is a terrible example so here’s a better one. Warning - I’m about to drop some serious domain knowledge. In a portfolio management system you often need to calculate the cost base of an investment, say to calculate the change in value for the investment, or to work out the tax consequences of selling the investment. There are several methods for calculating a cost base (financial planners are interested in performance, tax accountants are interested in tax consequences) and regardless of the method it can be quite complicated. Cost base is calculated using a number of variables such as the cost of the parcels that make up the investment, any capital returns received, the effect of corporate actions such as demergers, etc. So a cost base calculator for a given method is an excellent candidate for extraction and reuse as a service class. An example calculator signature might look something like this:</p>
 
-<pre><code>class AverageTaxCostBaseCalculator {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class AverageTaxCostBaseCalculator {
 	public decimal Calculate(
 		Parcel[] parcels, 
 		CapitalReturnDistribution[] capitalReturns,
 		CorporateAction[] corporateActions);
 }
-</code></pre>
+</code></pre></div></div>
 
 <h4 id="updates-inserts-and-deletes">Updates, inserts and deletes</h4>
 
-<p>Navigation properties also have the advantage of already being tracked by EF, so any updates to them will be persisted when the context is saved. This doesn’t change when pulling those entities out explicitly in queries - EF will track them as well, as long as you’ve used the same context. In other words, don’t use <code>InstancePerDependency</code> to register the context in Autofac - use something like <code>InstancePerRequest</code> or <code>InstancePerLifetimeScope</code>.</p>
+<p>Navigation properties also have the advantage of already being tracked by EF, so any updates to them will be persisted when the context is saved. This doesn’t change when pulling those entities out explicitly in queries - EF will track them as well, as long as you’ve used the same context. In other words, don’t use <code class="language-plaintext highlighter-rouge">InstancePerDependency</code> to register the context in Autofac - use something like <code class="language-plaintext highlighter-rouge">InstancePerRequest</code> or <code class="language-plaintext highlighter-rouge">InstancePerLifetimeScope</code>.</p>
 
 <p>Of course, this means that methods in an aggregate root that create or delete child entities will need to be restructured. Take this method that adds a new item to a portfolio using navigation properties:</p>
 
-<pre><code>class Portfolio {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Portfolio {
 	// ...
 	public virtual ICollection&lt;PortfolioItem&gt; Items { get; set; }
 	public void AddItem(Security security, decimal units) {
@@ -393,19 +390,19 @@ var results =
 		this.Items.Add(item);
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>To work without the <code>Items</code> navigation property, I need to pass the EF context to the method. Entities are constructed by EF and can’t get dependencies injected by a DI container, so this has to be done explicitly. If you didn’t pass the context in then the caller would be responsible for adding it to EF - a prime opportunity for creating a bug.</p>
+<p>To work without the <code class="language-plaintext highlighter-rouge">Items</code> navigation property, I need to pass the EF context to the method. Entities are constructed by EF and can’t get dependencies injected by a DI container, so this has to be done explicitly. If you didn’t pass the context in then the caller would be responsible for adding it to EF - a prime opportunity for creating a bug.</p>
 
-<p>Another consequence of removing the navigation properties is that the portfolio entity <em>per se</em> now doesn’t have a concept of the items that it contains. To mitigate that the <code>AddItem</code> could return the new item, which could be consumed in the calling code:</p>
+<p>Another consequence of removing the navigation properties is that the portfolio entity <em>per se</em> now doesn’t have a concept of the items that it contains. To mitigate that the <code class="language-plaintext highlighter-rouge">AddItem</code> could return the new item, which could be consumed in the calling code:</p>
 
-<pre><code>public PortfolioItem AddItem(IDbContext context, Security security, decimal units)
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public PortfolioItem AddItem(IDbContext context, Security security, decimal units)
 {
     var item = new PortfolioItem(this, security, units);
     context.PortfolioItems.Add(item);
     return item;
 }
-</code></pre>
+</code></pre></div></div>
 
 <aside class="pull-right well" style="width: 23em">
 	There are more complicated scenarios such as making multiple passes over a collection of items that are alternately queried and updated. In this situation I argue that a domain object is the incorrect level of abstraction to be holding this collection. It should be the responsibility of the orchestrating function to maintain then persist its state.
@@ -420,7 +417,7 @@ var results =
 
 <p>If I can consider allocating an investment to a portfolio to be unrelated to the portfolio, this method should be removed from the portfolio (Single Responsibility Principle) and extracted into a service:</p>
 
-<pre><code>class AddAssetToPortfolio {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class AddAssetToPortfolio {
 	// ...
 	public void Add(Portfolio portfolio, Security security, decimal units) {
 		var item = new PortfolioItem(portfolio, security, units);
@@ -428,9 +425,9 @@ var results =
 		_context.PortfolioItems.Add(item);
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>Note that the service doesn’t call <code>_context.SaveChanges()</code>. That is left for the consuming code. It could be done in the service itself but because I’ve got a shared EF context I can take advantage of batching. I could also use a unit of work implementation that wraps the EF context and flushes the context automatically.</p>
+<p>Note that the service doesn’t call <code class="language-plaintext highlighter-rouge">_context.SaveChanges()</code>. That is left for the consuming code. It could be done in the service itself but because I’ve got a shared EF context I can take advantage of batching. I could also use a unit of work implementation that wraps the EF context and flushes the context automatically.</p>
 
 <p>In an example this trivial I don’t think a discrete service class is actually warranted. I may as well just perform the operation in the consuming code. Generally I would defer extracting out service classes until it is clear that the logic will actually be reused and is too complex to be safely duplicated.</p>
 
@@ -446,9 +443,9 @@ var results =
 
 <h3 id="domain-event-handler">Domain event handler</h3>
 
-<p>The domain event handler for updating security names (above) is an example of extracting functionality from an aggregate root / entity. The aggregate root way of implementing updating security names would be a method on <code>Security</code>, using a collection of portfolio items linked to the security:</p>
+<p>The domain event handler for updating security names (above) is an example of extracting functionality from an aggregate root / entity. The aggregate root way of implementing updating security names would be a method on <code class="language-plaintext highlighter-rouge">Security</code>, using a collection of portfolio items linked to the security:</p>
 
-<pre><code>class Security {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Security {
 	// ...
 	public virtual ICollection&lt;PortfolioItem&gt; PortfolioItems { get; set; }
 
@@ -459,17 +456,17 @@ var results =
 		}
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
-<p>Given this design, whenever I want to update a security name I need to remember to eagerly load the <code>PortfolioItems</code> as well. Extracting out the update part of that functionality reduces the complexity on the consumer side, and since the update can be performed out-of-band (maybe pushed into another process) the operation of updating a security name becomes simpler and more performant.</p>
+<p>Given this design, whenever I want to update a security name I need to remember to eagerly load the <code class="language-plaintext highlighter-rouge">PortfolioItems</code> as well. Extracting out the update part of that functionality reduces the complexity on the consumer side, and since the update can be performed out-of-band (maybe pushed into another process) the operation of updating a security name becomes simpler and more performant.</p>
 
 <h3 id="service-class">Service class</h3>
 
-<p>Of course, a domain event handler is just a nice auto-wired wrapper for a (hopefully) single purpose service class. I could instead have a service class that replaces the above aggregate root style <code>Security.UpdateName()</code> method and also implements the domain event to update the denormalised names on <code>PortfolioItem</code>. </p>
+<p>Of course, a domain event handler is just a nice auto-wired wrapper for a (hopefully) single purpose service class. I could instead have a service class that replaces the above aggregate root style <code class="language-plaintext highlighter-rouge">Security.UpdateName()</code> method and also implements the domain event to update the denormalised names on <code class="language-plaintext highlighter-rouge">PortfolioItem</code>.</p>
 
 <p>This is a contrived example - in this situation a domain event handler is probably a much better choice unless you need to take advantage of EF’s implicit database transaction to maintain integrity in case of a failure.</p>
 
-<pre><code>class UpdateSecurityName {
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class UpdateSecurityName {
 	// _context...
 
 	public void Update(Guid securityId, string name) {
@@ -491,7 +488,7 @@ var results =
 		_context.SaveChanges();
 	}
 }
-</code></pre>
+</code></pre></div></div>
 
 <h2 id="isnt-this-all-a-bit-too-hard">Isn’t this all a bit too hard?</h2>
 
@@ -507,48 +504,38 @@ var results =
 
 
 
-
-
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -558,7 +545,6 @@ var results =
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>

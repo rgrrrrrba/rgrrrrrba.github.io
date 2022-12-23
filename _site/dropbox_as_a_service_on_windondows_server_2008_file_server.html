@@ -4,10 +4,10 @@
 		<meta charset="utf-8"/>
 		<title>Dropbox as a service on Windows Server 2008 file server</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-		<meta name="description" content="Ben d'état. Ben Scott's personal blog. The site formerly known as Red, Green, Refactor, Red, Red, Red, Revert, Back Away, the site formally known as Belfry Images."/>
-		<meta name="author" content="Ben Scott"/>
-		<link href="http://fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
-		<link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
+		<meta name="description" content="Bec d'état, Rebecca Scott's personal blog"/>
+		<meta name="author" content="Rebecca Scott"/>
+		<link href="//fonts.googleapis.com/css?family=Cinzel" rel="stylesheet" type="text/css"/>
+		<link href="//fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css"/>
 		<link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 		<link href="/lib/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet"/>
 		<link href="/css/site.css" rel="stylesheet"/>
@@ -15,20 +15,17 @@
 	<body>
 		<div class="container">
 			<div class="row header">
-				<h1><a href="http://bendetat.com">Ben d'état</a></h1>
-				<h2><a href="mailto:ben@swxben.com">Ben Scott</a></h2>
+				<h1><a href="https://becdetat.com">Bec d'état</a></h1>
+				<h2><a href="https://becdetat.com">Rebecca Scott's Blog</a></h2>
 			</div>
 		</div>
 
 		<hr/>
-		
-		<div class="container">		
+
+		<div class="container">
 			<div class="row content">
 				<h1><a href="/">~/</a>Dropbox as a service on Windows Server 2008 file server <br/></h1>
-<p class="twitter-link"><a href="https://twitter.com/share" class="twitter-share-button" data-via="bendetat">Tweet</a></p>
 <h2><small><em>21 Jan 2013</em></small></h2>
-
-
 
 <p>I’ve set up a Dropbox account on a file server so that:</p>
 
@@ -37,18 +34,18 @@
   <li>Disaster recovery procedures that include backups of the file server cover the files hosted offsite in the Dropbox account.</li>
 </ol>
 
-<p>By default, Dropbox installs as a desktop application. To get it to work as a Windows service it needs to be run within a utility in the Windows Server 2003 Resource Kit called <code>srvany.exe</code>. Since the only instructions I could find for setting this up were for <a href="http://blog.dreamfactory.se/2011/01/20/dropbox-as-a-service/">a Windows 2003 server</a> I thought I would document the procedure for Windows 2008 here.</p>
+<p>By default, Dropbox installs as a desktop application. To get it to work as a Windows service it needs to be run within a utility in the Windows Server 2003 Resource Kit called <code class="language-plaintext highlighter-rouge">srvany.exe</code>. Since the only instructions I could find for setting this up were for <a href="http://blog.dreamfactory.se/2011/01/20/dropbox-as-a-service/">a Windows 2003 server</a> I thought I would document the procedure for Windows 2008 here.</p>
 
 <ol>
   <li>Install Dropbox on the file server as a desktop application.</li>
   <li>Right-click the Dropbox notify icon and open preferences.</li>
   <li>Uncheck <em>Show desktop notifications</em> and <em>Start Dropbox on system startup</em>, save and close.</li>
   <li>Right-click the Dropbox notify icon and select <em>Exit Application</em>.</li>
-  <li>Install the <a href="http://www.microsoft.com/en-us/download/details.aspx?id=17657">Windows 2003 Resource Kit</a>. I installed this on a Server 2003 box and copied <code>srvany.exe</code> to the file server, but it should install to 2008.</li>
-  <li>Open cmd / Powershell and run <code>sc \\server-name create Dropbox binPath= "&lt;path to svrany.exe&gt;" DisplayName= "DropBox"</code>. The spaces after the <code>=</code> are important.</li>
+  <li>Install the <a href="http://www.microsoft.com/en-us/download/details.aspx?id=17657">Windows 2003 Resource Kit</a>. I installed this on a Server 2003 box and copied <code class="language-plaintext highlighter-rouge">srvany.exe</code> to the file server, but it should install to 2008.</li>
+  <li>Open cmd / Powershell and run <code class="language-plaintext highlighter-rouge">sc \\server-name create Dropbox binPath= "&lt;path to svrany.exe&gt;" DisplayName= "DropBox"</code>. The spaces after the <code class="language-plaintext highlighter-rouge">=</code> are important.</li>
   <li>Open regedit.</li>
-  <li>Under <code>HKEY_LOCAL_MACHINE\SYSTEM\Dropbox</code> create a new key called <code>Parameters</code>.</li>
-  <li>Under the <code>Parameters</code> key create a new string value <code>Application</code> and enter the full path to <code>dropbox.exe</code>.</li>
+  <li>Under <code class="language-plaintext highlighter-rouge">HKEY_LOCAL_MACHINE\SYSTEM\Dropbox</code> create a new key called <code class="language-plaintext highlighter-rouge">Parameters</code>.</li>
+  <li>Under the <code class="language-plaintext highlighter-rouge">Parameters</code> key create a new string value <code class="language-plaintext highlighter-rouge">Application</code> and enter the full path to <code class="language-plaintext highlighter-rouge">dropbox.exe</code>.</li>
   <li>Close regedit.</li>
   <li>Open the Services management console.</li>
   <li>Change the Dropbox service to automatic startup and set the logon user to the Administrator account.</li>
@@ -58,48 +55,38 @@
 <p>Note that the Dropbox service isn’t running on the desktop so administrative tasks such as sharing folders need to be performed via Dropbox’s web interface.</p>
 
 
-
-
 <br/>
 
 <div id="disqus_thread"></div>
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-    var disqus_shortname = 'bendetat'; // required: replace example with your forum shortname
-
-    /* * * DON'T EDIT BELOW THIS LINE * * */
+<script>
     (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        var d = document, s = d.createElement('script');
+        s.src = 'https://becdetat.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
 			</div>
 		</div>
 
 		<hr/>
 
-		<div class="container">			
+		<div class="container">
 			<div class="row footer">
 				<p><small>
-					Content &copy; 2008-2014 Ben Scott<br/>
-					<a href="https://twitter.com/bendetat">@bendetat</a> |
-					<a href="mailto:ben@swxben.com">ben@swxben.com</a> |
-					<a href="https://github.com/bendetat">github.com/bendetat</a> |
-					<a href="http://www.swxben.com">Software by Ben Pty Ltd</a> | <a href="http://www.swxben.com">SWXBEN</a>
+					Content &copy; 2008-2022 Rebecca Scott<br/>
+					<a href="https://www.linkedin.com/in/rebecca-scott-b522a418/" target="_blank">LinkedIn</a> |
+					<a href="https://github.com/becdetat" target="_blank">GitHub</a> |
+					<a href="mailto:me@becdetat.com">me@becdetat.com</a>
 				</small></p>
 			</div>
 		</div>
 
 		<script src="/lib/jquery-2.0.2.min.js"></script>
 		<script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-		<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
+		<script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js" type="text/javascript"></script>
 		<script src="/js/site.js"></script>
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -109,7 +96,6 @@
 
 		  ga('create', 'UA-67018713-1', 'auto');
 		  ga('send', 'pageview');
-
 		</script>
 	</body>
 </html>
