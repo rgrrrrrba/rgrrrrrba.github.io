@@ -30,7 +30,7 @@ This adds a remote called `localcopy` which points to the local repo copy. Then,
      * [new branch]      xxxx -> repo-copy/xxxx              
      ...
 
-`<aside>`What happened with  line 3 of the response? `emote`? strange.`</aside>`
+`<aside>`What happened with line 3 of the response? `emote`? strange.`</aside>`
 
 Then cherry-pick the appropriate commit:
 

@@ -1,5 +1,6 @@
 body {
 	font-family: 'PT Sans', sans-serif;
+	color: #000;
 }
 .container {
 	text-align: center; 
@@ -46,3 +47,16 @@ hr {
 .well.pull-left {
 	margin-right: 1em;
 }
+
+img.pull-right {
+	float: right;
+	border: 1px solid #888;
+	margin: 0 0 1em 1em;
+}
+img.pull-left {
+	float: left;
+	border: 1px solid #888;
+	margin: 0 1em 1em 0;
+}
+
+
