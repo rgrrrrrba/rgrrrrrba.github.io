@@ -3,8 +3,33 @@
 	<channel>
 		<title>Bec d&apos;état - Rebecca Scott&apos;s blog</title>
 		<description></description>		
-		<link>http://localhost:4000</link>
-		<atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
+		<link>https://becdetat.com</link>
+		<atom:link href="https://becdetat.com/feed.xml" rel="self" type="application/rss+xml" />
+		
+			<item>
+				<author>Rebecca Scott - me@becdetat.com</author>
+				<title>Reboot, yet again</title>
+				<description>&lt;p&gt;And yet again I have rebooted this site.&lt;/p&gt;
+
+&lt;p&gt;This time I’ve stuck with the existing style (I like it) and backend (Jekyll, hosted on GitHub Pages). But I’ve added some new pages (&lt;a href=&quot;/about-me&quot;&gt;About me&lt;/a&gt; and &lt;a href=&quot;/resume&quot;&gt;my resume&lt;/a&gt;) and &lt;a href=&quot;/archive&quot;&gt;archived&lt;/a&gt; all my old posts.&lt;/p&gt;
+
+&lt;p&gt;There are posts here from 2008, and the most recent post was from 2018. Things have definitely changed for me since then. I’ve moved more and more into leadership roles, and I’ve developed a strong interest in DEI, mental health, neurodiversity, and coaching.&lt;/p&gt;
+
+&lt;p&gt;I’ve also joined &lt;a href=&quot;https://sixpivot.com.au&quot;&gt;SixPivot&lt;/a&gt;, going back to my consultant roots but with a major part of my role helping the company develop mental health and neurodiversity safe spaces and support systems, building out DEI initiatives, working on internal mentor programs and career pathways, and starting my own coaching practice.&lt;/p&gt;
+
+&lt;p&gt;I talk about this some more in my &lt;a href=&quot;/about-me&quot;&gt;About me&lt;/a&gt; page, but I have developed a strong interest in professional coaching, especially given an incredibly positive experience with &lt;a href=&quot;https://www.linkedin.com/in/katejenkinsonnextstephr/&quot;&gt;Kate Jenkinson&lt;/a&gt; as my coach while I was a Head of Development with &lt;a href=&quot;https://automattic.com&quot;&gt;Automattic&lt;/a&gt;. I’m planning on starting a professional coaching certification in 2023, and using that within SixPivot to help with 1:1s, coaching, mentoring, and career development.&lt;/p&gt;
+
+&lt;p&gt;I’m also planning on building my (currently poor) knowledge of Azure, particularly around Azure architecture and the many, many, …..many different services available on the Azure platform. This is so I can more confidently help design systems and make recommendations to clients and within the teams I’ll be working with at SixPivot.&lt;/p&gt;
+
+&lt;p&gt;Very exciting times for the year ahead to be honest. As always my mental health is a struggle, especially in the last couple of weeks. So I need to be careful of that too.&lt;/p&gt;
+
+&lt;p&gt;I’ve always loved writing, and I’m hoping that my new position will allow me to do much more of that in a professional capacity. So, this blog will hopefully see more action, with some technical posts but possibly with more of a focus on mental health, neurodiversity, DEI, coaching, and communication in general.&lt;/p&gt;
+
+</description>
+				<pubDate>Sat, 24 Dec 2022 00:00:00 +1000</pubDate>
+				<link>https://becdetat.com/reboot-yet-again.html</link>
+				<guid isPermaLink="true">https://becdetat.com/reboot-yet-again.html</guid>
+			</item>
 		
 			<item>
 				<author>Rebecca Scott - me@becdetat.com</author>
@@ -70,8 +95,8 @@
 
 </description>
 				<pubDate>Tue, 06 Mar 2018 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/limit-an-element-to-n-lines.html</link>
-				<guid isPermaLink="true">http://localhost:4000/limit-an-element-to-n-lines.html</guid>
+				<link>https://becdetat.com/limit-an-element-to-n-lines.html</link>
+				<guid isPermaLink="true">https://becdetat.com/limit-an-element-to-n-lines.html</guid>
 			</item>
 		
 			<item>
@@ -98,8 +123,8 @@
 
 </description>
 				<pubDate>Fri, 02 Mar 2018 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/copying-react-props-to-a-child-component.html</link>
-				<guid isPermaLink="true">http://localhost:4000/copying-react-props-to-a-child-component.html</guid>
+				<link>https://becdetat.com/copying-react-props-to-a-child-component.html</link>
+				<guid isPermaLink="true">https://becdetat.com/copying-react-props-to-a-child-component.html</guid>
 			</item>
 		
 			<item>
@@ -157,8 +182,8 @@ Return thing
 &lt;iframe width=&quot;854&quot; height=&quot;480&quot; src=&quot;https://www.youtube.com/embed/crIJvcWkVcs&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
 </description>
 				<pubDate>Tue, 19 Jul 2016 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/vertical-whitespace-a-fairy-tale.html</link>
-				<guid isPermaLink="true">http://localhost:4000/vertical-whitespace-a-fairy-tale.html</guid>
+				<link>https://becdetat.com/vertical-whitespace-a-fairy-tale.html</link>
+				<guid isPermaLink="true">https://becdetat.com/vertical-whitespace-a-fairy-tale.html</guid>
 			</item>
 		
 			<item>
@@ -210,8 +235,8 @@ Return thing
 
 </description>
 				<pubDate>Thu, 11 Feb 2016 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/dumping-custom-emoji-from-slack.html</link>
-				<guid isPermaLink="true">http://localhost:4000/dumping-custom-emoji-from-slack.html</guid>
+				<link>https://becdetat.com/dumping-custom-emoji-from-slack.html</link>
+				<guid isPermaLink="true">https://becdetat.com/dumping-custom-emoji-from-slack.html</guid>
 			</item>
 		
 			<item>
@@ -694,8 +719,8 @@ var results =
 
 </description>
 				<pubDate>Thu, 05 Nov 2015 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/minimum-viable-ef.html</link>
-				<guid isPermaLink="true">http://localhost:4000/minimum-viable-ef.html</guid>
+				<link>https://becdetat.com/minimum-viable-ef.html</link>
+				<guid isPermaLink="true">https://becdetat.com/minimum-viable-ef.html</guid>
 			</item>
 		
 			<item>
@@ -862,8 +887,8 @@ var results =
 
 </description>
 				<pubDate>Mon, 02 Nov 2015 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/notes-on-kerberos-and-active-directory.html</link>
-				<guid isPermaLink="true">http://localhost:4000/notes-on-kerberos-and-active-directory.html</guid>
+				<link>https://becdetat.com/notes-on-kerberos-and-active-directory.html</link>
+				<guid isPermaLink="true">https://becdetat.com/notes-on-kerberos-and-active-directory.html</guid>
 			</item>
 		
 			<item>
@@ -1118,8 +1143,8 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 
 </description>
 				<pubDate>Fri, 28 Aug 2015 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/react-early-thoughts.html</link>
-				<guid isPermaLink="true">http://localhost:4000/react-early-thoughts.html</guid>
+				<link>https://becdetat.com/react-early-thoughts.html</link>
+				<guid isPermaLink="true">https://becdetat.com/react-early-thoughts.html</guid>
 			</item>
 		
 			<item>
@@ -1224,8 +1249,8 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 
 </description>
 				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/bundling-and-deploying-azure-webjobs-in-a-web-app.html</link>
-				<guid isPermaLink="true">http://localhost:4000/bundling-and-deploying-azure-webjobs-in-a-web-app.html</guid>
+				<link>https://becdetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</link>
+				<guid isPermaLink="true">https://becdetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</guid>
 			</item>
 		
 			<item>
@@ -1468,112 +1493,8 @@ gulp.task(&apos;code&apos;, function(){
 
 </description>
 				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/build-pipeline-for-react.html</link>
-				<guid isPermaLink="true">http://localhost:4000/build-pipeline-for-react.html</guid>
-			</item>
-		
-			<item>
-				<author>Rebecca Scott - me@becdetat.com</author>
-				<title>Ubuntu Desktop in AWS EC2</title>
-				<description>&lt;p&gt;This turned out to be much harder than I had hoped. Creating and connecting to a Windows Server VM is trivial in Azure but I thought I would try creating an Ubuntu VM with a desktop in AWS for the exercise (and hopefully in less time than it would take to download an Ubuntu ISO and set up a local VM - I failed). The main time sink was messing around with the SSH keys, which is admittedly a good thing because it’s got to be, excuse me, pretty damn secure. The other delay was in properly configuring X-Windows to show the Ubuntu desktop. Again this is probably a good thing because an OOTB Ubuntu instance is quite lean and most server-y things can be done via SSH rather in a GUI. That’s not what I was intending for this exercise though.&lt;/p&gt;
-
-&lt;p&gt;I won’t go into &lt;a href=&quot;https://aws.amazon.com/&quot;&gt;creating an AWS account&lt;/a&gt; but wow, that UI. I thought Azure was arcane.&lt;/p&gt;
-
-&lt;p&gt;To create a VM you find a section called ‘Create instance’, which lets you press a button called ‘Launch Instance’, which launches a virtual server, which is known as an Amazon EC2 instance. In Azure this is a big blue plus sign.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/SOJx4Np.png&quot; alt=&quot;pressss meeeee&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Now select your VM image. I picked “Ubuntu Server 14.04 LTS (HVM), SSD Volume Type”. It’s free! For eligible! I selected the ‘t2.micro’ instance type, which is also free. This is exactly how much I want to spend. I left everything else as default and clicked ‘Review and Launch’, mainly because I didn’t realise there were other things to configure.&lt;/p&gt;
-
-&lt;p&gt;By default a new security group will be created when launching a new instance, named something like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;launch-wizard-1&lt;/code&gt;. This is ‘open to the world’, meaning that any IP address could connect to the instance if it has the proper credentials. A security group is basically a set of firewall rules. The only port open by default is 22 for SSH, which requires a private key. Because I’m using SSH tunnelling to forward the VNC port I don’t actually have to change the security group but you could limit port 22 to your static IP if you’ve got one.&lt;/p&gt;
-
-&lt;p&gt;Now hit Launch. The next step lets you create a public &amp;amp; private key pair. Select ‘Create a new key pair’ and give it a nice name. Press Download Key Pair to download the private key then continue. If you hit ‘View instances’ you can see the new VM get provisioned. It’s not that exciting.&lt;/p&gt;
-
-&lt;p&gt;I followed &lt;a href=&quot;https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html?console_help=true&quot;&gt;these instructions&lt;/a&gt; to use PuTTY to SSH into the VM but you could just use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh&lt;/code&gt; directly. I ended up needing to use SSH directly later on to create an SSH tunnel anyway.&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -i &amp;lt;KEYFILE&amp;gt;.pem
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;The value for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-i&lt;/code&gt; is the path to the .pem file downloaded previously.&lt;/p&gt;
-
-&lt;p&gt;I followed &lt;a href=&quot;https://xmodulo.com/how-to-set-up-ubuntu-desktop-vm-on-amazon-ec2.html&quot;&gt;these instructions&lt;/a&gt; to install the Ubuntu desktop and a TightVNC server, but I ended up with the grey screen of an empty X-Windows session. I needed some &lt;a href=&quot;https://askubuntu.com/a/475036/29199&quot;&gt;extra work&lt;/a&gt; to get it going. You should just do the following instead ;)&lt;/p&gt;
-
-&lt;p&gt;Update &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt-get&lt;/code&gt; and install lots of things:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;sudo apt-get update
-sudo apt-get intall ubuntu-desktop
-sudo apt-get intall tightvncserver
-sudo apt-get install gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Launch VNC server to create an initial configuration file:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vncserver :1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Open the configuration file in VIM:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vim ~/.vnc/xstartup
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Edit the configuration file to look like this, using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;i&lt;/code&gt; to enter insert mode, then &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;escape&amp;gt;&lt;/code&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;:wq&lt;/code&gt; to save and exit:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#!/bin/sh
-
-export XKL_XMODMAP_DISABLE=1
-unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADDRESS
-
-[ -x /etc/vnc/xstartup ] &amp;amp;&amp;amp; exec /etc/vnc/xstartup
-[ -r $HOME/.Xresources ] &amp;amp;&amp;amp; xrdb $HOME/.Xresources
-xsetroot -solid grey
-
-vncconfig -iconic &amp;amp;
-gnome-panel &amp;amp;
-gnome-settings-daemon &amp;amp;
-metacity &amp;amp;
-nautilus &amp;amp;
-gnome-terminal &amp;amp;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Kill and restart the VNC server to apply the settings. This needs to happen each time the VNC / X-Windows configuration is updated.&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;vncserver -kill :1
-vncserver :1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;After setting up the VNC server you need to create an SSH tunnel. Open a local console that has &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ssh.exe&lt;/code&gt; in the path (Cmder didn’t have it but vanilla PowerShell did). The command to run is&lt;sup id=&quot;fnref:how-to-specify-a-private-key-in-ssh&quot; role=&quot;doc-noteref&quot;&gt;&lt;a href=&quot;#fn:how-to-specify-a-private-key-in-ssh&quot; class=&quot;footnote&quot; rel=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ssh ubuntu@&amp;lt;PUBLIC DNS&amp;gt; -L 5902/127.0.0.1/5901 -i &amp;lt;KEYFILE&amp;gt;.pem
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-L&lt;/code&gt; sets up the tunnel, from port &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;5902&lt;/code&gt; on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1&lt;/code&gt; (localhost) to port &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;5901&lt;/code&gt; on the remote server. Note that I’m setting my local endpoint to port 5902 - 5901 didn’t work for me.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/iYRRB3k.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;If you’re on Windows, &lt;a href=&quot;https://www.tightvnc.com/download.php&quot;&gt;download Tight-VNC&lt;/a&gt; instead of using apt-get to install VNC. Connect to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1::5902&lt;/code&gt; and use the password you gave above. You should now see your new shiny Ubuntu desktop:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/m7PRgMm.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;If you see an empty grey window like this:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/crHgZFM.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;, or if parts of the Ubuntu desktop seem to be missing, you will need to work on the VNC / X-Windows configuration. Make sure you’ve edited the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;xstartup&lt;/code&gt; file for the user that the tunnel is logged in as for a start.&lt;/p&gt;
-
-&lt;p&gt;Quick note: to delete an instance you just need to terminate it. It doesn’t disappear from the list immediately but apparently it will. &lt;em&gt;refresh&lt;/em&gt; nope, still there.&lt;/p&gt;
-
-&lt;div class=&quot;footnotes&quot; role=&quot;doc-endnotes&quot;&gt;
-  &lt;ol&gt;
-    &lt;li id=&quot;fn:how-to-specify-a-private-key-in-ssh&quot; role=&quot;doc-endnote&quot;&gt;
-      &lt;p&gt;https://xmodulo.com/how-to-specify-private-key-file-in-ssh.html &lt;a href=&quot;#fnref:how-to-specify-a-private-key-in-ssh&quot; class=&quot;reversefootnote&quot; role=&quot;doc-backlink&quot;&gt;&amp;#8617;&lt;/a&gt;&lt;/p&gt;
-    &lt;/li&gt;
-  &lt;/ol&gt;
-&lt;/div&gt;
-</description>
-				<pubDate>Thu, 30 Jul 2015 00:00:00 +1000</pubDate>
-				<link>http://localhost:4000/ubuntu-desktop-in-ec2.html</link>
-				<guid isPermaLink="true">http://localhost:4000/ubuntu-desktop-in-ec2.html</guid>
+				<link>https://becdetat.com/build-pipeline-for-react.html</link>
+				<guid isPermaLink="true">https://becdetat.com/build-pipeline-for-react.html</guid>
 			</item>
 		
 	</channel>
