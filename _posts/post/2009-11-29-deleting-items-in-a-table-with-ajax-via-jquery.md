@@ -2,7 +2,7 @@
 title: Deleting items in a table with AJAX via JQuery
 layout: post
 date: 2009-11-29
-category: post
+category: archived
 ---
 
 This is a very straight-forward tutorial on implementing a jQuery-driven ‘delete via AJAX’ feature. Say we have a plain HTML table containing a list of items and a ‘Remove’ link. I’m not going to describe the back-end, but I’m assuming something groovy like [CakePHP][1] or [ASP.NET MVC][2]. I’ve also assumed that the delete request always succeeds and never returns an error, which may not be the case. The script itself is a more than required but is my preferred method as I can extend the elements in the UI fairly easily.

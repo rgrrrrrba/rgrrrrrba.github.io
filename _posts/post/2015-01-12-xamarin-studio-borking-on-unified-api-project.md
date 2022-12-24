@@ -2,7 +2,7 @@
 title: Xamarin Studio borking on a Unified API project
 layout: post
 date: 2015-01-12
-category: post
+category: archived
 ---
 
 I created a Unified API iOS Binding Project in Xamarin Studio (but this may happen for all unified API projects). This is in Xamarin Studio 5.5.4. When I went to build the project I got an error, something like this:

@@ -2,7 +2,7 @@
 title: Top/Bottom docking in XAML / WPF
 layout: post
 date: 2014-01-10
-category: post
+category: archived
 ---
 
 You want a layout like:

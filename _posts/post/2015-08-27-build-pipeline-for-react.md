@@ -2,7 +2,7 @@
 title: Build pipeline for React
 layout: post
 date: 2015-08-27
-category: post
+category: archived
 ---
 
 I'm going to eshew Bower and just use NPM as the package manager. I've already got [Node and NPM installed][gulp-hello-world]. The example site I'm creating is `survey-thing` - a simple thing for [creating surveys][survey-thing-repo]. I also have a [stub package][react-gulp-bootstrap-stub-project] which just includes a script for setting up the environment and a simple landing page.

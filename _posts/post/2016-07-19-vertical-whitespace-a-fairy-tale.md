@@ -2,7 +2,7 @@
 title: Vertical whitespace - a fairy tale
 layout: post
 date: 2016-07-19
-category: post
+category: archived
 ---
 
 I saw this in a code review:

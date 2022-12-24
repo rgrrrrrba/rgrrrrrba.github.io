@@ -3,7 +3,7 @@ title: Setting up an open SMTP relay in an intranet with hMailServer
 layout: post
 date: 2012-11-12
 type: regular
-category: post
+category: archived
 ---
 
 **You need to do this because you have line of business software or printer/scanner/faxes that need to send emails within a corporate intranet and your email server is hosted offsite.**

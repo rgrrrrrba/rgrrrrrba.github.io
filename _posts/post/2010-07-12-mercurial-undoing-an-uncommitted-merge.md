@@ -2,7 +2,7 @@
 title: Mercurial - Undoing an uncommitted merge
 layout: post
 date: 2010-07-12
-category: post
+category: archived
 ---
 
 I've moved from Subversion to Mercurial at work to get past some merge problems SVN was giving me. After a few teething problems everything is working out fantastic. I'm also mainly using the command line rather than a GUI front end which is surprisingly efficient.

@@ -2,7 +2,7 @@
 title: Push a Git repository to TFS
 layout: post
 date: 2013-09-20
-category: post
+category: archived
 ---
 
 I've been working on a project using Git and the time has come to move it to TFS. This is for TFS 2012. TFS 2013 should include support for Git out of the box but it looks like that only if the TFS project is created as a Git repo from the start - I may be wrong on this - but these instructions should work regardless. I'm pushing my Git repository in to an empty TFS project.

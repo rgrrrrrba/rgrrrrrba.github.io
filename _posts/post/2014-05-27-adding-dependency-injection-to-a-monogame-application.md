@@ -2,7 +2,7 @@
 title: Adding dependency injection to a MonoGame application
 layout: post
 date: 2014-05-27
-category: post
+category: archived
 ---
 
 ### Disclaimer

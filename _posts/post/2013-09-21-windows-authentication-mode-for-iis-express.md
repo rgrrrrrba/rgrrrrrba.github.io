@@ -2,7 +2,7 @@
 title: Enabling Windows authentication in IIS Express
 layout: post
 date: 2013-09-21
-category: post
+category: archived
 ---
 
 So I'm changing a site developed using Forms authentication to use Windows authentication, testing in IIS Express.

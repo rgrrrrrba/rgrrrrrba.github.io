@@ -2,7 +2,7 @@
 title: Karma and Mocha for AngularJS testing
 layout: post
 date: 2015-02-21
-category: post
+category: archived
 ---
 
 ## Setting up Karma with Mocha, PhantomJS and Chai

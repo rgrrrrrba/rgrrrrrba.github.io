@@ -2,7 +2,7 @@
 title: Class and method invariants and validation
 layout: post
 date: 2015-02-24
-category: post
+category: archived
 ---
 
 I was chatting to my man [Tod](https://twitter.com/todthomson) and we came up with a cool pattern for validating both class and method invariants in a way that seems to scale.

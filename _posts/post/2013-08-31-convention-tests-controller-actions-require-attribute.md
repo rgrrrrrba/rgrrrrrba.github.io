@@ -2,7 +2,7 @@
 title: Convention tests - Controller actions require an attribute
 layout: post
 date: 2013-08-31
-category: post
+category: archived
 ---
 
 I looove convention tests. The idea is you have some assumption about the system that you want to test and enforce. In this case, I want all controller actions (bar some exceptions) to be decorated with the `AuthorizeAttribute`.

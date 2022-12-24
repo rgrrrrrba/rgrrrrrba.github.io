@@ -2,7 +2,7 @@
 title: The Greatest string.FormatWith() Extension Method Implementation In The World
 layout: post
 date: 2014-04-06
-category: post
+category: archived
 ---
 
 This is in fact the Greatest `string.FormatWith()` Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, ~~probably thanks to my brother-in-code [Rob Moore](https://robdmoore.id.au/)~~ **correction** turns out credit is due to [Matt Kocoj](https://hammerproject.com/), and I brought it back along the breadth of our mighty continent. A 'Journey to the West', if you will. Less awesome implementations of `FormatWith()` are just simple inversions of `string.Format()`:

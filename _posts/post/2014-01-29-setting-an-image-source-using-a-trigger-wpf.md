@@ -2,7 +2,7 @@
 title: Setting an image source using a trigger (WPF and Caliburn.Micro)
 layout: post
 date: 2014-01-29
-category: post
+category: archived
 ---
 
 So all I'm doing here is creating a button that has a different images depending on the enum value that is bound to the control.

@@ -2,7 +2,7 @@
 title: Limit an element to N lines
 layout: post
 date: 2018-03-06
-category: post
+category: archived
 ---
 
 HTML layout tips (and jQuery) are sooooo 2008 but you know.

@@ -2,7 +2,7 @@
 title: Notes on Kerberos and Active Directory
 layout: post
 date: 2015-11-02
-category: post
+category: archived
 ---
 
 These are just some notes I made while reading about Kerberos and Active Directory. They aren't very technical or well-edited and probably have plenty of errors. Read at your peril!

@@ -3,7 +3,7 @@ title: Cliche – an extremely simple view template engine for jQuery
 layout: post
 date: 2009-12-21
 type: regular
-category: post
+category: archived
 ---
 
 I’ve written a very simple plugin for jQuery that takes a template and a model and returns a view of the model. The plugin itself is pretty straightforward:

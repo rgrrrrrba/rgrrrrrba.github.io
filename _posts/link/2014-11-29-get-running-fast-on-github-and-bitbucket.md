@@ -2,9 +2,7 @@
 title: Get running fast on GitHub and BitBucket
 layout: post
 date: 2014-11-29
-categories: 
-- link
-- sticky
+category: archived
 ---
 
 These are the steps I use to set up a new PC with Git. I mainly use Git on the command line, with TortoiseGit for staging commits and visualising logs and Beyond Compare for diffs and merges.

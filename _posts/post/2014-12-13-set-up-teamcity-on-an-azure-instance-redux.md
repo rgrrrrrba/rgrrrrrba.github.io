@@ -2,7 +2,7 @@
 title: Set up TeamCity on an Azure virtual machine - Redux
 layout: post
 date: 2014-12-13
-category: post
+category: archived
 ---
 
 **NOTE:** This is a repost of an [earlier post](set-up-teamcity-on-an-azure-instance.html) with some refinements based on feedback and tips from my friend and collegue [Rob Moore](https://robdmoore.id.au/). 

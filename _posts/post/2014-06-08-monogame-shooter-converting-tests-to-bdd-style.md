@@ -2,7 +2,7 @@
 title: MonoGame Shooter - Converting tests to BDD style
 layout: post
 date: 2014-06-08
-category: post
+category: archived
 ---
 
 1. [Better boundary detection for the player](monogame-shooter-better-boundary-detection-for-the-player.html)

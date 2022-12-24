@@ -3,7 +3,7 @@ title: UTF issue when running Jekyll on Windows
 layout: post
 date: 2013-06-23
 type: regular
-category: post
+category: archived
 ---
 
 **UPDATE:** Running `chcp 65001` seems to work just as well, rather than messing with the environment.

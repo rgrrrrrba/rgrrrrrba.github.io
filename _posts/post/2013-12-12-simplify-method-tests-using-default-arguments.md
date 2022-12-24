@@ -2,7 +2,7 @@
 title: Try This One Simple Trick To Drastically Reduce Method Test Complexity And Reveal Intent Using Default Arguments
 layout: post
 date: 2013-12-12
-category: post
+category: archived
 ---
 
 ### YOU WON'T BELIEVE YOUR EYES

@@ -3,7 +3,7 @@ title: Explicit, parameterless constructors for WCF DataContractSerializer
 layout: post
 date: 2011-06-24
 type: regular
-category: post
+category: archived
 ---
 
 So WCF in .NET 3.5 SP1 can (de)serialise POCOs without a default, parameterless constructor <small>citation needed :-P</small>. But if your POCO has _any_ constructor at all, there has to be an explicit parameterless constructor as well.

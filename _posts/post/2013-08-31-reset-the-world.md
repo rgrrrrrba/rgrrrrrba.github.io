@@ -2,7 +2,7 @@
 title: Reset The World!
 layout: post
 date: 2013-08-31
-category: post
+category: archived
 ---
 
 Resetting the world refers to resetting a build environment (usually just a database) to a known state. This could include running SSIS scripts to migrate data from existing systems, creating web sites, or setting up dependent services. For a simple system or a system in its infancy it usually just refers to creating or upgrading a database for development, and that is what I'm going to show now. There will be two execution paths here - the first drops any existing database and recreates it from the scripts, and the second just executes any new scripts on an existing database. This technique is taken from several projects that I've worked in at Readify. The scripts are run in a console - Powershell if you know what's good for you :trollface:

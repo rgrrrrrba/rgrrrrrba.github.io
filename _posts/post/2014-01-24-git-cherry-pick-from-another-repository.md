@@ -2,7 +2,7 @@
 title: Git cherry-pick from another repository
 layout: post
 date: 2014-01-24
-category: post
+category: archived
 ---
 
 Somehow.. somehow... I managed to overwrite a commit by force-pushing a branch that didn't include said commit.

@@ -2,7 +2,7 @@
 title: Simplicity - pattern matching in C#
 layout: post
 date: 2015-05-15
-category: post
+category: archived
 ---
 
 *TL;DR;* Check out my awesome new library for [pattern matching in C# - Simplicity](https://www.nuget.org/packages/Simplicity) ([GitHub](https://github.com/becdetat/Simplicity)) or just copy the contents of the [single file](https://github.com/becdetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs) into your project for near-instant gratification.

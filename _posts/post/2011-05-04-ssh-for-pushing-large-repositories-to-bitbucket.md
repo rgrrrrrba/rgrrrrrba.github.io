@@ -2,7 +2,7 @@
 title: SSH for pushing large repositories to BitBucket
 layout: post
 date: 2011-05-04
-category: post
+category: archived
 ---
 
 I'm trying to push a very large (for me) repository to [BitBucket][1]. The `.hg` folder is 2.5 G which is a pretty big chunk. This is my first time using BitBucket, in fact until now my experience of hosting Mercurial repos has been limited to either file shares or `hg serve`, so initially I tried pushing over HTTP.

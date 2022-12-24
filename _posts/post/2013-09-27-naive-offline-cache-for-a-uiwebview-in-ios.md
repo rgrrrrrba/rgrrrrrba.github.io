@@ -2,7 +2,7 @@
 title: Naive offline cache for a UIWebView in iOS
 layout: post
 date: 2013-09-27
-category: post
+category: archived
 ---
 
 On Github I've got a [NSUrlCache implementation that adds simple offline caching](https://github.com/belfryimages/naive-ios-urlcache). Dropping this in to an iOS application will allow `UIWebView`s to work offline.

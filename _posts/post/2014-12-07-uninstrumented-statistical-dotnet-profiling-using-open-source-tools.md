@@ -2,7 +2,7 @@
 title: Uninstrumented statistical .NET profiling using open source tools
 layout: post
 date: 2014-12-07
-category: post
+category: archived
 ---
 
 Profilers are unusual tools in that you generally never need one, right up to just past the point where users are melting down and you desperately need one. Usually you get a condition that involves many different pieces of code and internal services and libraries put together in way that quickly grinds your application to a painful halt. Those conditions are (hopefully) pretty rare and in my experience come up when you change something in one area that turns out to badly affect a seemingly unrelated area.

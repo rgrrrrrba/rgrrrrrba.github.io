@@ -3,8 +3,8 @@
 	<channel>
 		<title>Bec d&apos;état - Rebecca Scott&apos;s blog</title>
 		<description></description>		
-		<link>https://becdetat.com</link>
-		<atom:link href="https://becdetat.com/feed.xml" rel="self" type="application/rss+xml" />
+		<link>http://localhost:4000</link>
+		<atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
 		
 			<item>
 				<author>Rebecca Scott - me@becdetat.com</author>
@@ -70,8 +70,8 @@
 
 </description>
 				<pubDate>Tue, 06 Mar 2018 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/limit-an-element-to-n-lines.html</link>
-				<guid isPermaLink="true">https://becdetat.com/limit-an-element-to-n-lines.html</guid>
+				<link>http://localhost:4000/limit-an-element-to-n-lines.html</link>
+				<guid isPermaLink="true">http://localhost:4000/limit-an-element-to-n-lines.html</guid>
 			</item>
 		
 			<item>
@@ -98,8 +98,8 @@
 
 </description>
 				<pubDate>Fri, 02 Mar 2018 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/copying-react-props-to-a-child-component.html</link>
-				<guid isPermaLink="true">https://becdetat.com/copying-react-props-to-a-child-component.html</guid>
+				<link>http://localhost:4000/copying-react-props-to-a-child-component.html</link>
+				<guid isPermaLink="true">http://localhost:4000/copying-react-props-to-a-child-component.html</guid>
 			</item>
 		
 			<item>
@@ -157,8 +157,8 @@ Return thing
 &lt;iframe width=&quot;854&quot; height=&quot;480&quot; src=&quot;https://www.youtube.com/embed/crIJvcWkVcs&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
 </description>
 				<pubDate>Tue, 19 Jul 2016 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/vertical-whitespace-a-fairy-tale.html</link>
-				<guid isPermaLink="true">https://becdetat.com/vertical-whitespace-a-fairy-tale.html</guid>
+				<link>http://localhost:4000/vertical-whitespace-a-fairy-tale.html</link>
+				<guid isPermaLink="true">http://localhost:4000/vertical-whitespace-a-fairy-tale.html</guid>
 			</item>
 		
 			<item>
@@ -210,8 +210,8 @@ Return thing
 
 </description>
 				<pubDate>Thu, 11 Feb 2016 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/dumping-custom-emoji-from-slack.html</link>
-				<guid isPermaLink="true">https://becdetat.com/dumping-custom-emoji-from-slack.html</guid>
+				<link>http://localhost:4000/dumping-custom-emoji-from-slack.html</link>
+				<guid isPermaLink="true">http://localhost:4000/dumping-custom-emoji-from-slack.html</guid>
 			</item>
 		
 			<item>
@@ -694,8 +694,8 @@ var results =
 
 </description>
 				<pubDate>Thu, 05 Nov 2015 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/minimum-viable-ef.html</link>
-				<guid isPermaLink="true">https://becdetat.com/minimum-viable-ef.html</guid>
+				<link>http://localhost:4000/minimum-viable-ef.html</link>
+				<guid isPermaLink="true">http://localhost:4000/minimum-viable-ef.html</guid>
 			</item>
 		
 			<item>
@@ -862,8 +862,8 @@ var results =
 
 </description>
 				<pubDate>Mon, 02 Nov 2015 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/notes-on-kerberos-and-active-directory.html</link>
-				<guid isPermaLink="true">https://becdetat.com/notes-on-kerberos-and-active-directory.html</guid>
+				<link>http://localhost:4000/notes-on-kerberos-and-active-directory.html</link>
+				<guid isPermaLink="true">http://localhost:4000/notes-on-kerberos-and-active-directory.html</guid>
 			</item>
 		
 			<item>
@@ -1118,8 +1118,8 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 
 </description>
 				<pubDate>Fri, 28 Aug 2015 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/react-early-thoughts.html</link>
-				<guid isPermaLink="true">https://becdetat.com/react-early-thoughts.html</guid>
+				<link>http://localhost:4000/react-early-thoughts.html</link>
+				<guid isPermaLink="true">http://localhost:4000/react-early-thoughts.html</guid>
 			</item>
 		
 			<item>
@@ -1224,8 +1224,8 @@ Warning: getInitialState was defined on CommentBox, a plain JavaScript class. Th
 
 </description>
 				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</link>
-				<guid isPermaLink="true">https://becdetat.com/bundling-and-deploying-azure-webjobs-in-a-web-app.html</guid>
+				<link>http://localhost:4000/bundling-and-deploying-azure-webjobs-in-a-web-app.html</link>
+				<guid isPermaLink="true">http://localhost:4000/bundling-and-deploying-azure-webjobs-in-a-web-app.html</guid>
 			</item>
 		
 			<item>
@@ -1468,8 +1468,8 @@ gulp.task(&apos;code&apos;, function(){
 
 </description>
 				<pubDate>Thu, 27 Aug 2015 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/build-pipeline-for-react.html</link>
-				<guid isPermaLink="true">https://becdetat.com/build-pipeline-for-react.html</guid>
+				<link>http://localhost:4000/build-pipeline-for-react.html</link>
+				<guid isPermaLink="true">http://localhost:4000/build-pipeline-for-react.html</guid>
 			</item>
 		
 			<item>
@@ -1572,8 +1572,8 @@ vncserver :1
 &lt;/div&gt;
 </description>
 				<pubDate>Thu, 30 Jul 2015 00:00:00 +1000</pubDate>
-				<link>https://becdetat.com/ubuntu-desktop-in-ec2.html</link>
-				<guid isPermaLink="true">https://becdetat.com/ubuntu-desktop-in-ec2.html</guid>
+				<link>http://localhost:4000/ubuntu-desktop-in-ec2.html</link>
+				<guid isPermaLink="true">http://localhost:4000/ubuntu-desktop-in-ec2.html</guid>
 			</item>
 		
 	</channel>

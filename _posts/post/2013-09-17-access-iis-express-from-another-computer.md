@@ -2,7 +2,7 @@
 title: Access IIS Express from another computer
 layout: post
 date: 2013-09-17
-category: post
+category: archived
 ---
 
 Here's some good resources:

@@ -3,7 +3,7 @@ layout: post
 title: Setting up MEF
 comments: true
 date: 2012-04-29
-category: post
+category: archived
 ---
 
 *The source code for the example application created while writing this post is available on [GitHub](https://github.com/belfryimages/mef-test).*

@@ -2,7 +2,7 @@
 title: Application support images for iOS applications
 layout: post
 date: 2013-09-20
-category: post
+category: archived
 ---
 
 These are the image sizes needed for universal iOS applications - including iPad, iPad Retina, iPhone 3.5", iPhone 4", iPhone 4" Retina, iOS >=6 and iOS 7. Images should be PNGs at 24 BPP.

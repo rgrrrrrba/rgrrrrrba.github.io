@@ -2,7 +2,7 @@
 title: A convention test for projects referencing other project references instead of NuGet packages
 layout: post
 date: 2015-01-17
-category: post
+category: archived
 ---
 
 Earlier this week I was running into problems when adding a solution to a CI build server. Although there were no problems running the solution locally, the build server was complaining about not being able to resolve a reference for a project.

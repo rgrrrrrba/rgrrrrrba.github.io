@@ -2,7 +2,7 @@
 title: Set up TeamCity on an Azure virtual machine
 layout: post
 date: 2014-03-16
-category: post
+category: archived
 ---
 
 **DISCLAIMER:** I'm learning in the open here. I have barely used Azure and have only ever used already established TeamCity instances, so I'm really just messing around with two new things at the same time here. I'm sure I'm missing a heap of very important points.

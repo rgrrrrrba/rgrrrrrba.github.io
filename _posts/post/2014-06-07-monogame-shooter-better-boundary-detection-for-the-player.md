@@ -2,7 +2,7 @@
 title: MonoGame Shooter - Better boundary detection for the player
 layout: post
 date: 2014-06-07
-category: post
+category: archived
 ---
 
 1. Better boundary detection for the player

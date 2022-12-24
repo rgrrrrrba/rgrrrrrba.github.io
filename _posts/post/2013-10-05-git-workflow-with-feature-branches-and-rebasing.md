@@ -2,7 +2,7 @@
 title: Git workflow with feature branches and rebasing
 layout: post
 date: 2013-10-05
-category: post
+category: archived
 ---
 
 

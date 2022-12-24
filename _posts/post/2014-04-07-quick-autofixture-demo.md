@@ -2,7 +2,7 @@
 title: A Quick AutoFixture Demo
 layout: post
 date: 2014-04-07
-category: post
+category: archived
 ---
 
 **Note:** This is a very basic exploration of AutoFixture, written while I tried out a couple of things. It is not authoritive or representative of best practices. Comments are welcome! As are [pull requests](https://github.com/rgrrrrrba/rgrrrrrba.github.io)!

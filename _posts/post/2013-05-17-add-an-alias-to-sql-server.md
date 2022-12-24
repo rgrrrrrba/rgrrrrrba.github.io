@@ -2,7 +2,7 @@
 title: Add an alias to SQL Server
 layout: post
 date: 2013-05-17
-category: post
+category: archived
 ---
 
 Ok with a default install of SQL Server I missed setting up the named instance. Because of some messy hard-coded configuration I needed to access the server via `.\SQLEXPRESS`. To add an alias use SQL Server Configuration Manager and add an alias to both SQL Native Client 10.0 Configuration and SQL Native Client 10.0 Configuration (32bit) (if you’re using a 64 bit machine):

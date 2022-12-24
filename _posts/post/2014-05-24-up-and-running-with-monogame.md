@@ -2,7 +2,7 @@
 title: Up and Running with MonoGame
 layout: post
 date: 2014-05-24
-category: post
+category: archived
 ---
 
 *or, XNA is dead! Long live XNA!*

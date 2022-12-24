@@ -3,7 +3,7 @@ title: Google via Ruby console tool
 layout: post
 date: 2010-08-01
 type: regular
-category: post
+category: archived
 ---
 
 So I’ve been getting my console-fu on since moving to [Mercurial][https://blog.belfryimages.com.au/category/mercurial/] at work, and finding ways to get more efficient. One thing that bugs me is having to spend time grabbing the mouse to search Google via a browser. I’ve also wanted to spend some time with Ruby, so to acheive both goals I wrote a little script that uses the Google AJAX Search API, which returns search results as a JSON object. The full code is available as a [gist on my GitHub][https://gist.github.com/503145]. There are a couple of interesting (for me anyway) parts of the code that I’ll go through now.

@@ -2,7 +2,7 @@
 title: xUnit tests in a Windows 8.1 Store App
 layout: post
 date: 2014-05-25
-category: post
+category: archived
 ---
 
 At the time of writing the current version of xUnit (1.9.2) does not support Windows 8.1 Store applications. The pre-release version (2.0.0-beta-build2650) however has the core library built as a PCL (Portable Class Library). So to add a xUnit test assembly to a Windows 8.1 Store application we need to add a PCL library and add the pre-release xUnit NuGet package.

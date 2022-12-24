@@ -2,7 +2,7 @@
 title: Bundling and deploying Azure WebJobs in a Web App with Octopus and Nimbus
 layout: post
 date: 2015-08-27
-category: post
+category: archived
 ---
 
 <aside class="pull-right well" style="width: 20em">

@@ -2,7 +2,7 @@
 title: Form validation with jQuery
 layout: post
 date: 2009-12-09
-category: post
+category: archived
 ---
 
 Every time I’ve implemented client-side form validation I’ve started from scratch and done it a little differently. Usually it devolves into a messy set of `if` statements and duplicated code. Here’s my latest method, which separates the validation rules from the processing. This will only handle relatively simple validation cases.

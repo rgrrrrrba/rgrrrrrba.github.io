@@ -3,7 +3,7 @@ title: Accessing anonymous object properties using reflection
 layout: post
 date: 2010-04-19
 type: regular
-category: post
+category: archived
 ---
 
 Anonymous objects are a way to create strongly typed objects without having to declare a class or struct in C# 3.5 and above. Declaring an anonymous object is easy:

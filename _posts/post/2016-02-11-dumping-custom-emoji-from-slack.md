@@ -2,7 +2,7 @@
 title: Dumping custom emoji from Slack
 layout: post
 date: 2016-02-11
-category: post
+category: archived
 ---
 
 Ok this is a little geeky and not really programmer-ary.

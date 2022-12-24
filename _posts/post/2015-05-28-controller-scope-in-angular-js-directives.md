@@ -2,7 +2,7 @@
 title: Controller scope in Angular JS directives
 layout: post
 date: 2015-06-28
-category: post
+category: archived
 ---
 
 This is probably basic level Angular JS but I haven't seen it mentioned anywhere. I'm probably missing something fundamental about directive scope.

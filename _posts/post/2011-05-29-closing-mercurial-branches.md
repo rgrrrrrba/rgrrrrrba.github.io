@@ -2,7 +2,7 @@
 title: Closing Mercurial branches
 layout: post
 date: 2011-05-29
-category: post
+category: archived
 ---
 
 I've used two methods of closing branches in Mercurial.

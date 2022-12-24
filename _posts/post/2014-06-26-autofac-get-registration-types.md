@@ -2,7 +2,7 @@
 title: Resolving a list of type registrations from Autofac
 layout: post
 date: 2014-06-26
-category: post
+category: archived
 ---
 
 I needed to get all types that implemented a given interface that were registered with Autofac. Not a set of factories, that would be as simple as this:

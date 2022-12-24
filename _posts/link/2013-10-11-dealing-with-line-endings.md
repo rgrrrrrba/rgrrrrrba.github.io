@@ -2,9 +2,7 @@
 title: Git - dealing with line endings
 layout: post
 date: 2013-10-11
-categories: 
-- link
-- sticky
+category: archived
 ---
 
 [Github Help - Dealing with line endings](https://help.github.com/articles/dealing-with-line-endings)

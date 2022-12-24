@@ -2,7 +2,7 @@
 title: Create a shared mailbox in Office 365
 layout: post
 date: 2013-02-11
-category: post
+category: archived
 ---
 
 I keep needing to find the instructions for this so I'm putting them all together in one place. The steps are gathered from here and here and assume that PowerShell is installed.

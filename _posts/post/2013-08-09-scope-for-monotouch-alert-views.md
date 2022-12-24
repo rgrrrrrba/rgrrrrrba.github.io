@@ -2,7 +2,7 @@
 title: Scope for MonoTouch UIAlertViews
 layout: post
 date: 2013-08-09
-category: post
+category: archived
 ---
 
 I'm currently working on a MonoTouch app - after a month I'm finally starting to come around to the stack. 

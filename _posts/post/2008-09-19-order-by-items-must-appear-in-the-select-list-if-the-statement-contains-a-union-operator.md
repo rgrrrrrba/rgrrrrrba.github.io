@@ -2,7 +2,7 @@
 title: ORDER BY items must appear in the select list if the statement contains a UNION operator
 layout: post
 date: 2008-08-19
-category: post
+category: archived
 ---
 
 Is a very annoying error message that you get when writing above average complexity `SELECT` statements. I’m not sure if it only applies to queries against SQL Server, but it can be very difficult to debug if you haven’t come across it before (or come across so many things in a day that they all blur into one big problem).

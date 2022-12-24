@@ -3,7 +3,7 @@ title: Troubleshooting SQL Server 2008 R2 install on Windows Server 2003 with Wi
 layout: post
 date: 2013-02-28
 type: regular
-category: post
+category: archived
 ---
 
 Short story. Trying to install SQL Server 2008 R2 Express on a Windows Server 2003 (SP2) machine using [WebPI](https://www.microsoft.com/web/downloads/platform.aspx) – usually the best way to get server bits by far – but it fails with a meaningless message after a lengthy reboot that interrupted a small office.

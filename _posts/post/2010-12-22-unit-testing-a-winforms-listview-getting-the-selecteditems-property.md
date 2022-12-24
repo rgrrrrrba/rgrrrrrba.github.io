@@ -2,7 +2,7 @@
 title: Unit testing a WinForms ListView - getting the SelectedItems property
 layout: post
 date: 2010-12-22
-category: post
+category: archived
 ---
 
 Quick tip / reminder to myself. I'm adding some tests to an ancient (almost two years old :-) ) Winforms control that uses a ListView. All I'm doing is making sure that a particular context menu item is enabled or disabled depending on the state of the object in the tag of the selected item in the ListView. The details aren't important. Trust me.

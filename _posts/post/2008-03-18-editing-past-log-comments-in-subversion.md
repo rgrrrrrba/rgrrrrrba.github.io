@@ -3,7 +3,7 @@ title: Editing past log comments in Subversion
 layout: post
 date: 2008-03-18
 type: regular
-category: post
+category: archived
 ---
 
 Subversion is my source version control software of choice, but it’s not immediately obvious how to edit the log comment of a past commit (such as after adding a particularly scathing remark that may not be a wise career move). A caveat is that you need to have administrator access to the Subversion repository.

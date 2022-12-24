@@ -2,7 +2,7 @@
 title: Starting out with convention tests and data-driven tests in xUnit
 layout: post
 date: 2013-12-14
-category: post
+category: archived
 ---
 
 I'm really interested in convention tests, and as I want to get into xUnit I thought I would try taking some patterns that I've used in NUnit and applying them in xUnit.

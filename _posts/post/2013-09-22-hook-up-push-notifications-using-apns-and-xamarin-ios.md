@@ -2,7 +2,7 @@
 title: Hook up push notifications using APNS and Xamarin.iOS
 layout: post
 date: 2013-09-22
-category: post
+category: archived
 ---
 
 I'm adding push notifications to an iOS app, sent from an ASP.NET MVC application. I'm developing the iOS application on a Mac using Xamarin Studio and the ASP.NET application on Windows using Visual Studio. I haven't taken this past a sandbox environment. The server component uses [PushSharp](https://github.com/Redth/PushSharp), a library that handles the interface to Apple's APNS as well as Google and Microsoft's equivalent services for Android and Windows phones.

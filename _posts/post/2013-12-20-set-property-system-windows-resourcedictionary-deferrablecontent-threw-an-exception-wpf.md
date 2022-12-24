@@ -2,7 +2,7 @@
 title: Set property System.Windows.ResourceDictionary.DeferrableContent threw an exception error in WPF
 layout: post
 date: 2013-12-20
-category: post
+category: archived
 ---
 
 Ok so I'm working on a WPF launcher that loads a shell that loads a client. Three different appdomains. The launcher could load the shell. The shell could load the client. But when I tried to get the launcher to load the shell then the shell to load the client, I would get this lovely exception when the client instance was created:

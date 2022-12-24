@@ -2,7 +2,7 @@
 title: AppHarbor - Early notes
 layout: post
 date: 2013-08-22
-category: post
+category: archived
 ---
 
 Finally I have got around to checking out AppHarbor to quickly spin up a test project for something I'm working on. I've only got a couple of sites on [Heroku](https://www.heroku.com/) set up some time ago for comparison with cloud hosting so this isn't a pros/cons post.

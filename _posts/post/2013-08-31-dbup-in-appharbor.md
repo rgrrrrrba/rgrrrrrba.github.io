@@ -2,7 +2,7 @@
 title: How to run DbUp in an AppHarbor ASP.NET MVC application
 layout: post
 date: 2013-08-31
-category: post
+category: archived
 ---
 
 [Pawel Pabich](https://twitter.com/PawelPabich) has a good way to [run DbUp as part of AppHarbor's build process](https://www.pabich.eu/2011/03/automated-database-deployments-to.html) which looks interesting but I wanted to run the migrations manually. So here is a quick recipe for setting up [DbUp](https://dbup.github.io/) with a web hook.

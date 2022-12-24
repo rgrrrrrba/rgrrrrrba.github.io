@@ -2,7 +2,7 @@
 title: URL namespace access rights when developing WCF hosts
 layout: post
 date: 2011-05-09
-category: post
+category: archived
 ---
 
 Running up a WCF service host on a new address gives this exception:

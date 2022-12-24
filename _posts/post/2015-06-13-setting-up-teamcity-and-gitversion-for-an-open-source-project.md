@@ -2,7 +2,7 @@
 title: Setting up TeamCity and GitVersion for an open source project
 layout: post
 date: 2015-06-25
-category: post
+category: archived
 ---
 
 Note that I'm using TeamCity 9.0 (build 32060) and GitVersion 2.0.1. These steps may be different in future versions. GitVersion seems to be slated for a 3.0 release very soon.

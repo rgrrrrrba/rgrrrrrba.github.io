@@ -3,7 +3,7 @@ title: Dropbox as a service on Windows Server 2008 file server
 layout: post
 date: 2013-01-21
 type: regular
-category: post
+category: archived
 ---
 
 I've set up a Dropbox account on a file server so that:

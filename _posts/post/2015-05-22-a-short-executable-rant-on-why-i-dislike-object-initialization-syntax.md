@@ -2,7 +2,7 @@
 title: A short, executable rant on why I dislike object initialization syntax
 layout: post
 date: 2015-05-22
-category: post
+category: archived
 ---
 
 	void Main()

@@ -2,7 +2,7 @@
 title: Minimum Viable EF
 layout: post
 date: 2015-11-05
-category: post
+category: archived
 ---
 
 LINQ to SQL provides a mechanism for generating complex queries without having to resort to inline SQL or custom query generation syntax. I happen to like LINQ to SQL as a SQL generation tool, and using EF to execute those queries and hydrate objects is a passable experience, especially in the more recent version of EF. Entity Framework also provides reasonable good batching of mutation (update/insert/delete) operations.

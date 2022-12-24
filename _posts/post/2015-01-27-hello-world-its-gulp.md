@@ -2,7 +2,7 @@
 title: Hello World! It's Gulp!
 layout: post
 date: 2015-01-27
-category: post
+category: archived
 ---
 
 **DISCLAIMER:** I'm learning in the open here. This is the first time I've used Gulp and I'm sure I'm missing a heap of really important stuff. Enjoy!

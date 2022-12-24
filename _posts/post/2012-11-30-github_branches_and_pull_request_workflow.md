@@ -3,7 +3,7 @@ title: GitHub branches and pull request workflow
 layout: post
 date: 2012-11-30
 type: regular
-category: post
+category: archived
 ---
 
 This is a workflow for contributing a pull request (PR) to a project on GitHub using feature branches:

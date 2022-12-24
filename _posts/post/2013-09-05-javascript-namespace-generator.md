@@ -2,7 +2,7 @@
 title: JavaScript namespace generator
 layout: post
 date: 2013-09-05
-category: post
+category: archived
 ---
 
 The project I'm working on at the moment is using [Knockout](https://knockoutjs.com/) with some view models that are three deep. Since all the projects scripts are being bundled together that's a lot of JS, so I'm using namespaces to keep things tidy.

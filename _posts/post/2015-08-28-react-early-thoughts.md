@@ -2,7 +2,7 @@
 title: React - Early thoughts
 layout: post
 date: 2015-08-28
-category: post
+category: archived
 ---
 
 I've just started playing with React, so here is a bit of a brain dump of my first impressions.

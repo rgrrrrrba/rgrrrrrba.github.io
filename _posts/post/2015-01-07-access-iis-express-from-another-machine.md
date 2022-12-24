@@ -2,7 +2,7 @@
 title: Access IIS Express from another machine
 layout: post
 date: 2015-01-07
-category: post
+category: archived
 ---
 
 By default, IIS Express (via Visual Studio) will only allow connections from the local machine. This is a Good Thing but sometimes you need to test sites and services from another machine. I've found several guide that explain how to do this but they always seem to miss some steps. This will show how to share an IIS Express site via the host's IP address. Using the machine name is also possible as is using the HOSTS file to fake a domain (like `api.mysite.example.com`) but both of these scenarios are outside the scope of these instructions. This has only been tested on computers on the same subnet which should be sufficient for most test scenarios.

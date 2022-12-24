@@ -2,7 +2,7 @@
 title: Subversion on a USB stick
 layout: post
 date: 2009-09-27
-category: post
+category: archived
 ---
 
 I use Subversion for version control at work, so I wanted to use it for a couple of websites and projects that I play with at home. I’ve been thinking about buying a cheap server or NAS that I could set up but couldn’t justify the cost and electricity just for want of version control.
