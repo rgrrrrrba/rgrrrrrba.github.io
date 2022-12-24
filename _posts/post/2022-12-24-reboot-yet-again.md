@@ -1,5 +1,6 @@
 ---
 title: Reboot, yet again
+permalink: /reboot-yet-again
 layout: post
 date: 2022-12-24
 category: post

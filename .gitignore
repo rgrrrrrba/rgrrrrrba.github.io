@@ -1,2 +1,4 @@
 # VIM temporary files, because I'm hardcore right
 *.md~
+
+_site/
