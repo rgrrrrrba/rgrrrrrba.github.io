@@ -25,7 +25,7 @@ thing.DoSomething()
 Return thing
 ```
 
-Or to make it clearer:
+Or, for a slightly more complex example:
 
 ```
 function foo() {
@@ -52,7 +52,6 @@ I'm aware that I'm totally overthinking things and probably could use a holiday,
 > ### Chapter 3 - Mrs Conclusion
 > 
 > The value of the thing called `b` left the land called `foo` and lived happily ever after in the scope of the calling function.
-> 
-> *THE END*
 
-<iframe width="854" height="480" src="https://www.youtube.com/embed/crIJvcWkVcs" frameborder="0" allowfullscreen></iframe>
+
+

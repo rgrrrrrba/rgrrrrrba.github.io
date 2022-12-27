@@ -5,7 +5,7 @@ permalink: /about-me/
 ---
 
 # [~/](/)About me
-<img src="/images/rebecca-scott-portrait.jpg" class="pull-right" style="width:300px;" alt="Self-portrait of Rebecca Scott"/>
+<img src="/images/rebecca-scott-portrait.jpg" class="pull-right" style="width:200px;" alt="Self-portrait of Rebecca Scott"/>
 Hi, I'm Rebecca! I live in Yeppoon, Queenland, Australia. I was born in Rockhampton, a 25 minute drive away. I grew up in Yeppoon and have lived here all my life, except for a 3 year stint in Brisbane as a senior developer slash consultant at Readify (now [Telstra Purple](https://purple.telstra.com/)). I recently built my own home on an acre block in a lovely estate in the middle of the bush. I'm about 12 minutes from Yeppoon and 12 minutes from Emu Park, a smaller coastal town that I absolutely love. Even though I'm in the bush I've got town services and fixed wireless broadband (suitable for Zoom and 4k streaming) so I'm quite happy.
 
 I live by myself most of the time, which I can find incredibly lonely, but every second weekend I am joined by my 12 year old kidlette who shares my deep interest in biology. He wants to be a biologist—this was my backup career if IT didn't work out so I'm very excited about living vicariously through him. We spend our time together talking about video games, biology, physics, philosophy, politics, and mental health. Kidlette is my favourite human and best friend. I don't have or want pets despite constant pressure from my mother and kidlette to do so, because a lot of the time I feel like I can only just look after myself, and a pet would be too much. I have a house plant that is apparently impossible to kill—turns out if you forget to water it for three months it's possible.
