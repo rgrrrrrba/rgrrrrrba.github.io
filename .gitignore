@@ -1,4 +1,5 @@
 # VIM temporary files, because I'm hardcore right
 *.md~
 
+.DS_Store
 _site/
