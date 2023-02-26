@@ -2,3 +2,4 @@ permalink: /:title.html
 markdown: kramdown
 name: Bec d'état - Rebecca Scott's blog
 url: https://becdetat.com
+future: true
