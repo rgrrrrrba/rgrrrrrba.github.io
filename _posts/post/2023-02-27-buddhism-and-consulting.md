@@ -88,7 +88,7 @@ Sometimes you'll start on the work and find more complexity and that it's going 
 _Right view_ is knowing about the challenges we face—suffering, dissatisfaction, _duhkha_—and being able to act in a way that reduces those challenges.
 
 <aside class="pull-right well" style="width:15em">
-    I've heard that "if you love your job you'll never work a day in your life". Sounds good on a motivational poster. In reality though there are always aspects of our job that we don't enjoy, like timesheets, invoicing, self-promotion, networking, writing tedious boilerplate code or attending meetings that should have been an email. What _right motivation_ is about is making sure that your motivations are true to your values, that your resolve is consistent with the kind of person you see yourself as. If that makes you enjoy your job a bit more, you're winning.
+    I've heard that "if you love your job you'll never work a day in your life". Sounds good on a motivational poster. In reality though there are always aspects of our job that we don't enjoy, like timesheets, invoicing, self-promotion, networking, writing tedious boilerplate code or attending meetings that should have been an email. <em>Right motivation</em> is about making sure that your motivations are true to your values, that your resolve is consistent with the kind of person you see yourself as. If that makes you enjoy your job a bit more, you're winning.
 </aside>
 
 ### Right resolve
@@ -160,8 +160,11 @@ Just remember to drink water and set healthy boundaries :-)
 If you get to IT consulting nirvana, let me know. But we can take some lessons from the [Bodhisattva vow](https://en.wikipedia.org/wiki/Bodhisattva_vow):
 
 >Having crossed over, I will rescue others.
+>
 >Liberated, I will liberate others.
+>
 >Comforted, I will comfort others.
+>
 >Having attained paranirvana, I will help others attain paranirvana.
 
 I see this as nurturing a desire to help others in their journey as consultants.
