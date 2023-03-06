@@ -81,7 +81,11 @@ For example, say you've been asked to provide an estimate for a project or task.
 
 If you were to embrace _Right view_, you would be taking into account the effects of both of those less helpful paths. Use the information available to you, find an open, honest, and justifiable solution, and you will hopefully travel a middle path that results in a positive and valuable outcome for everyone involved.
 
-Sometimes this means that you'll miss out on tenders or contracts where someone else has quoted less than you. Generally these are clients you might not want to work with anyway. In fact sometimes they'll come back to you to fix issues that the last consultants created.
+Sometimes this means that you'll miss out on tenders or contracts where someone else has quoted less than you. ~Generally these are clients you might not want to work with anyway. In fact sometimes they'll come back to you to fix issues that the last consultants created.~
+
+My friend and colleague [Chris Gilbert](https://hachyderm.io/@chriswithpants), coming from a different perspective, disagreed with the above statement and had a more nuanced approach:
+
+> Some clients will choose the cheaper option because, as far as they're aware, both offerings are equal in quality, so why pay more? They might not know what the real quality is like until it's too late.
 
 Sometimes you'll start on the work and find more complexity and that it's going to take longer and require more effort than estimated. If you're open and communicative about this, usually you can end up with a good outcome for everyone involved anyway.
 
