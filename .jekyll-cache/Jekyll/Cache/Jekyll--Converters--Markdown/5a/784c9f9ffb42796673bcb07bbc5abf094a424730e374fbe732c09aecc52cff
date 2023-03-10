@@ -1,0 +1,11 @@
+I";<h1 id="projects"><a href="/">~/</a>Projects</h1>
+
+<h2 id="partsbin"><a href="https://partsbin.page">partsbin</a></h2>
+
+<p>I’m an aspiring hardware hacker, so I’ve got boxes and trays of electrical components like capacitors and Arduinos laying around everywhere. This can make it hard to find what I need sometimes. Rather than making a spreadsheet to help track where things go, I of course used the opportunity to start hacking together my own parts management tool.</p>
+
+<p>This is both an experiment in lean engineering (I’m using <a href="https://www.litedb.org/">LiteDb</a> and <a href="https://lucenenet.apache.org/">Lucene.net</a> in the backend) and in learning Blazor more fully.</p>
+
+<p>Here’s the <a href="/partsbin-release-0-1">launch post</a> that talks about the early development work a bit more.</p>
+
+:ET
