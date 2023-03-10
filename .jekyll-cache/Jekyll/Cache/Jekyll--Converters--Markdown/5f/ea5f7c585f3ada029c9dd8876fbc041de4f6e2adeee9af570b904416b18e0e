@@ -1,0 +1,65 @@
+I"$<h3 id="you-wont-believe-your-eyes">YOU WON’T BELIEVE YOUR EYES</h3>
+
+<p>How search engine. Such marketing. Wow.</p>
+
+<p>A trap I fall into when writing tests is big ‘arrange’ or ‘act’ sections to test a single ‘thing’. Here’s a trivial example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Test]
+public void Member_first_name_is_updated_correctly()
+{
+	var member = new Member(....);
+
+	member.Modify("First", "Last", "0400123456", new DateTime(2000, 1, 1));
+
+	Assert.That(member.FirstName, Is.EqualTo("First");
+}
+</code></pre></div></div>
+
+<p>The member instantiation could be taken care of using an <a href="https://martinfowler.com/bliki/ObjectMother.html">object mother pattern</a> but the complexity of the <code class="language-plaintext highlighter-rouge">Modify()</code> invocation (passing a dummy last name, phone number, etc) hides the intent of the test. That is, given a member, <em>when modifying the first name</em>, the first name matches what it was modified to.</p>
+
+<p>Revealing that intent can be done by creating a proxy method over <code class="language-plaintext highlighter-rouge">member.Modify</code>, which uses default parameters to allow the test to succinctly express the <em>when</em>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Test]
+public void Member_first_name_is_updated_correctly()
+{
+	var member = new Member(...);
+
+	ModifyMember(member, first: "First");
+
+	Assert.That(member.FirstName, Is.EqualTo("First"));
+}
+
+static void ModifyMember(Member member, string first = "first", string last = "last", string phone = "0400123456", DateTime dateOfBirth = default(DateTime))
+{
+	if (dateOfBirth == default(DateTime))
+		dateOfBirth = new DateTime(2000, 1, 1);
+	member.Modify(first, last, phone, dateOfBirth);
+}
+</code></pre></div></div>
+
+<p>Now the test only reveals the subject of the test - the first name.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">dateOfBirth</code> parameter is interesting. Default parameters have to be compile-time constants. <code class="language-plaintext highlighter-rouge">new DateTime(2000, 1, 1)</code> is mutable, i.e. not a constant. We default to a magic value (<code class="language-plaintext highlighter-rouge">default(DateTime)</code>) which is then converted to the default value for the <code class="language-plaintext highlighter-rouge">member.Modify()</code> call. So to actually pass in <code class="language-plaintext highlighter-rouge">default(DateTime)</code> another proxy method is needed:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>static void ModifyMemberWithDefaultDateOfBirth(Member member) 
+{
+	member.Modify("first", "last", "0400123456", default(DateTime));
+}
+</code></pre></div></div>
+
+<p>which is annoying and not completely DRY, but at least the test is nice. A better way would be to use <code class="language-plaintext highlighter-rouge">DateTime?</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>static void ModifyMember(.... , DateTime? dateOfBirth = null)
+{
+	dateOfBirth = dateOfBirth ?? new DateTime(2000, 1, 1);
+	member.Modify(...);
+}
+</code></pre></div></div>
+
+<p>Of course this assumes that <code class="language-plaintext highlighter-rouge">member.Modify()</code> doesn’t accept a nullable date of birth.</p>
+
+<p>These proxy methods would quickly need to be used in multiple test fixtures, so could be appropriate to move them to the member’s object mother. They <em>could</em> be made into extension methods, but that may make things more confusing as the tests would appear to operate on the member in a way that isn’t supported in the application itself. If indeed your tests are intended to be documentation for the application. Which they should be. Y’all.</p>
+
+<p>HT to my home boy <a href="https://robdmoore.id.au/">Rob Moore</a> (<a href="https://twitter.com/robdmoore">@robdmoore</a>) for showing me this ONE SIMPLE TRICK.</p>
+
+:ET

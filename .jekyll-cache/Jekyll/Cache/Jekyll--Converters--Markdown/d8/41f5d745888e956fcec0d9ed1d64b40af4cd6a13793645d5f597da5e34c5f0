@@ -1,0 +1,39 @@
+I"�
+<p>Somehow.. somehow… I managed to overwrite a commit by force-pushing a branch that didn’t include said commit.</p>
+
+<p>The commit was made in a local copy of the repository that I was working on in parallel with my normal working copy. So,</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c:\source\repo        &lt;-- working copy
+c:\source\repo-copy   &lt;-- copy with the commit I need
+</code></pre></div></div>
+
+<p>I didn’t want to mess around with rebasing the <code class="language-plaintext highlighter-rouge">repo-copy</code> to merge in the remote branch and totally muck everything up.</p>
+
+<p>The solution is to cherry pick the commit from the working copy. First add the local copy as a remote to the working copy:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c:\source\repo&gt; git remote add localcopy ../repo-copy
+</code></pre></div></div>
+
+<p>This adds a remote called <code class="language-plaintext highlighter-rouge">localcopy</code> which points to the local repo copy. Then, fetch from <code class="language-plaintext highlighter-rouge">localcopy</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c:\source\repo&gt; git fetch localcopy
+remote: Counting objects: 500, done.                                                                                   
+remote: Compressing objects: 100% (306/306), done.                                                                     
+emote: Total 444 (delta 329), reused 149 (delta 132)                                                                   
+Receiving objects: 100% (444/444), 58.53 KiB | 0 bytes/s, done.                                                        
+Resolving deltas: 100% (329/329), completed with 35 local objects.                                                     
+From ..\repo-copy\                                                                                                  
+ * [new branch]      xxxx -&gt; repo-copy/xxxx              
+ ...
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">&lt;aside&gt;</code>What happened with line 3 of the response? <code class="language-plaintext highlighter-rouge">emote</code>? strange.<code class="language-plaintext highlighter-rouge">&lt;/aside&gt;</code></p>
+
+<p>Then cherry-pick the appropriate commit:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c:\source\repo-copy&gt; git cherry-pick &lt;commit-hash&gt;
+</code></pre></div></div>
+
+<p>I had to resolve some conflicts but it all looks ok.</p>
+
+:ET

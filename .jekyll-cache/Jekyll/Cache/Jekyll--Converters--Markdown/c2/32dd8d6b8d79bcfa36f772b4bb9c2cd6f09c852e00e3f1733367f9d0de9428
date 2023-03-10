@@ -1,0 +1,121 @@
+I"�<h1 id="resume"><a href="/">~/</a>Resume</h1>
+
+<p><strong>Please note:</strong> I’m not open to job offers at the moment, as I’m quite happy at <a href="https://sixpivot.com.au">SixPivot</a>. Always available to chat though—please feel free to reach out via <a href="https://www.linkedin.com/in/rebecca-scott-b522a418/">LinkedIn</a>. My <a href="/about-me">About me</a> page gives a different perspective too, for better or worse :-D</p>
+
+<h2 id="profile">Profile</h2>
+<p>I am an elder millennial, with an IT career spanning an incredible 17 years. I started as a helpdesk manager, and then I was the IT manager for a small financial services company based in Rockhampton, Queensland, for seven years. I then spent almost three years as a consultant software developer in Brisbane, working with a wide range of clients on a variety of projects. These experiences brought about a love of working and communicating with people—clients, co-workers, and other developers—which has turned into a strong interest in technical and project leadership, mentoring and coaching, and building psychologically safe environments for my teams. The last six years I have been working in increasingly senior leadership roles while still maintaining a strong technical background.</p>
+
+<h2 id="technical-strengths">Technical strengths</h2>
+<h3 id="languages-components-and-tools">Languages, components and tools</h3>
+<ul>
+  <li>C#</li>
+  <li>ASP.NET Core</li>
+  <li>Blazor</li>
+  <li>Ruby (and Rails)</li>
+  <li>JavaScript/ES6</li>
+  <li>TypeScript</li>
+  <li>T-SQL</li>
+  <li>React</li>
+  <li>XML</li>
+  <li>PHP</li>
+  <li>Angular</li>
+  <li>Node.js</li>
+  <li>Embedded C++</li>
+  <li>TeamCity</li>
+  <li>GitHub Projects</li>
+  <li>Octopus Deploy</li>
+  <li>Seq</li>
+  <li>Bash</li>
+  <li>MSSQL</li>
+  <li>MySQL</li>
+  <li>PostgreSQL</li>
+  <li>CouchDB</li>
+</ul>
+
+<h3 id="methodologies-and-techniques">Methodologies and techniques</h3>
+<ul>
+  <li>Scrum master (PSM 1)</li>
+  <li>Sensible project and team management</li>
+  <li>Project planning and scoping</li>
+  <li>Product and feature discovery</li>
+</ul>
+
+<h3 id="industries">Industries</h3>
+<ul>
+  <li>Finance</li>
+  <li>Professional services</li>
+  <li>Government</li>
+  <li>Transport and logistics</li>
+  <li>Health</li>
+  <li>Event planning</li>
+  <li>Merchandising</li>
+  <li>Retail</li>
+  <li>Agriculture</li>
+  <li>Digital news media</li>
+  <li>Employment and DEI</li>
+  <li>eCommerce</li>
+  <li>Web design</li>
+  <li>Accommodation reservation management</li>
+  <li>Software and hardware tech support</li>
+</ul>
+
+<h2 id="education-and-qualifications">Education and qualifications</h2>
+<ul>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>2015</td>
+          <td>Scrum master (PSM 1)</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>2001</td>
+          <td>Bachelor of IT (Software Development)</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+
+<h2 id="employment-history">Employment history</h2>
+<p><strong>SixPivot</strong> | October 2022—Present | Senior Consultant</p>
+
+<p><strong>Automattic</strong> | January 2020—October 2022 | Director of Engineering</p>
+
+<p><strong>WORK180</strong> | January 2019—October 2019 | CTO</p>
+
+<p><strong>Livewire Markets</strong> | April 2017—September 2018 | Senior Full Stack Engineer</p>
+
+<p><strong>Ideacraft</strong> | March 2016—April 2017 | Head of Technology</p>
+
+<p><strong>Readify</strong> | April 2013—March 2016 | Senior Developer</p>
+
+<p><strong>Capricorn Investment Partners</strong> | July 2006—April 2013 | IT Manager</p>
+
+<h2 id="recent-major-projects">Recent major projects</h2>
+<h3 id="q3-2022--automattic">Q3 2022 | Automattic</h3>
+<p>Scoped and planned a major project to be undertaken by one of my teams over the following 6 months, involving working with multiple stakeholders and different teams and business units across the organisation. The project is part of a larger WooCommerce-wide project that will provide a dedicated, seamless SaaS product using WooCommerce and other extensions and business partners, which will directly compete with other SaaS eCommerce providers. This also involved higher level discussions with product directors, senior management, and other engineering directors and team leads, to help define the scope and deliverables, and to discover technical boundaries and issues. Worked with my team with the scope to develop high level estimates and a rough timeline, which were shared with the overall project team.</p>
+
+<h3 id="q2-2022--automattic">Q2 2022 | Automattic</h3>
+<p>Designed and developed a data-driven rules engine and spec polling system within WooCommerce, which enabled merchant’s WooCommerce sites to remotely poll <code class="language-plaintext highlighter-rouge">woocommerce.com</code> for a feed containing notification specifications. These specifications are then run on the merchant’s site to dynamically create in-app notifications based on rules that are applied to the merchant’s sit. For example, a complex condition might be satisfied based on age of store, number of products, or monthly gross income.</p>
+
+<p>The rules engine was designed so that it could be extended with new rules as required, and it has been extended and used by multiple teams across WooCommerce. The rules engine and polling system were later genericised and reused to create a system for dynamically deciding which extensions to promote within the merchant’s in-app extension store. The notifications spec feed, which was originally a static JSON file that had to be updated by hand, was taken on by another team, who built a web-based administration tool that allows the feed to be generated dynamically out of a database. This is now used by less technical marketing staff to create notification specifications for their own marketing campaigns, etc.</p>
+
+<h3 id="2017-2018--livewire-markets">2017-2018 | Livewire Markets</h3>
+<p>Transitioned and expanded a “traditional” server-side Ruby on Rails digital news site to a hybrid SPA-based architecture, with considerable use of React and a RoR-based REST API. This avoided having to rewrite any of the existing site while allowing the development of new features, with a pleasant and fast user experience, including dynamic filtering of articles, social engagement, commenting, and advanced subscription management.</p>
+
+<h3 id="2017--ideacraft">2017 | Ideacraft</h3>
+<p>Designed the architecture and performed early POC development of a system that integrated BTLE beacons with a mobile app and a server, which recieves and processes BTLE proximity events. The system can execute different actions such as sending an email, triggering an app notification, or calling a web hook, based on a dynamic set of configurable rules which are run through a rules engine. Led the team through further development of the system, to the point where it was working successfully in an alpha test environment using real beacons and a basic POC React Native phone app.</p>
+
+<p>Unfortunately, the company was wound up at this point, stopping further development.</p>
+
+<h3 id="2016--ideacraft">2016 | Ideacraft</h3>
+<p>Rearchitected and led the team through the reimplementation of a complex data replication system, using a combination of a CouchDb cluster, .NET Windows services, and PouchDB on the React Native phone/tablet client app. Previously replication could take several days because of the original design, however we managed to get it down to 1-2 hours by optimising the data structures and filtering the replication to clients by using a view within CouchDB. Also managed the ongoing development, maintenance, and support of the product, and successfully handed the product and system over to the single customer when they purchased it from us.</p>
+
+:ET

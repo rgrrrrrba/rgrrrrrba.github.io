@@ -1,0 +1,67 @@
+I"K<p>So I’m changing a site developed using Forms authentication to use Windows authentication, testing in IIS Express.</p>
+
+<h3 id="threadcurrentprincipalidentityname">Thread.CurrentPrincipal.Identity.Name</h3>
+<p>The first thing to be aware of is that in Forms authentication you set the thread principal yourself when logging in. With Windows authentication <code class="language-plaintext highlighter-rouge">Thread.CurrentPrincipal.Identity.Name</code> is set automatically (as long as the rest of these instructions are correct). So nothing should have to be changed in the application code as long as you’re already using <code class="language-plaintext highlighter-rouge">Thread.CurrentPrincipal.Identity.Name</code> with the Forms authentication.</p>
+
+<h3 id="webconfig">Web.config</h3>
+<p>The first step is to get rid of the Forms authentication section in the application’s <code class="language-plaintext highlighter-rouge">Web.config</code>. Mine looked like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;system.web&gt;
+	...
+
+	&lt;!-- Comment out this to disable Forms authentication --&gt;
+	&lt;authentication mode="Forms"&gt;
+		&lt;forms loginUrl="/LogIn" timeout="30"&gt;
+			&lt;credentials passwordFormat="Clear"&gt;
+				&lt;user name="admin" password="test" /&gt;
+				&lt;user name="state_admin" password="test" /&gt;
+				&lt;user name="api" password="test" /&gt;
+			&lt;/credentials&gt;
+		&lt;/forms&gt;
+	&lt;/authentication&gt;
+
+&lt;/system.web&gt;
+</code></pre></div></div>
+
+<h3 id="iis-express-configuration">IIS Express configuration</h3>
+<p>You can find the IIS Express configuration in <code class="language-plaintext highlighter-rouge">X:\Users\your_account\Documents\IISExpress\config\applicationhost.config</code>. First you need to find the name of the site. Search for the <code class="language-plaintext highlighter-rouge">&lt;sites&gt;</code> node and look for the site. It should be something like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;site name="YourSite" id="6"&gt;
+    &lt;application path="/" applicationPool="Clr4IntegratedAppPool"&gt;
+        &lt;virtualDirectory path="/" physicalPath="C:\source\YourSolution\src\YourSite.Web" /&gt;
+    &lt;/application&gt;
+    &lt;bindings&gt;
+        &lt;binding protocol="http" bindingInformation="*:57635:localhost" /&gt;
+        &lt;binding protocol="http" bindingInformation="*:57635:192.168.80.103" /&gt;
+    &lt;/bindings&gt;
+&lt;/site&gt;
+</code></pre></div></div>
+
+<p>This site’s name is <code class="language-plaintext highlighter-rouge">YourSite</code>. You need to add (or alter) the site’s <code class="language-plaintext highlighter-rouge">system.webServer</code> overrides. Search for <code class="language-plaintext highlighter-rouge">location path="YourSite"</code> but chances are you need to create a new one. Add this right at the bottom of the file, just before the closing <code class="language-plaintext highlighter-rouge">&lt;/configuration&gt;</code> tag:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;location path="YourSite"&gt;
+    &lt;system.webServer&gt;
+        &lt;security&gt;
+            &lt;authentication&gt;
+                &lt;anonymousAuthentication enabled="false" /&gt;
+                &lt;windowsAuthentication enabled="true" /&gt;
+            &lt;/authentication&gt;
+        &lt;/security&gt;
+    &lt;/system.webServer&gt;
+&lt;/location&gt;
+</code></pre></div></div>
+
+<p>That should be all that is required to enable Windows authentication in an IIS Express ASP.NET application.</p>
+
+<h3 id="check-the-authentication-mode">Check the authentication mode</h3>
+<p>One thing you can change in the application code is a check for the authentication mode being used. This can be used to hide a “Log out” link for example. You can get the authentication mode using this method:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public AuthenticationMode GetAuthenticationMode()
+{
+    var configuration = WebConfigurationManager.OpenWebConfiguration("/");
+    var authenticationSection = (AuthenticationSection)configuration.GetSection("system.web/authentication");
+    return authenticationSection.Mode;
+}
+</code></pre></div></div>
+
+:ET

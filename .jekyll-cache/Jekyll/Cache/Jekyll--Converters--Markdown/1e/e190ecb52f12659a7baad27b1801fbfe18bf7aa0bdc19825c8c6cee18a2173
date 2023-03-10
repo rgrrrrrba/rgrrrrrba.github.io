@@ -1,0 +1,34 @@
+I"�<p>I’m currently working on a MonoTouch app - after a month I’m finally starting to come around to the stack. 
+One issue I’ve been having is a crazy native code crash when I display a <code class="language-plaintext highlighter-rouge">UIAlertView</code>. The problem turned
+out to be objects going out of scope.</p>
+
+<p>The first tip is to use a delegate for the alert view and keep it in the class scope:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class MyAlertViewDelegate {
+  readonly Action _callback;
+  public MyAlertViewDelegate(Action callback) {
+    _callback = callback;
+  }
+  public override Clicked(UIAlertView alertview, int buttonIndex) {
+    _callback();
+  }
+}
+
+public class ParentClass {
+  MyAlertViewDelegate _myAlertViewDelegate;
+  
+  void ShowAlert() {
+    _myAlertViewDelegate = new MyAlertViewDelegate(() =&gt; {});
+    var alert = new UIAlertView("title", "message", _alertViewDelegate, "Ok");
+    alert.Show();
+  }
+}
+</code></pre></div></div>
+
+<p>The second tip is to make sure the ParentClass instance doesn’t go out of scope. This is probably by giving 
+it a lifetime scope in the IoC container. For example in TinyIoC:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>container.Register&lt;ParentClass&gt;().AsSingleton();
+</code></pre></div></div>
+
+:ET

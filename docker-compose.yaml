@@ -1,0 +1,12 @@
+version: '3'
+services:
+  jekyll:
+    image: becdetatcom
+    platform: linux/amd64
+    ports:
+      - "4050:4000"
+    volumes:
+      - .:/srv/jekyll
+
+
+

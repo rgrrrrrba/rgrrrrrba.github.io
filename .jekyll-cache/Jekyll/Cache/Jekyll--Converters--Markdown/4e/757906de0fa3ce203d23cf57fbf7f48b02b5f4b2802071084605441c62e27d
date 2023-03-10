@@ -1,0 +1,18 @@
+I"Á<p>At the time of writing the current version of xUnit (1.9.2) does not support Windows 8.1 Store applications. The pre-release version (2.0.0-beta-build2650) however has the core library built as a PCL (Portable Class Library). So to add a xUnit test assembly to a Windows 8.1 Store application we need to add a PCL library and add the pre-release xUnit NuGet package.</p>
+
+<p>Add a new project. Under <code class="language-plaintext highlighter-rouge">Visual C#</code>, then <code class="language-plaintext highlighter-rouge">Store Apps</code>, then <code class="language-plaintext highlighter-rouge">Windows Apps</code>, select <code class="language-plaintext highlighter-rouge">Class Library (Windows)</code>:</p>
+
+<p><img src="https://i.imgur.com/L9hKws2.png" alt="" /></p>
+
+<p>Install the pre-release version of xUnit by either picking <code class="language-plaintext highlighter-rouge">Include Prelease</code> in the Package Manager, or open the Package Manager Console (<code class="language-plaintext highlighter-rouge">Tools</code>, <code class="language-plaintext highlighter-rouge">NuGet Packager Manager</code>, <code class="language-plaintext highlighter-rouge">Package Manager Console</code>), select the new test assembly project, and execute <code class="language-plaintext highlighter-rouge">install-package xunit -Pre</code>.</p>
+
+<p><img src="https://i.imgur.com/kbtfRkN.png" alt="" /></p>
+
+<p>I also use the <a href="https://github.com/xunit/resharper-xunit">xUnit.net Test Support</a> test runner for Resharper, which has a pre-release version that supports xUnit 2. Install that by opening Resharperâ€™s <code class="language-plaintext highlighter-rouge">Extension Manager</code> and selecting <code class="language-plaintext highlighter-rouge">Include Prerelease</code> before searching for xUnit:</p>
+
+<p><img src="https://i.imgur.com/eIp0x04.png" alt="" /></p>
+
+<p>Results are fields of green:</p>
+
+<p><img src="https://i.imgur.com/gMjneQL.png" alt="" /></p>
+:ET

@@ -64,4 +64,13 @@ img.pull-left {
 	margin: 0 1em 1em 0;
 }
 
+table {
+	margin: 0 0 10px;
+}
+table, th, td {
+	border: 1px solid #eee;
+}
+th, td {
+	padding: 10px;
+}
 

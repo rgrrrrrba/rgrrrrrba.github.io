@@ -1,0 +1,169 @@
+I"�&<p><em>TL;DR;</em> Check out my awesome new library for <a href="https://www.nuget.org/packages/Simplicity">pattern matching in C# - Simplicity</a> (<a href="https://github.com/becdetat/Simplicity">GitHub</a>) or just copy the contents of the <a href="https://github.com/becdetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs">single file</a> into your project for near-instant gratification.</p>
+
+<p>Pattern matching is a method of transforming data in some way, similar to <code class="language-plaintext highlighter-rouge">map</code> (<code class="language-plaintext highlighter-rouge">.Select()</code> in LINQ) but closer to a <code class="language-plaintext highlighter-rouge">switch</code> statement in structure. It is a first class language construct in many functional languages including F#:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>let name = "Rebecca"
+
+let result =
+	match name with 
+	| "Fiona" -&gt; "It's Fiona!"
+	| "Rebecca" -&gt; "it me!"
+	| "Steve" -&gt; "Steve you rascal!"
+	| _ -&gt; "I don't know this person"
+	
+// result = "it me!"
+</code></pre></div></div>
+
+<p>That’s as deep an explanation of pattern matching in F# you’re going to get from me at this point, but this is conceptually similar to this <code class="language-plaintext highlighter-rouge">switch</code> construct in C#:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "Rebecca";
+string result;
+
+switch (name) {
+	case "Fiona":
+		result =  "It's Fiona!";
+		break;
+	case "Rebecca":
+		result = "it me!";
+		break;
+	case "Steve":
+		result = "Steve you rascal!";
+		break;
+	default:
+		result = "I don't know this person";
+		break;
+}
+</code></pre></div></div>
+
+<p>This is of course pretty average to read, relies on <code class="language-plaintext highlighter-rouge">break</code> for execution control, and isn’t ‘pure’ since <code class="language-plaintext highlighter-rouge">result</code> is mutated during execution.</p>
+
+<aside class="pull-right well" style="width: 42ex">
+	<p>I also found a couple of extant libraries that provide similar (and possibly more) functionality:</p>
+	<ul>
+		<li><a href="https://github.com/johansson/PatternMatching">johansson/PatternMatching</a></li>
+		<li><a href="https://github.com/Patrickkk/FunctionalSharp">Patrickkk/FunctionalSharp</a></li>
+	</ul>
+</aside>
+
+<p>When I found out about pattern matching I wanted to write code the same way in C#. I found a great <a href="https://codebetter.com/matthewpodwysocki/2008/09/16/functional-c-pattern-matching/">article by Matt Podwysocki</a> and adapted and extended the code into a single-file library called <a href="https://github.com/becdetat/Simplicity">Simplicity</a>. Install it <a href="https://www.nuget.org/packages/Simplicity">using NuGet</a> (<code class="language-plaintext highlighter-rouge">install-package PatternMatching</code>) or just <a href="https://github.com/becdetat/Simplicity/blob/master/src/Simplicity/PatternMatching.cs">copy the single file</a> into your project.</p>
+
+<p>Now for the fun part. Here’s the above example using my library. It adds an generic extension method called <code class="language-plaintext highlighter-rouge">Match()</code> which is the usual entry point. The match statement is built up using a fluent interface.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "Rebecca";
+var result = name.Match()
+	.With(x =&gt; x == "Fiona", "It's Fiona!")
+	.With(x =&gt; x == "Rebecca", "Hey it's me!")
+	.With(x =&gt; x == "Steve", "Steve you rascal!")
+	.Else("I don't know this person")
+	.Do();
+</code></pre></div></div>
+
+<p>The result can be an action, taking the value as a parameter:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "George";
+var result = name.Match()
+	.With(x =&gt; x == "Fiona", "It's Fiona!")
+	.With(x =&gt; x == "Rebecca", x =&gt; string.Format("Hey it's {0}!", x))
+	.With(x =&gt; x == "Steve", "Steve you rascal!")
+	.Else(x =&gt; string.Format("I don't know {0}", x))
+	.Do();
+
+// result = "I don't know George"
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">Else</code> value is optional but if it falls through without matching and there’s no <code class="language-plaintext highlighter-rouge">Else</code> value it throws an <code class="language-plaintext highlighter-rouge">IncompletePatternMatchException</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var name = "Elton";
+var result = name.Match()
+	.With(x =&gt; x == "John", "matched")
+	.With(x =&gt; x == "Paul", "matched")
+	.Do();
+</code></pre></div></div>
+
+<p>F# has a wicked type system that C# can’t match, but I can set the output type to dynamic:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var question = "meaning of life";
+var result = question.Match().WithOutputType&lt;dynamic&gt;()
+    .With(x =&gt; x.Contains("roads"), "Blowing in the wind")
+    .With(x =&gt; x.Contains("life"), 42)
+    .Else("Ask again later")
+    .Do();
+
+// result = (int)42
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">Do()</code> call evaluates the patterns against the value being matched on, but there’s also an implicit cast operator to the output type that removes the need much of the time. When <code class="language-plaintext highlighter-rouge">total</code> is calculated, the <code class="language-plaintext highlighter-rouge">gstRate</code> match is implicitly cast to <code class="language-plaintext highlighter-rouge">decimal</code> from the pattern match type, which is <code class="language-plaintext highlighter-rouge">PatternMatchOnValue&lt;string, decimal&gt;</code>.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var country = "NZ";
+var gstRate = country.Match()
+	.With("AU", 0.1m)
+	.With("NZ", 0.15m)
+	.Else(0.0m);
+
+var total = 2300.0m * (1.0m + gstRate);
+
+// total = 2645.0m
+</code></pre></div></div>
+
+<p>All of the examples up until now have used the <code class="language-plaintext highlighter-rouge">Match()</code> generic extension method to apply the match statement to the value that gets called with <code class="language-plaintext highlighter-rouge">Match()</code>. I’ve also implemented matching without an input value using the static <code class="language-plaintext highlighter-rouge">PatternMatch.Match()</code> method. This lets you write a match statement that can do things like match on different values or methods, or close over a local value as below:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var eggs = 2;
+var basket = PatternMatch.Match()
+	.With(() =&gt; eggs == 0, "No eggs")
+	.With(() =&gt; eggs == 1, "One egg")
+	.With(() =&gt; eggs &gt; 1, string.Format("{0} eggs", eggs))
+	.Else("Invalid number of eggs");
+
+var twoEggs = basket.Do();
+eggs = 0;
+var zeroEggs = basket.Do();
+eggs = int.MinValue;
+var invalidEggs = basket.Do();
+
+// twoEggs = "2 eggs"
+// zeroEggs = "No eggs"
+// invalidEggs = "Invalid number of eggs"
+</code></pre></div></div>
+
+<p>There’s also a <code class="language-plaintext highlighter-rouge">.ToFunc()</code> method that gets rid of the <code class="language-plaintext highlighter-rouge">.Do()</code> call by transforming the match statement into a <code class="language-plaintext highlighter-rouge">Func&lt;TOut&gt;</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var footwear = "boots";
+var intention = PatternMatch.Match()
+	.With(() =&gt; footwear == "red slippers", "following the Yellow Brick Road")
+	.With(() =&gt; footwear == "boots", "walking")
+	.With(() =&gt; footwear == "these shoes", "I don't think so")
+	.ToFunc();
+
+var walking = intention();
+footwear = "these shoes";
+var noWayJose = intention();
+
+// walking = "walking"
+// noWayJose = "I don't think so"
+</code></pre></div></div>
+
+<p>This is getting quite DRY but closing over a local mutable value will have the purists climbing the walls, myself included. So the final form goes back to processing an input, deferred until the match statement is executed. The syntax is a little verbose because C# can’t infer the types of the lambdas without help, but I’m pretty happy with the result - a reusable <code class="language-plaintext highlighter-rouge">Func&lt;TIn, TOut&gt;</code> value that is defined declaratively with no flow control or mutated state:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var processName = PatternMatch.Match&lt;string, string&gt;()
+	.With(x =&gt; x.StartsWith("A"), "Starts with A")
+	.With(x =&gt; x.StartsWith("B"), "Starts with B")
+	.With(x =&gt; x.StartsWith("C"), "Starts with C")
+	.With(x =&gt; x.StartsWith("D"), "Starts with D")
+	.With(x =&gt; x.StartsWith("E"), "Starts with E")
+	.With(x =&gt; x.StartsWith("F"), x =&gt; string.Format("{0} starts with F", x))
+	.Else("Unknown")
+	.ToFunc();
+	
+var alfred = processName("Alfred");
+var fiona = processName("Fiona");
+var bec = processName("Bec");
+var xerces = processName("Xerces");
+
+// alfred = "Starts with A"
+// fiona = "Fiona starts with F"
+// bec = "Starts with B"
+// xerces = "Unknown"
+</code></pre></div></div>
+
+<p>Note that this isn’t especially performant! The match statement is built up as a list of expressions that are then looped through naively when evaluated. This could probably be improved using some form of caching. <a href="https://github.com/becdetat/Simplicity">Submit a pull request!</a></p>
+:ET

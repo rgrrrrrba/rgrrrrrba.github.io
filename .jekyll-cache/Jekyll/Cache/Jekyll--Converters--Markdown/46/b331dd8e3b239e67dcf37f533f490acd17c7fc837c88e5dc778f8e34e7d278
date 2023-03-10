@@ -1,0 +1,90 @@
+I"�<p>This is in fact the Greatest <code class="language-plaintext highlighter-rouge">string.FormatWith()</code> Extension Method Implementation In The World. I have taken it with me for a few projects now. I found it in Perth, <del>probably thanks to my brother-in-code <a href="https://robdmoore.id.au/">Rob Moore</a></del> <strong>correction</strong> turns out credit is due to <a href="https://hammerproject.com/">Matt Kocoj</a>, and I brought it back along the breadth of our mighty continent. A ‘Journey to the West’, if you will. Less awesome implementations of <code class="language-plaintext highlighter-rouge">FormatWith()</code> are just simple inversions of <code class="language-plaintext highlighter-rouge">string.Format()</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static string FormatWith(string s, params object[] args)
+{
+	return string.Format(s, args);
+}
+</code></pre></div></div>
+
+<p>which you can use thusly:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"This is {0} the {1} {2} in the {3}".FormatWith(
+	"not", "greatest", "string.FormatWith() implementation", "world")
+</code></pre></div></div>
+
+<p><img src="https://media.giphy.com/media/B9bZxUmVr3ZNS/giphy.gif" alt="" /></p>
+
+<p>Nice, but let’s be honest, pitiful. Feel the power of this implementation.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public static class StringExtensions
+{
+    public static string FormatWith(this string format, params object[] args)
+    {
+        args = args ?? new object[0];
+        string result;
+        var numberedTemplateCount = (from object match in new Regex(@"\{\d{1,2}\}").Matches(format) select match.ToString()).Distinct().Count();
+
+        if (numberedTemplateCount != args.Length)
+        {
+            var argsDictionary = args[0].ToDictionary();
+
+            if (!argsDictionary.Any())
+            {
+                throw new InvalidOperationException("Please supply enough args for the numbered templates or use an anonymous object to identify the templates by name.");
+            }
+
+            result = argsDictionary.Aggregate(format, (current, o) =&gt; current.Replace("{" + o.Key + "}", (o.Value ?? string.Empty).ToString()));
+        }
+        else
+        {
+            result = string.Format(format, args);
+        }
+
+        if (result == format)
+        {
+            throw new InvalidOperationException("You cannot mix template types. Use numbered templates or named ones with an anonymous object.");
+        }
+
+        return result;
+    }
+}
+
+public static class ObjectExtensions
+{ 
+    public static IDictionary&lt;string, object&gt; ToDictionary(this object o)
+    {
+        if (o == null) return new Dictionary&lt;string, object&gt;();
+
+        return TypeDescriptor
+            .GetProperties(o).Cast&lt;PropertyDescriptor&gt;()
+            .ToDictionary(x =&gt; x.Name, x =&gt; x.GetValue(o));
+    }
+}
+</code></pre></div></div>
+
+<p>This can be used in the same way as before:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"This is {0} the {1} {2} in the {3}".FormatWith(
+	"definitely", "greatest", "string.FormatWith() implementation", "world, but why?")
+</code></pre></div></div>
+
+<p>Or it can go full <a href="https://dragonball.wikia.com/wiki/Super_Saiyan">super-saiyan</a>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"{who} is {what} who {action} with {target}!".FormatWith(new{
+	who = "Hero",
+	what = "he alone",
+	action = "vies",
+	target = "powers supreme"})
+</code></pre></div></div>
+
+<p><img src="https://media.giphy.com/media/6KlLzO38CkLjG/giphy.gif" alt="" /></p>
+
+<p><strong>WARNING</strong>: Now this is probably not the most performant code. If you’re going to run this in a tight loop you may want to go with ye olde <code class="language-plaintext highlighter-rouge">string.Format()</code>. The other 99.99% of the time, go forth and be awesome.</p>
+
+<h3 id="updates">Updates</h3>
+
+<ul>
+  <li>2014-04-23: <code class="language-plaintext highlighter-rouge">ToDictionary()</code> is now in it’s own extension class, the named template conversion is simpler, and the numbered template conversion just uses <code class="language-plaintext highlighter-rouge">string.Format</code>.</li>
+</ul>
+
+:ET

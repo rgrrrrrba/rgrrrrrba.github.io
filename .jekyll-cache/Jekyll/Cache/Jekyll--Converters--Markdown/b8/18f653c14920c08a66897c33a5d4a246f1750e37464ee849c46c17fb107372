@@ -1,0 +1,25 @@
+I"T<p>I created a Unified API iOS Binding Project in Xamarin Studio (but this may happen for all unified API projects). This is in Xamarin Studio 5.5.4. When I went to build the project I got an error, something like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Error: could not import 'blah'
+</code></pre></div></div>
+
+<p><a href="https://forums.xamarin.com/discussion/27217">Turns out</a> the generated project file <a href="https://forums.xamarin.com/discussion/comment/87535/#Comment_87535">has some errors</a>:</p>
+
+<blockquote>
+  <p>Hi, i did succeed in the end. Here was the solution for me: For some reason, the binding project with Unified API has some errors in it’s project file. After creating the project, i saved it. and opened it with a text editor.
+Look for the Importproject element that claims to import the ObjCruntime, this line has a faulty path. It should be:</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Import Project="$(MSBuildExtensionsPath)\Xamarin\Xamarin.ObjcBinding.CSharp.targets" /&gt;
+</code></pre></div></div>
+
+<blockquote>
+  <p>Also, i added this to the propertygroups:</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;TargetFrameworkIdentifier&gt;Xamarin.iOS&lt;/TargetFrameworkIdentifier&gt;
+</code></pre></div></div>
+
+<p>(Note: add the framework identifier to each of the <code class="language-plaintext highlighter-rouge">PropertyGroup</code> elements)</p>
+
+:ET

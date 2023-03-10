@@ -1,0 +1,13 @@
+I"�<p>I’ve moved from Subversion to Mercurial at work to get past some merge problems SVN was giving me. After a few teething problems everything is working out fantastic. I’m also mainly using the command line rather than a GUI front end which is surprisingly efficient.</p>
+
+<p>I just did a merge to a stable branch then realised I had forgotten a change that really should be done on the branch I was merging from (just a version number update). Unfortunately you can’t seem to merge revisions over the top of an existing uncommitted merge so I needed to roll back the merge and start again. In Subversion I would just revert the changes, but Mercurial is a bit smarter about its merges.</p>
+
+<p>To see the parents of the working copy, run <code class="language-plaintext highlighter-rouge">hg parents</code>. After doing the merge there should be two parents. There are two steps in rolling back the merge. Note the period (.) at the end of both of these commands:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hg revert --all -r .
+hg update -C -r .
+</code></pre></div></div>
+
+<p>Calling <code class="language-plaintext highlighter-rouge">hg parents</code> should now just show the original parent.</p>
+
+:ET

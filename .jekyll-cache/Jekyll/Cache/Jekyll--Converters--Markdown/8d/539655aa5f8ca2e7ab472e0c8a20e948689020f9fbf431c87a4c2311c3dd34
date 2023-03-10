@@ -1,0 +1,301 @@
+I"�><h2 id="setting-up-karma-with-mocha-phantomjs-and-chai">Setting up Karma with Mocha, PhantomJS and Chai</h2>
+
+<p>I’m following the <a href="https://karma-runner.github.io/0.12/intro/installation.html">installation guide</a> at <a href="https://karma-runner.github.io">karma-runner.github.io</a>.</p>
+
+<p>I already have Node.js and NPM installed so I won’t go through the process for that, but I’ve found the easiest way to get running is via <a href="https://chocolatey.org/packages/nodejs.install">Chocolatey NuGet</a> using <code class="language-plaintext highlighter-rouge">choco install nodejs.install</code>.</p>
+
+<p>First up, install Karma:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save-dev karma
+</code></pre></div></div>
+
+<p>Now install some plugins for Karma. The installation instructions are for Jasmine and the Chrome launcher, but I want <a href="https://mochajs.org/">Mocha</a> as the testing framework and <a href="https://phantomjs.org/">PhantomJS</a> for a headless (window-less) test environment.</p>
+
+<blockquote>
+  <p><em>Huh? I thought Karma was the test environment</em></p>
+</blockquote>
+
+<p>Karma is a test <em>runner</em>. Much like how NUnit has a test runner .exe which can run test assemblies that use the NUnit test framework assemblies. In this case the test runner can run tests based on different test frameworks - in this case. Mocha. Because I’m setting up tests for client-side JavaScript - in particular, I’m going to use AngularJS - the tests need to be run inside a browser environment so that there is a usable DOM. PhantomJS is a WebKit based headless browser that will allow tests to run without opening a browser window.</p>
+
+<p>So now the Karma plugins for Mocha and PhantomJS need to be installed. The plugins have Mocha and PhantomJS as dependencies, so only the plugins need to be installed. I also want to use <a href="https://chaijs.com/">Chai</a> as the assertion library.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save-dev karma-mocha
+npm install --save-dev karma-phantomjs-launcher
+npm install --save-dev karma-chai
+</code></pre></div></div>
+
+<p>To make it easier to run <code class="language-plaintext highlighter-rouge">karma</code> from the command line you can install <code class="language-plaintext highlighter-rouge">karma-cli</code> globally, which will run the local version without having to specify the path to karma (<code class="language-plaintext highlighter-rouge">node node_modules/karma/bin/karma</code>):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install -g karma-cli
+</code></pre></div></div>
+
+<p>Karma needs a configuration file. Generate it using <code class="language-plaintext highlighter-rouge">karma init</code> and answer the questions. For this demo all of my code is going to live in <code class="language-plaintext highlighter-rouge">./source-and-tests</code>. If I were using a Gulp build chain this would probably need to be tweaked.</p>
+
+<dl>
+  <dt>Which testing framework do you want to use ?</dt>
+  <dd><code class="language-plaintext highlighter-rouge">mocha</code></dd>
+  <dt>Do you want to use Require.js ?</dt>
+  <dd><code class="language-plaintext highlighter-rouge">no</code></dd>
+  <dt>Do you want to capture any browsers automatically ?</dt>
+  <dd><code class="language-plaintext highlighter-rouge">PhantomJS</code></dd>
+  <dt>What is the location of your source and test files ?</dt>
+  <dd><code class="language-plaintext highlighter-rouge">source-and-tests/**/*.js</code></dd>
+  <dt>Should any of the files included by the previous patterns be excluded ?</dt>
+  <dd><em>leave blank</em></dd>
+  <dt>Do you want Karma to watch all the files and run the tests on change ?</dt>
+  <dd><code class="language-plaintext highlighter-rouge">yes</code></dd>
+</dl>
+
+<p>This generates a file called <code class="language-plaintext highlighter-rouge">karma-conf.js</code>, which configures Karma for a test run. You can have multiple configuration files pointing to different test suites or browser configurations, which can be run by specifying the name of the configuration file (<code class="language-plaintext highlighter-rouge">karma start my.conf.ks</code>).</p>
+
+<p>To get Chai included in the test pipeline, we need to edit <code class="language-plaintext highlighter-rouge">karma-conf.js</code> and add it to the <code class="language-plaintext highlighter-rouge">frameworks</code> setting:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>frameworks: ['mocha', 'chai'],
+</code></pre></div></div>
+
+<p>Running <code class="language-plaintext highlighter-rouge">karma start</code> will execute the default <code class="language-plaintext highlighter-rouge">karma-conf.js</code> (or <code class="language-plaintext highlighter-rouge">karma-conf.coffee</code>). First we need a test to run. In <code class="language-plaintext highlighter-rouge">./source-and-tests/</code> I created <code class="language-plaintext highlighter-rouge">array-tests.js</code> which just contains the <a href="https://mochajs.org/#synchronous-code">first example</a> from Mocha’s documentation.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('Array', function(){
+  describe('#indexOf()', function(){
+    it('should return -1 when the value is not present', function(){
+      assert.equal(-1, [1,2,3].indexOf(5));
+      assert.equal(-1, [1,2,3].indexOf(0));
+    })
+  })
+})
+</code></pre></div></div>
+
+<p>Running <code class="language-plaintext highlighter-rouge">karma start</code> should find and run this test, then watch for changes to the watched files and repeating.</p>
+
+<p><img src="https://i.imgur.com/cwTVVjT.png" alt="" /></p>
+
+<h2 id="adding-angularjs-to-the-mix">Adding AngularJS to the mix</h2>
+
+<p>I’ll use Bower to install AngularJS.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install --save-dev bower 
+npm install -g bower
+</code></pre></div></div>
+
+<p>This installs Bower to <code class="language-plaintext highlighter-rouge">./node_modules/bower</code>, then installs it globally. Now we need to create a configuration file for Bower:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bower init
+</code></pre></div></div>
+
+<p>You can just <kbd>enter</kbd> through the configuration, accepting all the defaults. This creates a <code class="language-plaintext highlighter-rouge">bower.json</code> file, which will save the dependencies added by Bower. Now use Bower to install AngularJS and angular-mocks:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bower install --save angular
+bower install --save angular-mocks
+</code></pre></div></div>
+
+<p>This installs AngularJS to <code class="language-plaintext highlighter-rouge">./bower_components/angular</code> and angular-mocks to <code class="language-plaintext highlighter-rouge">./bower_components/angular-mocks</code>. The angular-mocks package gives us methods to resolve our application’s components and create mocks of AngularJS services.</p>
+
+<p>I’m not going through how to integrate AngularJS an actual website as there are a number of techniques ranging from ASP.NET MVC bundling and minification to more advanced build chains such as Gulp or Grunt. Instead I’ll just show how to include AngularJS in the test suite, create a simple controller, and write a test against a property exposed by the controller.</p>
+
+<p>To include AngularJS and angular-mocks in Karma’s test run, edit the <code class="language-plaintext highlighter-rouge">files</code> config setting in <code class="language-plaintext highlighter-rouge">karma.conf.js</code>. Any future dependencies for the codebase and tests will need to be added here too, unless they are imported in some other way.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>files: [
+	'bower_components/angular/angular.js',
+	'bower_components/angular-mocks/angular-mocks.js',
+	'source-and-tests/**/*.js'
+],
+</code></pre></div></div>
+
+<p>The controller to test is very simple at this stage (<code class="language-plaintext highlighter-rouge">MyController.js</code>):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(function(){
+	angular.module('my-module', []);
+
+	angular
+		.module('my-module')
+		.controller('MyController', [
+			function(){
+				var self = this;
+
+				self.firstName = '';
+				self.lastName = '';
+
+				self.getFullName = function(){
+					return self.firstName + ' ' + self.lastName;
+				};
+
+				return self;
+			}
+	]);
+})();
+</code></pre></div></div>
+
+<p>This creates a module called <code class="language-plaintext highlighter-rouge">my-module</code> and creates a controller called <code class="language-plaintext highlighter-rouge">MyController</code> that exposes <code class="language-plaintext highlighter-rouge">firstName</code>, <code class="language-plaintext highlighter-rouge">lastName</code> and <code class="language-plaintext highlighter-rouge">getFullName()</code>. I want to test the result of <code class="language-plaintext highlighter-rouge">getFullName()</code> (<code class="language-plaintext highlighter-rouge">MyControllerTests.js</code>):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('MyController', function(){
+	beforeEach(module('my-module'));
+
+	describe('getFullName()', function(){
+		it('should handle names correctly', inject(function($controller){
+			var myController = $controller('MyController');
+
+			myController.firstName = 'George';
+			myController.lastName = 'Harrison';
+
+			myController.getFullName().should.equal('George Harrison');
+		}));
+	});
+});
+</code></pre></div></div>
+
+<p>This does some interesting things.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>beforeEach(module('my-module'));
+</code></pre></div></div>
+
+<p>This loads the <code class="language-plaintext highlighter-rouge">my-module</code> module before each test in the <code class="language-plaintext highlighter-rouge">MyController</code> suite.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>it('should handle names correctly', inject(function($controller){
+</code></pre></div></div>
+
+<p>This injects <code class="language-plaintext highlighter-rouge">$controller</code> into the test. <code class="language-plaintext highlighter-rouge">$controller</code> allows resolving registered controllers.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var myController = $controller('MyController');
+</code></pre></div></div>
+
+<p>This resolves an instance of the <code class="language-plaintext highlighter-rouge">MyController</code> controller. The instance is then used as the test subject.</p>
+
+<h2 id="scope-injection">$scope injection</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">$scope</code> that gets injected in to an Angular controller is just a JS object. I’ll assign a value and a method to <code class="language-plaintext highlighter-rouge">$scope</code> for another test. The controller declaration changes to this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>angular
+	.module('my-module')
+	.controller('MyController', [
+		'$scope',
+		function($scope){
+			var self = this;
+
+			// ...
+
+			$scope.songs = [
+				'Here Comes The Sun'
+			];
+
+			$scope.addSong = function(song) {
+				$scope.songs.push(song);
+			};
+
+			return self;
+		}
+]);
+</code></pre></div></div>
+
+<p>The existing test can just pass in an empty object to the controller resolution:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var myController = $controller('MyController', {
+	$scope: {}
+});
+</code></pre></div></div>
+
+<p>Now the new test can inject, use and inspect a mock scope:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('addSong()', function(){
+	it('should add songs', inject(function($controller) {
+		var scope = {};
+		var myController = $controller('MyController', {
+			$scope: scope
+		});
+
+		scope.addSong('While My Guitar Gently Weeps');
+
+		scope.songs.should.contain('While My Guitar Gently Weeps');
+	}));
+});
+</code></pre></div></div>
+
+<h2 id="injecting-and-mocking-http">Injecting and mocking $http</h2>
+
+<p>So now I’ve got a web service that I call to populate something on <code class="language-plaintext highlighter-rouge">$scope</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>angular
+	.module('my-module')
+	.controller('MyController', [
+		'$scope', '$http',
+		function($scope, $http){
+			var self = this;
+
+			// ...
+
+			$scope.instruments = ['foo'];
+
+			$http.get('api/get-instruments')
+				.success(function(data) {
+					$scope.instruments = data;
+				});
+
+			return self;
+		}
+]);
+</code></pre></div></div>
+
+<p>The <a href="https://docs.angularjs.org/api/ngMock/service/$httpBackend"><code class="language-plaintext highlighter-rouge">$httpBackend</code></a> is an <code class="language-plaintext highlighter-rouge">angular-mocks</code> service that fakes the <code class="language-plaintext highlighter-rouge">$http</code> service:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('get-instruments result', function(){
+	it('should be added to scope', inject(function($controller, $httpBackend){
+		var scope = {};
+		$httpBackend
+			.when('GET', 'api/get-instruments')
+			.respond([
+				'vocals', 'guitar', 'sitar'
+			]);
+		var myController = $controller('MyController', {
+			$scope: scope
+		});
+
+		$httpBackend.flush();
+
+		scope.instruments.should.contain('guitar');
+	}));
+});
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">$httpBackend.flush()</code> simulates the async calls completing, so they can be tested synchronously.</p>
+
+<h2 id="simulating-http-errors">Simulating $http errors</h2>
+
+<p>If the call to <code class="language-plaintext highlighter-rouge">api/get-instruments</code> fails, I want to set a status to ‘ERROR’:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$scope.instruments = ['foo'];
+$scope.status = '';
+
+$http.get('api/get-instruments')
+	.success(function(data) {
+		$scope.instruments = data;
+	})
+	.error(function(e) {
+		$scope.status = 'ERROR';
+	});
+</code></pre></div></div>
+
+<p>To simulate the error, you can just tell the <code class="language-plaintext highlighter-rouge">$httpBackend</code> to respond with an error code (500):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>describe('get-instruments with error', function(){
+	it('should have a status with error', inject(function($controller, $httpBackend){
+		var scope = {};
+		$httpBackend
+			.when('GET', 'api/get-instruments')
+			.respond(500, '');
+		var myController = $controller('MyController', {
+			$scope: scope
+		});
+
+		$httpBackend.flush();
+
+		scope.status.should.equal('ERROR');
+	}));
+});
+</code></pre></div></div>
+
+<h2 id="here-is-a-cat-doing-some-tdd">Here is a cat doing some TDD</h2>
+
+<p>Please imagine that this cat is really stoked about now being able to test front-end JavaScript.</p>
+
+<p><img src="/images/tdd-cat.jpg" alt="Source: https://www.aaamovies.com/Pictures%5CTestCatProfilePicture.jpg" /></p>
+
+:ET

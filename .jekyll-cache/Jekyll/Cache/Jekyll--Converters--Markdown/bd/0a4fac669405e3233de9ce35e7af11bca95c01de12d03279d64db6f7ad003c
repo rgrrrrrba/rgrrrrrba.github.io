@@ -1,0 +1,97 @@
+I"�<p>I was chatting to my man <a href="https://twitter.com/todthomson">Tod</a> and we came up with a cool pattern for validating both class and method invariants in a way that seems to scale.</p>
+
+<p>Given a simple class <code class="language-plaintext highlighter-rouge">Person</code>, with some methods for updating from another <code class="language-plaintext highlighter-rouge">Person</code> and updating just the name:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Person
+{
+	public string Name { get; private set; }
+	private int _age;
+
+	public Person(string name, int age)
+	{
+		Name = name;
+		_age = age;
+	}
+
+	public void UpdateFrom(Person person)
+	{
+		Name = person.Name;
+		_age = person._age;
+	}
+
+	public void UpdateName(string name)
+	{
+		Name = name;
+	}
+}
+</code></pre></div></div>
+
+<p>The private <code class="language-plaintext highlighter-rouge">_age</code> is just to demonstrate a private field.</p>
+
+<p>First add some validation on the constructor. I’m using my <a href="https://github.com/becdetat/check">Check</a> library but this could be implemented in any way that throws an exception if the rule isn’t set.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public Person(string name, int age)
+{
+	// method invariants
+	Check.That(() =&gt; name).IsNotNullOrEmpty();
+	Check.That(() =&gt; age &gt;= 0);
+
+	Name = name;
+	_age = age;
+}
+</code></pre></div></div>
+
+<p>This is what I’m calling a <em>method invariant</em> - a set of rules that validate the input to a method.</p>
+
+<p>We also want to validate the state of a person at the end of the method.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>static void Validate(Person person)
+{
+	Check.That(() =&gt; person.Name).IsNotNullOrEmpty();
+	Check.That(() =&gt; person._ge &gt;= 0);
+}
+</code></pre></div></div>
+
+<p>This should happen at the end of each method that changes the state of the person. For example, the constructor becomes:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public Person(string name, int age)
+{
+	// method invariants
+	Check.That(() =&gt; name).IsNotNullOrEmpty();
+	Check.That(() =&gt; age &gt;= 0);
+
+	Name = name;
+	_age = age;
+
+	// validate myself
+	Validate(this);
+}
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">UpdateName()</code> method needs to do the same thing:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public void UpdateName(string name)
+{
+	Check.That(() =&gt; name).IsNotNullOrEmpty();
+
+	Name = name;
+
+	Validate(this);
+}
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">UpdateFrom()</code> method can validate the entire incoming person:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public void UpdateFrom(Person person)
+{
+	Validate(person);
+
+	Name = person.Name;
+	_age = person._age;
+
+	Validate(this);
+}
+</code></pre></div></div>
+
+<p>Shweet.</p>
+:ET

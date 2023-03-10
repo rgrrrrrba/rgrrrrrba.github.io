@@ -4,6 +4,8 @@ Rebecca Scott's Blog - <https://becdetat.com>
 
 ## Setup
 
-1. Jekyll
+1. Have you any Docker? Man?
+2. Run it: `./build-and-watch.sh`
+
 
 

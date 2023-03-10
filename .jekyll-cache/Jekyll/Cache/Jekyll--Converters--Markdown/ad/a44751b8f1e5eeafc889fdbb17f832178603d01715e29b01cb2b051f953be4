@@ -1,0 +1,37 @@
+I"�<p>I’ve been working on a project using Git and the time has come to move it to TFS. This is for TFS 2012. TFS 2013 should include support for Git out of the box but it looks like that only if the TFS project is created as a Git repo from the start - I may be wrong on this - but these instructions should work regardless. I’m pushing my Git repository in to an empty TFS project.</p>
+
+<p>I’ve used <a href="https://chocolatey.org/packages/gittfs">Chocolatey NuGet</a> to install <a href="https://github.com/git-tfs/git-tfs">git-tfs</a> (<code class="language-plaintext highlighter-rouge">cinst gittfs</code>).</p>
+
+<ol>
+  <li>To keep the TFS migration separate from all my hard work I created a new directory outside of the existing project.</li>
+  <li><code class="language-plaintext highlighter-rouge">cd MyProjectTfs</code> and then clone down the empty TFS project: <code class="language-plaintext highlighter-rouge">git tfs clone https://path.to.tfs/tfs/CollectionName $/MyProject/Trunk</code></li>
+  <li><code class="language-plaintext highlighter-rouge">cd Trunk</code> so that we’re working in the cloned TFS repository</li>
+  <li>Pull down the changesets from the existing project: <code class="language-plaintext highlighter-rouge">git pull ..\..\MyGitRepo</code></li>
+  <li>Check in the changesets to TFS: <code class="language-plaintext highlighter-rouge">git tfs checkin</code></li>
+</ol>
+
+<p>Simple as that. <code class="language-plaintext highlighter-rouge">git-tfs</code> keeps the history so all your glorious commit messages are there for the huddled non-Git masses.</p>
+
+<p>To keep working with the original upstreams you can copy the references from the <code class="language-plaintext highlighter-rouge">.git\config</code>. Mine looks like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[tfs-remote "default"]
+	url = https://tfs.redacted.com/tfs/CollectionName/
+	repository = $/MyProject/Trunk
+	fetch = refs/remotes/default/master
+[remote "origin"]
+	url = git@bitbucket.org:belfryimages/redacted.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+</code></pre></div></div>
+
+<p>The TFS and Git references are both the respective defaults which is fine because <code class="language-plaintext highlighter-rouge">git push/pull</code> works on the Git repository while <code class="language-plaintext highlighter-rouge">git tfs checkin/pull</code> works on the TFS server. So the commit/push workflow is just:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit -m "git ftw!1!1!!"
+git push
+git tfs checkin
+</code></pre></div></div>
+
+<p>And everything is pushed to both remote repositories. Once everything is working you can just copy the <code class="language-plaintext highlighter-rouge">.git</code> folder back in to the original, <code class="language-plaintext highlighter-rouge">git reset --hard</code>, and get back to work. Allons-y!</p>
+:ET

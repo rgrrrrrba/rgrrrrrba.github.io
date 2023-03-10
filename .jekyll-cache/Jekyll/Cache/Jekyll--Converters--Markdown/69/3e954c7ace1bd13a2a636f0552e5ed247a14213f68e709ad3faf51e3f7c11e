@@ -1,0 +1,48 @@
+I"<p>I saw this in a code review:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Dim thing As New Thing(someValue)
+thing.DoSomething()
+Return thing
+</code></pre></div></div>
+
+<p><em>(names changed to protect the innocent)</em></p>
+
+<p>Apart from it being Visual Basic, there is nothing wrong with the code, but I’m classified as human and humans like to find things to complain about. Now this is absolutely personal preference and I normally would never bug anybody about it, but a trick I’ve been doing the past 18 months especially is to put a line between groups of different types of statements. Like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Dim thing As New Thing(someValue)
+
+thing.DoSomething()
+
+Return thing
+</code></pre></div></div>
+
+<p>Or, for a slightly more complex example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>function foo() {
+    var a = 1
+    var b = 2
+
+    a = a + b
+    b = a * a
+
+    return b
+}
+</code></pre></div></div>
+
+<p>I’m aware that I’m totally overthinking things and probably could use a holiday, but I’ve found it makes it easier to parse code at a higher level - this block of statements is to declare variables, this block is doing some operations, this block returns stuff. So if I need to go back in and change something I can find the block faster. It also makes it easier to move stuff around and it reads like a story.</p>
+
+<blockquote>
+  <h3 id="chapter-1---mrs-premise">Chapter 1 - Mrs Premise</h3>
+
+  <p>Once upon a time there was land called <code class="language-plaintext highlighter-rouge">foo</code>. In that land lived a thing called <code class="language-plaintext highlighter-rouge">a</code> whose value was <code class="language-plaintext highlighter-rouge">1</code>, and a thing called <code class="language-plaintext highlighter-rouge">b</code> whose value was <code class="language-plaintext highlighter-rouge">2</code>.</p>
+
+  <h3 id="chapter-2---mrs-essence">Chapter 2 - Mrs Essence</h3>
+
+  <p>The thing called <code class="language-plaintext highlighter-rouge">a</code> had <code class="language-plaintext highlighter-rouge">b</code>’s value added to it. Then the thing called <code class="language-plaintext highlighter-rouge">b</code> had the square of <code class="language-plaintext highlighter-rouge">a</code>’s value added to it.</p>
+
+  <h3 id="chapter-3---mrs-conclusion">Chapter 3 - Mrs Conclusion</h3>
+
+  <p>The value of the thing called <code class="language-plaintext highlighter-rouge">b</code> left the land called <code class="language-plaintext highlighter-rouge">foo</code> and lived happily ever after in the scope of the calling function.</p>
+</blockquote>
+
+:ET

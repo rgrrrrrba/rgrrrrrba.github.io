@@ -1,0 +1,20 @@
+I"7<p><a href="https://help.github.com/articles/dealing-with-line-endings">Github Help - Dealing with line endings</a></p>
+
+<p><a href="https://help.github.com/articles/dealing-with-line-endings#re-normalizing-a-repository">Re-normalizing a repository</a>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git rm --cached -r .
+# Remove everything from the index.
+
+git reset --hard
+# Write both the index and working directory from git's database.
+
+git add .
+# Prepare to make a commit by staging all the files that will get normalized.
+# This is your chance to inspect which files were never normalized. You should
+# get lots of messages like: "warning: CRLF will be replaced by LF in file."
+
+git commit -m "Normalize line endings"
+# Commit
+</code></pre></div></div>
+
+:ET

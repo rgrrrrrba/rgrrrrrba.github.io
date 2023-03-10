@@ -1,0 +1,248 @@
+I"�3<p>I’ve just started playing with React, so here is a bit of a brain dump of my first impressions.</p>
+
+<h2 id="there-are-some-nice-abstractions">There are some nice abstractions…</h2>
+
+<p>I’m comparing this mainly with Angular, which I have about 8 months experience with. React seems to be all about the components, which is similar to the directive-first approach that is working well for me in Angular. The components are very nice to work with, especially with JSX using ES6 features. Here’s a very basic example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export default class HelloWorld extends React.Component {
+	render() {
+		return (
+			&lt;h1&gt;Hello, world!&lt;/h1&gt;
+		);
+	}
+}
+
+React.render(
+	&lt;HelloWorld/&gt;,
+	document.getElementById('content')
+)
+</code></pre></div></div>
+
+<p>This renders the <code class="language-plaintext highlighter-rouge">HelloWorld</code> component inside a div with the ID <code class="language-plaintext highlighter-rouge">content</code>. JSX’s inline style of declaring markup seems strange to look at first, but it’s really just syntactic sugar for commands that create shadow DOM elements.</p>
+
+<h2 id="but-it-feels-closer-to-the-metal">…but it feels closer to the metal</h2>
+
+<p>Angular includes services such as <code class="language-plaintext highlighter-rouge">$http</code> for AJAX and <code class="language-plaintext highlighter-rouge">$q</code> for promises, and uses separate templates with a templating language to work with the UI. While you don’t have to, use of the included services is recommended - you’re largely buying into the whole ecosystem.</p>
+
+<p>React is all about the DOM. Inline JSX is syntactic sugar for methods that work directly with the DOM. React doesn’t provide or depend on any particular AJAX library - the tutorials suggest using jQuery directly. This makes React feel very lightweight and gives the impression that it’s not trying to solve too many problems.</p>
+
+<h2 id="new-es6-features-and-good-practices">New ES6 features and good practices</h2>
+
+<p>The <a href="https://facebook.github.io/react/docs/tutorial.html">React tutorial</a> is a good starting point, but it is built using ES5 syntax. ES6 adds classes, which makes working with JSX a lot easier. There are some important changes that need to made though.</p>
+
+<p>I’m not a huge fan of ES6 and TypeScript classes, partly because it doesn’t give you much over just using functions, and partly because it makes it more difficult to manage <code class="language-plaintext highlighter-rouge">this</code>.</p>
+
+<p>Here’s what I mean. In TypeScript (<a href="https://codepen.io/anon/pen/PPYOzJ?editors=001">pen</a>):</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Child {
+	constructor(private name) {}
+
+	sayName() {
+		console.log(this.name);
+	}
+}
+
+class Parent {
+	sayChildName;
+  
+	constructor(private name, private child) {
+		this.sayChildName = child.sayName;
+	}
+}
+
+var c = new Child("child");
+var p = new Parent("parent", c);
+
+p.sayChildName()
+</code></pre></div></div>
+
+<p>This writes <code class="language-plaintext highlighter-rouge">"parent"</code> to the console, not <code class="language-plaintext highlighter-rouge">"child"</code> as expected. This is because of JavaScript’s late binding - when the <code class="language-plaintext highlighter-rouge">sayChildName</code> reference is executed, <code class="language-plaintext highlighter-rouge">this</code> is the parent. The <code class="language-plaintext highlighter-rouge">this</code> reference in <code class="language-plaintext highlighter-rouge">sayName()</code> isn’t closed over in the function. To get the correct <code class="language-plaintext highlighter-rouge">this</code> in function-based ES6, we usually assign <code class="language-plaintext highlighter-rouge">this</code> to <code class="language-plaintext highlighter-rouge">self</code>. The working equivalent is this:</p>
+
+<aside class="pull-right" style="width: 15em">
+	In fact, by removing the <code>self.name = name</code> you can make <code>name</code> truly private, something that isn't possible (yet) in ES6/TS classes.
+</aside>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>function Child(name) {
+	var self = this;
+	
+	self.name = name;
+	
+	self.sayName = () =&gt; {
+		console.log(self.name)
+	};
+}
+
+function Parent(name, child) {
+	var self = this;
+	
+	self.name = name;
+	self.child = child;
+	self.sayChildName = child.sayName;
+}
+
+var c = new Child("child");
+var p = new Parent("parent", c);
+
+p.sayChildName();
+</code></pre></div></div>
+
+<p>I wanted to use ES6 classes for React because React’s way of creating a component functionally (<code class="language-plaintext highlighter-rouge">var MyComponent = React.createClass({...})</code>) uses object notation, which I find very frustrating to work with, and not having to deal with dependency injection (a la Angular) makes classes feel more lightweight.</p>
+
+<p>From the tutorial, creating a component functionally is like this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var CommentForm = React.createClass({
+  handleSubmit: function(e) {
+    e.preventDefault();
+    var author = React.findDOMNode(this.refs.author).value.trim();
+    var text = React.findDOMNode(this.refs.text).value.trim();
+    if (!text || !author) {
+      return;
+    }
+    this.props.onCommentSubmit({author: author, text: text});
+    React.findDOMNode(this.refs.author).value = '';
+    React.findDOMNode(this.refs.text).value = '';
+  },
+  render: function() {
+    return (
+      &lt;form className="commentForm" onSubmit={this.handleSubmit}&gt;
+        &lt;input type="text" placeholder="Your name" ref="author" /&gt;
+        &lt;input type="text" placeholder="Say something..." ref="text" /&gt;
+        &lt;input type="submit" value="Post" /&gt;
+      &lt;/form&gt;
+    );
+  }
+});
+</code></pre></div></div>
+
+<p>Note that in the <code class="language-plaintext highlighter-rouge">render</code> method, the <code class="language-plaintext highlighter-rouge">onSubmit</code> event handler in the form is set to <code class="language-plaintext highlighter-rouge">this.handleSubmit</code>. This works because React <a href="https://facebook.github.io/react/docs/interactivity-and-dynamic-uis.html#under-the-hood-autobinding-and-event-delegation">autobinds</a> <code class="language-plaintext highlighter-rouge">this</code> to the component instance when using <code class="language-plaintext highlighter-rouge">React.createClass</code>.</p>
+
+<p>The equivalent using an ES6 class is this:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export default class CommentForm extends React.Component {
+	render() {
+		let handleSubmit = e =&gt; {
+			e.preventDefault();
+			var author = React.findDOMNode(this.refs.author).value.trim();
+			var text = React.findDOMNode(this.refs.text).value.trim();
+			if (!text || !author) {
+				return;
+			}
+			this.props.onCommentSubmit({
+				author: author,
+				text: text
+			});
+			React.findDOMNode(this.refs.author).value = '';
+			React.findDOMNode(this.refs.text).value = '';
+		};
+
+		return (
+			&lt;form className="commentForm" onSubmit={handleSubmit}&gt;
+				&lt;input type="text" placeholder="Your name" ref="author" /&gt;
+				&lt;input type="text" placeholder="Say something..." ref="text" /&gt;
+				&lt;input type="submit" value="Post" /&gt;
+			&lt;/form&gt;
+		);
+	}
+}
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">handleSubmit</code> has changed from being a function on the class to an inline function within the <code class="language-plaintext highlighter-rouge">render()</code> method. This is because the <code class="language-plaintext highlighter-rouge">onSubmit</code> handler is executed in a different context, so if <code class="language-plaintext highlighter-rouge">handleSubmit</code> were a function directly on the <code class="language-plaintext highlighter-rouge">CommentForm</code> class <code class="language-plaintext highlighter-rouge">this</code> would have a different value and the call would fail. React’s ES6 class support doesn’t support autobinding <code class="language-plaintext highlighter-rouge">this</code> so this is a workaround for idiomatic ES6.</p>
+
+<p>Making the function an inline value is equivalent to doing the following to the above parent/child TypeScript example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Child {
+	constructor(private name) {
+		this.sayName = () =&gt; {
+			console.log(this.name);
+		};
+	}
+
+	sayName;
+}
+
+class Parent {
+	sayChildName;
+
+	constructor(private name, private child) {
+		this.sayChildName = child.sayName;
+	}
+}
+
+var c = new Child("child");
+var p = new Parent("parent", c);
+
+p.sayChildName()
+</code></pre></div></div>
+
+<p>This now outputs <code class="language-plaintext highlighter-rouge">"child"</code> as originally expected.</p>
+
+<p>Another gotcha I found with using ES6 classes for React components is setting the initial <code class="language-plaintext highlighter-rouge">state</code> value. <code class="language-plaintext highlighter-rouge">this.state</code> is what React uses for one-way binding to the view. The way to set the initial value using the <code class="language-plaintext highlighter-rouge">React.createClass</code> syntax is with a <code class="language-plaintext highlighter-rouge">getInitialState</code> function:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var CommentBox = React.createClass({
+	getInitialState: function() {
+		return {data: []};
+	},
+	// ...
+</code></pre></div></div>
+
+<p>Trying to do this with ES6 classes doesn’t work.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export default class CommentBox extends React.Component {
+	getInitialState() {
+		return { data: []};
+	}
+	//...
+
+Warning: getInitialState was defined on CommentBox, a plain JavaScript class. This is only supported for classes created using React.createClass. Did you mean to define a state property instead?
+</code></pre></div></div>
+
+<p>The correct way is to set <code class="language-plaintext highlighter-rouge">this.state</code> from the constructor:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export default class CommentBox extends React.Component {
+	constructor() {
+		super();
+
+		this.state = { data: []};
+	}
+	//...
+</code></pre></div></div>
+
+<p>Note that <code class="language-plaintext highlighter-rouge">this.state</code> is only set directly like this <em>in the constructor</em>. Updating the state subsequently has to happen using <code class="language-plaintext highlighter-rouge">this.setState</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$.get('/comments').then(data =&gt; this.setState({
+	data: data
+}));
+</code></pre></div></div>
+
+<p><strong>But</strong> you can’t use <code class="language-plaintext highlighter-rouge">this.setState</code> in the constructor, and setting the state <em>outside</em> of the constructor has to be via <code class="language-plaintext highlighter-rouge">this.setState</code>. Important to remember.</p>
+
+<h2 id="one-way-binding">One-way binding</h2>
+
+<p>By default, Angular supports two-way binding between a view and its controller. It does that by automatically setting up watchers on binding expressions in the view. This works very well most of the time, but when it doesn’t everything suddenly becomes very difficult to work with. The view is also mutating the state of the controller, leading to possible issues when debugging or tracing the application.</p>
+
+<p>React also has two-way binding, but <a href="https://facebook.github.io/react/docs/two-way-binding-helpers.html">it’s opt-in</a> with some quite explicit syntax. The default is one-way binding, from <code class="language-plaintext highlighter-rouge">this.state</code> to the view. The view pushes data back to the component using DOM events:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export default class TestBinding extends React.Component {
+	render() {
+		let testChanged = e =&gt; {
+			console.log(React.findDOMNode(this.refs.test).value);
+		};
+
+		return &lt;input type="text" ref="test" onChange={testChanged} /&gt;;
+	}
+}
+</code></pre></div></div>
+
+<h2 id="the-error-messages-are-superb">The error messages are superb</h2>
+
+<p><img src="https://i.imgur.com/2DM7t7Q.png" alt="" /></p>
+
+<h2 id="resources--further-reading">Resources &amp; further reading:</h2>
+
+<ul>
+  <li><a href="https://facebook.github.io/react/docs/tutorial.html">React tutorial</a></li>
+  <li><a href="https://youtu.be/z5e7kWSHWTg">React.js Conf 2015 - Hype!</a></li>
+  <li><a href="https://youtu.be/I7IdS-PbEgI">React.js Conf 2015 - Immutable Data and React</a></li>
+</ul>
+
+:ET

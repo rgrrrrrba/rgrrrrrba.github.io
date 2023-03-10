@@ -1,0 +1,160 @@
+I" <p>These are just some notes I made while reading about Kerberos and Active Directory. They aren’t very technical or well-edited and probably have plenty of errors. Read at your peril!</p>
+
+<h2 id="kerberos">Kerberos</h2>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Kerberos_(protocol)">https://en.wikipedia.org/wiki/Kerberos_(protocol)</a></li>
+  <li>Requires a trusted third party
+    <ul>
+      <li>Authentication Server and Ticket Granting Service</li>
+      <li>usually backed by a database - Active Directory for example</li>
+    </ul>
+  </li>
+  <li>Originally implemented by MIT</li>
+  <li>Windows 2000 onwards uses the Kerberos protocol (<em>not</em> MIT’s implementation) as the default auth method
+    <ul>
+      <li>Prior to Windows 2000 it used NTLM</li>
+      <li>If the machine is not joined to a domain it falls back to NTML between client and server</li>
+      <li>Intranet web applications can enforce Kerberos as an authentication method for domain joined clients by using APIs provided under SSPI
+        <ul>
+          <li>IIS integrated auth for example</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p><img src="/images/2015-11-02-notes-on-kerberos-and-active-directory/kerberos-data-flow.jpg" alt="Kerberos Data Flow" /></p>
+
+<h3 id="authentication-and-sso-service-access">Authentication and SSO service access</h3>
+
+<h4 id="stage-1---initial-sign-on">Stage 1 - Initial sign-on</h4>
+
+<ol>
+  <li>Client sends user ID (in plain text) to authentication server (AS)</li>
+  <li>AS finds the user in the database (Active Directory) and sends:
+    <ul>
+      <li>TGS Session Key - encrypted with user’s password (from AD)</li>
+      <li>Ticket Granting Ticket (TGT) - encrypted with the AS’s private key</li>
+    </ul>
+  </li>
+  <li>Client decrypts Session Key using the password the user entered
+    <ul>
+      <li>If it can’t decrypt the Session Key then it can’t be used and authentication has failed</li>
+    </ul>
+  </li>
+</ol>
+
+<p>Now the client has enough information to access the Ticket Granting Server.</p>
+
+<h4 id="stage-2---getting-clientserver-ticket-so-the-client-can-access-a-service-server-ss">Stage 2 - Getting Client/Server ticket, so the client can access a Service Server (SS)</h4>
+
+<ol>
+  <li>Client sends to Ticket Granting Server (TGS):
+    <ul>
+      <li>TGT and ID of requested service</li>
+      <li>Authenticator, encrypted using the TGS Session Key</li>
+    </ul>
+  </li>
+  <li>TGS decrypts the TGT using the AS’s private key, which gives it the session key.</li>
+  <li>TGS uses the session key to decrypt the Authenticator</li>
+  <li>TGS checks that the client has access to the requested service (using AD)</li>
+  <li>TGS sends to client:
+    <ul>
+      <li>Client/Server Ticket, encrypted with the Service Server’s (SS) private key (the TGS has the SS’s private keys)</li>
+      <li>Client/Server Session Key, encrypted with the TGS Session Key</li>
+    </ul>
+  </li>
+</ol>
+
+<p>Now the client has enough information to access the Service Server.</p>
+
+<h4 id="stage-3---accessing-the-service-server">Stage 3 - Accessing the Service Server</h4>
+
+<ol>
+  <li>Client sends to SS:
+    <ul>
+      <li>Client/Server Ticket (still encrypted with service’s private key)</li>
+      <li>A new Authenticator, encrypted using Client/Server Session Key</li>
+    </ul>
+  </li>
+  <li>SS decrypts the Client/Server Ticket using its private key</li>
+  <li>SS uses the Client/Server Ticket to decrypt the Authenticator</li>
+  <li>SS sends to client a message with the timestamp encoded in the Authenticator, encrypted with the Client/Server Ticket</li>
+  <li>This verifies to the client that the SS can be trusted and is willing to service the client</li>
+</ol>
+
+<p>Now the client and the SS can interact.</p>
+
+<h2 id="active-directory">Active Directory</h2>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Active_Directory">https://en.wikipedia.org/wiki/Active_Directory</a></li>
+  <li>Domain controller (DC) authenticates and authorises users and computers in the domain</li>
+  <li>AD implements LDAP (lightweight directory access protocol) (not 100%, there are exceptions)</li>
+  <li>Stores network objects:
+    <ul>
+      <li>resources (machines, printers)</li>
+      <li>security principles (user/computer accounts and groups)</li>
+    </ul>
+  </li>
+  <li>Objects have many different attributes</li>
+  <li>Schema can be extended and modified by administrators</li>
+  <li>Hierarchical:
+    <ul>
+      <li>A domain is a group of network objects</li>
+      <li>A tree is a collection of domains and domain trees, linked by a trust hierarchy</li>
+      <li>A forest is a collection of trees with a common schema, structure and configuration - used as the security boundary</li>
+      <li>Objects in a domain can be grouped into Organizational Units (OUs). OUs give hierarchy to a domain. OUs should be used for structure instead of domains or sites.</li>
+      <li>Duplicate usernames are an issue. Can’t have duplicate usernames in a single domain. This is why you get names like <code class="language-plaintext highlighter-rouge">DOMAIN\scottbe123</code>.</li>
+      <li>OUs aren’t used for access permissions (specific to AD, other directory services support this). Shadow groups are used for this, usually via third party tooling to map a group to an OU.</li>
+    </ul>
+  </li>
+  <li>Physical structure:
+    <ul>
+      <li>Sites are common across the forest - independent of the domain/OU structure</li>
+      <li>Sites are physical groupings based on 1+ IP subnets</li>
+      <li>Include concept of connections between sites</li>
+      <li>Sites are used to control replication between domain controllers and refering clients to the nearest DC</li>
+      <li>AD info is replicated across peer DCs, each DC has a copy of the AD</li>
+      <li>AD uses DNS and TCP/IP, each connection -&gt; link has a cost (speed - the type of connection). This determines the network topology and replication strategy</li>
+    </ul>
+  </li>
+  <li>Replication:
+    <ul>
+      <li>Generally networks using AD will have more than one DC for failover</li>
+      <li>DCs should be single-purpose - other services on the machine can interfere with AD</li>
+      <li>virtualisation can help with reducing hardware costs</li>
+    </ul>
+  </li>
+  <li>Applications can access AD features using COM interfaces - Active Directory Service Interfaces</li>
+  <li>Trusts:
+    <ul>
+      <li>Allow users in one domain to access resources in another. Lots of different trust types.</li>
+      <li>There are also forest-level trusts</li>
+    </ul>
+  </li>
+  <li>Interoperability with *nix systems can be done via LDAP but that doesn’t include all of the features of AD. There are third party AD integration applications including Samba which can act as a DC.</li>
+  <li>Group policy:
+    <ul>
+      <li><a href="https://en.wikipedia.org/wiki/Group_Policy">https://en.wikipedia.org/wiki/Group_Policy</a></li>
+      <li>centralised management of AD configuration</li>
+      <li>Local Group Policy (LGPO) is a version that enables GPO management in non-domain environments</li>
+      <li>Controls what users are allows to do on a system, for example password policies, RDP configuration, block access to Task Manager</li>
+      <li>GPOs are pushed to computers using Active Directory</li>
+      <li>GPOs are refreshed every 90 minutes + random 30m offset</li>
+      <li>GPOs on DCs are refreshed every 5 minutes</li>
+      <li>Windows 8 clients can have forced GPO updates (per OU) running the update within 10 minutes, with a random offset (avoid spiked load on the DC)</li>
+      <li>Processed in order: local -&gt; site -&gt; domain -&gt; OU</li>
+      <li>policies use inheritance</li>
+    </ul>
+  </li>
+  <li><a href="https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol">LDAP</a> - <a href="https://tools.ietf.org/html/rfc4511">https://tools.ietf.org/html/rfc4511</a>:
+    <ul>
+      <li>provides an interface for querying AD - <a href="https://technet.microsoft.com/en-us/library/aa996205(v=exchg.65).aspx">LDAP Query Basics (TechNet)</a></li>
+      <li>can also manipulate data and perform authentication</li>
+    </ul>
+  </li>
+</ul>
+
+:ET

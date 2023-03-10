@@ -12,39 +12,40 @@ permalink: /resume/
 ## Profile
 I am an elder millennial, with an IT career spanning an incredible 17 years. I started as a helpdesk manager, and then I was the IT manager for a small financial services company based in Rockhampton, Queensland, for seven years. I then spent almost three years as a consultant software developer in Brisbane, working with a wide range of clients on a variety of projects. These experiences brought about a love of working and communicating with people—clients, co-workers, and other developers—which has turned into a strong interest in technical and project leadership, mentoring and coaching, and building psychologically safe environments for my teams. The last six years I have been working in increasingly senior leadership roles while still maintaining a strong technical background.
 
-
-## Technical strengths
-### Languages, components and tools
-- C#
-- ASP.NET Core
-- Blazor
-- Ruby (and Rails)
-- JavaScript/ES6
-- TypeScript
-- T-SQL
-- React
-- XML
-- PHP
+## Languages, components and tools
 - Angular
-- Node.js
-- Embedded C++
-- TeamCity
-- GitHub Projects
-- Octopus Deploy
-- Seq
+- ASP.NET Core
 - Bash
+- Blazor
+- C#
+- CouchDB
+- Docker
+- Embedded C++
+- GitHub Projects
+- JavaScript/ES6
 - MSSQL
 - MySQL
+- Node.js
+- Octopus Deploy
+- PHP
 - PostgreSQL
-- CouchDB
+- Power BI
+- React
+- Ruby (and Rails)
+- Seq
+- T-SQL
+- TeamCity
+- TypeScript
+- Vue
+- XML
 
-### Methodologies and techniques
+## Methodologies and techniques
 - Scrum master (PSM 1)
 - Sensible project and team management
 - Project planning and scoping
 - Product and feature discovery
 
-### Industries
+## Industries
 - Finance
 - Professional services
 - Government
@@ -63,24 +64,18 @@ I am an elder millennial, with an IT career spanning an incredible 17 years. I s
 
 
 ## Education and qualifications
-- 2015 | Scrum master (PSM 1)
-- 2001 | Bachelor of IT (Software Development)
+- 2015 \| Scrum master (PSM 1)
+- 2001 \| Bachelor of IT (Software Development)
 
 
 ## Employment history
-**SixPivot** \| October 2022—Present \| Senior Consultant
-
-**Automattic** \| January 2020—October 2022 \| Director of Engineering
-
-**WORK180** \| January 2019—October 2019 \| CTO
-
-**Livewire Markets** \| April 2017—September 2018 \| Senior Full Stack Engineer
-
-**Ideacraft** \| March 2016—April 2017 \| Head of Technology
-
-**Readify** \| April 2013—March 2016 \| Senior Developer
-
-**Capricorn Investment Partners** \| July 2006—April 2013 \| IT Manager
+- **SixPivot** \| October 2022—Present \| Senior Consultant
+- **Automattic** \| January 2020—October 2022 \| Director of Engineering
+- **WORK180** \| January 2019—October 2019 \| CTO
+- **Livewire Markets** \| April 2017—September 2018 \| Senior Full Stack Engineer
+- **Ideacraft** \| March 2016—April 2017 \| Head of Technology
+- **Readify** \| April 2013—March 2016 \| Senior Developer
+- **Capricorn Investment Partners** \| July 2006—April 2013 \| IT Manager
 
 
 ## Recent major projects

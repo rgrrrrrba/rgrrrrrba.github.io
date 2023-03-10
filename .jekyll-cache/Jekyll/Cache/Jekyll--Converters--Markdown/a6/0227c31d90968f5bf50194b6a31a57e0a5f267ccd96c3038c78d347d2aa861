@@ -1,0 +1,40 @@
+I"�<p>These are the image sizes needed for universal iOS applications - including iPad, iPad Retina, iPhone 3.5”, iPhone 4”, iPhone 4” Retina, iOS &gt;=6 and iOS 7. Images should be PNGs at 24 BPP.</p>
+
+<p>An iPhone app needs the 4” launch screens present, otherwise the app will run at 3.5” on the 4” device (letterboxed).</p>
+
+<p>Sources:</p>
+
+<ul>
+  <li><a href="https://docs.xamarin.com/guides/ios/application_fundamentals/working_with_images/#2.5.launch-screen-images">https://docs.xamarin.com/guides/ios/application_fundamentals/working_with_images/#2.5.launch-screen-images</a></li>
+  <li><a href="https://docs.xamarin.com/guides/ios/application_fundamentals/working_with_images/#2.2.1.configuring-icons-with-property-lists">https://docs.xamarin.com/guides/ios/application_fundamentals/working_with_images/#2.2.1.configuring-icons-with-property-lists</a></li>
+</ul>
+
+<h3 id="launch-images">Launch images</h3>
+<ul>
+  <li>320 x 480</li>
+  <li>640 x 960</li>
+  <li>640 x 1136</li>
+  <li>768 x 1004</li>
+  <li>1024 x 748</li>
+  <li>1536 x 2008</li>
+  <li>2048 x 1496</li>
+</ul>
+
+<h3 id="application-icons">Application icons</h3>
+<ul>
+  <li>29 x 29</li>
+  <li>40 x 40</li>
+  <li>50 x 50</li>
+  <li>57 x 57</li>
+  <li>58 x 58</li>
+  <li>72 x 72</li>
+  <li>76 x 76</li>
+  <li>80 x 80</li>
+  <li>100 x 100</li>
+  <li>114 x 114</li>
+  <li>120 x 120</li>
+  <li>144 x 144</li>
+  <li>152 x 152</li>
+</ul>
+
+:ET
