@@ -3,3 +3,13 @@ markdown: kramdown
 name: Bec d'état - Rebecca Scott's blog
 url: https://becdetat.com
 future: true
+
+gems:
+  - liquid
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+dependencies:
+  - liquid

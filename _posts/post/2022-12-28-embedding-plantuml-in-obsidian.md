@@ -49,10 +49,12 @@ The last point was very interesting—maybe this was to do with the relatively s
 
 Since I already have Docker installed for other projects I went with that:
 
-```
+<div class="code-section">
+  {% include copy_button.html target="#section-1" %}
+  <pre id="section-1">
 docker pull plantuml/plantuml-server
-docker run -d -p 8180:8080 plantuml/plantuml-server:jetty
-```
+docker run -d -p 8180:8080 plantuml/plantuml-server:jetty</pre>
+</div>
 
 <aside class="pull-right well" style="width:40%">
 	I have grand plans of setting up a little Synology NAS for backups and serving media files that I'll never watch (although kidlette has a dinosaur documentary series he wants to revisit). One of the side-benefits of a Synology is that it can run Docker, so when I eventually buy the smallest practical NAS I can afford I'll move the PlantUML server onto that so I can access it on different machines, free up some resources on my laptop (and make it easier if I upgrade or repave), and put it behind a VPN (which the Synology also can do) so I can use it from a coffee shop or hospital or a police waiting room. It pays to be prepared.
@@ -62,11 +64,13 @@ Then in the PlantUML plugin "Server URL" setting, I used `http://localhost:8180`
 
 To embed [PlantUML's 'canonical' example](https://plantuml.com):
 
-<pre style="width:50%">
+<div class="code-section">
+  {% include copy_button.html target="#section-2" %}
+<pre style="width:50%" id="section-2">
 ```plantuml
 Bob -> Alice : hello
-```
-</pre>
+```</pre>
+</div>
 
 Note that the `plantuml` code type is required for the plugin to find and process the block.
 
@@ -76,37 +80,39 @@ That block generates this diagram:
 
 Here's a more complex C4-ish diagram, similar to those I was generating for the report I mentioned at the start of this post:
 
-    ```plantuml
-    @startuml Context
+<div class="code-section">
+  {% include copy_button.html target="#section-3" %}
+<pre id="section-3">
+@startuml Context
 
-    title Admin System
+title Admin System
 
-    !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
-    !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
-    Person(office, "Office")
-    Person(admins, "Admins")
-    System_Boundary(system, "Admin") {
-        Container(app, "Application", ".NET Core 3.1")
-        ContainerDb(db_widgets, "MSSQL (Widgets)")
-        ContainerDb(db_docs, "MSSQL (Docs)")
-    }
-    Container(cdn, "CDN")
-    System_Ext(primary_api, "Primary API")
-    System_Ext(secondary_api, "Secondary API")
-    System_Ext(file_share, "File Share")
-    
-    Rel(office, app, "Uses")
-    Rel(admins, app, "Uses")
-    Rel(app, db_widgets, "Depends On")
-    Rel(app, db_docs, "Depends On")
-    Rel(app, cdn, "Depends On")
-    Rel(app, primary_api, "Depends On")
-    Rel(app, secondary_api, "Depends On")
-    Rel(app, file_share,"Depends On")
+Person(office, "Office")
+Person(admins, "Admins")
+System_Boundary(system, "Admin") {
+    Container(app, "Application", ".NET Core 3.1")
+    ContainerDb(db_widgets, "MSSQL (Widgets)")
+    ContainerDb(db_docs, "MSSQL (Docs)")
+}
+Container(cdn, "CDN")
+System_Ext(primary_api, "Primary API")
+System_Ext(secondary_api, "Secondary API")
+System_Ext(file_share, "File Share")
 
-    @enduml
-    ```
+Rel(office, app, "Uses")
+Rel(admins, app, "Uses")
+Rel(app, db_widgets, "Depends On")
+Rel(app, db_docs, "Depends On")
+Rel(app, cdn, "Depends On")
+Rel(app, primary_api, "Depends On")
+Rel(app, secondary_api, "Depends On")
+Rel(app, file_share,"Depends On")
+
+@enduml</pre>
+</div>
 
 The generated diagram is quite client-ready:
 

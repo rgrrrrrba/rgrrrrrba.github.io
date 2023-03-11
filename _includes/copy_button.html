@@ -1,0 +1,23 @@
+<button class="copy-button"
+        data-clipboard-target="{{ include.target }}"
+        style="float:right">
+  Copy
+</button>
+
+<script>
+  var clipboard = new ClipboardJS('.copy-button');
+
+  clipboard.on('success', function(e) {
+    e.clearSelection();
+  });
+
+  var copyButtons = document.querySelectorAll('.copy-button');
+  copyButtons.forEach(function(button) {
+    button.addEventListener('click', function() {
+      button.innerHTML = 'Copied!';
+      setTimeout(function() {
+        button.innerHTML = 'Copy';
+      }, 2000);
+    });
+  });
+</script>

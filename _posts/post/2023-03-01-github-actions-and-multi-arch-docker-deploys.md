@@ -4,6 +4,14 @@ permalink: /github-actions-and-multi-arch-docker-deploys
 layout: post
 date: 2023-03-01
 category: post
+section_1: >
+  name: Build image and deploy to Docker Hub
+  on:
+    workflow_dispatch:
+    push:
+      branches:
+        - main
+  jobs:
 ---
 
 I did two new things yesterday:
@@ -19,15 +27,19 @@ This turned out to be harder than I expected but easier than I dreaded...
 
 
 ## Setting up
-```
+
+<div class="code-section">
+  {% include copy_button.html target="#section-1" %}
+  <pre id="section-1">
 name: Build image and deploy to Docker Hub
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-jobs:
-```
+jobs:</pre>
+</div>
+
 This first section sets the name of the action. It then specfies what events trigger the action (`on:`).
 
 There are two triggers. The first is `workflow_dispatch`, which adds a button to the action page that lets you do a manual deploy.
@@ -46,24 +58,28 @@ Setting up my self-hosted runner was incredibly easy. Nothing like the old days 
 
 Here are [the instructions for adding a self-hosted runner](https://docs.github.com/en/actions/hosting-your-own-runners/adding-self-hosted-runners). There are [additional steps required to run it as a service](https://docs.github.com/en/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service?platform=mac), which for some reason are hidden away...
 
-```{% raw %}
+<div class="code-section">
+  {% include copy_button.html target="#section-2" %}
+  <pre id="section-2">
   build-and-push:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS]
-    runs-on: ${{ matrix.os }}
-    steps:
-{% endraw %}```
+    {% raw %}runs-on: ${{ matrix.os }}{% endraw %}
+    steps:</pre>
+</div>
 
 The `strategy` and `matrix` parts sets up a matrix of build options. The builds execute in parallel, however there are ways to limit how many builds run at the same time (to reduce resource load). I didn't need to set any limits as there are only two parallel builds.
 
 You could specify any number of matrix elements and GHA will run the job for each multiple in the matrix. For example:
 
-```
+<div class="code-section">
+  {% include copy_button.html target="#section-3" %}
+  <pre id="section-3">
 matrix:
     os: [ubuntu-latest, macOS]
-    node_version: [10, 11]
-```
+    node_version: [10, 11]</pre>
+</div>
 
 This would run the job four times, once for each combination of `os` and `node_version`, _in parallel_.
 
@@ -77,19 +93,23 @@ Remember that these steps will run two times, in parallel, one on an `ubuntu-lat
 
 This first step checks out the repository to the runner. The `uses` instruction pulls in an action to do this automagically (without having to authenticate then `git pull` etc).
 
-```
+<div class="code-section">
+  {% include copy_button.html target="#section-4" %}
+  <pre id="section-4">
       - 
         name: Checkout
-        uses: actions/checkout@v3
-```
+        uses: actions/checkout@v3</pre>
+</div>
 
 The next step builds the code, using the [`Dockerfile`](https://github.com/becdetat/partsbin/blob/main/src/Dockerfile) which is part of the project. Note that the build gets tagged with the current OS for the running job.
 
-```{% raw %}
+<div class="code-section">
+  {% include copy_button.html target="#section-5" %}
+  <pre id="section-5">
       -
         name: Build the image
-        run: docker build -t becdetat/partsbin:latest-${{ matrix.os }} ./src
-{% endraw %}```
+        {% raw %}run: docker build -t becdetat/partsbin:latest-${{ matrix.os }} ./src{% endraw %}</pre>
+</div>
 
 The final two steps in this job logs in to the Docker Hub and pushes the image.
 
@@ -97,21 +117,23 @@ Keep in mind that the image being pushed is for a single architecture (ARM64 or 
 
 The `secrets` being used for the username and password are configured in GitHub on the Settings page for the repository, under "Secrets and variables" and then "Actions".
 
-```{% raw %}
+<div class="code-section">
+  {% include copy_button.html target="#section-6" %}
+  <pre id="section-6">
       - 
         name: Log into Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          {% raw %}username: ${{ secrets.DOCKER_USERNAME }}{% endraw %}
+          {% raw %}password: ${{ secrets.DOCKER_PASSWORD }}{% endraw %}
       -
         name: Push image to Docker Hub
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:  
           context: ./src
           push: true
-          tags: becdetat/partsbin:latest-${{ matrix.os }}
-{% endraw %}```
+          {% raw %}tags: becdetat/partsbin:latest-${{ matrix.os }}{% endraw %}</pre>
+</div>
 
 So at this point I have two images, one for `ubuntu-latest` and one for `macOS`, pushed up to Docker Hub. This is great, but if someone wants to use my app they would need to make sure they're pulling the image that corresponds to their system architecture. I want to get smarter than that by creating a combined manifest.
 
@@ -121,42 +143,50 @@ This is a separate job, because it needs to execute after the `build-and-push` j
 
 Every job needs to specify what runner it can run on. The value isn't as critical as the previous job, but `ubuntu-latest` is a good default option.
 
-```
+<div class="code-section">
+  {% include copy_button.html target="#section-7" %}
+  <pre id="section-7">
   create-combined-manifest:
     needs: build-and-push
     runs-on: ubuntu-latest
-    steps:
-```
+    steps:</pre>
+</div>
 
 The first step logs into Docker Hub. This is exactly the same in the previous job.
-```{% raw %}
+<div class="code-section">
+  {% include copy_button.html target="#section-8" %}
+  <pre id="section-8">
       - 
         name: Log into Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-{% endraw %}```
+          {% raw %}username: ${{ secrets.DOCKER_USERNAME }}{% endraw %}
+          {% raw %}password: ${{ secrets.DOCKER_PASSWORD }}{% endraw %}</pre>
+</div>
 
 The next step creates a combined manifest, containing the `:latest-macOS` and `:latest-ubuntu-latest` image tags. There are actions and other tools that do this, however the Docker CLI has these commands now so it's easy enough to just use it directly. I believe that `docker manifest` was only added to the CLI within last year (2022) or so.
 
 The first image is the name for the combined manifest, the second and third (`macOS`, `ubuntu-latest`) are the ones that get added in to the combined manifest.
-```
+<div class="code-section">
+  {% include copy_button.html target="#section-9" %}
+  <pre id="section-9">
       - 
         name: Create manifest
         run: |
           docker manifest create \
             becdetat/partsbin:latest \
             becdetat/partsbin:latest-macOS \
-            becdetat/partsbin:latest-ubuntu-latest
-```
+            becdetat/partsbin:latest-ubuntu-latest</pre>
+</div>
 
 The final step is pretty sedate, given all the work that's just been done. It just pushes that combined manifest that was just created up to Docker Hub.
-```
+<div class="code-section">
+  {% include copy_button.html target="#section-10" %}
+  <pre id="section-10">
       -
         name: Push manifest
-        run: docker manifest push becdetat/partsbin:latest
-```
+        run: docker manifest push becdetat/partsbin:latest</pre>
+</div>
 
 The result is extremely satisfying:
 
