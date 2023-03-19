@@ -4,6 +4,11 @@ body {
 	font-size: 16px;
 	letter-spacing: 0.015em;
 }
+
+p {
+	margin: 0 0 1em;
+}
+
 .container {
 	text-align: center; 
 	max-width: 900px;
