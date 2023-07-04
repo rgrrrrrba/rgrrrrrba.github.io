@@ -11,7 +11,8 @@ As an accomplished technology leader with extensive experience in various leader
 - Senior Consultant at SixPivot (2022-present): I work with a range of clients, performing work with them that includes application development and technical and strategic reviews.
 - Director of Engineering at Automattic (2020-2022): I led a diverse international team of developers, guiding them through project planning, execution, and delivery. I collaborated closely with cross-functional stakeholders, aligning technical strategies with business objectives. I contributed to the successful launch of several projects ad initiatives and improved engineering processes to enhance overall efficiency.
 - CTO at WORK180 (2019): I played a pivotal role in establishing the technical vision, developing the product roadmap, and ensuring the timely delivery of high-quality features both internally and for our users and clients. I fostered a collaborative culture and provided mentorship to developers, driving their professional growth.
-- Head of Engineering at Ideacraft (2017-2018): At Ideacraft, I was responsible for driving technological innovation, managing the development team, and overseeing the execution of key projects. I successfully designed and implemented scalable software solutions, contributing to the company's growth.
+- Senior full-stack engineer at Livewire Markets (2017-2018): As the sole developer in a small financial news startup, I worked directly with team members across the company to deliver a top tier experience for our customers and users.
+- Head of Engineering at Ideacraft (2016-2017): At Ideacraft, I was responsible for driving technological innovation, managing the development team, and overseeing the execution of key projects. I successfully designed and implemented scalable software solutions, contributing to the company's growth.
 
 
 ## Skills and Expertise
