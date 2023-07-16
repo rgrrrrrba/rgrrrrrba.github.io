@@ -15,7 +15,7 @@ Since then I also found some adult toothpaste in different flavours, like mango,
 ### Sensory processing
 Everyone processes sensory inputs in different ways. Some people don't like the taste of certain foods—sauerkraut or olives, pineapple on pizza. Some people don't like the feel of certain fabrics or textures—velvet, leather. Smells—strong perfumes or deodorants, laundry powders. Sound is a classic—nails on chalkboards, loud shopping centres.
 
-I don't like going into Peter Alexander, a chain of store that sell sleepwear. The lights are far too bright and the colours of everything combined together are far too vivid. I actually veer away from the entrance of the store when I'm walking past it. There's another store nearby that is lovely and dark, however they sell soaps and oils and the smell is overwhelming, and I avoid the entrance of that store as well.
+I don't like going into Peter Alexander, a chain of stores that sell sleepwear. The lights are far too bright and the colours of everything combined together are far too vivid. I actually veer away from the entrance of the store when I'm walking past it. There's another store nearby that is lovely and dark, however they sell soaps and oils and the smell is overwhelming, and I avoid the entrance of that store as well.
 
 Sometimes I leave my sunglasses on when going to shopping centres. I also carry two sets of loop earplugs, which are really comfortable and discreet earplugs that block different sound profiles. These are great when going into the supermarket—they mute people talking loudly, the music playing, announcements, and the sound of trolleys banging around. Sometimes that's the only way I can handle buying groceries.
 
