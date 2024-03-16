@@ -1,6 +1,6 @@
 ---
-title: Stable Diffusion on Nvidia and Windows
-permalink: /stable-diffusion-on-nvidia-and-windows
+title: Stable Diffusion on Radeon and Windows
+permalink: /stable-diffusion-on-radeon-and-windows
 layout: post
 date: 2024-03-17
 category: post
