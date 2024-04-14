@@ -2,7 +2,7 @@
 title: Minimum Viable Programmer
 permalink: /minimum-viable-programmer
 layout: post
-date: 2024-03-29
+date: 2024-04-14
 category: post
 ---
 
@@ -44,7 +44,7 @@ And I'll talk about reducing your cognitive load, hustle culture, being sustaina
 
 <img
     alt="Baby Developer"
-    src="/images/2024-03-28-minimum-viable-programmer/baby-developer.jpg"
+    src="/images/2024-04-14-minimum-viable-programmer/baby-developer.jpg"
     class="pull-left"
     style="margin-right:1em;width:200px"/>
 
@@ -130,7 +130,7 @@ The rewritten component is easier and cheaper to maintain, and maybe the team wi
 
 Understanding that we are biased towards over-valuing investments made in the past can help with making better future decisions.
 
-![Dogs Playing Poker](/images/2024-03-28-minimum-viable-programmer/dogs-playing-poker.jpg)
+![Dogs Playing Poker](/images/2024-04-14-minimum-viable-programmer/dogs-playing-poker.jpg)
 
 This can apply to small decisions, too.
 
@@ -140,7 +140,7 @@ That way, if they're in a losing game, they've set a clear point where they can 
 
 <img
     alt="Dogs playing poker timebox"
-    src="/images/2024-03-28-minimum-viable-programmer/poker-timebox.png"
+    src="/images/2024-04-14-minimum-viable-programmer/poker-timebox.png"
     class="pull-right"
     style="margin-left:2em;"/>
 
@@ -158,7 +158,7 @@ Either way, you're making a more informed decision without a big up-front cost.
 
 <img
     alt="REWRITE ALL THE LEGACIES!"
-    src="/images/2024-03-28-minimum-viable-programmer/rewrite-all-the-legacies.png"
+    src="/images/2024-04-14-minimum-viable-programmer/rewrite-all-the-legacies.png"
     class="pull-left"
     style="margin-right:2em;width:200px"/>
 
@@ -194,7 +194,7 @@ These intuitive decisions are important, but a lot of our decisions need more ef
 
 <img
     alt="Cost-benefit analysis table"
-    src="/images/2024-03-28-minimum-viable-programmer/cost-benefit-analysis.png"
+    src="/images/2024-04-14-minimum-viable-programmer/cost-benefit-analysis.png"
     class="pull-right"
     style="margin-left:2em;width:200px"/>
 
@@ -230,13 +230,13 @@ Full, deep analysis:
 
 Limited, high level analysis:
 
-| Cost                                           | Benefit                                          |     |
-| ---------------------------------------------- | ------------------------------------------------ | --- |
-| Higher risk when implementing                  | Fast                                             |     |
-| Doesn't teach me details about the application | Don't have to dive into lots of code             |     |
-| Can't give a detailed explanation              | I don't have to understand the entire system     |     |
-| Leaves some questions unanswered               | Provides the answers that are needed _right now_ |     |
-| Increased chance that **I might be wrong**     |                                                  |     |
+| Cost                                           | Benefit                                          |
+| ---------------------------------------------- | ------------------------------------------------ |
+| Higher risk when implementing                  | Fast                                             |
+| Doesn't teach me details about the application | Don't have to dive into lots of code             |
+| Can't give a detailed explanation              | I don't have to understand the entire system     |
+| Leaves some questions unanswered               | Provides the answers that are needed _right now_ |
+| Increased chance that **I might be wrong**     |                                                  |
 
 Both options had legitimate costs and benefits, and it still wasn't clear what was the best choice.
 
@@ -296,7 +296,7 @@ And talk to end users if you can get access to them. They can give you highly re
 Being able to make effective decisions as a developer sometimes means acting in the role of a business analyst. Don't avoid putting yourself in situations where you can learn something that helps you make those decisions.
 
 <img alt="Empty feature card"
-    src="/images/2024-03-28-minimum-viable-programmer/feature-card.png"
+    src="/images/2024-04-14-minimum-viable-programmer/feature-card.png"
     class="pull-left"
     style="margin-left:2em;width:300px"/>
 
@@ -308,7 +308,7 @@ You're going to need to make some decisions. And to do that responsibly, you nee
 
 Make sure you're asking the right questions, and getting meaning answers.
 
-![Supermarket context vs Hospital context](/images/2024-03-28-minimum-viable-programmer/supermarket-and-hospital.jpg)
+![Supermarket context vs Hospital context](/images/2024-04-14-minimum-viable-programmer/supermarket-and-hospital.jpg)
 
 Understand the context.
 
@@ -360,7 +360,7 @@ Rather than going down a path just because it's familiar, see if there's a bette
 
 <img
     alt="Svelte investigation timebox"
-    src="/images/2024-03-28-minimum-viable-programmer/timebox-svelte.png"
+    src="/images/2024-04-14-minimum-viable-programmer/timebox-svelte.png"
     class="pull-right"
     style="margin-left:2em;width:200px"/>
 
@@ -374,7 +374,7 @@ Software engineering isn't civil engineering, and not all decisions in software 
 
 What if, instead of **committing** to a specific vendor early in the project, you made an early but **flexible** decision.
 
-So, you start development on the system as soon as possible, without worrying too much about your decision. But, you work in a way that has a low switching cost if you later decide to **change** the database vendor. By avoiding vendor specific features, or by using an abstraction like an ORM. Or by making good software design decisions, like separating the data layer from the business rules and UI. 
+So, you start development on the system as soon as possible, without worrying too much about your decision. But, you work in a way that has a low switching cost if you later decide to **change** the database vendor. By avoiding vendor specific features, or by using an abstraction like an ORM. Or by making good software design decisions, like separating the data layer from the business rules and UI.
 
 That way, if you later need to change vendors, you don't have a huge switching cost. You turn a large and difficult to change decision into two different decisions. One made early, which allows you to continue with your work, and one made later, when you've got more information and experience.
 
@@ -401,7 +401,7 @@ There are general rules and principles that we need to learn and understand as s
     alt="Barbara Liskov"
     class="pull-right"
     style="margin-left:1em;width:200px"
-    src="/images/2024-03-28-minimum-viable-programmer/barbara-liskov.png"/>
+    src="/images/2024-04-14-minimum-viable-programmer/barbara-liskov.png"/>
 
 When interviewing someone senior for a job I usually ask what they know about the SOLID principles. It's a pretty good baseline for gauging their exposure to more advanced concepts in software development that I would expect at more senior levels.
 
@@ -423,7 +423,7 @@ But if we don't first **understand** the rules and **why** we're breaking them, 
 
 Recently I used what boiled down to a global variable to implement a health check.
 
-![Global variable considered harmful](/images/2024-03-28-minimum-viable-programmer/global-variable-considered-harmful.png)
+![Global variable considered harmful](/images/2024-04-14-minimum-viable-programmer/global-variable-considered-harmful.png)
 
 Global variables have famously been "considered harmful" since 1973.
 
