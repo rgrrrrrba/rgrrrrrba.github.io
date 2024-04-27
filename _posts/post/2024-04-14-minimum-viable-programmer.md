@@ -302,11 +302,11 @@ Being able to make effective decisions as a developer sometimes means acting in 
 
 Even when you're working with the best business analysts, UX designers, and product owners, it's common to get work where not all of the information you need has been provided.
 
-Even when your team is "doing Agile" and having effective backlog refinement sessions, typically not every details is totally clear.
+Even when your team is "doing Agile" and having effective backlog refinement sessions, typically not every detail is totally clear.
 
 You're going to need to make some decisions. And to do that responsibly, you need to ask questions.
 
-Make sure you're asking the right questions, and getting meaning answers.
+Make sure you're asking the right questions, and getting meaningful answers.
 
 ![Supermarket context vs Hospital context](/images/2024-04-14-minimum-viable-programmer/supermarket-and-hospital.jpg)
 
@@ -350,7 +350,7 @@ Make sure you're getting the right information at the right time.
 
 The Last Responsible Moment principle is one of my favourite tools. I use it every day, for both big and small decisions.
 
-Sometimes we're operating on limited data. Remember that we've for those cognitive biases at play. You won't always make the best decision the first time around.
+Sometimes we're operating on limited data. Remember that we've got those cognitive biases at play. You won't always make the best decision the first time around.
 
 So, try to design your day in a way that doesn't stop you from changing course.
 
