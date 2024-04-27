@@ -44,7 +44,7 @@ I have some additional gripes with monolithic service classes:
 
 I'm not saying that monolithic service classes are bad _per se_. There are much worse ways software can be structured. I'm saying that we can do _better_.
 
-I'm a huge fan of the [Extract Method](https://refactoring.guru/extract-method) refactor, especially as a way to reduce the internal cyclomatic complexity of a method in isolation. 
+I'm a huge fan of the [Extract Method](https://refactoring.guru/extract-method) refactor, especially as a way to reduce the isolated cyclomatic complexity of a method in isolation. 
 
 For example, given this method:
 
@@ -89,7 +89,7 @@ private void ApplyDiscountToProduct(product, discount)
 }
 ```
 
-This reduces the internal cyclomatic complexity of `ApplyDiscount()` from 3 to 1. It's much easier to read and understand.
+This reduces the isolated cyclomatic complexity of `ApplyDiscount()` from 3 to 1. It's much easier to read and understand.
 
 What I like to do, and the real point of this post, is to extend the Extract Method refactor into extracting the method into a class.
 
