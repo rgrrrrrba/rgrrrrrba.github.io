@@ -19,7 +19,7 @@ With the larger than average block of land I'm on I would love to build a permac
 
 [Spoons](https://en.wikipedia.org/wiki/Spoon_theory) means that after work I generally crash out on the lounge with a book for a while, then turn on SBS Viceland and watch Forged in Fire while trying not to think about making dinner until it's physically uncomfortable. I do try to be a little social, I love going out to markets or the occasional Sunday cafe breakfasts.
 
-I am neurodiverse. I have ADHD, and I also live with (sometimes severe, always present) depression and anxiety. This manifests in different ways. I try not to mask as much as I did in the past, so sometimes I might give TMI. I prefer to be open about my experiences and how I'm going, and in doing so I hope to give a safe space for others in similar situations to be more open. I have had a fair bit of experience with depression and mental health issues throughout my life. Learning about neurodiversity, mental health, diversity, equity, and inclusion are special interests of mine.
+I have ADHD, and I also live with (sometimes severe, always present) depression and anxiety. This manifests in different ways. I try not to mask as much as I did in the past, so sometimes I might give TMI. I prefer to be open about my experiences and how I'm going, and in doing so I hope to give a safe space for others in similar situations to be more open. I have had a fair bit of experience with depression and mental health issues throughout my life. Learning about neurodiversity, mental health, diversity, equity, and inclusion are special interests of mine.
 
 
 ## My work
