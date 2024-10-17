@@ -74,7 +74,7 @@ I am an elder millennial, with an IT career spanning an incredible 18 years. I s
 ## Education and qualifications
 
 - 2015 \| Scrum master (PSM 1)
-- 2001 \| Bachelor of IT (Software Development)
+- 2001 \| Bachelor of IT (Software Development), CQ University
 
 ## Employment history
 
