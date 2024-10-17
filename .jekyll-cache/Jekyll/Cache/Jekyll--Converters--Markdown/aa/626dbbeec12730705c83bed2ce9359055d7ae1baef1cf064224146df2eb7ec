@@ -1,8 +1,0 @@
-I"G<p>Set them in Tools -&gt; Options -&gt; Environment -&gt; Keyboard.</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">File.Close</code>: <code class="language-plaintext highlighter-rouge">Ctrl+Shift+W</code></li>
-  <li><code class="language-plaintext highlighter-rouge">Window.MovetoPreviousTabGroup</code>: <code class="language-plaintext highlighter-rouge">Ctrl+Shift+Alt+[</code></li>
-  <li><code class="language-plaintext highlighter-rouge">Window.MovetoNextTabGroup</code>: <code class="language-plaintext highlighter-rouge">Ctrl+Shift+Alt+]</code></li>
-</ul>
-:ET

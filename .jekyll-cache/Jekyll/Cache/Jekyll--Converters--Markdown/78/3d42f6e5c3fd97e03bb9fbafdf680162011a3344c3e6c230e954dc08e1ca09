@@ -1,6 +1,0 @@
-I"><p>When serializing an enum value in Web API as JSON it will use the integer value of the enum by default. To make it serialize as the <code class="language-plaintext highlighter-rouge">ToString()</code> value (eg. <code class="language-plaintext highlighter-rouge">UserType.Admin</code> as <code class="language-plaintext highlighter-rouge">"Admin"</code> instead of <code class="language-plaintext highlighter-rouge">2</code>) add this to <code class="language-plaintext highlighter-rouge">WebApiConfig.cs</code> (in the <code class="language-plaintext highlighter-rouge">AppStart</code> directory):</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new StringEnumConverter());
-</code></pre></div></div>
-
-:ET
