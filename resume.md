@@ -10,16 +10,22 @@ Please feel free to reach out via [LinkedIn](https://www.linkedin.com/in/rebecca
 
 ## Profile
 
-I am an elder millennial, with an IT career spanning an incredible 18 years. I started as a helpdesk manager, and then I was the IT manager for a small financial services company based in Rockhampton, Queensland, for seven years. I then spent almost three years as a consultant software developer in Brisbane, working with a wide range of clients on a variety of projects. These experiences brought about a love of working and communicating with people—clients, co-workers, and other developers—which has turned into a strong interest in technical and project leadership, mentoring and coaching, and building psychologically safe environments for my teams. The last seven years I have been working in increasingly senior leadership roles while still maintaining a strong technical background.
+I am an elder millennial, with an IT career spanning an incredible 20+ years. I started as a helpdesk manager, and then I was the IT manager for a small financial services company based in Rockhampton, Queensland, for seven years. I then spent almost three years as a consultant software developer in Brisbane, working with a wide range of clients on a variety of projects. These experiences brought about a love of working and communicating with people—clients, co-workers, and other developers—which has turned into a strong interest in technical and project leadership, mentoring and coaching, and building psychologically safe environments for my teams. The last seven years I have been working in increasingly senior leadership roles while still maintaining a strong technical background.
 
 ## Languages, components and tools
 
+- Languages
+  - C#
+  - TypeScript
+  - JavaScript/ES6
+  - PHP
+  - Ruby (and Rails)
+  - Embedded C++
 - Front-end
+  - React
   - Angular
   - Blazor
   - Vue
-  - React
-  - TypeScript
 - Back-end
   - ASP.NET Core
   - AWS
@@ -38,12 +44,6 @@ I am an elder millennial, with an IT career spanning an incredible 18 years. I s
   - Power BI
   - Octopus Deploy
   - TeamCity
-- Languages
-  - C#
-  - Embedded C++
-  - JavaScript/ES6
-  - PHP
-  - Ruby (and Rails)
 
 
 ## Methodologies and techniques
@@ -88,15 +88,19 @@ I am an elder millennial, with an IT career spanning an incredible 18 years. I s
 
 ## Recent major projects
 
-### Q4 2023 | SixPivot
+### 2024 | SixPivot
+
+Worked with a department within Victoria Health to develop and maintain a number of systems that support delivery of services across Australia and New Zealand. This involved operating at a number of levels, from coding and infrastructure support to strategic planning, including building up a number of project proposals to help stakeholders secure funding.
+
+### 2023 | SixPivot
 
 Developed and delivered a promotional micro web site for a large commercial company, using Kubernetes, React, and ASP.NET Core. Due to expected demand and a public facing site, this involved careful resource management, autoscaling, and load testing, as well as compliance with security requirements and working with external audits.
 
-### Q3 2022 | Automattic
+### 2022 | Automattic
 
 Scoped and planned a major project to be undertaken by one of my teams over the following 6 months, involving working with multiple stakeholders and different teams and business units across the organisation. The project is part of a larger WooCommerce-wide project that will provide a dedicated, seamless SaaS product using WooCommerce and other extensions and business partners, which will directly compete with other SaaS eCommerce providers. This also involved higher level discussions with product directors, senior management, and other engineering directors and team leads, to help define the scope and deliverables, and to discover technical boundaries and issues. Worked with my team with the scope to develop high level estimates and a rough timeline, which were shared with the overall project team.
 
-### Q2 2022 | Automattic
+### 2022 | Automattic
 
 Designed and developed a data-driven rules engine and spec polling system within WooCommerce, which enabled merchant’s WooCommerce sites to remotely poll `woocommerce.com` for a feed containing notification specifications. These specifications are then run on the merchant’s site to dynamically create in-app notifications based on rules that are applied to the merchant’s sit. For example, a complex condition might be satisfied based on age of store, number of products, or monthly gross income.
 
@@ -110,7 +114,7 @@ Transitioned and expanded a “traditional” server-side Ruby on Rails digital 
 
 Designed the architecture and performed early POC development of a system that integrated BTLE beacons with a mobile app and a server, which receives and processes BTLE proximity events. The system can execute different actions such as sending an email, triggering an app notification, or calling a web hook, based on a dynamic set of configurable rules which are run through a rules engine. Led the team through further development of the system, to the point where it was working successfully in an alpha test environment using real beacons and a basic POC React Native phone app.
 
-Unfortunately, the company was wound up at this point, stopping further development.
+Unfortunately, the startup was wound up at this point, stopping further development.
 
 ### 2016 | Ideacraft
 
